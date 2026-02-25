@@ -28,13 +28,11 @@ data class MapUiState(
     val mockError: String? = null,
     val hasMockPermission: Boolean = false,
     val savedLocations: List<SavedLocation> = emptyList(),
-
-    // Route features
     val waypoints: List<LatLng> = emptyList(),
     val simulationState: SimulationState = SimulationState.IDLE,
     val speedKmh: Double = 5.0,
     val transportMode: TransportMode = TransportMode.WALKING,
-    val currentLocation: LatLng? = null // Current simulated location
+    val currentLocation: LatLng? = null
 )
 
 @HiltViewModel
@@ -48,32 +46,28 @@ class MapViewModel @Inject constructor(
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
     init {
-        // Collect saved locations
         viewModelScope.launch {
             repository.getAllLocations().collect { locations ->
                 _uiState.update { it.copy(savedLocations = locations) }
             }
         }
 
-        // Collect simulation state
         viewModelScope.launch {
             routeSimulator.simulationState.collect { state ->
                 _uiState.update { it.copy(simulationState = state) }
             }
         }
 
-        // Collect simulated location
         viewModelScope.launch {
             routeSimulator.currentLocation.collect { location ->
-                if (location != null) {
-                    _uiState.update { it.copy(currentLocation = location) }
-                    // Update mock engine if allowed
-                    if (_uiState.value.hasMockPermission) {
-                         try {
-                             mockEngine.setLocation(location.latitude, location.longitude)
-                         } catch (e: Exception) {
-                             // Handle error
-                         }
+                if (location == null) return@collect
+
+                _uiState.update { it.copy(currentLocation = location) }
+                if (_uiState.value.hasMockPermission) {
+                    try {
+                        mockEngine.setLocation(location.latitude, location.longitude)
+                    } catch (e: Exception) {
+                        setMockError("Failed to update simulated location: ${e.message}")
                     }
                 }
             }
@@ -86,38 +80,34 @@ class MapViewModel @Inject constructor(
     }
 
     fun onCameraMove(latLng: LatLng) {
-        // If we are simulating, we might not want to update center location to camera?
-        // Usually center location is just what the crosshair points to.
         _uiState.update { it.copy(centerLocation = latLng) }
     }
 
     fun startMocking() {
         checkMockPermission()
         if (!_uiState.value.hasMockPermission) {
-            _uiState.update { it.copy(mockError = "Please set this app as Mock Location App in Developer Options") }
+            setMockError(MOCK_PERMISSION_ERROR)
             return
         }
 
-        try {
+        runCatching {
             mockEngine.setupMockProvider()
             val target = _uiState.value.centerLocation
             mockEngine.setLocation(target.latitude, target.longitude)
             _uiState.update { it.copy(isMocking = true, mockError = null) }
-
             saveLocationIfNeeded(target)
-        } catch (e: SecurityException) {
-            _uiState.update { it.copy(mockError = "Permission denied: ${e.message}") }
-        } catch (e: Exception) {
-            _uiState.update { it.copy(mockError = "Error: ${e.message}") }
+        }.onFailure { error ->
+            setMockError(errorMessage(error))
         }
     }
 
     fun stopMocking() {
-        try {
+        runCatching {
+            routeSimulator.stop()
             mockEngine.teardownMockProvider()
             _uiState.update { it.copy(isMocking = false) }
-        } catch (e: Exception) {
-             // Ignore
+        }.onFailure {
+            _uiState.update { it.copy(isMocking = false) }
         }
     }
 
@@ -129,8 +119,8 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             val epsilon = 0.0001
             val exists = _uiState.value.savedLocations.any {
-                Math.abs(it.latitude - latLng.latitude) < epsilon &&
-                Math.abs(it.longitude - latLng.longitude) < epsilon
+                kotlin.math.abs(it.latitude - latLng.latitude) < epsilon &&
+                    kotlin.math.abs(it.longitude - latLng.longitude) < epsilon
             }
 
             if (!exists) {
@@ -144,7 +134,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    // Route methods
     fun addWaypoint() {
         val currentCenter = _uiState.value.centerLocation
         val newWaypoints = _uiState.value.waypoints + currentCenter
@@ -159,28 +148,31 @@ class MapViewModel @Inject constructor(
 
     fun setTransportMode(mode: TransportMode) {
         _uiState.update { it.copy(transportMode = mode, speedKmh = mode.speedKmh) }
-        routeSimulator.setSpeed(mode.speedKmh / 3.6)
+        routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS_DIVISOR)
     }
 
     fun setSpeed(speedKmh: Double) {
+        if (speedKmh <= 0.0) {
+            setMockError(INVALID_SPEED_ERROR)
+            return
+        }
         _uiState.update { it.copy(speedKmh = speedKmh) }
-        routeSimulator.setSpeed(speedKmh / 3.6)
+        routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
     }
 
     fun playRoute() {
         checkMockPermission()
-         if (!_uiState.value.hasMockPermission) {
-            _uiState.update { it.copy(mockError = "Please set this app as Mock Location App in Developer Options") }
+        if (!_uiState.value.hasMockPermission) {
+            setMockError(MOCK_PERMISSION_ERROR)
             return
         }
 
-        // Setup mock provider if not already
-        try {
+        runCatching {
             mockEngine.setupMockProvider()
-            _uiState.update { it.copy(isMocking = true) } // Route simulation implies mocking is active
+            _uiState.update { it.copy(isMocking = true, mockError = null) }
             routeSimulator.play(viewModelScope)
-        } catch (e: Exception) {
-            _uiState.update { it.copy(mockError = "Error: ${e.message}") }
+        }.onFailure { error ->
+            setMockError(errorMessage(error))
         }
     }
 
@@ -190,8 +182,23 @@ class MapViewModel @Inject constructor(
 
     fun stopRoute() {
         routeSimulator.stop()
-        // Should we stop mocking entirely?
-        // Maybe keep mocking but stop movement.
-        // Let's keep provider active but stop simulator.
+    }
+
+    private fun setMockError(message: String) {
+        _uiState.update { it.copy(mockError = message) }
+    }
+
+    private fun errorMessage(error: Throwable): String {
+        return if (error is SecurityException) {
+            "Permission denied: ${error.message}"
+        } else {
+            "Error: ${error.message}"
+        }
+    }
+
+    private companion object {
+        const val KMH_TO_MPS_DIVISOR = 3.6
+        const val MOCK_PERMISSION_ERROR = "Please set this app as Mock Location App in Developer Options"
+        const val INVALID_SPEED_ERROR = "Speed must be greater than 0 km/h"
     }
 }

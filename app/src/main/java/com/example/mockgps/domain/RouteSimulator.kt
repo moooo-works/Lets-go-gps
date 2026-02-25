@@ -11,7 +11,10 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 enum class SimulationState {
     IDLE, PLAYING, PAUSED
@@ -27,29 +30,25 @@ class RouteSimulator @Inject constructor() {
 
     private var simulationJob: Job? = null
     private var waypoints: List<LatLng> = emptyList()
-    private var speedMps: Double = 5.0 // meters per second
+    private var speedMps: Double = DEFAULT_SPEED_MPS
 
-    // State
     private var currentSegmentIndex = 0
-    private var distanceCoveredInSegment = 0.0 // meters
+    private var distanceCoveredInSegment = 0.0
 
     fun setRoute(points: List<LatLng>) {
         stop()
-        this.waypoints = points
+        waypoints = points
     }
 
     fun setSpeed(speed: Double) {
-        this.speedMps = speed
+        speedMps = speed.coerceAtLeast(MIN_SPEED_MPS)
     }
 
     fun play(scope: CoroutineScope) {
-        if (waypoints.size < 2) return
-        if (_simulationState.value == SimulationState.PLAYING) return
+        if (waypoints.size < 2 || _simulationState.value == SimulationState.PLAYING) return
 
         _simulationState.value = SimulationState.PLAYING
-
         simulationJob = scope.launch {
-            // Initial emission if starting fresh
             if (currentSegmentIndex == 0 && distanceCoveredInSegment == 0.0) {
                 _currentLocation.emit(waypoints.first())
             }
@@ -59,30 +58,28 @@ class RouteSimulator @Inject constructor() {
                 val end = waypoints[currentSegmentIndex + 1]
                 val segmentDistance = calculateDistance(start, end)
 
-                if (distanceCoveredInSegment >= segmentDistance) {
-                    // Move to next segment
-                    distanceCoveredInSegment = 0.0
+                if (segmentDistance <= 0.0) {
                     currentSegmentIndex++
-                    if (currentSegmentIndex >= waypoints.size - 1) {
-                        break // Finished
-                    }
-                    continue // Re-evaluate loop for next segment immediately? No, wait for next tick usually.
-                    // But to be precise, we carry over excess distance?
-                    // For simplicity MVP: just reset distanceCoveredInSegment and wait next tick.
+                    distanceCoveredInSegment = 0.0
+                    continue
                 }
 
-                // Calculate current position
-                // Check if segment distance is 0 to avoid division by zero
-                val fraction = if (segmentDistance > 0) distanceCoveredInSegment / segmentDistance else 1.0
-                val newPos = interpolate(start, end, fraction)
-                _currentLocation.emit(newPos)
+                val fraction = (distanceCoveredInSegment / segmentDistance).coerceIn(0.0, 1.0)
+                _currentLocation.emit(interpolate(start, end, fraction))
 
-                delay(1000) // 1 second tick
+                delay(TICK_DELAY_MS)
 
                 distanceCoveredInSegment += speedMps
+                while (distanceCoveredInSegment >= segmentDistance && currentSegmentIndex < waypoints.size - 1) {
+                    distanceCoveredInSegment -= segmentDistance
+                    currentSegmentIndex++
+                    if (currentSegmentIndex >= waypoints.size - 1) {
+                        break
+                    }
+                }
             }
 
-            // Finished
+            _currentLocation.emit(waypoints.lastOrNull())
             _simulationState.value = SimulationState.IDLE
             resetProgress()
         }
@@ -90,6 +87,7 @@ class RouteSimulator @Inject constructor() {
 
     fun pause() {
         simulationJob?.cancel()
+        simulationJob = null
         if (_simulationState.value == SimulationState.PLAYING) {
             _simulationState.value = SimulationState.PAUSED
         }
@@ -97,6 +95,7 @@ class RouteSimulator @Inject constructor() {
 
     fun stop() {
         simulationJob?.cancel()
+        simulationJob = null
         _simulationState.value = SimulationState.IDLE
         resetProgress()
         _currentLocation.value = null
@@ -107,14 +106,13 @@ class RouteSimulator @Inject constructor() {
         distanceCoveredInSegment = 0.0
     }
 
-    // Helper math functions
     private fun calculateDistance(start: LatLng, end: LatLng): Double {
-        val earthRadius = 6371000.0 // meters
+        val earthRadius = 6_371_000.0
         val dLat = Math.toRadians(end.latitude - start.latitude)
         val dLng = Math.toRadians(end.longitude - start.longitude)
         val a = sin(dLat / 2) * sin(dLat / 2) +
-                cos(Math.toRadians(start.latitude)) * cos(Math.toRadians(end.latitude)) *
-                sin(dLng / 2) * sin(dLng / 2)
+            cos(Math.toRadians(start.latitude)) * cos(Math.toRadians(end.latitude)) *
+            sin(dLng / 2) * sin(dLng / 2)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return earthRadius * c
     }
@@ -123,5 +121,11 @@ class RouteSimulator @Inject constructor() {
         val lat = start.latitude + (end.latitude - start.latitude) * fraction
         val lng = start.longitude + (end.longitude - start.longitude) * fraction
         return LatLng(lat, lng)
+    }
+
+    private companion object {
+        const val TICK_DELAY_MS = 1_000L
+        const val DEFAULT_SPEED_MPS = 5.0
+        const val MIN_SPEED_MPS = 0.1
     }
 }
