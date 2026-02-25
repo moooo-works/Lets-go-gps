@@ -54,6 +54,12 @@ fun MapScreen(
                     state = MarkerState(position = LatLng(location.latitude, location.longitude)),
                     title = location.name,
                     snippet = "Lat: ${location.latitude}, Lng: ${location.longitude}",
+                    onClick = {
+                        val target = LatLng(location.latitude, location.longitude)
+                        viewModel.onCameraMove(target)
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(target, 15f)
+                        false // Return false to allow default behavior (showing info window)
+                    },
                     icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
                 )
             }
