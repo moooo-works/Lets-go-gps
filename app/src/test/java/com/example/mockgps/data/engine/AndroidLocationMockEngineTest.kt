@@ -1,5 +1,6 @@
 package com.example.mockgps.data.engine
 
+import android.location.provider.ProviderProperties
 import android.content.Context
 import android.location.LocationManager
 import io.mockk.every
@@ -27,7 +28,7 @@ class AndroidLocationMockEngineTest {
         verify {
             locationManager.addTestProvider(
                 LocationManager.GPS_PROVIDER,
-                false, false, false, false, true, true, true, 0, 5
+                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
             )
             locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
         }

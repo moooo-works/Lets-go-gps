@@ -24,7 +24,7 @@ android {
 
         // Use a placeholder if not present.
         // User should add MAPS_API_KEY in local.properties or env var
-        manifestPlaceholders["MAPS_API_KEY"] = (project.findProperty("MAPS_API_KEY") as? String) ?: "YOUR_API_KEY_HERE"
+        manifestPlaceholders["MAPS_API_KEY"] = (project.findProperty("MAPS_API_KEY") as? String) ?: "AIzaSyAPMSfHEhF1OLWw6v6KSm164AH9PHskdVM"
     }
 
     buildTypes {

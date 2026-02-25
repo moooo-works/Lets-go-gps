@@ -1,5 +1,6 @@
 package com.example.mockgps.data.engine
 
+import android.location.provider.ProviderProperties
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
@@ -76,7 +77,7 @@ class AndroidLocationMockEngine @Inject constructor(
              val testProvider = "test_check_permission"
              locationManager.addTestProvider(
                 testProvider,
-                false, false, false, false, true, true, true, 0, 5
+                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
             )
             locationManager.removeTestProvider(testProvider)
             true
