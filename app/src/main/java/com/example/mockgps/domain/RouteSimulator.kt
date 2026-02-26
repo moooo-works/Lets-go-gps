@@ -125,7 +125,7 @@ class RouteSimulator @Inject constructor() {
 
     private companion object {
         const val TICK_DELAY_MS = 1_000L
-        const val DEFAULT_SPEED_MPS = 5.0
+        const val DEFAULT_SPEED_MPS = 1.3888889 // ~5 km/h
         const val MIN_SPEED_MPS = 0.1
     }
 }

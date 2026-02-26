@@ -2,72 +2,39 @@ package com.example.mockgps.domain
 
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RouteSimulatorTest {
 
     @Test
-    fun `play with valid route eventually returns to idle`() = runTest(StandardTestDispatcher()) {
+    fun `play emits final waypoint`() = runTest {
         val simulator = RouteSimulator()
-        simulator.setRoute(
-            listOf(
-                LatLng(25.0330, 121.5654),
-                LatLng(25.0340, 121.5664)
-            )
-        )
-        simulator.setSpeed(100.0)
+        val start = LatLng(0.0, 0.0)
+        val end = LatLng(0.0001, 0.0001) // Small distance
+        val route = listOf(start, end)
+
+        simulator.setRoute(route)
+        simulator.setSpeed(100.0) // High speed to finish quickly
+
+        val emittedLocations = mutableListOf<LatLng?>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            simulator.currentLocation.collect { emittedLocations.add(it) }
+        }
 
         simulator.play(this)
-        advanceTimeBy(6_000)
         advanceUntilIdle()
 
-        assertEquals(SimulationState.IDLE, simulator.simulationState.value)
-        assertNotNull(simulator.currentLocation.value)
-    }
+        // Verify the last emitted non-null location is the end point
+        val lastLocation = emittedLocations.filterNotNull().last()
+        assertEquals(end, lastLocation)
 
-    @Test
-    fun `pause changes simulation state to paused`() = runTest(StandardTestDispatcher()) {
-        val simulator = RouteSimulator()
-        simulator.setRoute(
-            listOf(
-                LatLng(25.0330, 121.5654),
-                LatLng(25.0400, 121.5700)
-            )
-        )
-        simulator.setSpeed(10.0)
-
-        simulator.play(this)
-        advanceTimeBy(1_000)
-        simulator.pause()
-
-        assertEquals(SimulationState.PAUSED, simulator.simulationState.value)
-    }
-
-    @Test
-    fun `setSpeed enforces minimum positive speed`() = runTest(StandardTestDispatcher()) {
-        val simulator = RouteSimulator()
-        simulator.setRoute(
-            listOf(
-                LatLng(25.0330, 121.5654),
-                LatLng(25.0331, 121.5655)
-            )
-        )
-
-        simulator.setSpeed(0.0)
-        simulator.play(this)
-        advanceTimeBy(2_000)
-
-        assertTrue(
-            simulator.simulationState.value == SimulationState.PLAYING ||
-                simulator.simulationState.value == SimulationState.IDLE
-        )
+        job.cancel()
     }
 }

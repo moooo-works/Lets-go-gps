@@ -183,16 +183,11 @@ fun MapScreen(
                 ) {
                     Button(
                         onClick = {
-                            if (uiState.isMocking && uiState.simulationState == SimulationState.IDLE && uiState.waypoints.isEmpty()) {
-                                viewModel.stopMocking()
-                            } else if (uiState.simulationState == SimulationState.PLAYING) {
-                                viewModel.pauseRoute()
-                            } else {
-                                if (uiState.waypoints.isNotEmpty()) {
-                                    viewModel.playRoute()
-                                } else {
-                                    viewModel.startMocking()
-                                }
+                            when {
+                                uiState.simulationState == SimulationState.PLAYING -> viewModel.pauseRoute()
+                                uiState.waypoints.isNotEmpty() -> viewModel.playRoute()
+                                uiState.isMocking -> viewModel.stopMocking()
+                                else -> viewModel.startMocking()
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -202,8 +197,8 @@ fun MapScreen(
                         Text(
                             text = when {
                                 uiState.simulationState == SimulationState.PLAYING -> "Pause Route"
-                                uiState.isMocking -> "Stop"
                                 uiState.waypoints.isNotEmpty() -> "Play Route"
+                                uiState.isMocking -> "Stop Mocking"
                                 else -> "Start Mocking"
                             }
                         )
