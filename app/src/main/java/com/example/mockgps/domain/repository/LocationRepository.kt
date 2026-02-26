@@ -9,6 +9,7 @@ interface LocationRepository {
     fun getAllLocations(): Flow<List<SavedLocation>>
     suspend fun saveLocation(location: SavedLocation)
     suspend fun deleteLocation(location: SavedLocation)
+    suspend fun updateLocation(location: SavedLocation)
 
     fun getAllRoutes(): Flow<List<Route>>
     suspend fun createRoute(route: Route, points: List<RoutePoint>)
