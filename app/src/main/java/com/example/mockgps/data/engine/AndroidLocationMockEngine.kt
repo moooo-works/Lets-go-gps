@@ -1,10 +1,12 @@
 package com.example.mockgps.data.engine
 
+import android.app.AppOpsManager
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
 import android.location.provider.ProviderProperties
 import android.os.Build
+import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import com.example.mockgps.domain.LocationMockEngine
@@ -26,6 +28,7 @@ class AndroidLocationMockEngine @Inject constructor(
 ) : LocationMockEngine {
 
     private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    private val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     private val providerName = LocationManager.GPS_PROVIDER
 
     private val _errors = MutableSharedFlow<MockEngineError>(extraBufferCapacity = ERROR_BUFFER_CAPACITY)
@@ -42,7 +45,7 @@ class AndroidLocationMockEngine @Inject constructor(
                 true,
                 true,
                 true,
-                0,
+                ProviderProperties.POWER_USAGE_LOW,
                 5
             )
             locationManager.setTestProviderEnabled(providerName, true)
@@ -87,26 +90,22 @@ class AndroidLocationMockEngine @Inject constructor(
 
     override fun isMockingAllowed(): Boolean {
         return try {
-            val testProvider = "test_check_permission"
-            locationManager.addTestProvider(
-                testProvider,
-                false,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                ProviderProperties.POWER_USAGE_LOW,
-                5
-            )
-            locationManager.removeTestProvider(testProvider)
-            true
-        } catch (e: SecurityException) {
-            reportError(MockEngineError.PermissionCheck(e), "isMockingAllowed denied")
-            false
+            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOpsManager.unsafeCheckOpNoThrow(
+                    AppOpsManager.OPSTR_MOCK_LOCATION,
+                    Process.myUid(),
+                    context.packageName
+                )
+            } else {
+                appOpsManager.checkOpNoThrow(
+                    AppOpsManager.OPSTR_MOCK_LOCATION,
+                    Process.myUid(),
+                    context.packageName
+                )
+            }
+            mode == AppOpsManager.MODE_ALLOWED
         } catch (e: Exception) {
-            reportError(MockEngineError.PermissionCheck(e), "isMockingAllowed failed")
+            reportError(MockEngineError.PermissionCheck(e), "isMockingAllowed check failed")
             false
         }
     }
