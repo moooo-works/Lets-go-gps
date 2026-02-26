@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mockgps.domain.SimulationState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -22,7 +21,7 @@ import com.google.maps.android.compose.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
-    viewModel: MapViewModel = hiltViewModel(),
+    viewModel: MapViewModel,
     onNavigateToSavedLocations: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

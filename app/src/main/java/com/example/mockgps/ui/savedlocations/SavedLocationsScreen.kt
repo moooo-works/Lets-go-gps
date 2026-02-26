@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mockgps.data.model.SavedLocation
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,7 +20,7 @@ import com.example.mockgps.data.model.SavedLocation
 fun SavedLocationsScreen(
     onNavigateBack: () -> Unit,
     onLocationSelected: (Double, Double) -> Unit,
-    viewModel: SavedLocationsViewModel = hiltViewModel()
+    viewModel: SavedLocationsViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var locationToDelete by remember { mutableStateOf<SavedLocation?>(null) }
