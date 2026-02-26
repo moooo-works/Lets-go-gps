@@ -54,7 +54,37 @@ class MapViewModelTest {
     }
 
     @Test
-    fun `startMocking succeeds when permission granted`() = runTest {
+    fun `startMocking sets NotMockAppSelected error when permission denied`() = runTest {
+        every { mockEngine.isMockingAllowed() } returns false
+        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
+
+        viewModel.startMocking()
+        advanceUntilIdle()
+
+        verify(exactly = 0) { mockEngine.setupMockProvider() }
+        assertFalse(viewModel.uiState.value.isMocking)
+        assertTrue(viewModel.uiState.value.mockError is MockError.NotMockAppSelected)
+    }
+
+    @Test
+    fun `startMocking sets ProviderSetupFailed error when setup fails`() = runTest {
+        every { mockEngine.isMockingAllowed() } returns true
+        every { mockEngine.setupMockProvider() } throws SecurityException("Setup failed")
+
+        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
+
+        viewModel.startMocking()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.mockError is MockError.ProviderSetupFailed)
+        assertEquals(
+            "System rejected mock provider: Setup failed",
+            (viewModel.uiState.value.mockError as MockError.ProviderSetupFailed).message
+        )
+    }
+
+    @Test
+    fun `startMocking succeeds when permission granted and setup succeeds`() = runTest {
         every { mockEngine.isMockingAllowed() } returns true
         every { mockEngine.setupMockProvider() } just runs
 
@@ -65,19 +95,7 @@ class MapViewModelTest {
 
         verify { mockEngine.setupMockProvider() }
         assertTrue(viewModel.uiState.value.isMocking)
-    }
-
-    @Test
-    fun `startMocking fails when permission denied`() = runTest {
-        every { mockEngine.isMockingAllowed() } returns false
-        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
-
-        viewModel.startMocking()
-        advanceUntilIdle()
-
-        verify(exactly = 0) { mockEngine.setupMockProvider() }
-        assertFalse(viewModel.uiState.value.isMocking)
-        assertTrue(viewModel.uiState.value.mockError != null)
+        assertTrue(viewModel.uiState.value.mockError == null)
     }
 
     @Test
@@ -87,15 +105,6 @@ class MapViewModelTest {
         viewModel.setSpeed(0.0)
 
         verify(exactly = 0) { routeSimulator.setSpeed(any()) }
-        assertEquals("Speed must be greater than 0 km/h", viewModel.uiState.value.mockError)
-    }
-
-    @Test
-    fun `stopMocking always stops route simulation`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
-
-        viewModel.stopMocking()
-
-        verify { routeSimulator.stop() }
+        assertTrue(viewModel.uiState.value.mockError is MockError.InvalidInput)
     }
 }

@@ -1,23 +1,22 @@
 package com.example.mockgps.ui.map
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mockgps.domain.SimulationState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,19 +24,18 @@ fun MapScreen(
     viewModel: MapViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
     }
 
-    // Sync camera movement to ViewModel
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
              viewModel.onCameraMove(cameraPositionState.position.target)
         }
     }
 
-    // Check permission on start
     LaunchedEffect(Unit) {
         viewModel.checkMockPermission()
     }
@@ -48,7 +46,6 @@ fun MapScreen(
             cameraPositionState = cameraPositionState,
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
-            // Saved locations markers
             uiState.savedLocations.forEach { location ->
                 Marker(
                     state = MarkerState(position = LatLng(location.latitude, location.longitude)),
@@ -58,13 +55,12 @@ fun MapScreen(
                         val target = LatLng(location.latitude, location.longitude)
                         viewModel.onCameraMove(target)
                         cameraPositionState.position = CameraPosition.fromLatLngZoom(target, 15f)
-                        false // Return false to allow default behavior (showing info window)
+                        false
                     },
                     icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
                 )
             }
 
-            // Route Waypoints
             uiState.waypoints.forEachIndexed { index, point ->
                 Marker(
                     state = MarkerState(position = point),
@@ -73,7 +69,6 @@ fun MapScreen(
                 )
             }
 
-            // Route Polyline
             if (uiState.waypoints.size > 1) {
                 Polyline(
                     points = uiState.waypoints,
@@ -82,8 +77,6 @@ fun MapScreen(
                 )
             }
 
-            // Current Mock Location Marker (if mocking)
-            // If simulating, show the dynamic location. If static mocking, show center.
             val mockLoc = uiState.currentLocation ?: if (uiState.isMocking && uiState.simulationState == SimulationState.IDLE) uiState.centerLocation else null
 
             if (mockLoc != null && uiState.isMocking) {
@@ -95,8 +88,6 @@ fun MapScreen(
             }
         }
 
-        // Center Crosshair (Only visible if not simulating or strictly following?)
-        // Always visible to allow adding points
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Center",
@@ -104,7 +95,6 @@ fun MapScreen(
             tint = Color.Red
         )
 
-        // Top Info Bar
         Surface(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -127,7 +117,6 @@ fun MapScreen(
             }
         }
 
-        // Bottom Controls (Route & Mock)
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -136,7 +125,6 @@ fun MapScreen(
             tonalElevation = 8.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Route Controls
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -152,7 +140,6 @@ fun MapScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Transport Mode & Speed
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -176,7 +163,6 @@ fun MapScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Play/Stop
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
@@ -207,15 +193,52 @@ fun MapScreen(
             }
         }
 
-        // Error Dialog
         if (uiState.mockError != null) {
+            val error = uiState.mockError!!
             AlertDialog(
                 onDismissRequest = { viewModel.clearError() },
-                title = { Text("Error") },
-                text = { Text(uiState.mockError ?: "") },
+                title = { Text(if (error is MockError.NotMockAppSelected) "Permission Required" else "Error") },
+                text = {
+                    Column {
+                        Text(text = when (error) {
+                            is MockError.NotMockAppSelected -> "Please go to Developer Options -> Select mock location app -> Select this app."
+                            is MockError.ProviderSetupFailed -> "Mock Engine Setup Failed: ${error.message}"
+                            is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
+                            is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"
+                            is MockError.InvalidInput -> "Invalid Input: ${error.message}"
+                            is MockError.Unknown -> "Unknown Error: ${error.message}"
+                        })
+                    }
+                },
                 confirmButton = {
-                    TextButton(onClick = { viewModel.clearError() }) {
-                        Text("OK")
+                    if (error is MockError.NotMockAppSelected) {
+                        Button(onClick = {
+                            viewModel.clearError()
+                            try {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                try {
+                                    val intent = Intent(Settings.ACTION_SETTINGS)
+                                    context.startActivity(intent)
+                                } catch (e2: Exception) {
+                                    // Ignore or show toast
+                                }
+                            }
+                        }) {
+                            Text("Go to Settings")
+                        }
+                    } else {
+                        TextButton(onClick = { viewModel.clearError() }) {
+                            Text("OK")
+                        }
+                    }
+                },
+                dismissButton = {
+                    if (error is MockError.NotMockAppSelected) {
+                        TextButton(onClick = { viewModel.clearError() }) {
+                            Text("Cancel")
+                        }
                     }
                 }
             )

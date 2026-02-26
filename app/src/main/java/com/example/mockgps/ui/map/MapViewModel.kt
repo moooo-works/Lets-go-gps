@@ -25,7 +25,7 @@ enum class TransportMode(val speedKmh: Double) {
 data class MapUiState(
     val isMocking: Boolean = false,
     val centerLocation: LatLng = LatLng(25.0330, 121.5654),
-    val mockError: String? = null,
+    val mockError: MockError? = null,
     val hasMockPermission: Boolean = false,
     val savedLocations: List<SavedLocation> = emptyList(),
     val waypoints: List<LatLng> = emptyList(),
@@ -67,7 +67,7 @@ class MapViewModel @Inject constructor(
                     try {
                         mockEngine.setLocation(location.latitude, location.longitude)
                     } catch (e: Exception) {
-                        setMockError("Failed to update simulated location: ${e.message}")
+                        setMockError(MockError.SetLocationFailed("Failed to update simulated location: ${e.message}"))
                     }
                 }
             }
@@ -86,7 +86,7 @@ class MapViewModel @Inject constructor(
     fun startMocking() {
         checkMockPermission()
         if (!_uiState.value.hasMockPermission) {
-            setMockError(MOCK_PERMISSION_ERROR)
+            setMockError(MockError.NotMockAppSelected)
             return
         }
 
@@ -97,7 +97,7 @@ class MapViewModel @Inject constructor(
             _uiState.update { it.copy(isMocking = true, mockError = null) }
             saveLocationIfNeeded(target)
         }.onFailure { error ->
-            setMockError(errorMessage(error))
+            handleEngineError(error)
         }
     }
 
@@ -106,8 +106,10 @@ class MapViewModel @Inject constructor(
             routeSimulator.stop()
             mockEngine.teardownMockProvider()
             _uiState.update { it.copy(isMocking = false) }
-        }.onFailure {
+        }.onFailure { error ->
             _uiState.update { it.copy(isMocking = false) }
+            // For stopMocking, we specifically want to detect teardown issues if any
+            setMockError(MockError.ProviderTeardownFailed(error.message ?: "Unknown teardown error"))
         }
     }
 
@@ -153,7 +155,7 @@ class MapViewModel @Inject constructor(
 
     fun setSpeed(speedKmh: Double) {
         if (speedKmh <= 0.0) {
-            setMockError(INVALID_SPEED_ERROR)
+            setMockError(MockError.InvalidInput("Speed must be greater than 0 km/h"))
             return
         }
         _uiState.update { it.copy(speedKmh = speedKmh) }
@@ -163,7 +165,7 @@ class MapViewModel @Inject constructor(
     fun playRoute() {
         checkMockPermission()
         if (!_uiState.value.hasMockPermission) {
-            setMockError(MOCK_PERMISSION_ERROR)
+            setMockError(MockError.NotMockAppSelected)
             return
         }
 
@@ -172,7 +174,7 @@ class MapViewModel @Inject constructor(
             _uiState.update { it.copy(isMocking = true, mockError = null) }
             routeSimulator.play(viewModelScope)
         }.onFailure { error ->
-            setMockError(errorMessage(error))
+            handleEngineError(error)
         }
     }
 
@@ -184,21 +186,20 @@ class MapViewModel @Inject constructor(
         routeSimulator.stop()
     }
 
-    private fun setMockError(message: String) {
-        _uiState.update { it.copy(mockError = message) }
+    private fun setMockError(error: MockError) {
+        _uiState.update { it.copy(mockError = error) }
     }
 
-    private fun errorMessage(error: Throwable): String {
-        return if (error is SecurityException) {
-            "Permission denied: ${error.message}"
-        } else {
-            "Error: ${error.message}"
+    private fun handleEngineError(error: Throwable) {
+        val refinedError = when {
+             error is SecurityException -> MockError.ProviderSetupFailed("System rejected mock provider: ${error.message}")
+             error is IllegalArgumentException -> MockError.ProviderSetupFailed("Invalid provider args: ${error.message}")
+             else -> MockError.Unknown("Operation failed: ${error.message}")
         }
+        setMockError(refinedError)
     }
 
     private companion object {
         const val KMH_TO_MPS_DIVISOR = 3.6
-        const val MOCK_PERMISSION_ERROR = "Please set this app as Mock Location App in Developer Options"
-        const val INVALID_SPEED_ERROR = "Speed must be greater than 0 km/h"
     }
 }
