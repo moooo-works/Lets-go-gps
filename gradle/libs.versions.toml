@@ -14,8 +14,8 @@ hilt = "2.48"
 ksp = "1.9.0-1.0.12"
 room = "2.6.0"
 coroutines = "1.7.3"
-mockk = "1.13.7"
-hilt-navigation-compose = "1.0.0"
+mockk = "1.13.10"
+hilt-navigation-compose = "1.2.0"
 robolectric = "4.10.3"
 
 [libraries]
