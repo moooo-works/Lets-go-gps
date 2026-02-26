@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mockgps.ui.map.MapScreen
 import com.example.mockgps.ui.map.MapViewModel
 import com.example.mockgps.ui.savedlocations.SavedLocationsScreen
+import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -37,40 +38,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    // Sharing MapViewModel might be tricky with simple navigation if scoping isn't handled by graph.
-    // For now, MapScreen has its own ViewModel instance via hiltViewModel().
-    // SavedLocationsScreen has its own ViewModel.
-    // To pass result back, we use SavedStateHandle or just relying on passing arguments if we were doing that.
-    // But requirement says: "Row 點擊：回 MapScreen 並置中至該座標".
-    // We can pass lat/lng as route arguments to MapScreen, OR use navController.previousBackStackEntry.savedStateHandle.
-
-    // However, MapScreen is the "home". When we go back from SavedLocationsScreen, we just popBackStack.
-    // To communicate the selected location, we can set a result in savedStateHandle.
 
     NavHost(navController = navController, startDestination = "map") {
         composable("map") { backStackEntry ->
-            // Check for returned result
+            // Use hiltViewModel(backStackEntry) to properly scope to the destination
+            // This ensures SavedStateHandle is correctly provided by the Navigation Component
+            val viewModel: MapViewModel = hiltViewModel(backStackEntry)
+
+            // Check for returned result from SavedLocations
             val selectedLat = backStackEntry.savedStateHandle.get<Double>("selectedLat")
             val selectedLng = backStackEntry.savedStateHandle.get<Double>("selectedLng")
 
-            // Clear the result after reading
             if (selectedLat != null && selectedLng != null) {
                 backStackEntry.savedStateHandle.remove<Double>("selectedLat")
                 backStackEntry.savedStateHandle.remove<Double>("selectedLng")
-                // We need to tell the ViewModel to move camera.
-                // But MapScreen gets a new ViewModel instance or existing one?
-                // hiltViewModel() is scoped to the NavBackStackEntry (the route).
-                // "map" route entry persists while we are in "saved_locations".
-                // So when we pop back, we get the same instance.
-            }
-
-            val viewModel: MapViewModel = hiltViewModel()
-            // Side effect to update camera if result exists
-            // We can pass this via a LaunchedEffect inside MapScreen or here.
-            // Let's pass it to MapScreen as a parameter? Or better, handle it here by calling VM.
-
-            if (selectedLat != null && selectedLng != null) {
-                 viewModel.onCameraMove(com.google.android.gms.maps.model.LatLng(selectedLat, selectedLng))
+                viewModel.onCameraMove(com.google.android.gms.maps.model.LatLng(selectedLat, selectedLng))
             }
 
             MapScreen(
@@ -78,8 +60,12 @@ fun AppNavigation() {
                 onNavigateToSavedLocations = { navController.navigate("saved_locations") }
             )
         }
-        composable("saved_locations") {
+        composable("saved_locations") { backStackEntry ->
+            // Use hiltViewModel(backStackEntry) here too for safety/correctness
+            val viewModel: SavedLocationsViewModel = hiltViewModel(backStackEntry)
+
             SavedLocationsScreen(
+                viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onLocationSelected = { lat, lng ->
                     navController.previousBackStackEntry?.savedStateHandle?.set("selectedLat", lat)
