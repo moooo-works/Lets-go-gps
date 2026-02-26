@@ -12,6 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
 import com.example.mockgps.domain.SimulationState
 import com.google.android.gms.maps.model.CameraPosition
@@ -26,6 +29,7 @@ fun MapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
@@ -37,15 +41,22 @@ fun MapScreen(
         }
     }
 
-    // Listen for centerLocation changes from ViewModel (e.g. from SavedLocations result)
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.checkMockPermission()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     LaunchedEffect(uiState.centerLocation) {
         if (cameraPositionState.position.target != uiState.centerLocation) {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.checkMockPermission()
     }
 
     Scaffold(
