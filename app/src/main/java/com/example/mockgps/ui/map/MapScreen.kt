@@ -20,6 +20,7 @@ import com.example.mockgps.domain.SimulationState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +42,12 @@ fun MapScreen(
         }
     }
 
+    // Initial check on cold start
+    LaunchedEffect(Unit) {
+        viewModel.checkMockPermission()
+    }
+
+    // Check on resume (e.g. returning from settings)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -233,6 +240,15 @@ fun MapScreen(
 
     if (uiState.mockError != null) {
         val error = uiState.mockError!!
+        var isButtonEnabled by remember { mutableStateOf(false) }
+
+        // Anti-misclick delay: button enables after 500ms
+        LaunchedEffect(error) {
+            isButtonEnabled = false
+            delay(500)
+            isButtonEnabled = true
+        }
+
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
             title = { Text(if (error is MockError.NotMockAppSelected) "Permission Required" else "Error") },
@@ -250,21 +266,24 @@ fun MapScreen(
             },
             confirmButton = {
                 if (error is MockError.NotMockAppSelected) {
-                    Button(onClick = {
-                        viewModel.clearError()
-                        try {
-                            val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
+                    Button(
+                        onClick = {
+                            viewModel.clearError()
                             try {
-                                val intent = Intent(Settings.ACTION_SETTINGS)
+                                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                                 context.startActivity(intent)
-                            } catch (e2: Exception) {
-                                // Ignore or show toast
+                            } catch (e: Exception) {
+                                try {
+                                    val intent = Intent(Settings.ACTION_SETTINGS)
+                                    context.startActivity(intent)
+                                } catch (e2: Exception) {
+                                    // Ignore or show toast
+                                }
                             }
-                        }
-                    }) {
-                        Text("Go to Settings")
+                        },
+                        enabled = isButtonEnabled
+                    ) {
+                        Text(if (isButtonEnabled) "Go to Settings" else "Wait...")
                     }
                 } else {
                     TextButton(onClick = { viewModel.clearError() }) {
