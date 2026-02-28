@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.mockgps.data.model.SavedLocation
 import kotlinx.coroutines.flow.Flow
 
@@ -18,4 +19,7 @@ interface LocationDao {
 
     @Delete
     suspend fun deleteLocation(location: SavedLocation)
+
+    @Update
+    suspend fun updateLocation(location: SavedLocation)
 }

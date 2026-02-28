@@ -6,6 +6,7 @@ junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.1"
+lifecycle-runtime-compose = "2.6.1"
 activity-compose = "1.7.2"
 compose-bom = "2023.08.00"
 google-maps-compose = "2.14.0"
@@ -14,8 +15,8 @@ hilt = "2.48"
 ksp = "1.9.0-1.0.12"
 room = "2.6.0"
 coroutines = "1.7.3"
-mockk = "1.13.7"
-hilt-navigation-compose = "1.0.0"
+mockk = "1.13.10"
+hilt-navigation-compose = "1.2.0"
 robolectric = "4.10.3"
 
 [libraries]
@@ -24,6 +25,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 ui = { group = "androidx.compose.ui", name = "ui" }
