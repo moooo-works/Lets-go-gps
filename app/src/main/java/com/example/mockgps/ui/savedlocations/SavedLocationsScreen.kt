@@ -77,7 +77,7 @@ fun SavedLocationsScreen(
     }
 
     if (locationToRename != null) {
-        var newName by remember { mutableStateOf(locationToRename?.name ?: "") }
+        var newName by remember(locationToRename?.id) { mutableStateOf(locationToRename?.name.orEmpty()) }
         AlertDialog(
             onDismissRequest = { locationToRename = null },
             title = { Text("Rename Location") },

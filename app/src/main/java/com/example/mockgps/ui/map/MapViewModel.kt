@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.LocationMockEngine
 import com.example.mockgps.domain.RouteSimulator
+import com.example.mockgps.domain.MockPermissionStatus
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import com.google.android.gms.maps.model.LatLng
@@ -74,9 +75,14 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun checkMockPermission() {
-        val allowed = mockEngine.isMockingAllowed()
-        _uiState.update { it.copy(hasMockPermission = allowed) }
+    private fun checkMockPermission(): MockPermissionStatus {
+        val permissionStatus = mockEngine.getMockPermissionStatus()
+        _uiState.update { it.copy(hasMockPermission = permissionStatus is MockPermissionStatus.Allowed) }
+        return permissionStatus
+    }
+
+    fun refreshMockPermission() {
+        checkMockPermission()
     }
 
     fun onCameraMove(latLng: LatLng) {
@@ -84,10 +90,16 @@ class MapViewModel @Inject constructor(
     }
 
     fun startMocking() {
-        checkMockPermission()
-        if (!_uiState.value.hasMockPermission) {
-            setMockError(MockError.NotMockAppSelected)
-            return
+        when (val permissionStatus = checkMockPermission()) {
+            MockPermissionStatus.Allowed -> Unit
+            MockPermissionStatus.NotAllowed -> {
+                setMockError(MockError.NotMockAppSelected)
+                return
+            }
+            is MockPermissionStatus.CheckFailed -> {
+                setMockError(MockError.PermissionCheckFailed(permissionStatus.cause.message ?: "Permission check failed"))
+                return
+            }
         }
 
         runCatching {
@@ -163,10 +175,16 @@ class MapViewModel @Inject constructor(
     }
 
     fun playRoute() {
-        checkMockPermission()
-        if (!_uiState.value.hasMockPermission) {
-            setMockError(MockError.NotMockAppSelected)
-            return
+        when (val permissionStatus = checkMockPermission()) {
+            MockPermissionStatus.Allowed -> Unit
+            MockPermissionStatus.NotAllowed -> {
+                setMockError(MockError.NotMockAppSelected)
+                return
+            }
+            is MockPermissionStatus.CheckFailed -> {
+                setMockError(MockError.PermissionCheckFailed(permissionStatus.cause.message ?: "Permission check failed"))
+                return
+            }
         }
 
         runCatching {

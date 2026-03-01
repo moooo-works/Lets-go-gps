@@ -44,14 +44,14 @@ fun MapScreen(
 
     // Initial check on cold start
     LaunchedEffect(Unit) {
-        viewModel.checkMockPermission()
+        viewModel.refreshMockPermission()
     }
 
     // Check on resume (e.g. returning from settings)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.checkMockPermission()
+                viewModel.refreshMockPermission()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -260,6 +260,7 @@ fun MapScreen(
                         is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
                         is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"
                         is MockError.InvalidInput -> "Invalid Input: ${error.message}"
+                        is MockError.PermissionCheckFailed -> "Permission Check Failed: ${error.message}"
                         is MockError.Unknown -> "Unknown Error: ${error.message}"
                     })
                 }
@@ -270,14 +271,19 @@ fun MapScreen(
                         onClick = {
                             viewModel.clearError()
                             try {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                                context.startActivity(intent)
+                                val appDevIntent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                                context.startActivity(appDevIntent)
                             } catch (e: Exception) {
                                 try {
-                                    val intent = Intent(Settings.ACTION_SETTINGS)
-                                    context.startActivity(intent)
+                                    val devIntent = Intent("android.settings.DEVELOPMENT_SETTINGS")
+                                    context.startActivity(devIntent)
                                 } catch (e2: Exception) {
-                                    // Ignore or show toast
+                                    try {
+                                        val settingsIntent = Intent(Settings.ACTION_SETTINGS)
+                                        context.startActivity(settingsIntent)
+                                    } catch (e3: Exception) {
+                                        // Ignore or show toast
+                                    }
                                 }
                             }
                         },
