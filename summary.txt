@@ -1,0 +1,40 @@
+以下是目前 `main` 主線已經完成的項目盤點（符合 P0 到 P1 的所有核心與加值需求，並修復了實機測試回報的崩潰與異常）：
+
+### 🟢 A. 核心功能：單點虛擬定位（中央準星模式）
+1. **地圖中央固定準星**：拖曳地圖時，即時顯示中心點的經緯度與當前狀態 (IDLE / MOCKING)。
+2. **啟動模擬 (Start Mocking)**：以當前中心點作為輸出位置，地圖上建立 "Mocking Here" 藍色 Marker。
+3. **自動收藏與防呆**：啟動模擬時，自動將該座標存入本地資料庫（Room），並具備 Epsilon 近似值防呆，避免重複儲存同一個點。
+4. **點擊跳轉**：點擊已收藏的 Marker，地圖中心會自動移動到該座標。
+5. **停止模擬**：提供按鈕停止定位輸出，並清理 Mock Provider。
+
+### 🟢 B. 核心功能：路徑規劃與模擬
+1. **多點路徑規劃**：可透過地圖中心點依序新增路徑點 (Waypoints)，畫面上會顯示青色 Marker 與藍色連線 (Polyline)。
+2. **路徑播放控制**：提供 Play Route、Pause Route、Clear（停止並清除）的完整狀態機控制。
+3. **移動速度控制**：提供 0~100 km/h 的滑桿 (Slider) 即時微調速度。
+4. **交通工具預設速度**：提供步行 (5 km/h)、單車 (15 km/h)、汽車 (40 km/h) 的快速切換 Chip，點選後會自動套用預設速度並更新滑桿。
+5. **路徑模擬邏輯**：背景 Coroutine 依序計算 A -> B 的插值 (Interpolation)，定期輸出 Mock Location，到達終點後自動停止。
+
+### 🟢 C. 加值功能 (P1-2)
+1. **收藏位置清單頁 (SavedLocationsScreen)**：
+   - 顯示所有歷史模擬點位。
+   - 支援點擊列表項目，帶參數返回地圖頁並自動置中。
+   - 支援「重新命名」與「刪除」特定收藏點。
+
+### 🟢 D. 架構與工程規範
+1. **技術棧**：Kotlin, Jetpack Compose, Material Design 3, MVVM + Clean Architecture。
+2. **Mock 機制封裝**：實作 `LocationMockEngine` interface，將系統 API (`LocationManager`, `AppOpsManager`) 與 ViewModel 徹底解耦。
+3. **依賴注入**：使用 Hilt 完成 DI (`@HiltViewModel`, `@AndroidEntryPoint`)。
+4. **測試與 CI**：
+   - 撰寫了 ViewModel 與 RouteSimulator 的 Unit Tests (JUnit 4, Mockk)。
+   - 配置了 GitHub Actions CI (`./gradlew test lintDebug assembleDebug`)。
+
+### 🟢 E. 重大 Bug 修復與穩定性提升 (P0-Urgent)
+1. **修復 Navigation Crash**：解決 `CreationExtras must have a value by SAVED_STATE_REGISTRY_OWNER_KEY`，確保 `hiltViewModel(backStackEntry)` 正確綁定 Navigation Graph 範圍，並升級 `hilt-navigation-compose` 至 1.2.0。
+2. **修復開發者選項找不到 App**：在 `AndroidManifest.xml` 補上 `ACCESS_MOCK_LOCATION` 權限，並在 `build.gradle.kts` 強制開啟 `debug { isDebuggable = true }`，確保實機能選取本 App。
+3. **防禦自動跳轉設定頁**：
+   - 徹底移除啟動時可能觸發 `startActivity` 的自動化流程。
+   - 實作了雙重檢查機制：冷啟動 (`LaunchedEffect`) 與 從設定返回 (`LifecycleEventObserver(ON_RESUME)`) 僅更新 State。
+   - 在「前往設定」按鈕加入 **500ms 延遲防誤觸 (Anti-Misclick)** 機制，徹底根絕冷啟動直接跳出 App 的現象。
+
+---
+**總結**：專案的核心測試工具功能已完全具備，架構與導航穩定，實機操作安全且符合 Material Design 3 規範。
