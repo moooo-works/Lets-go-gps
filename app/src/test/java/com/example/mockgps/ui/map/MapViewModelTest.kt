@@ -2,6 +2,7 @@ package com.example.mockgps.ui.map
 
 import com.example.mockgps.domain.LocationMockEngine
 import com.example.mockgps.domain.RouteSimulator
+import com.example.mockgps.domain.MockPermissionStatus
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import io.mockk.every
@@ -55,7 +56,7 @@ class MapViewModelTest {
 
     @Test
     fun `startMocking sets NotMockAppSelected error when permission denied`() = runTest {
-        every { mockEngine.isMockingAllowed() } returns false
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.NotAllowed
         val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
 
         viewModel.startMocking()
@@ -66,9 +67,23 @@ class MapViewModelTest {
         assertTrue(viewModel.uiState.value.mockError is MockError.NotMockAppSelected)
     }
 
+
+    @Test
+    fun `startMocking sets PermissionCheckFailed when permission check throws`() = runTest {
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.CheckFailed(IllegalStateException("AppOps unavailable"))
+        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
+
+        viewModel.startMocking()
+        advanceUntilIdle()
+
+        verify(exactly = 0) { mockEngine.setupMockProvider() }
+        assertTrue(viewModel.uiState.value.mockError is MockError.PermissionCheckFailed)
+        assertFalse(viewModel.uiState.value.mockError is MockError.NotMockAppSelected)
+    }
+
     @Test
     fun `startMocking sets ProviderSetupFailed error when setup fails`() = runTest {
-        every { mockEngine.isMockingAllowed() } returns true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { mockEngine.setupMockProvider() } throws SecurityException("Setup failed")
 
         val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
@@ -85,7 +100,7 @@ class MapViewModelTest {
 
     @Test
     fun `startMocking succeeds when permission granted and setup succeeds`() = runTest {
-        every { mockEngine.isMockingAllowed() } returns true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { mockEngine.setupMockProvider() } just runs
 
         val viewModel = MapViewModel(mockEngine, repository, routeSimulator)

@@ -6,5 +6,6 @@ sealed class MockError {
     data class SetLocationFailed(val message: String) : MockError()
     data class ProviderTeardownFailed(val message: String) : MockError()
     data class InvalidInput(val message: String) : MockError()
+    data class PermissionCheckFailed(val message: String) : MockError()
     data class Unknown(val message: String) : MockError()
 }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import com.example.mockgps.domain.MockPermissionStatus
 import java.lang.SecurityException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -105,9 +106,9 @@ class AndroidLocationMockEngineTest {
         } returns AppOpsManager.MODE_ALLOWED
 
         val engine = AndroidLocationMockEngine(context)
-        val allowed = engine.isMockingAllowed()
+        val status = engine.getMockPermissionStatus()
 
-        assertEquals(true, allowed)
+        assertEquals(MockPermissionStatus.Allowed, status)
     }
 
     @Test
@@ -121,8 +122,8 @@ class AndroidLocationMockEngineTest {
         } returns AppOpsManager.MODE_ERRORED
 
         val engine = AndroidLocationMockEngine(context)
-        val allowed = engine.isMockingAllowed()
+        val status = engine.getMockPermissionStatus()
 
-        assertEquals(false, allowed)
+        assertEquals(MockPermissionStatus.NotAllowed, status)
     }
 }

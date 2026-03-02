@@ -17,6 +17,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
 import com.example.mockgps.domain.SimulationState
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -26,6 +27,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun MapScreen(
     viewModel: MapViewModel,
+    selectedLocation: LatLng? = null,
+    onSelectedLocationConsumed: () -> Unit = {},
     onNavigateToSavedLocations: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -44,14 +47,14 @@ fun MapScreen(
 
     // Initial check on cold start
     LaunchedEffect(Unit) {
-        viewModel.checkMockPermission()
+        viewModel.refreshMockPermission()
     }
 
     // Check on resume (e.g. returning from settings)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.checkMockPermission()
+                viewModel.refreshMockPermission()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -63,6 +66,14 @@ fun MapScreen(
     LaunchedEffect(uiState.centerLocation) {
         if (cameraPositionState.position.target != uiState.centerLocation) {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
+        }
+    }
+
+    LaunchedEffect(selectedLocation) {
+        if (selectedLocation != null) {
+            cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(selectedLocation, 15f))
+            viewModel.onCameraMove(selectedLocation)
+            onSelectedLocationConsumed()
         }
     }
 
@@ -100,69 +111,63 @@ fun MapScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier
+        Column(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)) {
-
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                uiSettings = MapUiSettings(zoomControlsEnabled = false)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
-                uiState.savedLocations.forEach { location ->
-                    Marker(
-                        state = MarkerState(position = LatLng(location.latitude, location.longitude)),
-                        title = location.name,
-                        snippet = "Lat: ${location.latitude}, Lng: ${location.longitude}",
-                        onClick = {
-                            val target = LatLng(location.latitude, location.longitude)
-                            viewModel.onCameraMove(target)
-                            // cameraPositionState update handled by LaunchedEffect
-                            false
-                        },
-                        icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
-                    )
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false),
+                    properties = MapProperties(isMyLocationEnabled = false)
+                ) {
+                    uiState.savedLocations.forEach { location ->
+                        Marker(
+                            state = MarkerState(position = LatLng(location.latitude, location.longitude)),
+                            title = location.name,
+                            onClick = {
+                                val target = LatLng(location.latitude, location.longitude)
+                                viewModel.onCameraMove(target)
+                                // cameraPositionState update handled by LaunchedEffect
+                                false
+                            },
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
+                        )
+                    }
+
+                    uiState.waypoints.forEachIndexed { index, point ->
+                        Marker(
+                            state = MarkerState(position = point),
+                            title = "Point ${index + 1}",
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN)
+                        )
+                    }
+
+                    if (uiState.waypoints.size > 1) {
+                        Polyline(
+                            points = uiState.waypoints,
+                            color = Color.Blue,
+                            width = 10f
+                        )
+                    }
                 }
 
-                uiState.waypoints.forEachIndexed { index, point ->
-                    Marker(
-                        state = MarkerState(position = point),
-                        title = "Point ${index + 1}",
-                        icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN)
-                    )
-                }
-
-                if (uiState.waypoints.size > 1) {
-                    Polyline(
-                        points = uiState.waypoints,
-                        color = Color.Blue,
-                        width = 10f
-                    )
-                }
-
-                val mockLoc = uiState.currentLocation ?: if (uiState.isMocking && uiState.simulationState == SimulationState.IDLE) uiState.centerLocation else null
-
-                if (mockLoc != null && uiState.isMocking) {
-                     Marker(
-                        state = MarkerState(position = mockLoc),
-                        title = "Mocking Here",
-                        icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE)
-                    )
-                }
+                // Center Crosshair (centered in map viewport only)
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Center",
+                    modifier = Modifier.align(Alignment.Center).size(32.dp),
+                    tint = Color.Red
+                )
             }
-
-            // Center Crosshair
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Center",
-                modifier = Modifier.align(Alignment.Center).size(32.dp),
-                tint = Color.Red
-            )
 
             // Bottom Controls
             Surface(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
@@ -260,6 +265,7 @@ fun MapScreen(
                         is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
                         is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"
                         is MockError.InvalidInput -> "Invalid Input: ${error.message}"
+                        is MockError.PermissionCheckFailed -> "Permission Check Failed: ${error.message}"
                         is MockError.Unknown -> "Unknown Error: ${error.message}"
                     })
                 }
@@ -270,14 +276,19 @@ fun MapScreen(
                         onClick = {
                             viewModel.clearError()
                             try {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                                context.startActivity(intent)
+                                val appDevIntent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                                context.startActivity(appDevIntent)
                             } catch (e: Exception) {
                                 try {
-                                    val intent = Intent(Settings.ACTION_SETTINGS)
-                                    context.startActivity(intent)
+                                    val devIntent = Intent("android.settings.DEVELOPMENT_SETTINGS")
+                                    context.startActivity(devIntent)
                                 } catch (e2: Exception) {
-                                    // Ignore or show toast
+                                    try {
+                                        val settingsIntent = Intent(Settings.ACTION_SETTINGS)
+                                        context.startActivity(settingsIntent)
+                                    } catch (e3: Exception) {
+                                        // Ignore or show toast
+                                    }
                                 }
                             }
                         },

@@ -10,6 +10,7 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import com.example.mockgps.domain.LocationMockEngine
+import com.example.mockgps.domain.MockPermissionStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -88,7 +89,7 @@ class AndroidLocationMockEngine @Inject constructor(
         }
     }
 
-    override fun isMockingAllowed(): Boolean {
+    override fun getMockPermissionStatus(): MockPermissionStatus {
         return try {
             val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 appOpsManager.unsafeCheckOpNoThrow(
@@ -103,10 +104,14 @@ class AndroidLocationMockEngine @Inject constructor(
                     context.packageName
                 )
             }
-            mode == AppOpsManager.MODE_ALLOWED
+            if (mode == AppOpsManager.MODE_ALLOWED) {
+                MockPermissionStatus.Allowed
+            } else {
+                MockPermissionStatus.NotAllowed
+            }
         } catch (e: Exception) {
             reportError(MockEngineError.PermissionCheck(e), "isMockingAllowed check failed")
-            false
+            MockPermissionStatus.CheckFailed(e)
         }
     }
 
