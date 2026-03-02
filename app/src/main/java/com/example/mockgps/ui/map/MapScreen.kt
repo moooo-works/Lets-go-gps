@@ -17,6 +17,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
 import com.example.mockgps.domain.SimulationState
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -26,6 +27,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun MapScreen(
     viewModel: MapViewModel,
+    selectedLocation: LatLng? = null,
+    onSelectedLocationConsumed: () -> Unit = {},
     onNavigateToSavedLocations: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -66,6 +69,14 @@ fun MapScreen(
         }
     }
 
+    LaunchedEffect(selectedLocation) {
+        if (selectedLocation != null) {
+            cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(selectedLocation, 15f))
+            viewModel.onCameraMove(selectedLocation)
+            onSelectedLocationConsumed()
+        }
+    }
+
     Scaffold(
         topBar = {
             // Overlay Top Bar
@@ -100,69 +111,63 @@ fun MapScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier
+        Column(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)) {
-
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                uiSettings = MapUiSettings(zoomControlsEnabled = false)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
-                uiState.savedLocations.forEach { location ->
-                    Marker(
-                        state = MarkerState(position = LatLng(location.latitude, location.longitude)),
-                        title = location.name,
-                        snippet = "Lat: ${location.latitude}, Lng: ${location.longitude}",
-                        onClick = {
-                            val target = LatLng(location.latitude, location.longitude)
-                            viewModel.onCameraMove(target)
-                            // cameraPositionState update handled by LaunchedEffect
-                            false
-                        },
-                        icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
-                    )
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false),
+                    properties = MapProperties(isMyLocationEnabled = false)
+                ) {
+                    uiState.savedLocations.forEach { location ->
+                        Marker(
+                            state = MarkerState(position = LatLng(location.latitude, location.longitude)),
+                            title = location.name,
+                            onClick = {
+                                val target = LatLng(location.latitude, location.longitude)
+                                viewModel.onCameraMove(target)
+                                // cameraPositionState update handled by LaunchedEffect
+                                false
+                            },
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
+                        )
+                    }
+
+                    uiState.waypoints.forEachIndexed { index, point ->
+                        Marker(
+                            state = MarkerState(position = point),
+                            title = "Point ${index + 1}",
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN)
+                        )
+                    }
+
+                    if (uiState.waypoints.size > 1) {
+                        Polyline(
+                            points = uiState.waypoints,
+                            color = Color.Blue,
+                            width = 10f
+                        )
+                    }
                 }
 
-                uiState.waypoints.forEachIndexed { index, point ->
-                    Marker(
-                        state = MarkerState(position = point),
-                        title = "Point ${index + 1}",
-                        icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN)
-                    )
-                }
-
-                if (uiState.waypoints.size > 1) {
-                    Polyline(
-                        points = uiState.waypoints,
-                        color = Color.Blue,
-                        width = 10f
-                    )
-                }
-
-                val mockLoc = uiState.currentLocation ?: if (uiState.isMocking && uiState.simulationState == SimulationState.IDLE) uiState.centerLocation else null
-
-                if (mockLoc != null && uiState.isMocking) {
-                     Marker(
-                        state = MarkerState(position = mockLoc),
-                        title = "Mocking Here",
-                        icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE)
-                    )
-                }
+                // Center Crosshair (centered in map viewport only)
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Center",
+                    modifier = Modifier.align(Alignment.Center).size(32.dp),
+                    tint = Color.Red
+                )
             }
-
-            // Center Crosshair
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Center",
-                modifier = Modifier.align(Alignment.Center).size(32.dp),
-                tint = Color.Red
-            )
 
             // Bottom Controls
             Surface(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp

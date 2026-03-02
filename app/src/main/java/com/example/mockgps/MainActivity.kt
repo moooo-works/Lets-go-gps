@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -46,17 +48,20 @@ fun AppNavigation() {
             val viewModel: MapViewModel = hiltViewModel(backStackEntry)
 
             // Check for returned result from SavedLocations
-            val selectedLat = backStackEntry.savedStateHandle.get<Double>("selectedLat")
-            val selectedLng = backStackEntry.savedStateHandle.get<Double>("selectedLng")
-
-            if (selectedLat != null && selectedLng != null) {
-                backStackEntry.savedStateHandle.remove<Double>("selectedLat")
-                backStackEntry.savedStateHandle.remove<Double>("selectedLng")
-                viewModel.onCameraMove(com.google.android.gms.maps.model.LatLng(selectedLat, selectedLng))
-            }
+            val selectedLat by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLat", null).collectAsState()
+            val selectedLng by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLng", null).collectAsState()
 
             MapScreen(
                 viewModel = viewModel,
+                selectedLocation = if (selectedLat != null && selectedLng != null) {
+                    com.google.android.gms.maps.model.LatLng(selectedLat!!, selectedLng!!)
+                } else {
+                    null
+                },
+                onSelectedLocationConsumed = {
+                    backStackEntry.savedStateHandle.remove<Double>("selectedLat")
+                    backStackEntry.savedStateHandle.remove<Double>("selectedLng")
+                },
                 onNavigateToSavedLocations = { navController.navigate("saved_locations") }
             )
         }
