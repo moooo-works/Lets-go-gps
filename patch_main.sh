@@ -1,0 +1,12 @@
+#!/bin/bash
+sed -i 's/import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel/import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel\nimport com.example.mockgps.ui.routes.RoutesScreen\nimport com.example.mockgps.ui.routes.RoutesViewModel\nimport com.google.gson.Gson\nimport com.example.mockgps.data.model.RoutePoint/' app/src/main/java/com/example/mockgps/MainActivity.kt
+
+sed -i 's/onNavigateToSavedLocations = { navController.navigate("saved_locations") }/onNavigateToSavedLocations = { navController.navigate("saved_locations") },\n                onNavigateToRoutes = { navController.navigate("routes") }/' app/src/main/java/com/example/mockgps/MainActivity.kt
+
+# Insert route load handling in map screen block
+sed -i '/val selectedLng = backStackEntry.savedStateHandle.get<Double>("selectedLng")/a \            val loadedRoutePointsJson = backStackEntry.savedStateHandle.get<String>("loadedRoutePoints")\n            val loadedRouteSpeed = backStackEntry.savedStateHandle.get<Double>("loadedRouteSpeed")' app/src/main/java/com/example/mockgps/MainActivity.kt
+
+sed -i '/viewModel.onCameraMove(com.google.android.gms.maps.model.LatLng(selectedLat, selectedLng))/a \            }\n\n            if (loadedRoutePointsJson != null) {\n                backStackEntry.savedStateHandle.remove<String>("loadedRoutePoints")\n                backStackEntry.savedStateHandle.remove<Double>("loadedRouteSpeed")\n                val type = object : com.google.gson.reflect.TypeToken<List<RoutePoint>>() {}.type\n                val points: List<RoutePoint> = Gson().fromJson(loadedRoutePointsJson, type)\n                viewModel.loadRoute(points, loadedRouteSpeed ?: 5.0)\n            }' app/src/main/java/com/example/mockgps/MainActivity.kt
+
+# Add routes composable
+sed -i '/composable("saved_locations") { backStackEntry ->/i \        composable("routes") { backStackEntry ->\n            val viewModel: RoutesViewModel = hiltViewModel(backStackEntry)\n            RoutesScreen(\n                viewModel = viewModel,\n                onNavigateBack = { navController.popBackStack() },\n                onRouteSelected = { route, points ->\n                    navController.previousBackStackEntry?.savedStateHandle?.set("loadedRoutePoints", Gson().toJson(points))\n                    navController.previousBackStackEntry?.savedStateHandle?.set("loadedRouteSpeed", route.defaultSpeed)\n                    navController.popBackStack()\n                }\n            )\n        }' app/src/main/java/com/example/mockgps/MainActivity.kt

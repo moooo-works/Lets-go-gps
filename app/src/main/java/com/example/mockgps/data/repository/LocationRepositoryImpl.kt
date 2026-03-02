@@ -21,5 +21,6 @@ class LocationRepositoryImpl @Inject constructor(
     override fun getAllRoutes(): Flow<List<Route>> = routeDao.getAllRoutes()
     override suspend fun createRoute(route: Route, points: List<RoutePoint>) = routeDao.createRouteWithPoints(route, points)
     override suspend fun deleteRoute(route: Route) = routeDao.deleteRoute(route)
+    override suspend fun updateRoute(route: Route) = routeDao.updateRoute(route)
     override fun getPointsForRoute(routeId: Int): Flow<List<RoutePoint>> = routeDao.getPointsForRoute(routeId)
 }

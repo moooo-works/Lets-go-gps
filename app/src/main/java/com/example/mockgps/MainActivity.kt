@@ -16,6 +16,10 @@ import com.example.mockgps.ui.map.MapScreen
 import com.example.mockgps.ui.map.MapViewModel
 import com.example.mockgps.ui.savedlocations.SavedLocationsScreen
 import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel
+import com.example.mockgps.ui.routes.RoutesScreen
+import com.example.mockgps.ui.routes.RoutesViewModel
+import com.google.gson.Gson
+import com.example.mockgps.data.model.RoutePoint
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -48,6 +52,8 @@ fun AppNavigation() {
             // Check for returned result from SavedLocations
             val selectedLat = backStackEntry.savedStateHandle.get<Double>("selectedLat")
             val selectedLng = backStackEntry.savedStateHandle.get<Double>("selectedLng")
+            val loadedRoutePointsJson = backStackEntry.savedStateHandle.get<String>("loadedRoutePoints")
+            val loadedRouteSpeed = backStackEntry.savedStateHandle.get<Double>("loadedRouteSpeed")
 
             if (selectedLat != null && selectedLng != null) {
                 backStackEntry.savedStateHandle.remove<Double>("selectedLat")
@@ -55,9 +61,30 @@ fun AppNavigation() {
                 viewModel.onCameraMove(com.google.android.gms.maps.model.LatLng(selectedLat, selectedLng))
             }
 
+            if (loadedRoutePointsJson != null) {
+                backStackEntry.savedStateHandle.remove<String>("loadedRoutePoints")
+                backStackEntry.savedStateHandle.remove<Double>("loadedRouteSpeed")
+                val type = object : com.google.gson.reflect.TypeToken<List<RoutePoint>>() {}.type
+                val points: List<RoutePoint> = Gson().fromJson(loadedRoutePointsJson, type)
+                viewModel.loadRoute(points, loadedRouteSpeed ?: 5.0)
+            }
+
             MapScreen(
                 viewModel = viewModel,
-                onNavigateToSavedLocations = { navController.navigate("saved_locations") }
+                onNavigateToSavedLocations = { navController.navigate("saved_locations") },
+                onNavigateToRoutes = { navController.navigate("routes") }
+            )
+        }
+        composable("routes") { backStackEntry ->
+            val viewModel: RoutesViewModel = hiltViewModel(backStackEntry)
+            RoutesScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onRouteSelected = { route, points ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set("loadedRoutePoints", Gson().toJson(points))
+                    navController.previousBackStackEntry?.savedStateHandle?.set("loadedRouteSpeed", route.defaultSpeed)
+                    navController.popBackStack()
+                }
             )
         }
         composable("saved_locations") { backStackEntry ->

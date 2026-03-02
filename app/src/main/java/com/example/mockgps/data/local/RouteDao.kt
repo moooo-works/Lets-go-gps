@@ -20,6 +20,8 @@ interface RouteDao {
 
     @Delete
     suspend fun deleteRoute(route: Route)
+    @androidx.room.Update
+    suspend fun updateRoute(route: Route)
 
     @Query("SELECT * FROM route_points WHERE routeId = :routeId ORDER BY orderIndex ASC")
     fun getPointsForRoute(routeId: Int): Flow<List<RoutePoint>>

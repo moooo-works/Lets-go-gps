@@ -26,11 +26,14 @@ import kotlinx.coroutines.delay
 @Composable
 fun MapScreen(
     viewModel: MapViewModel,
-    onNavigateToSavedLocations: () -> Unit = {}
+    onNavigateToSavedLocations: () -> Unit = {},
+    onNavigateToRoutes: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showSaveRouteDialog by remember { mutableStateOf(false) }
+    var routeNameToSave by remember { mutableStateOf("") }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
@@ -92,6 +95,9 @@ fun MapScreen(
                         }
                         val statusColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING) Color.Green else Color.Gray
                         Text(text = "Status: $statusText", color = statusColor)
+                    }
+                    IconButton(onClick = onNavigateToRoutes) {
+                        Icon(Icons.Default.List, contentDescription = "Saved Routes")
                     }
                     IconButton(onClick = onNavigateToSavedLocations) {
                         Icon(Icons.Default.List, contentDescription = "Saved Locations")
@@ -173,6 +179,11 @@ fun MapScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (uiState.waypoints.size >= 2) {
+                            Button(onClick = { showSaveRouteDialog = true }) {
+                                Text("Save Route")
+                            }
+                        }
                         Button(onClick = { viewModel.addWaypoint() }) {
                             Text("Add Point")
                         }
@@ -236,6 +247,40 @@ fun MapScreen(
                 }
             }
         }
+    }
+
+    if (showSaveRouteDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveRouteDialog = false },
+            title = { Text("Save Route") },
+            text = {
+                OutlinedTextField(
+                    value = routeNameToSave,
+                    onValueChange = { if (it.length <= 40) routeNameToSave = it },
+                    label = { Text("Route Name") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (routeNameToSave.trim().isNotEmpty()) {
+                            viewModel.saveRoute(routeNameToSave.trim())
+                            showSaveRouteDialog = false
+                            routeNameToSave = ""
+                        }
+                    },
+                    enabled = routeNameToSave.trim().isNotEmpty()
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSaveRouteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     if (uiState.mockError != null) {

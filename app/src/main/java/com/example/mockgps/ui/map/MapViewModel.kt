@@ -143,6 +143,35 @@ class MapViewModel @Inject constructor(
         routeSimulator.setRoute(newWaypoints)
     }
 
+    fun saveRoute(name: String) {
+        viewModelScope.launch {
+            val route = com.example.mockgps.data.model.Route(
+                name = name,
+                defaultSpeed = _uiState.value.speedKmh,
+                transportMode = _uiState.value.transportMode.name
+            )
+            val points = _uiState.value.waypoints.mapIndexed { index, latLng ->
+                com.example.mockgps.data.model.RoutePoint(
+                    routeId = 0, // Assigned by DAO
+                    orderIndex = index,
+                    latitude = latLng.latitude,
+                    longitude = latLng.longitude
+                )
+            }
+            repository.createRoute(route, points)
+        }
+    }
+
+    fun loadRoute(points: List<com.example.mockgps.data.model.RoutePoint>, speed: Double) {
+        val latLngs = points.sortedBy { it.orderIndex }.map { LatLng(it.latitude, it.longitude) }
+        _uiState.update { it.copy(waypoints = latLngs, speedKmh = speed) }
+        routeSimulator.setRoute(latLngs)
+        routeSimulator.setSpeed(speed / KMH_TO_MPS_DIVISOR)
+        if (latLngs.isNotEmpty()) {
+            onCameraMove(latLngs.first())
+        }
+    }
+
     fun clearRoute() {
         _uiState.update { it.copy(waypoints = emptyList()) }
         routeSimulator.stop()
