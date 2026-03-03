@@ -2,20 +2,21 @@ package com.example.mockgps.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mockgps.data.model.RoutePoint
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.LocationMockEngine
-import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.MockPermissionStatus
+import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class TransportMode(val speedKmh: Double) {
     WALKING(5.0),
@@ -120,7 +121,6 @@ class MapViewModel @Inject constructor(
             _uiState.update { it.copy(isMocking = false) }
         }.onFailure { error ->
             _uiState.update { it.copy(isMocking = false) }
-            // For stopMocking, we specifically want to detect teardown issues if any
             setMockError(MockError.ProviderTeardownFailed(error.message ?: "Unknown teardown error"))
         }
     }
@@ -158,6 +158,45 @@ class MapViewModel @Inject constructor(
     fun clearRoute() {
         _uiState.update { it.copy(waypoints = emptyList()) }
         routeSimulator.stop()
+    }
+
+    fun saveCurrentRoute(name: String) {
+        val normalizedName = name.trim()
+        val points = _uiState.value.waypoints
+        if (normalizedName.isBlank() || normalizedName.length > 40 || points.size < 2) {
+            return
+        }
+
+        viewModelScope.launch {
+            repository.insertRouteWithPoints(
+                normalizedName,
+                points.mapIndexed { index, point ->
+                    RoutePoint(
+                        routeId = 0,
+                        orderIndex = index,
+                        latitude = point.latitude,
+                        longitude = point.longitude
+                    )
+                }
+            )
+        }
+    }
+
+    fun loadRoute(routeId: Int) {
+        viewModelScope.launch {
+            val route = repository.getRouteWithPoints(routeId) ?: return@launch
+            val points = route.points
+                .sortedBy { it.orderIndex }
+                .map { LatLng(it.latitude, it.longitude) }
+
+            _uiState.update {
+                it.copy(
+                    waypoints = points,
+                    centerLocation = points.firstOrNull() ?: it.centerLocation
+                )
+            }
+            routeSimulator.setRoute(points)
+        }
     }
 
     fun setTransportMode(mode: TransportMode) {
@@ -210,9 +249,9 @@ class MapViewModel @Inject constructor(
 
     private fun handleEngineError(error: Throwable) {
         val refinedError = when {
-             error is SecurityException -> MockError.ProviderSetupFailed("System rejected mock provider: ${error.message}")
-             error is IllegalArgumentException -> MockError.ProviderSetupFailed("Invalid provider args: ${error.message}")
-             else -> MockError.Unknown("Operation failed: ${error.message}")
+            error is SecurityException -> MockError.ProviderSetupFailed("System rejected mock provider: ${error.message}")
+            error is IllegalArgumentException -> MockError.ProviderSetupFailed("Invalid provider args: ${error.message}")
+            else -> MockError.Unknown("Operation failed: ${error.message}")
         }
         setMockError(refinedError)
     }

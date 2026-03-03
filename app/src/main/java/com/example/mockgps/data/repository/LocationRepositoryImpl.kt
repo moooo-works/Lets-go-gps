@@ -2,8 +2,9 @@ package com.example.mockgps.data.repository
 
 import com.example.mockgps.data.local.LocationDao
 import com.example.mockgps.data.local.RouteDao
-import com.example.mockgps.data.model.Route
 import com.example.mockgps.data.model.RoutePoint
+import com.example.mockgps.data.model.RouteSummary
+import com.example.mockgps.data.model.RouteWithPoints
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.repository.LocationRepository
 import kotlinx.coroutines.flow.Flow
@@ -18,8 +19,11 @@ class LocationRepositoryImpl @Inject constructor(
     override suspend fun deleteLocation(location: SavedLocation) = locationDao.deleteLocation(location)
     override suspend fun updateLocation(location: SavedLocation) = locationDao.updateLocation(location)
 
-    override fun getAllRoutes(): Flow<List<Route>> = routeDao.getAllRoutes()
-    override suspend fun createRoute(route: Route, points: List<RoutePoint>) = routeDao.createRouteWithPoints(route, points)
-    override suspend fun deleteRoute(route: Route) = routeDao.deleteRoute(route)
-    override fun getPointsForRoute(routeId: Int): Flow<List<RoutePoint>> = routeDao.getPointsForRoute(routeId)
+    override fun observeRoutes(): Flow<List<RouteSummary>> = routeDao.observeRoutes()
+    override suspend fun getRouteWithPoints(routeId: Int): RouteWithPoints? = routeDao.getRouteWithPoints(routeId)
+    override suspend fun insertRouteWithPoints(name: String, points: List<RoutePoint>) =
+        routeDao.insertRouteWithPoints(name, points)
+
+    override suspend fun deleteRoute(routeId: Int) = routeDao.deleteRoute(routeId)
+    override suspend fun updateRouteName(routeId: Int, name: String) = routeDao.updateRouteName(routeId, name)
 }

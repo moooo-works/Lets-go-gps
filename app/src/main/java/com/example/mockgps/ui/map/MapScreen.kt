@@ -2,25 +2,59 @@ package com.example.mockgps.ui.map
 
 import android.content.Intent
 import android.provider.Settings
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.unit.dp
 import com.example.mockgps.domain.SimulationState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.*
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,11 +63,14 @@ fun MapScreen(
     viewModel: MapViewModel,
     selectedLocation: LatLng? = null,
     onSelectedLocationConsumed: () -> Unit = {},
-    onNavigateToSavedLocations: () -> Unit = {}
+    onNavigateToSavedLocations: () -> Unit = {},
+    onNavigateToRoutes: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showSaveRouteDialog by remember { mutableStateOf(false) }
+    var routeNameInput by remember { mutableStateOf("") }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
@@ -41,16 +78,14 @@ fun MapScreen(
 
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
-             viewModel.onCameraMove(cameraPositionState.position.target)
+            viewModel.onCameraMove(cameraPositionState.position.target)
         }
     }
 
-    // Initial check on cold start
     LaunchedEffect(Unit) {
         viewModel.refreshMockPermission()
     }
 
-    // Check on resume (e.g. returning from settings)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -58,9 +93,7 @@ fun MapScreen(
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(uiState.centerLocation) {
@@ -79,7 +112,6 @@ fun MapScreen(
 
     Scaffold(
         topBar = {
-            // Overlay Top Bar
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,16 +136,23 @@ fun MapScreen(
                         val statusColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING) Color.Green else Color.Gray
                         Text(text = "Status: $statusText", color = statusColor)
                     }
-                    IconButton(onClick = onNavigateToSavedLocations) {
-                        Icon(Icons.Default.List, contentDescription = "Saved Locations")
+                    Row {
+                        IconButton(onClick = onNavigateToSavedLocations) {
+                            Icon(Icons.Default.List, contentDescription = "Saved Locations")
+                        }
+                        TextButton(onClick = onNavigateToRoutes) {
+                            Text("Routes")
+                        }
                     }
                 }
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -130,12 +169,12 @@ fun MapScreen(
                             state = MarkerState(position = LatLng(location.latitude, location.longitude)),
                             title = location.name,
                             onClick = {
-                                val target = LatLng(location.latitude, location.longitude)
-                                viewModel.onCameraMove(target)
-                                // cameraPositionState update handled by LaunchedEffect
+                                viewModel.onCameraMove(LatLng(location.latitude, location.longitude))
                                 false
                             },
-                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE)
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
+                                com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE
+                            )
                         )
                     }
 
@@ -143,32 +182,29 @@ fun MapScreen(
                         Marker(
                             state = MarkerState(position = point),
                             title = "Point ${index + 1}",
-                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN)
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
+                                com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN
+                            )
                         )
                     }
 
                     if (uiState.waypoints.size > 1) {
-                        Polyline(
-                            points = uiState.waypoints,
-                            color = Color.Blue,
-                            width = 10f
-                        )
+                        Polyline(points = uiState.waypoints, color = Color.Blue, width = 10f)
                     }
                 }
 
-                // Center Crosshair (centered in map viewport only)
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Center",
-                    modifier = Modifier.align(Alignment.Center).size(32.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(32.dp),
                     tint = Color.Red
                 )
             }
 
-            // Bottom Controls
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
@@ -181,7 +217,18 @@ fun MapScreen(
                         Button(onClick = { viewModel.addWaypoint() }) {
                             Text("Add Point")
                         }
-                        Button(onClick = { viewModel.clearRoute() }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
+                        if (uiState.waypoints.size >= 2) {
+                            Button(onClick = {
+                                routeNameInput = ""
+                                showSaveRouteDialog = true
+                            }) {
+                                Text("Save Route")
+                            }
+                        }
+                        Button(
+                            onClick = { viewModel.clearRoute() },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
                             Text("Clear")
                         }
                     }
@@ -193,7 +240,7 @@ fun MapScreen(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         TransportMode.values().forEach { mode ->
-                             FilterChip(
+                            FilterChip(
                                 selected = uiState.transportMode == mode,
                                 onClick = { viewModel.setTransportMode(mode) },
                                 label = { Text(mode.name.take(1)) }
@@ -201,13 +248,16 @@ fun MapScreen(
                         }
                     }
 
-                    Slider(
+                    androidx.compose.material3.Slider(
                         value = uiState.speedKmh.toFloat(),
                         onValueChange = { viewModel.setSpeed(it.toDouble()) },
                         valueRange = 0f..100f,
                         steps = 19
                     )
-                    Text("Speed: ${"%.1f".format(uiState.speedKmh)} km/h", modifier = Modifier.align(Alignment.CenterHorizontally))
+                    Text(
+                        "Speed: ${"%.1f".format(uiState.speedKmh)} km/h",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -243,11 +293,42 @@ fun MapScreen(
         }
     }
 
+    if (showSaveRouteDialog) {
+        val normalized = routeNameInput.trim()
+        AlertDialog(
+            onDismissRequest = { showSaveRouteDialog = false },
+            title = { Text("Save Route") },
+            text = {
+                OutlinedTextField(
+                    value = routeNameInput,
+                    onValueChange = { routeNameInput = it },
+                    singleLine = true,
+                    supportingText = { Text("1-40 chars") }
+                )
+            },
+            confirmButton = {
+                Button(
+                    enabled = normalized.isNotEmpty() && normalized.length <= 40,
+                    onClick = {
+                        viewModel.saveCurrentRoute(normalized)
+                        showSaveRouteDialog = false
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSaveRouteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     if (uiState.mockError != null) {
         val error = uiState.mockError!!
         var isButtonEnabled by remember { mutableStateOf(false) }
 
-        // Anti-misclick delay: button enables after 500ms
         LaunchedEffect(error) {
             isButtonEnabled = false
             delay(500)
@@ -259,15 +340,17 @@ fun MapScreen(
             title = { Text(if (error is MockError.NotMockAppSelected) "Permission Required" else "Error") },
             text = {
                 Column {
-                    Text(text = when (error) {
-                        is MockError.NotMockAppSelected -> "Please go to Developer Options -> Select mock location app -> Select this app."
-                        is MockError.ProviderSetupFailed -> "Mock Engine Setup Failed: ${error.message}"
-                        is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
-                        is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"
-                        is MockError.InvalidInput -> "Invalid Input: ${error.message}"
-                        is MockError.PermissionCheckFailed -> "Permission Check Failed: ${error.message}"
-                        is MockError.Unknown -> "Unknown Error: ${error.message}"
-                    })
+                    Text(
+                        text = when (error) {
+                            is MockError.NotMockAppSelected -> "Please go to Developer Options -> Select mock location app -> Select this app."
+                            is MockError.ProviderSetupFailed -> "Mock Engine Setup Failed: ${error.message}"
+                            is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
+                            is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"
+                            is MockError.InvalidInput -> "Invalid Input: ${error.message}"
+                            is MockError.PermissionCheckFailed -> "Permission Check Failed: ${error.message}"
+                            is MockError.Unknown -> "Unknown Error: ${error.message}"
+                        }
+                    )
                 }
             },
             confirmButton = {
@@ -276,18 +359,14 @@ fun MapScreen(
                         onClick = {
                             viewModel.clearError()
                             try {
-                                val appDevIntent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                                context.startActivity(appDevIntent)
-                            } catch (e: Exception) {
+                                context.startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+                            } catch (_: Exception) {
                                 try {
-                                    val devIntent = Intent("android.settings.DEVELOPMENT_SETTINGS")
-                                    context.startActivity(devIntent)
-                                } catch (e2: Exception) {
+                                    context.startActivity(Intent("android.settings.DEVELOPMENT_SETTINGS"))
+                                } catch (_: Exception) {
                                     try {
-                                        val settingsIntent = Intent(Settings.ACTION_SETTINGS)
-                                        context.startActivity(settingsIntent)
-                                    } catch (e3: Exception) {
-                                        // Ignore or show toast
+                                        context.startActivity(Intent(Settings.ACTION_SETTINGS))
+                                    } catch (_: Exception) {
                                     }
                                 }
                             }
@@ -297,16 +376,12 @@ fun MapScreen(
                         Text(if (isButtonEnabled) "Go to Settings" else "Wait...")
                     }
                 } else {
-                    TextButton(onClick = { viewModel.clearError() }) {
-                        Text("OK")
-                    }
+                    TextButton(onClick = { viewModel.clearError() }) { Text("OK") }
                 }
             },
             dismissButton = {
                 if (error is MockError.NotMockAppSelected) {
-                    TextButton(onClick = { viewModel.clearError() }) {
-                        Text("Cancel")
-                    }
+                    TextButton(onClick = { viewModel.clearError() }) { Text("Cancel") }
                 }
             }
         )
