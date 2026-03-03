@@ -12,6 +12,7 @@ import com.example.mockgps.domain.repository.LocationRepository
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +47,7 @@ class MapViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+    private var locationPushJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -57,21 +59,6 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             routeSimulator.simulationState.collect { state ->
                 _uiState.update { it.copy(simulationState = state) }
-            }
-        }
-
-        viewModelScope.launch {
-            routeSimulator.currentLocation.collect { location ->
-                if (location == null) return@collect
-
-                _uiState.update { it.copy(currentLocation = location) }
-                if (_uiState.value.hasMockPermission) {
-                    try {
-                        mockEngine.setLocation(location.latitude, location.longitude)
-                    } catch (e: Exception) {
-                        setMockError(MockError.SetLocationFailed("Failed to update simulated location: ${e.message}"))
-                    }
-                }
             }
         }
     }
@@ -107,6 +94,7 @@ class MapViewModel @Inject constructor(
             mockEngine.setupMockProvider()
             val target = _uiState.value.centerLocation
             mockEngine.setLocation(target.latitude, target.longitude)
+            ensureLocationPushJob()
             _uiState.update { it.copy(isMocking = true, mockError = null) }
             saveLocationIfNeeded(target)
         }.onFailure { error ->
@@ -116,6 +104,7 @@ class MapViewModel @Inject constructor(
 
     fun stopMocking() {
         runCatching {
+            stopLocationPushJob()
             routeSimulator.stop()
             mockEngine.teardownMockProvider()
             _uiState.update { it.copy(isMocking = false) }
@@ -157,6 +146,7 @@ class MapViewModel @Inject constructor(
 
     fun clearRoute() {
         _uiState.update { it.copy(waypoints = emptyList()) }
+        stopLocationPushJob()
         routeSimulator.stop()
     }
 
@@ -228,6 +218,7 @@ class MapViewModel @Inject constructor(
 
         runCatching {
             mockEngine.setupMockProvider()
+            ensureLocationPushJob()
             _uiState.update { it.copy(isMocking = true, mockError = null) }
             routeSimulator.play(viewModelScope)
         }.onFailure { error ->
@@ -240,7 +231,30 @@ class MapViewModel @Inject constructor(
     }
 
     fun stopRoute() {
+        stopLocationPushJob()
         routeSimulator.stop()
+    }
+
+    private fun ensureLocationPushJob() {
+        if (locationPushJob?.isActive == true) return
+
+        locationPushJob = viewModelScope.launch {
+            routeSimulator.currentLocation.collect { location ->
+                if (location == null) return@collect
+
+                _uiState.update { it.copy(currentLocation = location) }
+                runCatching {
+                    mockEngine.setLocation(location.latitude, location.longitude)
+                }.onFailure { error ->
+                    setMockError(MockError.SetLocationFailed("Failed to update simulated location: ${error.message}"))
+                }
+            }
+        }
+    }
+
+    private fun stopLocationPushJob() {
+        locationPushJob?.cancel()
+        locationPushJob = null
     }
 
     private fun setMockError(error: MockError) {
@@ -254,6 +268,11 @@ class MapViewModel @Inject constructor(
             else -> MockError.Unknown("Operation failed: ${error.message}")
         }
         setMockError(refinedError)
+    }
+
+    override fun onCleared() {
+        stopLocationPushJob()
+        super.onCleared()
     }
 
     private companion object {

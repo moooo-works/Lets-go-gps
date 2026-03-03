@@ -5,6 +5,8 @@ import android.content.Context
 import android.location.LocationManager
 import android.location.provider.ProviderProperties
 import android.os.Process
+import android.util.Log
+import com.example.mockgps.domain.MockPermissionStatus
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -15,9 +17,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import com.example.mockgps.domain.MockPermissionStatus
 import java.lang.SecurityException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -32,11 +34,14 @@ class AndroidLocationMockEngineTest {
         every { context.getSystemService(Context.APP_OPS_SERVICE) } returns appOpsManager
         every { context.packageName } returns "com.example.mockgps"
         mockkStatic(Process::class)
+        mockkStatic(Log::class)
         every { Process.myUid() } returns 1000
+        every { Log.d(any(), any()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
     }
 
     @Test
-    fun `setupMockProvider calls addTestProvider`() {
+    fun `setupMockProvider calls addTestProvider for gps and network`() {
         val engine = AndroidLocationMockEngine(context)
 
         engine.setupMockProvider()
@@ -47,6 +52,11 @@ class AndroidLocationMockEngineTest {
                 false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
             )
             locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
+            locationManager.addTestProvider(
+                LocationManager.NETWORK_PROVIDER,
+                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
+            )
+            locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true)
         }
     }
 
@@ -67,11 +77,11 @@ class AndroidLocationMockEngineTest {
 
         val deferredError = async(start = CoroutineStart.UNDISPATCHED) { engine.errors.first() }
 
-        engine.setLocation(25.0, 121.0)
+        runCatching { engine.setLocation(25.0, 121.0) }
 
         val error = deferredError.await()
         val cause = (error as MockEngineError.SetLocation).cause
-        assertEquals(true, cause.message?.isNotBlank() == true)
+        assertTrue(cause.message?.isNotBlank() == true)
     }
 
     @Test
@@ -85,18 +95,12 @@ class AndroidLocationMockEngineTest {
         val error = deferredError.await()
         val cause = (error as MockEngineError.Teardown).cause
         assertEquals("not found", cause.message)
+        verify { locationManager.removeTestProvider(LocationManager.GPS_PROVIDER) }
+        verify { locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER) }
     }
 
     @Test
     fun `isMockingAllowed returns true when AppOps allowed`() {
-        // Mock API level behavior if strictly needed, or rely on Robolectric environment if configured.
-        // Here we mock the AppOpsManager call directly assuming unsafeCheckOpNoThrow or checkOpNoThrow is called.
-        // Since we cannot easily control Build.VERSION.SDK_INT in unit tests without Robolectric config or reflection,
-        // we mock both paths to be safe or rely on the fact that mockk handles method calls.
-
-        // For simplicity in pure unit test with mockk, we can mock the specific method call.
-        // Assuming the test runs on a JVM that defaults to "high enough" SDK or we just mock the calls.
-
         every {
             appOpsManager.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_MOCK_LOCATION, 1000, "com.example.mockgps")
         } returns AppOpsManager.MODE_ALLOWED
