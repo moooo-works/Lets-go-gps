@@ -113,6 +113,52 @@ class MapViewModelTest {
         assertTrue(viewModel.uiState.value.mockError == null)
     }
 
+
+    @Test
+    fun `playRoute pushes multiple locations to mock engine`() = runTest {
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { mockEngine.setupMockProvider() } just runs
+        every { routeSimulator.play(any()) } answers {
+            currentLocationFlow.value = com.google.android.gms.maps.model.LatLng(25.0, 121.0)
+            currentLocationFlow.value = com.google.android.gms.maps.model.LatLng(25.0001, 121.0001)
+            currentLocationFlow.value = com.google.android.gms.maps.model.LatLng(25.0002, 121.0002)
+        }
+        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
+
+        viewModel.playRoute()
+        advanceUntilIdle()
+
+        verify(atLeast = 3) { mockEngine.setLocation(any(), any()) }
+    }
+
+    @Test
+    fun `startMocking sets currentMockLocation when successful`() = runTest {
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { mockEngine.setupMockProvider() } just runs
+
+        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
+
+        viewModel.startMocking()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.currentMockLocation != null)
+    }
+
+    @Test
+    fun `playRoute updates currentMockLocation with route ticks`() = runTest {
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { mockEngine.setupMockProvider() } just runs
+        every { routeSimulator.play(any()) } answers {
+            currentLocationFlow.value = com.google.android.gms.maps.model.LatLng(25.1, 121.1)
+            currentLocationFlow.value = com.google.android.gms.maps.model.LatLng(25.2, 121.2)
+        }
+        val viewModel = MapViewModel(mockEngine, repository, routeSimulator)
+
+        viewModel.playRoute()
+        advanceUntilIdle()
+
+        assertEquals(com.google.android.gms.maps.model.LatLng(25.2, 121.2), viewModel.uiState.value.currentMockLocation)
+    }
     @Test
     fun `setSpeed rejects non positive speed`() = runTest {
         val viewModel = MapViewModel(mockEngine, repository, routeSimulator)

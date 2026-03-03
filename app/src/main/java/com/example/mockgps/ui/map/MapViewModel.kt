@@ -2,20 +2,22 @@ package com.example.mockgps.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mockgps.data.model.RoutePoint
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.LocationMockEngine
-import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.MockPermissionStatus
+import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class TransportMode(val speedKmh: Double) {
     WALKING(5.0),
@@ -33,7 +35,8 @@ data class MapUiState(
     val simulationState: SimulationState = SimulationState.IDLE,
     val speedKmh: Double = 5.0,
     val transportMode: TransportMode = TransportMode.WALKING,
-    val currentLocation: LatLng? = null
+    val currentLocation: LatLng? = null,
+    val currentMockLocation: LatLng? = null
 )
 
 @HiltViewModel
@@ -45,6 +48,7 @@ class MapViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+    private var locationPushJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -56,21 +60,6 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             routeSimulator.simulationState.collect { state ->
                 _uiState.update { it.copy(simulationState = state) }
-            }
-        }
-
-        viewModelScope.launch {
-            routeSimulator.currentLocation.collect { location ->
-                if (location == null) return@collect
-
-                _uiState.update { it.copy(currentLocation = location) }
-                if (_uiState.value.hasMockPermission) {
-                    try {
-                        mockEngine.setLocation(location.latitude, location.longitude)
-                    } catch (e: Exception) {
-                        setMockError(MockError.SetLocationFailed("Failed to update simulated location: ${e.message}"))
-                    }
-                }
             }
         }
     }
@@ -106,7 +95,8 @@ class MapViewModel @Inject constructor(
             mockEngine.setupMockProvider()
             val target = _uiState.value.centerLocation
             mockEngine.setLocation(target.latitude, target.longitude)
-            _uiState.update { it.copy(isMocking = true, mockError = null) }
+            ensureLocationPushJob()
+            _uiState.update { it.copy(isMocking = true, mockError = null, currentMockLocation = target) }
             saveLocationIfNeeded(target)
         }.onFailure { error ->
             handleEngineError(error)
@@ -115,12 +105,12 @@ class MapViewModel @Inject constructor(
 
     fun stopMocking() {
         runCatching {
+            stopLocationPushJob()
             routeSimulator.stop()
             mockEngine.teardownMockProvider()
-            _uiState.update { it.copy(isMocking = false) }
+            _uiState.update { it.copy(isMocking = false, currentMockLocation = null) }
         }.onFailure { error ->
-            _uiState.update { it.copy(isMocking = false) }
-            // For stopMocking, we specifically want to detect teardown issues if any
+            _uiState.update { it.copy(isMocking = false, currentMockLocation = null) }
             setMockError(MockError.ProviderTeardownFailed(error.message ?: "Unknown teardown error"))
         }
     }
@@ -156,8 +146,48 @@ class MapViewModel @Inject constructor(
     }
 
     fun clearRoute() {
-        _uiState.update { it.copy(waypoints = emptyList()) }
+        _uiState.update { it.copy(waypoints = emptyList(), currentMockLocation = null) }
+        stopLocationPushJob()
         routeSimulator.stop()
+    }
+
+    fun saveCurrentRoute(name: String) {
+        val normalizedName = name.trim()
+        val points = _uiState.value.waypoints
+        if (normalizedName.isBlank() || normalizedName.length > 40 || points.size < 2) {
+            return
+        }
+
+        viewModelScope.launch {
+            repository.insertRouteWithPoints(
+                normalizedName,
+                points.mapIndexed { index, point ->
+                    RoutePoint(
+                        routeId = 0,
+                        orderIndex = index,
+                        latitude = point.latitude,
+                        longitude = point.longitude
+                    )
+                }
+            )
+        }
+    }
+
+    fun loadRoute(routeId: Int) {
+        viewModelScope.launch {
+            val route = repository.getRouteWithPoints(routeId) ?: return@launch
+            val points = route.points
+                .sortedBy { it.orderIndex }
+                .map { LatLng(it.latitude, it.longitude) }
+
+            _uiState.update {
+                it.copy(
+                    waypoints = points,
+                    centerLocation = points.firstOrNull() ?: it.centerLocation
+                )
+            }
+            routeSimulator.setRoute(points)
+        }
     }
 
     fun setTransportMode(mode: TransportMode) {
@@ -189,6 +219,7 @@ class MapViewModel @Inject constructor(
 
         runCatching {
             mockEngine.setupMockProvider()
+            ensureLocationPushJob()
             _uiState.update { it.copy(isMocking = true, mockError = null) }
             routeSimulator.play(viewModelScope)
         }.onFailure { error ->
@@ -201,7 +232,33 @@ class MapViewModel @Inject constructor(
     }
 
     fun stopRoute() {
+        stopLocationPushJob()
+        _uiState.update { it.copy(currentMockLocation = null) }
         routeSimulator.stop()
+    }
+
+    private fun ensureLocationPushJob() {
+        if (locationPushJob?.isActive == true) return
+
+        locationPushJob = viewModelScope.launch {
+            routeSimulator.currentLocation.collect { location ->
+                if (location == null) return@collect
+
+                _uiState.update { it.copy(currentLocation = location) }
+                runCatching {
+                    mockEngine.setLocation(location.latitude, location.longitude)
+                }.onSuccess {
+                    _uiState.update { state -> state.copy(currentMockLocation = location) }
+                }.onFailure { error ->
+                    setMockError(MockError.SetLocationFailed("Failed to update simulated location: ${error.message}"))
+                }
+            }
+        }
+    }
+
+    private fun stopLocationPushJob() {
+        locationPushJob?.cancel()
+        locationPushJob = null
     }
 
     private fun setMockError(error: MockError) {
@@ -210,11 +267,19 @@ class MapViewModel @Inject constructor(
 
     private fun handleEngineError(error: Throwable) {
         val refinedError = when {
-             error is SecurityException -> MockError.ProviderSetupFailed("System rejected mock provider: ${error.message}")
-             error is IllegalArgumentException -> MockError.ProviderSetupFailed("Invalid provider args: ${error.message}")
-             else -> MockError.Unknown("Operation failed: ${error.message}")
+            error is SecurityException -> MockError.ProviderSetupFailed("System rejected mock provider: ${error.message}")
+            error is IllegalArgumentException -> MockError.ProviderSetupFailed("Invalid provider args: ${error.message}")
+            error is IllegalStateException && (error.message?.contains("setLocation failed") == true) ->
+                MockError.SetLocationFailed(error.message ?: "Failed to push mock location")
+            error is IllegalStateException -> MockError.ProviderSetupFailed("Mock engine setup failed: ${error.message}")
+            else -> MockError.Unknown("Operation failed: ${error.message}")
         }
         setMockError(refinedError)
+    }
+
+    override fun onCleared() {
+        stopLocationPushJob()
+        super.onCleared()
     }
 
     private companion object {

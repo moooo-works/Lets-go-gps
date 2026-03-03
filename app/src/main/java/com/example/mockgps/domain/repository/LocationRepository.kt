@@ -1,7 +1,8 @@
 package com.example.mockgps.domain.repository
 
-import com.example.mockgps.data.model.Route
 import com.example.mockgps.data.model.RoutePoint
+import com.example.mockgps.data.model.RouteSummary
+import com.example.mockgps.data.model.RouteWithPoints
 import com.example.mockgps.data.model.SavedLocation
 import kotlinx.coroutines.flow.Flow
 
@@ -11,8 +12,9 @@ interface LocationRepository {
     suspend fun deleteLocation(location: SavedLocation)
     suspend fun updateLocation(location: SavedLocation)
 
-    fun getAllRoutes(): Flow<List<Route>>
-    suspend fun createRoute(route: Route, points: List<RoutePoint>)
-    suspend fun deleteRoute(route: Route)
-    fun getPointsForRoute(routeId: Int): Flow<List<RoutePoint>>
+    fun observeRoutes(): Flow<List<RouteSummary>>
+    suspend fun getRouteWithPoints(routeId: Int): RouteWithPoints?
+    suspend fun insertRouteWithPoints(name: String, points: List<RoutePoint>)
+    suspend fun deleteRoute(routeId: Int)
+    suspend fun updateRouteName(routeId: Int, name: String)
 }
