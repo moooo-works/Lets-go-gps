@@ -1,0 +1,6 @@
+清單：
+- feat-mock-gps-app-17393958473817860231 (PR)
+- feat/p1-3-routes-on-main (PR)
+- fix/saved-locations-crash
+
+狀態：已停止開發，本 PR 暫不合併。P1-3 功能已改由 Codex 分支接手，本 PR 停止更新並關閉，以避免整合風險與回歸成本。謝謝。
