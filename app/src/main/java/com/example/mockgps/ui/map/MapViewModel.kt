@@ -1,5 +1,7 @@
 package com.example.mockgps.ui.map
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
@@ -250,6 +252,14 @@ class MapViewModel @Inject constructor(
     }
 
     private fun ensurePermission(): Boolean {
+        val hasFineLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val hasCoarseLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasFineLocation && !hasCoarseLocation) {
+            setMockError(MockError.LocationPermissionMissing)
+            return false
+        }
+
         return when (val permissionStatus = checkMockPermission()) {
             MockPermissionStatus.Allowed -> true
             MockPermissionStatus.NotAllowed -> {

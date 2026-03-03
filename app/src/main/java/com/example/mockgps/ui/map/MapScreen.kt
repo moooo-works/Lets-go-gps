@@ -1,5 +1,8 @@
 package com.example.mockgps.ui.map
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
@@ -342,6 +345,18 @@ fun MapScreen(
         )
     }
 
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
+                viewModel.clearError()
+            } else {
+                viewModel.clearError()
+            }
+        }
+    )
+
     if (uiState.mockError != null) {
         val error = uiState.mockError!!
         var isButtonEnabled by remember { mutableStateOf(false) }
@@ -354,12 +369,13 @@ fun MapScreen(
 
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            title = { Text(if (error is MockError.NotMockAppSelected) "Permission Required" else "Error") },
+            title = { Text(if (error is MockError.NotMockAppSelected || error is MockError.LocationPermissionMissing) "Permission Required" else "Error") },
             text = {
                 Column {
                     Text(
                         text = when (error) {
                             is MockError.NotMockAppSelected -> "Please go to Developer Options -> Select mock location app -> Select this app."
+                            is MockError.LocationPermissionMissing -> "This app requires location permission to function."
                             is MockError.ProviderSetupFailed -> "Mock Engine Setup Failed: ${error.message}"
                             is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
                             is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"

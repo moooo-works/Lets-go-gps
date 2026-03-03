@@ -73,9 +73,19 @@ class MockLocationService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
 
+
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE) {
-            startForeground(NOTIFICATION_ID, buildNotification("Starting..."))
+            try {
+                startForeground(NOTIFICATION_ID, buildNotification("Starting..."))
+            } catch (e: SecurityException) {
+                Log.e(TAG, "Failed to start foreground service", e)
+                mockStateRepository.setMockError(MockEngineError.Setup(e))
+                mockStateRepository.setMockStatus(MockStatus.IDLE)
+                stopSelf()
+                return START_NOT_STICKY
+            }
         }
+
 
         when (action) {
             ACTION_START_SINGLE -> handleStartSingle(intent)

@@ -2,6 +2,7 @@ package com.example.mockgps.ui.map
 
 sealed class MockError {
     object NotMockAppSelected : MockError()
+    object LocationPermissionMissing : MockError()
     data class ProviderSetupFailed(val message: String) : MockError()
     data class SetLocationFailed(val message: String) : MockError()
     data class ProviderTeardownFailed(val message: String) : MockError()
