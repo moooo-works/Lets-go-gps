@@ -3,6 +3,8 @@ AGENTS.md — Jules / Codex 協同開發規範（Lets-go-gps）
 目標：避免「Codex 的功能已合併 main，但 Jules 未拉取 main 就在舊 branch 繼續開發」導致回歸與整合失敗。
 適用對象：google-labs-jules / Codex（含其 bot 連接器）。
 
+Fallback：若 agent 環境未同步到含 AGENTS.md 的最新 main，或無法讀取本檔案，仍必須依本規範執行。請先 git fetch origin --prune 並確認 origin/main 含 AGENTS.md（ls -la AGENTS.md），再開始任何 coding。
+
 0. 合併門檻（Hard Gates）
 
 未滿足以下條件，不得要求合併 PR：
@@ -12,6 +14,8 @@ AGENTS.md — Jules / Codex 協同開發規範（Lets-go-gps）
 GitHub 分支狀態：behind main = 0
 
 若 behind > 0：先 rebase/merge main，直到 behind = 0
+
+不得以 ‘我無法 push’ 作為 diverged 的理由；必須改新分支 cherry-pick。
 
 必跑驗證
 
