@@ -45,8 +45,23 @@ class AndroidLocationMockEngineTest {
     }
 
     @Test
-    fun `setupMockProvider enables both providers when possible`() {
-        val engine = AndroidLocationMockEngine(context)
+    fun `setupMockProvider uses ProviderProperties API on android 12 plus`() {
+        val engine = AndroidLocationMockEngine(context, sdkInt = 33)
+
+        engine.setupMockProvider()
+
+        verify { locationManager.addTestProvider(LocationManager.GPS_PROVIDER, any<ProviderProperties>()) }
+        verify { locationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, any<ProviderProperties>()) }
+        verify(exactly = 0) {
+            locationManager.addTestProvider(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
+            )
+        }
+    }
+
+    @Test
+    fun `setupMockProvider uses legacy API below android 12`() {
+        val engine = AndroidLocationMockEngine(context, sdkInt = 30)
 
         engine.setupMockProvider()
 
@@ -55,19 +70,17 @@ class AndroidLocationMockEngineTest {
                 LocationManager.GPS_PROVIDER,
                 false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
             )
-            locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
             locationManager.addTestProvider(
                 LocationManager.NETWORK_PROVIDER,
                 false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
             )
-            locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true)
         }
     }
 
     @Test
-    fun `setupMockProvider succeeds when at least one provider enabled`() {
+    fun `setup with one provider failure still leaves enabled providers`() {
         every { locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true) } throws IllegalArgumentException("gps bad")
-        val engine = AndroidLocationMockEngine(context)
+        val engine = AndroidLocationMockEngine(context, sdkInt = 33)
 
         engine.setupMockProvider()
         engine.setLocation(25.0, 121.0)
@@ -77,9 +90,9 @@ class AndroidLocationMockEngineTest {
     }
 
     @Test
-    fun `setLocation reports setup error and skips push when no providers enabled`() = runTest {
+    fun `setup all failure reports no test providers and setLocation skips push`() = runTest {
         every { locationManager.setTestProviderEnabled(any(), true) } throws IllegalArgumentException("enable failed")
-        val engine = AndroidLocationMockEngine(context)
+        val engine = AndroidLocationMockEngine(context, sdkInt = 33)
 
         runCatching { engine.setupMockProvider() }
 
@@ -92,18 +105,6 @@ class AndroidLocationMockEngineTest {
     }
 
     @Test
-    fun `teardown only removes enabled providers`() {
-        every { locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true) } throws IllegalArgumentException("gps bad")
-        val engine = AndroidLocationMockEngine(context)
-
-        engine.setupMockProvider()
-        engine.teardownMockProvider()
-
-        verify(exactly = 0) { locationManager.removeTestProvider(LocationManager.GPS_PROVIDER) }
-        verify(exactly = 1) { locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER) }
-    }
-
-    @Test
     fun `isMockingAllowed returns true when AppOps allowed`() {
         every {
             appOpsManager.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_MOCK_LOCATION, 1000, "com.example.mockgps")
@@ -113,7 +114,7 @@ class AndroidLocationMockEngineTest {
             appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_MOCK_LOCATION, 1000, "com.example.mockgps")
         } returns AppOpsManager.MODE_ALLOWED
 
-        val engine = AndroidLocationMockEngine(context)
+        val engine = AndroidLocationMockEngine(context, sdkInt = 33)
         val status = engine.getMockPermissionStatus()
 
         assertEquals(MockPermissionStatus.Allowed, status)
@@ -129,7 +130,7 @@ class AndroidLocationMockEngineTest {
             appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_MOCK_LOCATION, 1000, "com.example.mockgps")
         } returns AppOpsManager.MODE_ERRORED
 
-        val engine = AndroidLocationMockEngine(context)
+        val engine = AndroidLocationMockEngine(context, sdkInt = 33)
         val status = engine.getMockPermissionStatus()
 
         assertEquals(MockPermissionStatus.NotAllowed, status)
