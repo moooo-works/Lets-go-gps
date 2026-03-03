@@ -31,42 +31,84 @@ class AndroidLocationMockEngine @Inject constructor(
     private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     private val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     private val mockProviders = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+    private val enabledProviders = linkedSetOf<String>()
 
     private val _errors = MutableSharedFlow<MockEngineError>(extraBufferCapacity = ERROR_BUFFER_CAPACITY)
     val errors: SharedFlow<MockEngineError> = _errors.asSharedFlow()
 
     override fun setupMockProvider() {
+        enabledProviders.clear()
+
         mockProviders.forEach { provider ->
-            ensureProviderEnabled(provider)
+            runCatching {
+                locationManager.addTestProvider(
+                    provider,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    ProviderProperties.POWER_USAGE_LOW,
+                    5
+                )
+                Log.d(TAG, "addTestProvider success provider=$provider")
+            }.onFailure { addError ->
+                if (addError !is IllegalArgumentException) {
+                    val message = "addTestProvider failed provider=$provider type=${addError::class.java.simpleName}"
+                    Log.e(TAG, message, addError)
+                    reportError(MockEngineError.Setup(addError), message)
+                }
+            }
+
+            runCatching {
+                locationManager.setTestProviderEnabled(provider, true)
+                enabledProviders.add(provider)
+                Log.d(TAG, "setTestProviderEnabled success provider=$provider")
+            }.onFailure { enableError ->
+                val message = "setTestProviderEnabled failed provider=$provider type=${enableError::class.java.simpleName}"
+                Log.e(TAG, message, enableError)
+                reportError(MockEngineError.Setup(enableError), message)
+            }
+        }
+
+        if (enabledProviders.isEmpty()) {
+            val error = IllegalStateException("No test providers enabled")
+            reportError(MockEngineError.Setup(error), "setupMockProvider failed: no enabled providers")
+            throw error
         }
     }
 
     override fun teardownMockProvider() {
-        mockProviders.forEach { provider ->
+        enabledProviders.forEach { provider ->
             try {
                 locationManager.removeTestProvider(provider)
             } catch (e: Exception) {
-                Log.e(TAG, "teardownMockProvider failed for provider=$provider", e)
-                reportError(MockEngineError.Teardown(e), "teardownMockProvider failed for provider=$provider")
+                val message = "teardownMockProvider failed provider=$provider type=${e::class.java.simpleName}"
+                Log.e(TAG, message, e)
+                reportError(MockEngineError.Teardown(e), message)
             }
         }
+        enabledProviders.clear()
     }
 
     override fun setLocation(latitude: Double, longitude: Double) {
-        mockProviders.forEach { provider ->
+        if (enabledProviders.isEmpty()) {
+            val error = IllegalStateException("No test providers enabled")
+            reportError(MockEngineError.Setup(error), "setLocation aborted: no enabled providers")
+            throw error
+        }
+
+        enabledProviders.forEach { provider ->
             try {
-                ensureProviderEnabled(provider)
                 val mockLocation = createMockLocation(provider, latitude, longitude)
                 locationManager.setTestProviderLocation(provider, mockLocation)
                 Log.d(TAG, "setLocation success provider=$provider lat=$latitude lng=$longitude")
             } catch (e: Exception) {
-                val errorType = when (e) {
-                    is SecurityException -> "SecurityException"
-                    is IllegalArgumentException -> "IllegalArgumentException"
-                    else -> e::class.java.simpleName
-                }
-                Log.e(TAG, "setLocation failed provider=$provider type=$errorType", e)
-                reportError(MockEngineError.SetLocation(e), "setLocation failed provider=$provider type=$errorType")
+                val message = "setLocation failed provider=$provider type=${e::class.java.simpleName}"
+                Log.e(TAG, message, e)
+                reportError(MockEngineError.SetLocation(e), message)
                 throw e
             }
         }
@@ -95,42 +137,6 @@ class AndroidLocationMockEngine @Inject constructor(
         } catch (e: Exception) {
             reportError(MockEngineError.PermissionCheck(e), "isMockingAllowed check failed")
             MockPermissionStatus.CheckFailed(e)
-        }
-    }
-
-    private fun ensureProviderEnabled(provider: String) {
-        try {
-            locationManager.addTestProvider(
-                provider,
-                false,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                ProviderProperties.POWER_USAGE_LOW,
-                5
-            )
-            Log.d(TAG, "addTestProvider success provider=$provider")
-        } catch (e: IllegalArgumentException) {
-            Log.d(TAG, "addTestProvider skipped provider=$provider already exists")
-        } catch (e: SecurityException) {
-            reportError(MockEngineError.Setup(e), "addTestProvider security exception provider=$provider")
-            throw e
-        }
-
-        try {
-            locationManager.setTestProviderEnabled(provider, true)
-        } catch (e: Exception) {
-            val errorType = when (e) {
-                is SecurityException -> "SecurityException"
-                is IllegalArgumentException -> "IllegalArgumentException"
-                else -> e::class.java.simpleName
-            }
-            Log.e(TAG, "setTestProviderEnabled failed provider=$provider type=$errorType", e)
-            reportError(MockEngineError.Setup(e), "setTestProviderEnabled failed provider=$provider type=$errorType")
-            throw e
         }
     }
 

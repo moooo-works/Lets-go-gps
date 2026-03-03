@@ -265,6 +265,7 @@ class MapViewModel @Inject constructor(
         val refinedError = when {
             error is SecurityException -> MockError.ProviderSetupFailed("System rejected mock provider: ${error.message}")
             error is IllegalArgumentException -> MockError.ProviderSetupFailed("Invalid provider args: ${error.message}")
+            error is IllegalStateException -> MockError.ProviderSetupFailed("Mock engine setup failed: ${error.message}")
             else -> MockError.Unknown("Operation failed: ${error.message}")
         }
         setMockError(refinedError)

@@ -20,9 +20,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.lang.SecurityException
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class AndroidLocationMockEngineTest {
     private val context = mockk<Context>()
     private val locationManager = mockk<LocationManager>(relaxed = true)
@@ -41,7 +45,7 @@ class AndroidLocationMockEngineTest {
     }
 
     @Test
-    fun `setupMockProvider calls addTestProvider for gps and network`() {
+    fun `setupMockProvider enables both providers when possible`() {
         val engine = AndroidLocationMockEngine(context)
 
         engine.setupMockProvider()
@@ -60,43 +64,43 @@ class AndroidLocationMockEngineTest {
         }
     }
 
-    @Test(expected = SecurityException::class)
-    fun `setupMockProvider throws SecurityException if denied`() {
-        every {
-            locationManager.addTestProvider(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
-        } throws SecurityException("Denied")
-
+    @Test
+    fun `setupMockProvider succeeds when at least one provider enabled`() {
+        every { locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true) } throws IllegalArgumentException("gps bad")
         val engine = AndroidLocationMockEngine(context)
+
         engine.setupMockProvider()
+        engine.setLocation(25.0, 121.0)
+
+        verify(exactly = 0) { locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, any()) }
+        verify(atLeast = 1) { locationManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, any()) }
     }
 
     @Test
-    fun `setLocation emits observable error when LocationManager fails`() = runTest {
-        every { locationManager.setTestProviderLocation(any(), any()) } throws IllegalStateException("provider missing")
+    fun `setLocation reports setup error and skips push when no providers enabled`() = runTest {
+        every { locationManager.setTestProviderEnabled(any(), true) } throws IllegalArgumentException("enable failed")
         val engine = AndroidLocationMockEngine(context)
 
-        val deferredError = async(start = CoroutineStart.UNDISPATCHED) { engine.errors.first() }
+        runCatching { engine.setupMockProvider() }
 
+        val deferredError = async(start = CoroutineStart.UNDISPATCHED) { engine.errors.first() }
         runCatching { engine.setLocation(25.0, 121.0) }
-
         val error = deferredError.await()
-        val cause = (error as MockEngineError.SetLocation).cause
-        assertTrue(cause.message?.isNotBlank() == true)
+
+        assertTrue(error is MockEngineError.Setup)
+        verify(exactly = 0) { locationManager.setTestProviderLocation(any(), any()) }
     }
 
     @Test
-    fun `teardown emits observable error when remove provider fails`() = runTest {
-        every { locationManager.removeTestProvider(any()) } throws IllegalArgumentException("not found")
+    fun `teardown only removes enabled providers`() {
+        every { locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true) } throws IllegalArgumentException("gps bad")
         val engine = AndroidLocationMockEngine(context)
 
-        val deferredError = async(start = CoroutineStart.UNDISPATCHED) { engine.errors.first() }
+        engine.setupMockProvider()
         engine.teardownMockProvider()
 
-        val error = deferredError.await()
-        val cause = (error as MockEngineError.Teardown).cause
-        assertEquals("not found", cause.message)
-        verify { locationManager.removeTestProvider(LocationManager.GPS_PROVIDER) }
-        verify { locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER) }
+        verify(exactly = 0) { locationManager.removeTestProvider(LocationManager.GPS_PROVIDER) }
+        verify(exactly = 1) { locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER) }
     }
 
     @Test
