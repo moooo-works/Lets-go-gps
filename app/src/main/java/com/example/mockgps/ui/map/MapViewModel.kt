@@ -35,7 +35,8 @@ data class MapUiState(
     val simulationState: SimulationState = SimulationState.IDLE,
     val speedKmh: Double = 5.0,
     val transportMode: TransportMode = TransportMode.WALKING,
-    val currentLocation: LatLng? = null
+    val currentLocation: LatLng? = null,
+    val currentMockLocation: LatLng? = null
 )
 
 @HiltViewModel
@@ -95,7 +96,7 @@ class MapViewModel @Inject constructor(
             val target = _uiState.value.centerLocation
             mockEngine.setLocation(target.latitude, target.longitude)
             ensureLocationPushJob()
-            _uiState.update { it.copy(isMocking = true, mockError = null) }
+            _uiState.update { it.copy(isMocking = true, mockError = null, currentMockLocation = target) }
             saveLocationIfNeeded(target)
         }.onFailure { error ->
             handleEngineError(error)
@@ -107,9 +108,9 @@ class MapViewModel @Inject constructor(
             stopLocationPushJob()
             routeSimulator.stop()
             mockEngine.teardownMockProvider()
-            _uiState.update { it.copy(isMocking = false) }
+            _uiState.update { it.copy(isMocking = false, currentMockLocation = null) }
         }.onFailure { error ->
-            _uiState.update { it.copy(isMocking = false) }
+            _uiState.update { it.copy(isMocking = false, currentMockLocation = null) }
             setMockError(MockError.ProviderTeardownFailed(error.message ?: "Unknown teardown error"))
         }
     }
@@ -145,7 +146,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun clearRoute() {
-        _uiState.update { it.copy(waypoints = emptyList()) }
+        _uiState.update { it.copy(waypoints = emptyList(), currentMockLocation = null) }
         stopLocationPushJob()
         routeSimulator.stop()
     }
@@ -232,6 +233,7 @@ class MapViewModel @Inject constructor(
 
     fun stopRoute() {
         stopLocationPushJob()
+        _uiState.update { it.copy(currentMockLocation = null) }
         routeSimulator.stop()
     }
 
@@ -245,6 +247,8 @@ class MapViewModel @Inject constructor(
                 _uiState.update { it.copy(currentLocation = location) }
                 runCatching {
                     mockEngine.setLocation(location.latitude, location.longitude)
+                }.onSuccess {
+                    _uiState.update { state -> state.copy(currentMockLocation = location) }
                 }.onFailure { error ->
                     setMockError(MockError.SetLocationFailed("Failed to update simulated location: ${error.message}"))
                 }

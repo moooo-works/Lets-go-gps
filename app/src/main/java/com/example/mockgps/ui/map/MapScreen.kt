@@ -71,6 +71,7 @@ fun MapScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showSaveRouteDialog by remember { mutableStateOf(false) }
     var routeNameInput by remember { mutableStateOf("") }
+    val mockMarkerState = remember { MarkerState(position = uiState.centerLocation) }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
@@ -110,6 +111,10 @@ fun MapScreen(
         }
     }
 
+    LaunchedEffect(uiState.currentMockLocation) {
+        uiState.currentMockLocation?.let { mockMarkerState.position = it }
+    }
+
     Scaffold(
         topBar = {
             Surface(
@@ -129,8 +134,9 @@ fun MapScreen(
                         Text(text = "Lng: %.6f".format(uiState.centerLocation.longitude))
 
                         val statusText = when {
-                            uiState.simulationState == SimulationState.PLAYING -> "SIMULATING (${"%.1f".format(uiState.speedKmh)} km/h)"
-                            uiState.isMocking -> "MOCKING (Fixed)"
+                            uiState.simulationState == SimulationState.PLAYING -> "ROUTE_PLAYING (${"%.1f".format(uiState.speedKmh)} km/h)"
+                            uiState.simulationState == SimulationState.PAUSED -> "ROUTE_PAUSED"
+                            uiState.isMocking -> "MOCKING"
                             else -> "IDLE"
                         }
                         val statusColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING) Color.Green else Color.Gray
@@ -184,6 +190,17 @@ fun MapScreen(
                             title = "Point ${index + 1}",
                             icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
                                 com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN
+                            )
+                        )
+                    }
+
+
+                    if (uiState.currentMockLocation != null) {
+                        Marker(
+                            state = mockMarkerState,
+                            title = "Current Mock Location",
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
+                                com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE
                             )
                         )
                     }
