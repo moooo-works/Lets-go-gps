@@ -1,0 +1,26 @@
+feat: Add Foreground Service for continuous mock location
+
+Preflight:
+Branch: feat/p2-foreground-service
+Status: Up to date with origin/main
+Origin/main hash: ccff58a7d99e6a73c4e01ddf74462f48a9985b46
+
+Behind main: 0
+
+Gradle Verifications:
+- ./gradlew test: PASS
+- ./gradlew lintDebug: PASS
+- ./gradlew assembleDebug: PASS
+
+Smoke Test Instructions (To be performed by reviewer/human on a real device):
+1. **Device:** [Please specify Android version when testing]
+2. **Single Mock:** Start single point mock -> Verify ongoing notification appears -> Move app to background -> Wait 30 seconds -> Verify location is still being mocked.
+3. **Route Play:** Play a route -> Verify ongoing notification appears -> Move app to background -> Verify location moves along the route.
+4. **Pause/Resume:** Click Pause on the notification -> Verify route stops and UI updates to Paused -> Click Resume -> Verify route continues and UI updates to Playing.
+5. **Stop:** Click Stop on the notification -> Verify service stops, notification disappears, mock provider is torn down, and UI returns to Idle.
+6. **Cold Start:** Kill app -> Relaunch -> Verify no crashes and state is correct.
+
+Implementation Details:
+- **Notification Channel ID:** `MockLocationServiceChannel`
+- **startForegroundService / startForeground:** `startForegroundService` is called from `MapViewModel` via `ContextCompat.startForegroundService`. `startForeground` is called immediately in `MockLocationService.onStartCommand` to ensure it executes within the OS time limit.
+- **Stop Flow:** The `handleStop()` method in `MockLocationService` explicitly calls `stopLocationPushJob()` (cancels the coroutine job), `routeSimulator.stop()`, and `mockEngine.teardownMockProvider()` before calling `stopForeground(true)` and `stopSelf()`. This guarantees the route job stops and the provider is torn down.
