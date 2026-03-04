@@ -17,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -137,6 +138,8 @@ class MockLocationService : Service() {
                     try {
                         mockEngine.setLocation(lat, lng)
                         kotlinx.coroutines.delay(1000)
+                    } catch (e: CancellationException) {
+                        break
                     } catch (e: Exception) {
                         mockStateRepository.setMockError(MockEngineError.SetLocation(e))
                         break
@@ -161,6 +164,8 @@ class MockLocationService : Service() {
                     try {
                         mockEngine.setLocation(location.latitude, location.longitude)
                         mockStateRepository.setCurrentMockLocation(location)
+                    } catch (e: CancellationException) {
+                        // ignore
                     } catch (e: Exception) {
                         mockStateRepository.setMockError(MockEngineError.SetLocation(e))
                     }
@@ -219,7 +224,7 @@ class MockLocationService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Mock Location Service",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Runs the mock location engine in the background"
             }
@@ -252,7 +257,7 @@ class MockLocationService : Service() {
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .addAction(android.R.drawable.ic_media_pause, "Stop", stopIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         if (statusText == "Route Playing") {
             val pauseIntent = PendingIntent.getService(
@@ -282,7 +287,7 @@ class MockLocationService : Service() {
 
     companion object {
         private const val TAG = "MockLocationService"
-        const val CHANNEL_ID = "MockLocationServiceChannel"
+        const val CHANNEL_ID = "MockLocationServiceChannelV2"
         const val NOTIFICATION_ID = 1
 
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"
