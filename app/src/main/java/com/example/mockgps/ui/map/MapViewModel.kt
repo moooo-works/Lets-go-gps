@@ -226,6 +226,8 @@ class MapViewModel @Inject constructor(
     fun loadRoute(routeId: Int) {
         viewModelScope.launch {
             val route = repository.getRouteWithPoints(routeId) ?: return@launch
+            clearRoute()
+
             val points = route.points
                 .sortedBy { it.orderIndex }
                 .map { LatLng(it.latitude, it.longitude) }
