@@ -23,6 +23,7 @@ import com.example.mockgps.ui.savedlocations.SavedLocationsScreen
 import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel
 import com.example.mockgps.ui.settings.SettingsScreen
 import com.example.mockgps.ui.settings.SettingsViewModel
+import com.example.mockgps.ui.theme.MockGpsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,7 +31,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            MockGpsTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
