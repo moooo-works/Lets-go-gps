@@ -76,7 +76,9 @@ class MockLocationService : Service() {
 
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE) {
             try {
+                Log.d(TAG, "Attempting to start foreground service")
                 startForeground(NOTIFICATION_ID, buildNotification("Starting..."))
+                Log.d(TAG, "Successfully started foreground service")
             } catch (e: SecurityException) {
                 Log.e(TAG, "Failed to start foreground service", e)
                 mockStateRepository.setMockError(MockEngineError.Setup(e))

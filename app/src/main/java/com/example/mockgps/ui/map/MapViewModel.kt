@@ -2,6 +2,7 @@ package com.example.mockgps.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
@@ -258,6 +259,14 @@ class MapViewModel @Inject constructor(
         if (!hasFineLocation && !hasCoarseLocation) {
             setMockError(MockError.LocationPermissionMissing)
             return false
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasNotificationPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            if (!hasNotificationPermission) {
+                setMockError(MockError.NotificationPermissionMissing)
+                return false
+            }
         }
 
         return when (val permissionStatus = checkMockPermission()) {

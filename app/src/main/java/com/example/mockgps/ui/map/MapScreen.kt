@@ -349,11 +349,11 @@ fun MapScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
-            if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
-                viewModel.clearError()
-            } else {
-                viewModel.clearError()
-            }
+            val hasLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            val hasNotification = permissions[Manifest.permission.POST_NOTIFICATIONS] == true
+            // If any requested permission is granted, we clear error.
+            // If a permission is missing, ensuring logic in VM will catch it on next action.
+            viewModel.clearError()
         }
     )
 
@@ -369,13 +369,14 @@ fun MapScreen(
 
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            title = { Text(if (error is MockError.NotMockAppSelected || error is MockError.LocationPermissionMissing) "Permission Required" else "Error") },
+            title = { Text(if (error is MockError.NotMockAppSelected || error is MockError.LocationPermissionMissing || error is MockError.NotificationPermissionMissing) "Permission Required" else "Error") },
             text = {
                 Column {
                     Text(
                         text = when (error) {
                             is MockError.NotMockAppSelected -> "Please go to Developer Options -> Select mock location app -> Select this app."
                             is MockError.LocationPermissionMissing -> "This app requires location permission to function."
+                            is MockError.NotificationPermissionMissing -> "This app requires notification permission to show foreground service controls."
                             is MockError.ProviderSetupFailed -> "Mock Engine Setup Failed: ${error.message}"
                             is MockError.SetLocationFailed -> "Set Location Failed: ${error.message}"
                             is MockError.ProviderTeardownFailed -> "Teardown Failed: ${error.message}"
@@ -418,6 +419,19 @@ fun MapScreen(
                                     Manifest.permission.ACCESS_COARSE_LOCATION
                                 )
                             )
+                        }
+                    ) {
+                        Text("Grant Permission")
+                    }
+                } else if (error is MockError.NotificationPermissionMissing) {
+                    Button(
+                        onClick = {
+                            viewModel.clearError()
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                permissionLauncher.launch(
+                                    arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+                                )
+                            }
                         }
                     ) {
                         Text("Grant Permission")
