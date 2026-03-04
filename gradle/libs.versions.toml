@@ -20,6 +20,8 @@ gson = "2.10.1"
 hilt-navigation-compose = "1.2.0"
 robolectric = "4.10.3"
 datastore = "1.0.0"
+openlocationcode = "1.0.4"
+
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -51,6 +53,8 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+openlocationcode = { group = "com.google.openlocationcode", name = "openlocationcode", version.ref = "openlocationcode" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
