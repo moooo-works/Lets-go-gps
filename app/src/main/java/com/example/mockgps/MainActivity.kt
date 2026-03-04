@@ -21,6 +21,8 @@ import com.example.mockgps.ui.routes.RoutesScreen
 import com.example.mockgps.ui.routes.RoutesViewModel
 import com.example.mockgps.ui.savedlocations.SavedLocationsScreen
 import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel
+import com.example.mockgps.ui.settings.SettingsScreen
+import com.example.mockgps.ui.settings.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -70,7 +72,8 @@ fun AppNavigation() {
                     backStackEntry.savedStateHandle.remove<Double>("selectedLng")
                 },
                 onNavigateToSavedLocations = { navController.navigate("saved_locations") },
-                onNavigateToRoutes = { navController.navigate("routes") }
+                onNavigateToRoutes = { navController.navigate("routes") },
+                onNavigateToSettings = { navController.navigate("settings") }
             )
         }
         composable("saved_locations") { backStackEntry ->
@@ -95,6 +98,14 @@ fun AppNavigation() {
                     navController.previousBackStackEntry?.savedStateHandle?.set("selectedRouteId", routeId)
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable("settings") { backStackEntry ->
+            val viewModel: SettingsViewModel = hiltViewModel(backStackEntry)
+            SettingsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

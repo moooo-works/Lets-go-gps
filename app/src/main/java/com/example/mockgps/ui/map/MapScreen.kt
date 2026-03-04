@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,7 +68,8 @@ fun MapScreen(
     selectedLocation: LatLng? = null,
     onSelectedLocationConsumed: () -> Unit = {},
     onNavigateToSavedLocations: () -> Unit = {},
-    onNavigateToRoutes: () -> Unit = {}
+    onNavigateToRoutes: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -151,6 +153,9 @@ fun MapScreen(
                         }
                         TextButton(onClick = onNavigateToRoutes) {
                             Text("Routes")
+                        }
+                        IconButton(onClick = onNavigateToSettings) {
+                            Icon(Icons.Default.Settings, contentDescription = "Settings")
                         }
                     }
                 }
