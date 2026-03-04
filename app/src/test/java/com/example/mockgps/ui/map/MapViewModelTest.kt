@@ -8,6 +8,7 @@ import com.example.mockgps.domain.MockPermissionStatus
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import com.example.mockgps.domain.repository.MockStateRepository
+import com.example.mockgps.domain.repository.SettingsRepository
 import com.example.mockgps.domain.repository.MockStatus
 import com.example.mockgps.service.MockLocationService
 import io.mockk.every
@@ -41,8 +42,29 @@ import com.google.android.gms.maps.model.LatLng
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class MapViewModelTest {
+    @Test
+    fun `init loads last center from settings repository`() = runTest {
+        val lastCenter = LatLng(25.1, 121.1)
+        lastCenterFlow.value = lastCenter
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
+        advanceUntilIdle()
+        assertEquals(lastCenter, viewModel.uiState.value.centerLocation)
+    }
+
+    @Test
+    fun `onCameraMove saves center to settings repository after debounce`() = runTest {
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
+        val newCenter = LatLng(26.0, 122.0)
+
+        viewModel.onCameraMove(newCenter)
+        advanceUntilIdle()
+
+        verify { kotlinx.coroutines.runBlocking { settingsRepository.setLastCenter(newCenter) } }
+    }
+
     private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
     private val repository = mockk<LocationRepository>(relaxed = true)
+    private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
     private val mockStateRepository = mockk<MockStateRepository>(relaxed = true)
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
@@ -54,6 +76,7 @@ class MapViewModelTest {
     private val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
     private val currentMockLocationFlow = MutableStateFlow<com.google.android.gms.maps.model.LatLng?>(null)
     private val mockErrorFlow = MutableStateFlow<MockEngineError?>(null)
+    private val lastCenterFlow = MutableStateFlow<com.google.android.gms.maps.model.LatLng?>(null)
 
     @Before
     fun setup() {
@@ -64,6 +87,7 @@ class MapViewModelTest {
         every { mockStateRepository.mockStatus } returns mockStatusFlow
         every { mockStateRepository.currentMockLocation } returns currentMockLocationFlow
         every { mockStateRepository.mockError } returns mockErrorFlow
+        every { settingsRepository.observeLastCenter() } returns lastCenterFlow
     }
 
     @After
@@ -74,7 +98,7 @@ class MapViewModelTest {
     @Test
     fun `startMocking sets NotMockAppSelected error when permission denied`() = runTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.NotAllowed
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         viewModel.startMocking()
         advanceUntilIdle()
@@ -86,7 +110,7 @@ class MapViewModelTest {
     @Test
     fun `startMocking sets PermissionCheckFailed when permission check throws`() = runTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.CheckFailed(IllegalStateException("AppOps unavailable"))
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         viewModel.startMocking()
         advanceUntilIdle()
@@ -100,7 +124,7 @@ class MapViewModelTest {
     fun `startMocking succeeds and sends intent when permission granted`() = runTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
 
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         viewModel.startMocking()
         advanceUntilIdle()
@@ -116,7 +140,7 @@ class MapViewModelTest {
     fun `playRoute sends intent when permission granted`() = runTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
 
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         viewModel.playRoute()
         advanceUntilIdle()
@@ -128,7 +152,7 @@ class MapViewModelTest {
 
     @Test
     fun `stopMocking sends stop intent`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         viewModel.stopMocking()
         advanceUntilIdle()
@@ -140,7 +164,7 @@ class MapViewModelTest {
 
     @Test
     fun `mock status updates UI state`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         mockStatusFlow.value = MockStatus.MOCKING
         advanceUntilIdle()
@@ -156,7 +180,7 @@ class MapViewModelTest {
 
     @Test
     fun `setSpeed rejects non positive speed`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, routeSimulator, context)
 
         viewModel.setSpeed(0.0)
 

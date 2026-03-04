@@ -16,6 +16,9 @@ import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import com.example.mockgps.domain.repository.MockStateRepository
+import com.example.mockgps.domain.repository.SettingsRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import com.example.mockgps.domain.repository.MockStatus
 import com.example.mockgps.service.MockLocationService
 import com.google.android.gms.maps.model.LatLng
@@ -54,14 +57,27 @@ class MapViewModel @Inject constructor(
     private val mockEngine: LocationMockEngine,
     private val repository: LocationRepository,
     private val mockStateRepository: MockStateRepository,
+    private val settingsRepository: SettingsRepository,
     private val routeSimulator: RouteSimulator,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    private var saveCenterJob: Job? = null
+    private var isFirstLoad = true
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            settingsRepository.observeLastCenter().collect { center ->
+                if (isFirstLoad && center != null) {
+                    _uiState.update { it.copy(centerLocation = center) }
+                    isFirstLoad = false
+                }
+            }
+        }
+
         viewModelScope.launch {
             repository.getAllLocations().collect { locations ->
                 _uiState.update { it.copy(savedLocations = locations) }
@@ -118,6 +134,12 @@ class MapViewModel @Inject constructor(
 
     fun onCameraMove(latLng: LatLng) {
         _uiState.update { it.copy(centerLocation = latLng) }
+
+        saveCenterJob?.cancel()
+        saveCenterJob = viewModelScope.launch {
+            delay(500)
+            settingsRepository.setLastCenter(latLng)
+        }
     }
 
     fun startMocking() {

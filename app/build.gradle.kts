@@ -84,6 +84,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.datastore.preferences)
     ksp(libs.hilt.compiler)
 
     // Room
