@@ -78,6 +78,9 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
 
+    // Gson
+    implementation(libs.gson)
+
     // Maps
     implementation(libs.google.maps.compose)
     implementation(libs.play.services.maps)
