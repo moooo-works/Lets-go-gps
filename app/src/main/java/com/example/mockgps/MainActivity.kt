@@ -9,8 +9,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,71 +58,154 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "map") {
-        composable("map") { backStackEntry ->
-            val viewModel: MapViewModel = hiltViewModel(backStackEntry)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-            val selectedLat by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLat", null).collectAsState()
-            val selectedLng by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLng", null).collectAsState()
-            val selectedRouteId by backStackEntry.savedStateHandle.getStateFlow<Int?>("selectedRouteId", null).collectAsState()
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Place, contentDescription = "地圖") },
+                    label = { Text("地圖") },
+                    selected = currentRoute == "map",
+                    onClick = {
+                        navController.navigate("map") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.List, contentDescription = "位置") },
+                    label = { Text("位置") },
+                    selected = currentRoute == "saved_locations",
+                    onClick = {
+                        navController.navigate("saved_locations") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Refresh, contentDescription = "路線") },
+                    label = { Text("路線") },
+                    selected = currentRoute == "routes",
+                    onClick = {
+                        navController.navigate("routes") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "設定") },
+                    label = { Text("設定") },
+                    selected = currentRoute == "settings",
+                    onClick = {
+                        navController.navigate("settings") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = "map",
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable("map") { backStackEntry ->
+                val viewModel: MapViewModel = hiltViewModel(backStackEntry)
 
-            LaunchedEffect(selectedRouteId) {
-                val routeId = selectedRouteId ?: return@LaunchedEffect
-                viewModel.loadRoute(routeId)
-                backStackEntry.savedStateHandle.remove<Int>("selectedRouteId")
+                val selectedLat by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLat", null).collectAsState()
+                val selectedLng by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLng", null).collectAsState()
+                val selectedRouteId by backStackEntry.savedStateHandle.getStateFlow<Int?>("selectedRouteId", null).collectAsState()
+
+                LaunchedEffect(selectedRouteId) {
+                    val routeId = selectedRouteId ?: return@LaunchedEffect
+                    viewModel.loadRoute(routeId)
+                    backStackEntry.savedStateHandle.remove<Int>("selectedRouteId")
+                }
+
+                MapScreen(
+                    viewModel = viewModel,
+                    selectedLocation = if (selectedLat != null && selectedLng != null) {
+                        com.google.android.gms.maps.model.LatLng(selectedLat!!, selectedLng!!)
+                    } else {
+                        null
+                    },
+                    onSelectedLocationConsumed = {
+                        backStackEntry.savedStateHandle.remove<Double>("selectedLat")
+                        backStackEntry.savedStateHandle.remove<Double>("selectedLng")
+                    },
+                    onNavigateToSavedLocations = { },
+                    onNavigateToRoutes = { },
+                    onNavigateToSettings = { }
+                )
+            }
+            composable("saved_locations") { backStackEntry ->
+                val viewModel: SavedLocationsViewModel = hiltViewModel(backStackEntry)
+
+                SavedLocationsScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { },
+                    onLocationSelected = { lat, lng ->
+                        navController.getBackStackEntry("map").savedStateHandle.set("selectedLat", lat)
+                        navController.getBackStackEntry("map").savedStateHandle.set("selectedLng", lng)
+                        navController.navigate("map") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+            composable("routes") { backStackEntry ->
+                val viewModel: RoutesViewModel = hiltViewModel(backStackEntry)
+                RoutesScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { },
+                    onRouteSelected = { routeId ->
+                        navController.getBackStackEntry("map").savedStateHandle.set("selectedRouteId", routeId)
+                        navController.navigate("map") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
 
-            MapScreen(
-                viewModel = viewModel,
-                selectedLocation = if (selectedLat != null && selectedLng != null) {
-                    com.google.android.gms.maps.model.LatLng(selectedLat!!, selectedLng!!)
-                } else {
-                    null
-                },
-                onSelectedLocationConsumed = {
-                    backStackEntry.savedStateHandle.remove<Double>("selectedLat")
-                    backStackEntry.savedStateHandle.remove<Double>("selectedLng")
-                },
-                onNavigateToSavedLocations = { navController.navigate("saved_locations") },
-                onNavigateToRoutes = { navController.navigate("routes") },
-                onNavigateToSettings = { navController.navigate("settings") }
-            )
-        }
-        composable("saved_locations") { backStackEntry ->
-            val viewModel: SavedLocationsViewModel = hiltViewModel(backStackEntry)
-
-            SavedLocationsScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onLocationSelected = { lat, lng ->
-                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedLat", lat)
-                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedLng", lng)
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable("routes") { backStackEntry ->
-            val viewModel: RoutesViewModel = hiltViewModel(backStackEntry)
-            RoutesScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onRouteSelected = { routeId ->
-                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedRouteId", routeId)
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable("settings") { backStackEntry ->
-            val viewModel: SettingsViewModel = hiltViewModel(backStackEntry)
-            SettingsScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
-            )
+            composable("settings") { backStackEntry ->
+                val viewModel: SettingsViewModel = hiltViewModel(backStackEntry)
+                SettingsScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { }
+                )
+            }
         }
     }
 }
