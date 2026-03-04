@@ -173,4 +173,28 @@ class SettingsViewModelTest {
         assertTrue(diag.contains("Mock Status: IDLE"))
         assertTrue(diag.contains("Target SDK: 34"))
     }
+
+    @Test
+    fun testExportData_Failure_NullOutputStream() = runTest {
+        val uri = mockk<Uri>()
+        every { contentResolver.openOutputStream(uri) } returns null
+
+        coEvery { locationRepository.getAllLocations() } returns flowOf(emptyList())
+        coEvery { locationRepository.observeRoutes() } returns flowOf(emptyList())
+
+        var successResult: Boolean? = null
+        var errorResult: String? = null
+
+        val latch = java.util.concurrent.CountDownLatch(1)
+        viewModel.exportDataToUri(uri) { success, error ->
+            successResult = success
+            errorResult = error
+            latch.countDown()
+        }
+
+        latch.await()
+
+        assertEquals(false, successResult)
+        assertTrue(errorResult?.contains("openOutputStream returned null") == true)
+    }
 }

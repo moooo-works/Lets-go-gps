@@ -98,15 +98,24 @@ class SettingsViewModel @Inject constructor(
                 val jsonString = gson.toJson(exportData)
 
                 withContext(Dispatchers.IO) {
-                    context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                    outputStream.write(jsonString.toByteArray(Charsets.UTF_8))
+                    val outputStream = context.contentResolver.openOutputStream(uri)
+                        ?: throw java.io.IOException("openOutputStream returned null")
+                    outputStream.use { out ->
+                        out.write(jsonString.toByteArray(Charsets.UTF_8))
+                        out.flush()
                     }
                 }
 
-                onResult(true, null)
+                withContext(Dispatchers.Main) {
+                    onResult(true, null)
+                }
 
             } catch (e: Exception) {
-                onResult(false, e.message)
+                withContext(Dispatchers.Main) {
+                    withContext(Dispatchers.Main) {
+                    onResult(false, e.message)
+                }
+                }
             }
         }
     }
@@ -116,25 +125,27 @@ class SettingsViewModel @Inject constructor(
             try {
                 var jsonString = ""
                 withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    jsonString = inputStream.bufferedReader(Charsets.UTF_8).readText()
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                        ?: throw java.io.IOException("openInputStream returned null")
+                    inputStream.use { stream ->
+                        jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
                     }
                 }
 
                 if (jsonString.isBlank()) {
-                    onResult(false, "File is empty")
+                    withContext(Dispatchers.Main) { onResult(false, "File is empty") }
                     return@launch
                 }
 
                 val exportData = try {
                     gson.fromJson(jsonString, ExportData::class.java)
                 } catch (e: Exception) {
-                    onResult(false, "Invalid JSON format: ${e.message}")
+                    withContext(Dispatchers.Main) { onResult(false, "Invalid JSON format: ${e.message}") }
                     return@launch
                 }
 
                 if (exportData == null || exportData.schemaVersion != 1) {
-                    onResult(false, "Unsupported schema version or invalid data")
+                    withContext(Dispatchers.Main) { onResult(false, "Unsupported schema version or invalid data") }
                     return@launch
                 }
 
@@ -201,10 +212,14 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 val summaryMsg = "Locations: $importedLocations imported, $skippedLocations skipped.\\nRoutes: $importedRoutes imported, $skippedRoutes skipped."
-                onResult(true, summaryMsg)
+                withContext(Dispatchers.Main) {
+                    onResult(true, summaryMsg)
+                }
 
             } catch (e: Exception) {
-                onResult(false, e.message)
+                withContext(Dispatchers.Main) {
+                    onResult(false, e.message)
+                }
             }
         }
     }
