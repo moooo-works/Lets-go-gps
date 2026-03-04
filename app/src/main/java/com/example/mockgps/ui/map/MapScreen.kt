@@ -408,6 +408,20 @@ fun MapScreen(
                     ) {
                         Text(if (isButtonEnabled) "Go to Settings" else "Wait...")
                     }
+                } else if (error is MockError.LocationPermissionMissing) {
+                    Button(
+                        onClick = {
+                            viewModel.clearError()
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        }
+                    ) {
+                        Text("Grant Permission")
+                    }
                 } else {
                     TextButton(onClick = { viewModel.clearError() }) { Text("OK") }
                 }
