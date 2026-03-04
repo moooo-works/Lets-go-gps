@@ -29,12 +29,7 @@ fun SavedLocationsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Saved Locations") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
+                title = { Text("儲存位置") }
             )
         }
     ) { padding ->

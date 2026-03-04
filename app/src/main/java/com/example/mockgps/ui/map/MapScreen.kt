@@ -122,6 +122,7 @@ fun MapScreen(
 
     Scaffold(
         topBar = {
+
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -131,10 +132,10 @@ fun MapScreen(
             ) {
                 Row(
                     modifier = Modifier.padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = "Lat: %.6f".format(uiState.centerLocation.latitude))
                         Text(text = "Lng: %.6f".format(uiState.centerLocation.longitude))
 
@@ -146,17 +147,6 @@ fun MapScreen(
                         }
                         val statusColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING) Color.Green else Color.Gray
                         Text(text = "Status: $statusText", color = statusColor)
-                    }
-                    Row {
-                        IconButton(onClick = onNavigateToSavedLocations) {
-                            Icon(Icons.Default.List, contentDescription = "Saved Locations")
-                        }
-                        TextButton(onClick = onNavigateToRoutes) {
-                            Text("Routes")
-                        }
-                        IconButton(onClick = onNavigateToSettings) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
                     }
                 }
             }

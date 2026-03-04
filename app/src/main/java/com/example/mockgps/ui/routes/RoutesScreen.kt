@@ -42,12 +42,7 @@ fun RoutesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Saved Routes") },
-                navigationIcon = {
-                    TextButton(onClick = onNavigateBack) {
-                        Text("Back")
-                    }
-                }
+                title = { Text("已儲存路線") }
             )
         }
     ) { paddingValues ->
