@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -68,11 +69,19 @@ fun AppNavigation() {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            val navItemColors = NavigationBarItemDefaults.colors(
+                selectedIconColor   = MaterialTheme.colorScheme.primary,
+                selectedTextColor   = MaterialTheme.colorScheme.primary,
+                indicatorColor      = MaterialTheme.colorScheme.primaryContainer,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "地圖") },
                     label = { Text("地圖") },
                     selected = currentRoute == "map",
+                    colors = navItemColors,
                     onClick = {
                         navController.navigate("map") {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -87,6 +96,7 @@ fun AppNavigation() {
                     icon = { Icon(Icons.Default.List, contentDescription = "位置") },
                     label = { Text("位置") },
                     selected = currentRoute == "saved_locations",
+                    colors = navItemColors,
                     onClick = {
                         navController.navigate("saved_locations") {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -101,6 +111,7 @@ fun AppNavigation() {
                     icon = { Icon(Icons.Default.Refresh, contentDescription = "路線") },
                     label = { Text("路線") },
                     selected = currentRoute == "routes",
+                    colors = navItemColors,
                     onClick = {
                         navController.navigate("routes") {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -115,6 +126,7 @@ fun AppNavigation() {
                     icon = { Icon(Icons.Default.Settings, contentDescription = "設定") },
                     label = { Text("設定") },
                     selected = currentRoute == "settings",
+                    colors = navItemColors,
                     onClick = {
                         navController.navigate("settings") {
                             popUpTo(navController.graph.findStartDestination().id) {
