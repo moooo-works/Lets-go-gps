@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -48,6 +49,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.example.mockgps.utils.LocationQueryParser
+import com.example.mockgps.utils.ParseResult
 import com.example.mockgps.domain.SimulationState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -60,6 +63,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +79,8 @@ fun MapScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showSaveRouteDialog by remember { mutableStateOf(false) }
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+    var showSearchDialog by remember { mutableStateOf(false) }
     var routeNameInput by remember { mutableStateOf("") }
     val mockMarkerState = remember { MarkerState(position = uiState.centerLocation) }
 
@@ -121,6 +127,14 @@ fun MapScreen(
     }
 
     Scaffold(
+        floatingActionButton = {
+            androidx.compose.material3.FloatingActionButton(
+                onClick = { showSearchDialog = true },
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Icon(Icons.Filled.Search, contentDescription = "Search Location")
+            }
+        },
         topBar = {
 
             Surface(
@@ -306,6 +320,67 @@ fun MapScreen(
                 }
             }
         }
+    }
+
+
+    if (showSearchDialog) {
+        var searchInput by remember { mutableStateOf("") }
+        var errorMessage by remember { mutableStateOf<String?>(null) }
+
+        AlertDialog(
+            onDismissRequest = { showSearchDialog = false },
+            title = { Text("Search Location") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = searchInput,
+                        onValueChange = {
+                            searchInput = it
+                            errorMessage = null
+                        },
+                        label = { Text("Query") },
+                        supportingText = { Text("Supports Plus Code or lat,lng") },
+                        singleLine = true,
+                        isError = errorMessage != null
+                    )
+                    if (errorMessage != null) {
+                        Text(
+                            text = errorMessage!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val result = LocationQueryParser.parse(searchInput, uiState.centerLocation)
+                        when (result) {
+                            is ParseResult.Success -> {
+                                val targetLatLng = result.parsedLocation.latLng
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(targetLatLng, 15f))
+                                }
+                                viewModel.onCameraMove(targetLatLng)
+                                showSearchDialog = false
+                            }
+                            is ParseResult.Error -> {
+                                errorMessage = result.message
+                            }
+                        }
+                    }
+                ) {
+                    Text("Locate")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSearchDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     if (showSaveRouteDialog) {

@@ -80,6 +80,7 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
+    implementation(libs.openlocationcode)
 
     // Maps
     implementation(libs.google.maps.compose)
