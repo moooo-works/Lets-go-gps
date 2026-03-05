@@ -15,7 +15,7 @@ sealed class ParseResult {
 }
 
 object LocationQueryParser {
-    fun parse(input: String): ParseResult {
+    fun parse(input: String, referenceLatLng: LatLng? = null): ParseResult {
         val trimmed = input.trim()
         if (trimmed.isEmpty()) {
             return ParseResult.Error("Input cannot be empty")
@@ -40,20 +40,35 @@ object LocationQueryParser {
         }
 
         // Try Plus Code
-        if (OpenLocationCode.isValidCode(trimmed)) {
-            if (OpenLocationCode.isFullCode(trimmed)) {
+        // Extract the first token that might be a Plus Code, ignoring trailing text
+        val token = trimmed.split("\\s+".toRegex()).firstOrNull() ?: ""
+
+        if (OpenLocationCode.isValidCode(token)) {
+            if (OpenLocationCode.isFullCode(token)) {
                 try {
-                    val code = OpenLocationCode(trimmed)
+                    val code = OpenLocationCode(token)
                     val decode = code.decode()
                     return ParseResult.Success(ParsedLocation(LatLng(decode.centerLatitude, decode.centerLongitude), LocationSource.PLUS_CODE))
                 } catch (e: IllegalArgumentException) {
                     return ParseResult.Error("Failed to decode Plus Code")
                 }
+            } else if (OpenLocationCode.isShortCode(token)) {
+                if (referenceLatLng == null) {
+                    return ParseResult.Error("Reference location required for short Plus Code")
+                }
+                try {
+                    val code = OpenLocationCode(token)
+                    val recovered = code.recover(referenceLatLng.latitude, referenceLatLng.longitude)
+                    val decode = recovered.decode()
+                    return ParseResult.Success(ParsedLocation(LatLng(decode.centerLatitude, decode.centerLongitude), LocationSource.PLUS_CODE))
+                } catch (e: IllegalArgumentException) {
+                    return ParseResult.Error("Failed to recover short Plus Code: ${e.message}")
+                }
             } else {
-                return ParseResult.Error("Short Plus Codes are not supported yet")
+                return ParseResult.Error("Invalid Plus Code type")
             }
         }
 
-        return ParseResult.Error("Invalid format. Please enter lat,lng or a full Plus Code")
+        return ParseResult.Error("Invalid format. Please enter lat,lng or a valid Plus Code")
     }
 }

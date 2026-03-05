@@ -356,7 +356,7 @@ fun MapScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        val result = LocationQueryParser.parse(searchInput)
+                        val result = LocationQueryParser.parse(searchInput, uiState.centerLocation)
                         when (result) {
                             is ParseResult.Success -> {
                                 val targetLatLng = result.parsedLocation.latLng
