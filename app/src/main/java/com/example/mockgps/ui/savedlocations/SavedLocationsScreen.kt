@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.size
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mockgps.data.model.SavedLocation
 
@@ -78,7 +79,7 @@ fun SavedLocationsScreen(
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -164,7 +165,21 @@ fun SavedLocationsScreen(
                 }
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            if (locations.isEmpty()) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(
+                            imageVector = Icons.Outlined.FavoriteBorder,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                        Text("目前沒有儲存的位置", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("請至地圖新增你要保存的座標", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                    }
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(locations, key = { it.id }) { location ->
                     SavedLocationItem(
                         location = location,
@@ -181,8 +196,9 @@ fun SavedLocationsScreen(
             }
         }
     }
+}
 
-    if (locationToDelete != null) {
+if (locationToDelete != null) {
         AlertDialog(
             onDismissRequest = { locationToDelete = null },
             title = { Text("刪除位置") },

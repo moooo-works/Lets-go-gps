@@ -35,6 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.filled.Place
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mockgps.data.model.RouteSummary
 
@@ -66,23 +69,41 @@ fun RoutesScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
-            items(uiState.routes, key = { it.id }) { route ->
-                RouteCard(
-                    route = route,
-                    onLoadClick = { onRouteSelected(route.id) },
-                    onRenameClick = { routePendingRename = route.id },
-                    onDeleteClick = { routePendingDelete = route.id }
-                )
+        if (uiState.routes.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Place,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                    Text("尚未建立任何路線", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("在地圖上設定多個路點即可保存路線", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                }
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
+                items(uiState.routes, key = { it.id }) { route ->
+                    RouteCard(
+                        route = route,
+                        onLoadClick = { onRouteSelected(route.id) },
+                        onRenameClick = { routePendingRename = route.id },
+                        onDeleteClick = { routePendingDelete = route.id }
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+            }
         }
     }
 
