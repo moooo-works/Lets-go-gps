@@ -9,5 +9,6 @@ data class SavedLocation(
     val name: String,
     val latitude: Double,
     val longitude: Double,
+    val isFavorite: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )

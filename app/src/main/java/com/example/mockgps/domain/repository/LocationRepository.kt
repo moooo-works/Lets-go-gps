@@ -8,6 +8,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocationRepository {
     fun getAllLocations(): Flow<List<SavedLocation>>
+    fun observeSavedLocations(
+        query: String,
+        sortOption: String,
+        showHistory: Boolean,
+        showFavorites: Boolean
+    ): Flow<List<SavedLocation>>
+
     suspend fun saveLocation(location: SavedLocation)
     suspend fun deleteLocation(location: SavedLocation)
     suspend fun updateLocation(location: SavedLocation)
