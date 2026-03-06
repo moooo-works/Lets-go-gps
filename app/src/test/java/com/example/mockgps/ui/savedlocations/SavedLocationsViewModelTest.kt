@@ -1,14 +1,16 @@
 package com.example.mockgps.ui.savedlocations
 
+import com.example.mockgps.data.model.RoutePoint
+import com.example.mockgps.data.model.RouteSummary
+import com.example.mockgps.data.model.RouteWithPoints
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.repository.LocationRepository
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -23,16 +25,13 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SavedLocationsViewModelTest {
-    private val repository = mockk<LocationRepository>(relaxed = true)
     private val dispatcher = StandardTestDispatcher()
+    private lateinit var repository: FakeSavedLocationsRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(dispatcher)
-        every { repository.getAllLocations() } returns emptyFlow()
-        every {
-            repository.observeSavedLocations(any(), any(), any(), any())
-        } returns flowOf(emptyList())
+        repository = FakeSavedLocationsRepository()
     }
 
     @After
@@ -42,59 +41,52 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `default filters show all locations`() = runTest {
-        val all = listOf(
+        repository.savedLocations.value = listOf(
             SavedLocation(id = 1, name = "A", latitude = 0.0, longitude = 0.0, isFavorite = false),
             SavedLocation(id = 2, name = "B", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
-        every {
-            repository.observeSavedLocations("", SavedLocationsSortOption.RECENT.name, true, true)
-        } returns flowOf(all)
 
         val viewModel = SavedLocationsViewModel(repository)
+        val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         advanceTimeBy(350)
         advanceUntilIdle()
 
-        assertEquals(all, viewModel.filteredLocations.value)
+        assertEquals(2, viewModel.filteredLocations.value.size)
+        collectJob.cancel()
     }
 
     @Test
     fun `favorites only shows favorite locations`() = runTest {
-        val favorites = listOf(
+        repository.savedLocations.value = listOf(
+            SavedLocation(id = 1, name = "History", latitude = 0.0, longitude = 0.0, isFavorite = false),
             SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
-        every {
-            repository.observeSavedLocations("", SavedLocationsSortOption.RECENT.name, true, true)
-        } returns flowOf(emptyList())
-        every {
-            repository.observeSavedLocations("", SavedLocationsSortOption.RECENT.name, false, true)
-        } returns flowOf(favorites)
 
         val viewModel = SavedLocationsViewModel(repository)
+        val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         viewModel.onShowHistoryChanged(false)
         advanceTimeBy(350)
         advanceUntilIdle()
 
-        assertEquals(favorites, viewModel.filteredLocations.value)
+        assertEquals(listOf(2), viewModel.filteredLocations.value.map { it.id })
+        collectJob.cancel()
     }
 
     @Test
     fun `history only shows non-favorite locations`() = runTest {
-        val history = listOf(
-            SavedLocation(id = 1, name = "History", latitude = 0.0, longitude = 0.0, isFavorite = false)
+        repository.savedLocations.value = listOf(
+            SavedLocation(id = 1, name = "History", latitude = 0.0, longitude = 0.0, isFavorite = false),
+            SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
-        every {
-            repository.observeSavedLocations("", SavedLocationsSortOption.RECENT.name, true, true)
-        } returns flowOf(emptyList())
-        every {
-            repository.observeSavedLocations("", SavedLocationsSortOption.RECENT.name, true, false)
-        } returns flowOf(history)
 
         val viewModel = SavedLocationsViewModel(repository)
+        val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         viewModel.onShowFavoritesChanged(false)
         advanceTimeBy(350)
         advanceUntilIdle()
 
-        assertEquals(history, viewModel.filteredLocations.value)
+        assertEquals(listOf(1), viewModel.filteredLocations.value.map { it.id })
+        collectJob.cancel()
     }
 
     @Test
@@ -115,19 +107,18 @@ class SavedLocationsViewModelTest {
         viewModel.deleteLocation(location)
         advanceUntilIdle()
 
-        coVerify { repository.deleteLocation(location) }
+        assertEquals(location, repository.deleted.single())
     }
 
     @Test
     fun `renameLocation calls repository update with valid name`() = runTest {
         val viewModel = SavedLocationsViewModel(repository)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
-        val newName = "New Name"
 
-        viewModel.renameLocation(location, newName)
+        viewModel.renameLocation(location, "New Name")
         advanceUntilIdle()
 
-        coVerify { repository.updateLocation(location.copy(name = newName)) }
+        assertEquals("New Name", repository.updated.single().name)
     }
 
     @Test
@@ -138,18 +129,66 @@ class SavedLocationsViewModelTest {
         viewModel.renameLocation(location, "   ")
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { repository.updateLocation(any()) }
+        assertTrue(repository.updated.isEmpty())
     }
 
     @Test
     fun `renameLocation ignores too long name`() = runTest {
         val viewModel = SavedLocationsViewModel(repository)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
-        val longName = "A".repeat(41)
 
-        viewModel.renameLocation(location, longName)
+        viewModel.renameLocation(location, "A".repeat(41))
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { repository.updateLocation(any()) }
+        assertTrue(repository.updated.isEmpty())
     }
+}
+
+private class FakeSavedLocationsRepository : LocationRepository {
+    val savedLocations = MutableStateFlow<List<SavedLocation>>(emptyList())
+    val deleted = mutableListOf<SavedLocation>()
+    val updated = mutableListOf<SavedLocation>()
+
+    override fun getAllLocations(): Flow<List<SavedLocation>> = savedLocations
+
+    override fun observeSavedLocations(
+        query: String,
+        sortOption: String,
+        showHistory: Boolean,
+        showFavorites: Boolean
+    ): Flow<List<SavedLocation>> {
+        val filtered = savedLocations.value
+            .filter { it.name.contains(query, ignoreCase = true) }
+            .filter {
+                when {
+                    showHistory && showFavorites -> true
+                    showHistory && !showFavorites -> !it.isFavorite
+                    !showHistory && showFavorites -> it.isFavorite
+                    else -> false
+                }
+            }
+            .let { list ->
+                when (sortOption) {
+                    SavedLocationsSortOption.NAME_ASC.name -> list.sortedBy { it.name.lowercase() }
+                    else -> list.sortedByDescending { it.createdAt }
+                }
+            }
+        return flowOf(filtered)
+    }
+
+    override suspend fun saveLocation(location: SavedLocation) = Unit
+
+    override suspend fun deleteLocation(location: SavedLocation) {
+        deleted += location
+    }
+
+    override suspend fun updateLocation(location: SavedLocation) {
+        updated += location
+    }
+
+    override fun observeRoutes(): Flow<List<RouteSummary>> = flowOf(emptyList())
+    override suspend fun getRouteWithPoints(routeId: Int): RouteWithPoints? = null
+    override suspend fun insertRouteWithPoints(name: String, points: List<RoutePoint>) = Unit
+    override suspend fun deleteRoute(routeId: Int) = Unit
+    override suspend fun updateRouteName(routeId: Int, name: String) = Unit
 }

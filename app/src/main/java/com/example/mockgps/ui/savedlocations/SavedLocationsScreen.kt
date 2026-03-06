@@ -13,7 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mockgps.data.model.SavedLocation
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun SavedLocationsScreen(
     onNavigateBack: () -> Unit,
@@ -217,7 +218,7 @@ fun SavedLocationItem(
         )
         IconButton(onClick = onFavoriteClick) {
             Icon(
-                imageVector = if (location.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                imageVector = if (location.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                 contentDescription = if (location.isFavorite) "Unfavorite" else "Favorite"
             )
         }
