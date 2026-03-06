@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > app/src/test/java/com/example/mockgps/ui/settings/SettingsViewModelTest.kt
 package com.example.mockgps.ui.settings
 
 import android.content.ContentResolver
@@ -321,3 +322,4 @@ class SettingsViewModelTest {
         assertTrue(errorResult?.contains("openOutputStream returned null") == true)
     }
 }
+INNER_EOF
