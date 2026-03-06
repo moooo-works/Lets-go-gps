@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -24,16 +25,23 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
 
+    var showExportDialog by remember { mutableStateOf(false) }
+    var exportSavedLocations by remember { mutableStateOf(true) }
+    var exportRoutes by remember { mutableStateOf(true) }
+
+    var importPreview by remember { mutableStateOf<ImportPreview?>(null) }
+    var showImportDialog by remember { mutableStateOf(false) }
 
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            viewModel.importDataFromUri(it) { success, message ->
+            viewModel.parseImportData(it) { success, preview, _ ->
                 if (success) {
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                    importPreview = preview
+                    showImportDialog = true
                 } else {
-                    Toast.makeText(context, "Import failed: $message", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Import failed: \$message", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -43,14 +51,42 @@ fun SettingsScreen(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri: Uri? ->
         uri?.let {
-            viewModel.exportDataToUri(it) { success, error ->
+            viewModel.exportDataToUri(it, exportSavedLocations, exportRoutes) { success, _ ->
                 if (success) {
                     Toast.makeText(context, "Export successful", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Export failed: $error", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Export failed: \$error", Toast.LENGTH_LONG).show()
                 }
             }
         }
+    }
+
+    if (showExportDialog) {
+        ExportOptionsDialog(
+            exportSavedLocations = exportSavedLocations,
+            onSavedLocationsChange = { exportSavedLocations = it },
+            exportRoutes = exportRoutes,
+            onRoutesChange = { exportRoutes = it },
+            onDismiss = { showExportDialog = false },
+            onConfirm = {
+                showExportDialog = false
+                val dateStr = java.text.SimpleDateFormat("yyyyMMdd_HHmm", java.util.Locale.US).format(java.util.Date())
+                exportLauncher.launch("mockgps_export_${dateStr}.json")
+            }
+        )
+    }
+
+    if (showImportDialog && importPreview != null) {
+        ImportPreviewDialog(
+            preview = importPreview!!,
+            onDismiss = { showImportDialog = false },
+            onConfirm = {
+                showImportDialog = false
+                viewModel.applyImportData(importPreview!!) { _, message ->
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -68,7 +104,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Button(
-                onClick = { exportLauncher.launch("mockgps_export.json") },
+                onClick = { showExportDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Export Data")
@@ -95,4 +131,85 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ExportOptionsDialog(
+    exportSavedLocations: Boolean,
+    onSavedLocationsChange: (Boolean) -> Unit,
+    exportRoutes: Boolean,
+    onRoutesChange: (Boolean) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Export Data") },
+        text = {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = exportSavedLocations,
+                        onCheckedChange = onSavedLocationsChange
+                    )
+                    Text("Saved Locations")
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = exportRoutes,
+                        onCheckedChange = onRoutesChange
+                    )
+                    Text("Routes")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = exportSavedLocations || exportRoutes
+            ) {
+                Text("Export")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun ImportPreviewDialog(
+    preview: ImportPreview,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Import Preview") },
+        text = {
+            Column {
+                Text("Schema Version: ${preview.schemaVersion}")
+                Text("Saved Locations: ${preview.savedLocationsCount}")
+                Text("Routes: ${preview.routesCount}")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Import")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

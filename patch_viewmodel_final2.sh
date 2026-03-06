@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > app/src/main/java/com/example/mockgps/ui/settings/SettingsViewModel.kt
 package com.example.mockgps.ui.settings
 
 import android.Manifest
@@ -22,7 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import com.example.mockgps.utils.GeoDistanceMeters
 
 data class ImportPreview(
     val uri: Uri,
@@ -204,7 +204,7 @@ class SettingsViewModel @Inject constructor(
 
                 exportData.savedLocations.forEach { exportedLoc ->
                     val isDuplicate = existingLocations.any { existing ->
-                        GeoDistanceMeters.haversineMeters(existing.latitude, existing.longitude, exportedLoc.lat, exportedLoc.lng) < distanceThresholdMeters
+                        com.example.mockgps.utils.GeoDistanceMeters.haversineMeters(existing.latitude, existing.longitude, exportedLoc.lat, exportedLoc.lng) < distanceThresholdMeters
                     }
 
                     if (!isDuplicate) {
@@ -237,7 +237,7 @@ class SettingsViewModel @Inject constructor(
                     if (routeSameName != null) {
                         val existingPoints = routeSameName.points.sortedBy { it.orderIndex }
                         val isSamePoints = existingPoints.size == exportedPoints.size && existingPoints.zip(exportedPoints).all { (existingPt, exportedPt) ->
-                            GeoDistanceMeters.haversineMeters(existingPt.latitude, existingPt.longitude, exportedPt.lat, exportedPt.lng) < 10.0
+                            com.example.mockgps.utils.GeoDistanceMeters.haversineMeters(existingPt.latitude, existingPt.longitude, exportedPt.lat, exportedPt.lng) < 10.0
                         }
 
                         if (isSamePoints) {
@@ -310,13 +310,13 @@ class SettingsViewModel @Inject constructor(
 
         val mockStatus = mockStateRepository.mockStatus.value.name
 
-        val notificationPerm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val notificationPerm = if (Build.VERSION.SDK_INT >= Build.VERSION.CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         } else {
             true
         }
 
-        val fgsLocationPerm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        val fgsLocationPerm = if (Build.VERSION.SDK_INT >= Build.VERSION.CODES.UPSIDE_DOWN_CAKE) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.FOREGROUND_SERVICE_LOCATION) == PackageManager.PERMISSION_GRANTED
         } else {
             true
@@ -335,3 +335,4 @@ class SettingsViewModel @Inject constructor(
         """.trimIndent()
     }
 }
+INNER_EOF

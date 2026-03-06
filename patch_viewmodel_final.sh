@@ -1,0 +1,304 @@
+cat << 'INNER_EOF' > app/src/main/java/com/example/mockgps/ui/settings/SettingsViewModel.kt.patch
+--- app/src/main/java/com/example/mockgps/ui/settings/SettingsViewModel.kt
++++ app/src/main/java/com/example/mockgps/ui/settings/SettingsViewModel.kt
+@@ -23,10 +23,18 @@
+ import kotlinx.coroutines.withContext
+ import javax.inject.Inject
+
++data class ImportPreview(
++    val uri: Uri,
++    val schemaVersion: Int,
++    val savedLocationsCount: Int,
++    val routesCount: Int
++)
++
+ data class ExportData(
+-    val schemaVersion: Int = 1,
++    val schemaVersion: Int = 2,
++    val exportedAt: Long? = null,
+     val savedLocations: List<ExportSavedLocation> = emptyList(),
+     val routes: List<ExportRoute> = emptyList()
+ )
+
+@@ -58,41 +66,42 @@
+
+     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+
+-    fun exportDataToUri(uri: Uri, onResult: (Boolean, String?) -> Unit) {
++    fun exportDataToUri(uri: Uri, includeSavedLocations: Boolean, includeRoutes: Boolean, onResult: (Boolean, String?) -> Unit) {
+         viewModelScope.launch {
+             try {
+                 val locations = locationRepository.getAllLocations().first()
+                 val routesSummaries = locationRepository.observeRoutes().first()
+
+-                val routes = routesSummaries.mapNotNull { summary ->
++                val routes = if (!includeRoutes) emptyList() else routesSummaries.mapNotNull { summary ->
+                     val routeWithPoints = locationRepository.getRouteWithPoints(summary.id)
+                     routeWithPoints?.let { rwp ->
+                         ExportRoute(
+                             routeId = rwp.route.id,
+                             name = rwp.route.name,
+                             points = rwp.points.sortedBy { it.orderIndex }.map {
+                                 ExportRoutePoint(lat = it.latitude, lng = it.longitude, dwellSeconds = it.dwellSeconds)
+                             },
+                             createdAt = rwp.route.createdAt
+                         )
+                     }
+                 }
+
+-                val exportLocations = locations.map {
++                val exportLocations = if (!includeSavedLocations) emptyList() else locations.map {
+                     ExportSavedLocation(
+                         id = it.id,
+                         name = it.name,
+                         lat = it.latitude,
+                         lng = it.longitude,
+                         createdAt = it.createdAt
+                     )
+                 }
+
+                 val exportData = ExportData(
+-                    schemaVersion = 1,
++                    schemaVersion = 2,
++                    exportedAt = System.currentTimeMillis(),
+                     savedLocations = exportLocations,
+                     routes = routes
+                 )
+
+                 val jsonString = gson.toJson(exportData)
+@@ -120,86 +129,103 @@
+         }
+     }
+
+-    fun importDataFromUri(uri: Uri, onResult: (Boolean, String?) -> Unit) {
++    fun parseImportData(uri: Uri, onResult: (Boolean, ImportPreview?, String?) -> Unit) {
+         viewModelScope.launch {
+             try {
+                 var jsonString = ""
+                 withContext(Dispatchers.IO) {
+                     val inputStream = context.contentResolver.openInputStream(uri)
+                         ?: throw java.io.IOException("openInputStream returned null")
+                     inputStream.use { stream ->
+                         jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
+                     }
+                 }
+
+                 if (jsonString.isBlank()) {
+-                    withContext(Dispatchers.Main) { onResult(false, "File is empty") }
++                    withContext(Dispatchers.Main) { onResult(false, null, "File is empty") }
+                     return@launch
+                 }
+
+                 val exportData = try {
+                     gson.fromJson(jsonString, ExportData::class.java)
+                 } catch (e: Exception) {
+-                    withContext(Dispatchers.Main) { onResult(false, "Invalid JSON format: \${e.message}") }
++                    withContext(Dispatchers.Main) { onResult(false, null, "Invalid JSON format: \${e.message}") }
+                     return@launch
+                 }
+
+-                if (exportData == null || exportData.schemaVersion != 1) {
+-                    withContext(Dispatchers.Main) { onResult(false, "Unsupported schema version or invalid data") }
++                if (exportData == null) {
++                    withContext(Dispatchers.Main) { onResult(false, null, "Invalid data") }
++                    return@launch
++                }
++                if (exportData.schemaVersion > 2) {
++                    withContext(Dispatchers.Main) { onResult(false, null, "Unsupported schema version: \${exportData.schemaVersion}") }
+                     return@launch
+                 }
++
++                val preview = ImportPreview(
++                    uri = uri,
++                    schemaVersion = exportData.schemaVersion,
++                    savedLocationsCount = exportData.savedLocations.size,
++                    routesCount = exportData.routes.size
++                )
+
+-                var importedLocations = 0
+-                var skippedLocations = 0
+-                var importedRoutes = 0
+-                var skippedRoutes = 0
+-
+-                val existingLocations = locationRepository.getAllLocations().first()
+-                val epsilon = 0.0001
+-
+-                exportData.savedLocations.forEach { exportedLoc ->
+-                    val isDuplicate = existingLocations.any { existing ->
+-                        Math.abs(existing.latitude - exportedLoc.lat) < epsilon &&
+-                        Math.abs(existing.longitude - exportedLoc.lng) < epsilon
+-                    }
+-
+-                    if (!isDuplicate) {
+-                        locationRepository.saveLocation(
+-                            SavedLocation(
+-                                name = exportedLoc.name ?: "Imported Location",
+-                                latitude = exportedLoc.lat,
+-                                longitude = exportedLoc.lng,
+-                                createdAt = exportedLoc.createdAt ?: System.currentTimeMillis()
+-                            )
+-                        )
+-                        importedLocations++
+-                    } else {
+-                        skippedLocations++
+-                    }
+-                }
+-
+-                val existingRoutesSummaries = locationRepository.observeRoutes().first()
+-                val existingRoutes = existingRoutesSummaries.mapNotNull {
+-                    locationRepository.getRouteWithPoints(it.id)
+-                }
+-
+-                exportData.routes.forEach { exportedRoute ->
+-                    val exportedPointsHash = exportedRoute.points.map { "\${it.lat},\${it.lng}" }.hashCode()
+-                    val exportedName = exportedRoute.name ?: "Imported Route"
+-
+-                    val isDuplicate = existingRoutes.any { existing ->
+-                        val existingPointsHash = existing.points.sortedBy { it.orderIndex }.map { "\${it.latitude},\${it.longitude}" }.hashCode()
+-                        existing.route.name == exportedName && existingPointsHash == exportedPointsHash
+-                    }
+-
+-                    if (!isDuplicate) {
+-                        locationRepository.insertRouteWithPoints(
+-                            exportedName,
+-                            exportedRoute.points.mapIndexed { index, ep ->
+-                                com.example.mockgps.data.model.RoutePoint(
+-                                    routeId = 0,
+-                                    orderIndex = index,
+-                                    latitude = ep.lat,
+-                                    longitude = ep.lng,
+-                                    dwellSeconds = ep.dwellSeconds
+-                                )
+-                            }
+-                        )
+-                        importedRoutes++
+-                    } else {
+-                        skippedRoutes++
+-                    }
+-                }
+-
+-                val summaryMsg = "Locations: \$importedLocations imported, \$skippedLocations skipped.\\nRoutes: \$importedRoutes imported, \$skippedRoutes skipped."
+                 withContext(Dispatchers.Main) {
+-                    onResult(true, summaryMsg)
++                    onResult(true, preview, null)
+                 }
+
+             } catch (e: Exception) {
+                 withContext(Dispatchers.Main) {
+-                    onResult(false, e.message)
++                    onResult(false, null, e.message)
++                }
++            }
++        }
++    }
++
++    fun applyImportData(preview: ImportPreview, onResult: (Boolean, String?) -> Unit) {
++        viewModelScope.launch {
++            try {
++                var jsonString = ""
++                withContext(Dispatchers.IO) {
++                    val inputStream = context.contentResolver.openInputStream(preview.uri)
++                        ?: throw java.io.IOException("openInputStream returned null")
++                    inputStream.use { stream ->
++                        jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
++                    }
++                }
++
++                val exportData = gson.fromJson(jsonString, ExportData::class.java)
++
++                var importedLocations = 0
++                var skippedLocations = 0
++                var importedRoutes = 0
++                var skippedRoutes = 0
++
++                val existingLocations = locationRepository.getAllLocations().first()
++                val distanceThresholdMeters = 20.0
++
++                exportData.savedLocations.forEach { exportedLoc ->
++                    val isDuplicate = existingLocations.any { existing ->
++                        com.example.mockgps.utils.GeoDistanceMeters.haversineMeters(existing.latitude, existing.longitude, exportedLoc.lat, exportedLoc.lng) < distanceThresholdMeters
++                    }
++
++                    if (!isDuplicate) {
++                        locationRepository.saveLocation(
++                            SavedLocation(
++                                name = exportedLoc.name ?: "Imported Location",
++                                latitude = exportedLoc.lat,
++                                longitude = exportedLoc.lng,
++                                createdAt = exportedLoc.createdAt ?: System.currentTimeMillis()
++                            )
++                        )
++                        importedLocations++
++                    } else {
++                        skippedLocations++
++                    }
++                }
++
++                val existingRoutesSummaries = locationRepository.observeRoutes().first()
++                val existingRoutes = existingRoutesSummaries.mapNotNull {
++                    locationRepository.getRouteWithPoints(it.id)
++                }
++
++                exportData.routes.forEach { exportedRoute ->
++                    val exportedName = exportedRoute.name ?: "Imported Route"
++                    val exportedNameClean = exportedName.trim().lowercase()
++                    val exportedPoints = exportedRoute.points
++
++                    val routeSameName = existingRoutes.find { it.route.name.trim().lowercase() == exportedNameClean }
++
++                    if (routeSameName != null) {
++                        val existingPoints = routeSameName.points.sortedBy { it.orderIndex }
++                        val isSamePoints = existingPoints.size == exportedPoints.size && existingPoints.zip(exportedPoints).all { (existingPt, exportedPt) ->
++                            com.example.mockgps.utils.GeoDistanceMeters.haversineMeters(existingPt.latitude, existingPt.longitude, exportedPt.lat, exportedPt.lng) < 10.0
++                        }
++
++                        if (isSamePoints) {
++                            skippedRoutes++
++                        } else {
++                            var newName = "\$exportedName (imported 2)"
++                            var counter = 3
++                            while (existingRoutes.any { it.route.name.trim().lowercase() == newName.trim().lowercase() }) {
++                                newName = "\$exportedName (imported \$counter)"
++                                counter++
++                            }
++                            insertRoute(locationRepository, newName, exportedPoints)
++                            importedRoutes++
++                        }
++                    } else {
++                        insertRoute(locationRepository, exportedName, exportedPoints)
++                        importedRoutes++
++                    }
++                }
++
++                val summaryMsg = "Locations: \$importedLocations imported, \$skippedLocations skipped.\nRoutes: \$importedRoutes imported, \$skippedRoutes skipped."
++                withContext(Dispatchers.Main) {
++                    onResult(true, summaryMsg)
++                }
++
++            } catch (e: Exception) {
++                withContext(Dispatchers.Main) {
++                    onResult(false, e.message)
+                 }
+             }
+         }
+     }
+
++    private suspend fun insertRoute(locationRepository: LocationRepository, name: String, points: List<ExportRoutePoint>) {
++        locationRepository.insertRouteWithPoints(
++            name,
++            points.mapIndexed { index, ep ->
++                com.example.mockgps.data.model.RoutePoint(
++                    routeId = 0,
++                    orderIndex = index,
++                    latitude = ep.lat,
++                    longitude = ep.lng,
++                    dwellSeconds = ep.dwellSeconds
++                )
++            }
++        )
++    }
++
+     fun generateDiagnostics(): String {
+         val pm = context.packageManager
+INNER_EOF
+patch -p0 < app/src/main/java/com/example/mockgps/ui/settings/SettingsViewModel.kt.patch
