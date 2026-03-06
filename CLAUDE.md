@@ -9,6 +9,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## 工作守則 / Working Rules
+
+1. **撰寫任何程式碼前，先描述方法並等待批准。**
+2. **需求模糊時，先提出澄清問題，再動手寫程式碼。**
+3. **完成程式碼後，列出邊界情況並建議對應的測試案例。**
+4. **若任務需要修改超過 3 個檔案，先停下來將其拆分成更小的子任務。**
+5. **出現 bug 時，先撰寫能重現該 bug 的測試，再修復直到測試通過。**
+6. **每次被糾正時，反思犯錯原因，並制定避免再犯的計畫。**
+7. **所有文件與回覆一律以繁體中文撰寫。**
+
+---
+
 ## 專案概覽 / Project Overview
 
 MockGPS 是一款供開發者與 QA 工程師模擬 GPS 位置與路線的 Android 應用程式，透過 Foreground Service 將假位置注入 Android 系統。
