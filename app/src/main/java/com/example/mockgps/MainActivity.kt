@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -94,7 +95,10 @@ fun AppNavigation(
                 unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.background,
+                tonalElevation = 0.dp
+            ) {
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Place, contentDescription = "地圖") },
                     label = { Text("地圖") },

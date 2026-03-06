@@ -28,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -253,7 +254,12 @@ fun MapScreen(
             FloatingActionButton(
                 onClick = { showSearchDialog = true },
                 containerColor = MaterialTheme.colorScheme.primary,
-                shape = CircleShape
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 8.dp,
+                    pressedElevation = 12.dp,
+                    hoveredElevation = 10.dp
+                )
             ) {
                 Icon(Icons.Filled.Search, contentDescription = "搜尋位置", tint = Color.White)
             }
@@ -262,6 +268,7 @@ fun MapScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background) // Color the gap Area
                 .padding(paddingValues)
         ) {
             // 地圖區域（準星以此容器置中）
@@ -348,8 +355,9 @@ fun MapScreen(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(12.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
                     shape = RoundedCornerShape(12.dp),
+                    shadowElevation = 8.dp,
                     tonalElevation = 4.dp
                 ) {
                     Row(
@@ -378,8 +386,9 @@ fun MapScreen(
             // 底部控制面板
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 8.dp
+                color = MaterialTheme.colorScheme.background,
+                tonalElevation = 0.dp,
+                shadowElevation = 8.dp
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
