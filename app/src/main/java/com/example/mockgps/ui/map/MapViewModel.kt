@@ -49,7 +49,8 @@ data class MapUiState(
     val speedKmh: Double = 5.0,
     val transportMode: TransportMode = TransportMode.WALKING,
     val currentLocation: LatLng? = null,
-    val currentMockLocation: LatLng? = null
+    val currentMockLocation: LatLng? = null,
+    val routeFitRequestToken: Long? = null
 )
 
 @HiltViewModel
@@ -235,11 +236,16 @@ class MapViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     waypoints = points,
-                    centerLocation = points.firstOrNull() ?: it.centerLocation
+                    centerLocation = points.firstOrNull() ?: it.centerLocation,
+                    routeFitRequestToken = if (points.size >= 2) System.currentTimeMillis() else null
                 )
             }
             routeSimulator.setRoute(points)
         }
+    }
+
+    fun onRouteFitConsumed() {
+        _uiState.update { it.copy(routeFitRequestToken = null) }
     }
 
     fun setTransportMode(mode: TransportMode) {
