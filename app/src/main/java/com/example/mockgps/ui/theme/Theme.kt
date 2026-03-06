@@ -6,6 +6,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
+enum class ThemePreference { SYSTEM, LIGHT, DARK }
+
 private val DarkColorScheme = darkColorScheme(
     background           = Dark900,
     onBackground         = White,
@@ -13,9 +15,9 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant       = Dark600,
     onSurface            = White,
     onSurfaceVariant     = TextSecondaryDark,
-    primary              = Green400,
-    onPrimary            = Dark900,
-    primaryContainer     = GreenSurface900,
+    primary              = Accent500,
+    onPrimary            = White,
+    primaryContainer     = Dark700,
     onPrimaryContainer   = Light200,
     secondary            = TextTertiaryDark,
     onSecondary          = White,
@@ -35,10 +37,10 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant       = Light50,
     onSurface            = Dark900,
     onSurfaceVariant     = TextSecondaryLight,
-    primary              = Green400,
-    onPrimary            = Dark900,
+    primary              = Accent500,
+    onPrimary            = White,
     primaryContainer     = Light200,
-    onPrimaryContainer   = GreenSurface900,
+    onPrimaryContainer   = Dark900,
     secondary            = TextSecondaryLight,
     onSecondary          = White,
     secondaryContainer   = Light50,
@@ -52,9 +54,14 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun MockGpsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themePreference: ThemePreference = ThemePreference.SYSTEM,
     content: @Composable () -> Unit
 ) {
+    val darkTheme = when (themePreference) {
+        ThemePreference.DARK -> true
+        ThemePreference.LIGHT -> false
+        ThemePreference.SYSTEM -> isSystemInDarkTheme()
+    }
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(

@@ -1,5 +1,6 @@
 package com.example.mockgps.ui.settings
 
+import com.example.mockgps.ui.theme.ThemePreference
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -7,21 +8,31 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    themePreference: ThemePreference = ThemePreference.SYSTEM,
+    onThemeChange: (ThemePreference) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -92,9 +103,19 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("設定") }
+                title = {
+                    Text(
+                        "設定",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -103,33 +124,140 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(
-                onClick = { showExportDialog = true },
-                modifier = Modifier.fillMaxWidth()
+            // 權限狀態卡片
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                ),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Text("Export Data")
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF22C55E))
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            "Mock Location 權限",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "已授權 — 可正常使用模擬功能",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
-            Button(
-                onClick = { importLauncher.launch(arrayOf("application/json", "*/*")) },
-                modifier = Modifier.fillMaxWidth()
+            // 外觀主題
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Text("Import Data")
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "外觀主題",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(
+                            ThemePreference.SYSTEM to "跟隨系統",
+                            ThemePreference.LIGHT  to "淺色",
+                            ThemePreference.DARK   to "深色"
+                        ).forEach { (pref, label) ->
+                            val selected = themePreference == pref
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        if (selected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                    .clickable { onThemeChange(pref) }
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    label,
+                                    fontSize = 13.sp,
+                                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                            else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
-            Button(
-                onClick = {
-                    val diagText = viewModel.generateDiagnostics()
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("MockGPS Diagnostics", diagText)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, "Diagnostics copied to clipboard", Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.fillMaxWidth()
+            // 功能選單
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Text("Copy Diagnostics")
+                SettingsMenuItem(
+                    label = "匯出資料",
+                    onClick = { showExportDialog = true }
+                )
+                Divider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                SettingsMenuItem(
+                    label = "匯入資料",
+                    onClick = { importLauncher.launch(arrayOf("application/json", "*/*")) }
+                )
+                Divider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                SettingsMenuItem(
+                    label = "複製診斷資訊",
+                    onClick = {
+                        val diagText = viewModel.generateDiagnostics()
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("MockGPS Diagnostics", diagText)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "已複製到剪貼簿", Toast.LENGTH_SHORT).show()
+                    }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsMenuItem(label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Icon(
+            Icons.Default.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
