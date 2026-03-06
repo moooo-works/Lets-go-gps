@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -52,9 +53,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.example.mockgps.utils.LocationQueryParser
 import com.example.mockgps.utils.ParseResult
 import com.example.mockgps.domain.SimulationState
+import com.example.mockgps.utils.LatLngBoundsUtil
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -64,6 +67,8 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private const val DEFAULT_ROUTE_FALLBACK_ZOOM = 15f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +82,7 @@ fun MapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val density = LocalDensity.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showSaveRouteDialog by remember { mutableStateOf(false) }
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
@@ -114,12 +120,53 @@ fun MapScreen(
         }
     }
 
-    LaunchedEffect(selectedLocation) {
-        if (selectedLocation != null) {
+    LaunchedEffect(selectedLocation, uiState.routeFitRequestToken) {
+        // Route fit has higher priority than saved-location recenter when both exist.
+        if (selectedLocation != null && uiState.routeFitRequestToken == null) {
             cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(selectedLocation, 15f))
             viewModel.onCameraMove(selectedLocation)
             onSelectedLocationConsumed()
         }
+    }
+
+    LaunchedEffect(uiState.routeFitRequestToken) {
+        if (uiState.routeFitRequestToken == null) {
+            return@LaunchedEffect
+        }
+
+        val fitTarget = LatLngBoundsUtil.calculateFitTarget(uiState.waypoints)
+        val mapPaddingPx = with(density) { 80.dp.roundToPx() }
+        val bottomPanelPaddingPx = with(density) { 140.dp.roundToPx() }
+
+        when {
+            fitTarget.bounds != null -> {
+                val bounds = LatLngBounds(
+                    LatLng(fitTarget.bounds.minLat, fitTarget.bounds.minLng),
+                    LatLng(fitTarget.bounds.maxLat, fitTarget.bounds.maxLng)
+                )
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngBounds(
+                        bounds,
+                        mapPaddingPx,
+                        mapPaddingPx,
+                        bottomPanelPaddingPx
+                    )
+                )
+                viewModel.onCameraMove(cameraPositionState.position.target)
+            }
+
+            fitTarget.fallbackCenter != null -> {
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngZoom(
+                        fitTarget.fallbackCenter,
+                        DEFAULT_ROUTE_FALLBACK_ZOOM
+                    )
+                )
+                viewModel.onCameraMove(fitTarget.fallbackCenter)
+            }
+        }
+
+        viewModel.onRouteFitConsumed()
     }
 
     LaunchedEffect(uiState.currentMockLocation) {
