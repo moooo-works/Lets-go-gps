@@ -5,6 +5,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,19 +17,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -43,11 +46,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -243,41 +250,12 @@ fun MapScreen(
 
     Scaffold(
         floatingActionButton = {
-            androidx.compose.material3.FloatingActionButton(
+            FloatingActionButton(
                 onClick = { showSearchDialog = true },
-                modifier = Modifier.padding(bottom = 16.dp)
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = CircleShape
             ) {
-                Icon(Icons.Filled.Search, contentDescription = "Search Location")
-            }
-        },
-        topBar = {
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Lat: %.6f".format(uiState.centerLocation.latitude))
-                        Text(text = "Lng: %.6f".format(uiState.centerLocation.longitude))
-
-                        val statusText = when {
-                            uiState.simulationState == SimulationState.PLAYING -> "ROUTE_PLAYING (${"%.1f".format(uiState.speedKmh)} km/h)"
-                            uiState.simulationState == SimulationState.PAUSED -> "ROUTE_PAUSED"
-                            uiState.isMocking -> "MOCKING"
-                            else -> "IDLE"
-                        }
-                        val statusColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING) Color.Green else Color.Gray
-                        Text(text = "Status: $statusText", color = statusColor)
-                    }
-                }
+                Icon(Icons.Filled.Search, contentDescription = "搜尋位置", tint = Color.White)
             }
         }
     ) { paddingValues ->
@@ -286,6 +264,7 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // 地圖區域（準星以此容器置中）
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -311,7 +290,6 @@ fun MapScreen(
                             )
                         )
                     }
-
                     uiState.waypoints.forEachIndexed { index, point ->
                         Marker(
                             state = MarkerState(position = point),
@@ -321,8 +299,6 @@ fun MapScreen(
                             )
                         )
                     }
-
-
                     if (uiState.currentMockLocation != null) {
                         Marker(
                             state = mockMarkerState,
@@ -332,84 +308,102 @@ fun MapScreen(
                             )
                         )
                     }
-
                     if (uiState.waypoints.size > 1) {
                         Polyline(points = uiState.waypoints, color = Color.Blue, width = 10f)
                     }
                 }
 
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Center",
+                // 準星（十字線，以地圖容器置中）
+                Canvas(
                     modifier = Modifier
+                        .size(48.dp)
                         .align(Alignment.Center)
-                        .size(32.dp),
-                    tint = Color.Red
-                )
+                ) {
+                    val stroke = 3.dp.toPx()
+                    val arm = size.width
+                    val cx = size.width / 2f
+                    val cy = size.height / 2f
+                    drawRect(
+                        color = Color.Red,
+                        topLeft = Offset(0f, cy - stroke / 2f),
+                        size = Size(arm, stroke)
+                    )
+                    drawRect(
+                        color = Color.Red,
+                        topLeft = Offset(cx - stroke / 2f, 0f),
+                        size = Size(stroke, arm)
+                    )
+                }
+
+                // 狀態徽章（地圖右上角覆蓋）
+                val statusText = when {
+                    uiState.simulationState == SimulationState.PLAYING ->
+                        "PLAYING  ${"%.0f".format(uiState.speedKmh)} km/h"
+                    uiState.simulationState == SimulationState.PAUSED -> "PAUSED"
+                    uiState.isMocking -> "MOCKING"
+                    else -> "IDLE"
+                }
+                val statusActive = uiState.isMocking || uiState.simulationState == SimulationState.PLAYING
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (statusActive) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                        )
+                        Text(
+                            statusText,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
             }
 
+            // 底部控制面板
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(onClick = { viewModel.addWaypoint() }) {
-                            Text("Add Point")
-                        }
-                        if (uiState.waypoints.size >= 2) {
-                            Button(onClick = {
-                                routeNameInput = ""
-                                showSaveRouteDialog = true
-                            }) {
-                                Text("Save Route")
-                            }
-                        }
-                        Button(
-                            onClick = { viewModel.clearRoute() },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Clear")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        TransportMode.values().forEach { mode ->
-                            FilterChip(
-                                selected = uiState.transportMode == mode,
-                                onClick = { viewModel.setTransportMode(mode) },
-                                label = { Text(mode.name.take(1)) }
-                            )
-                        }
-                    }
-
-                    androidx.compose.material3.Slider(
-                        value = uiState.speedKmh.toFloat(),
-                        onValueChange = { viewModel.setSpeed(it.toDouble()) },
-                        valueRange = 0f..100f,
-                        steps = 19
-                    )
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // 座標顯示
                     Text(
-                        "Speed: ${"%.1f".format(uiState.speedKmh)} km/h",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        text = "${"%.4f".format(uiState.centerLocation.latitude)}° N," +
+                                "  ${"%.4f".format(uiState.centerLocation.longitude)}° E",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
+                    // 主要操作按鈕
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        OutlinedButton(
+                            onClick = { viewModel.addWaypoint() },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) { Text("+ 新增路點") }
+
                         Button(
                             onClick = {
                                 when {
@@ -419,18 +413,81 @@ fun MapScreen(
                                     else -> viewModel.startMocking()
                                 }
                             },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (uiState.isMocking) Color.Red else MaterialTheme.colorScheme.primary
+                                containerColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING)
+                                    MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Text(
-                                text = when {
-                                    uiState.simulationState == SimulationState.PLAYING -> "Pause Route"
-                                    uiState.waypoints.isNotEmpty() -> "Play Route"
-                                    uiState.isMocking -> "Stop Mocking"
-                                    else -> "Start Mocking"
+                                when {
+                                    uiState.simulationState == SimulationState.PLAYING -> "⏸ 暫停路線"
+                                    uiState.waypoints.isNotEmpty() -> "▶ 開始模擬"
+                                    uiState.isMocking -> "⏹ 停止模擬"
+                                    else -> "▶ 開始模擬"
                                 }
                             )
+                        }
+                    }
+
+                    // 速度控制
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "${"%.0f".format(uiState.speedKmh)} km/h",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(52.dp)
+                        )
+                        androidx.compose.material3.Slider(
+                            value = uiState.speedKmh.toFloat(),
+                            onValueChange = { viewModel.setSpeed(it.toDouble()) },
+                            valueRange = 0f..100f,
+                            steps = 19,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    // 交通模式 + 次要操作
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            TransportMode.values().forEach { mode ->
+                                FilterChip(
+                                    selected = uiState.transportMode == mode,
+                                    onClick = { viewModel.setTransportMode(mode) },
+                                    label = {
+                                        Text(
+                                            mode.name.take(1),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            if (uiState.waypoints.size >= 2) {
+                                TextButton(onClick = {
+                                    routeNameInput = ""
+                                    showSaveRouteDialog = true
+                                }) { Text("儲存路線") }
+                            }
+                            if (uiState.waypoints.isNotEmpty()) {
+                                TextButton(
+                                    onClick = { viewModel.clearRoute() },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.error
+                                    )
+                                ) { Text("清除") }
+                            }
                         }
                     }
                 }

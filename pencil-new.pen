@@ -31,7 +31,8 @@
               "fill": "#ffffff",
               "content": "Lat: 25.033000",
               "fontFamily": "Inter",
-              "fontSize": 13
+              "fontSize": 13,
+              "fontWeight": "normal"
             },
             {
               "type": "text",
@@ -40,7 +41,8 @@
               "fill": "#ffffff",
               "content": "Lng: 121.565400",
               "fontFamily": "Inter",
-              "fontSize": 13
+              "fontSize": 13,
+              "fontWeight": "normal"
             },
             {
               "type": "text",

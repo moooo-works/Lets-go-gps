@@ -3,12 +3,15 @@ package com.example.mockgps
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
@@ -40,6 +43,7 @@ import com.example.mockgps.ui.savedlocations.SavedLocationsViewModel
 import com.example.mockgps.ui.settings.SettingsScreen
 import com.example.mockgps.ui.settings.SettingsViewModel
 import com.example.mockgps.ui.theme.MockGpsTheme
+import com.example.mockgps.ui.theme.ThemePreference
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -47,12 +51,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MockGpsTheme {
+            val prefs = remember { getSharedPreferences("mockgps_prefs", Context.MODE_PRIVATE) }
+            val themePreference = remember {
+                val saved = prefs.getString("theme_pref", ThemePreference.SYSTEM.name)
+                mutableStateOf(ThemePreference.valueOf(saved ?: ThemePreference.SYSTEM.name))
+            }
+            MockGpsTheme(themePreference = themePreference.value) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    AppNavigation(
+                        themePreference = themePreference.value,
+                        onThemeChange = { newPref ->
+                            themePreference.value = newPref
+                            prefs.edit().putString("theme_pref", newPref.name).apply()
+                        }
+                    )
                 }
             }
         }
@@ -61,7 +76,10 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    themePreference: ThemePreference = ThemePreference.SYSTEM,
+    onThemeChange: (ThemePreference) -> Unit = {}
+) {
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -215,7 +233,9 @@ fun AppNavigation() {
                 val viewModel: SettingsViewModel = hiltViewModel(backStackEntry)
                 SettingsScreen(
                     viewModel = viewModel,
-                    onNavigateBack = { }
+                    onNavigateBack = { },
+                    themePreference = themePreference,
+                    onThemeChange = onThemeChange
                 )
             }
         }

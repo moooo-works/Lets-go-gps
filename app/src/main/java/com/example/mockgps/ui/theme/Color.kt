@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 // Brand
 val Green400 = Color(0xFF32D74B)
+val Accent500 = Color(0xFFFF5722)  // Deep orange accent (v2 design)
 
 // Dark palette
 val Dark900 = Color(0xFF0C0C0C)
