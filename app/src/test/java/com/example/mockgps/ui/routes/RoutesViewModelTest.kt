@@ -95,6 +95,12 @@ private class FakeLocationRepository : LocationRepository {
     private val routeFlow = MutableStateFlow<List<RouteSummary>>(emptyList())
 
     override fun getAllLocations(): Flow<List<SavedLocation>> = flowOf(emptyList())
+    override fun observeSavedLocations(
+        query: String,
+        sortOption: String,
+        showHistory: Boolean,
+        showFavorites: Boolean
+    ): Flow<List<SavedLocation>> = flowOf(emptyList())
     override suspend fun saveLocation(location: SavedLocation) = Unit
     override suspend fun deleteLocation(location: SavedLocation) = Unit
     override suspend fun updateLocation(location: SavedLocation) = Unit

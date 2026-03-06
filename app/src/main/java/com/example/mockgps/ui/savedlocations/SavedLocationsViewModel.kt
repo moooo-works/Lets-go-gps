@@ -5,15 +5,29 @@ import androidx.lifecycle.viewModelScope
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.repository.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+
+enum class SavedLocationsSortOption {
+    RECENT,
+    NAME_ASC
+}
 
 data class SavedLocationsUiState(
-    val locations: List<SavedLocation> = emptyList()
+    val query: String = "",
+    val sortOption: SavedLocationsSortOption = SavedLocationsSortOption.RECENT,
+    val showHistory: Boolean = true,
+    val showFavorites: Boolean = true
 )
 
 @HiltViewModel
@@ -24,11 +38,45 @@ class SavedLocationsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SavedLocationsUiState())
     val uiState: StateFlow<SavedLocationsUiState> = _uiState.asStateFlow()
 
-    init {
+    val filteredLocations: StateFlow<List<SavedLocation>> = combine(
+        _uiState.map { it.query.trim() }.debounce(300),
+        _uiState.map { it.sortOption },
+        _uiState.map { it.showHistory },
+        _uiState.map { it.showFavorites }
+    ) { query, sort, showHistory, showFavorites ->
+        QueryParams(query, sort, showHistory, showFavorites)
+    }.flatMapLatest { params ->
+        repository.observeSavedLocations(
+            query = params.query,
+            sortOption = params.sortOption.name,
+            showHistory = params.showHistory,
+            showFavorites = params.showFavorites
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun onQueryChanged(query: String) {
+        _uiState.update { it.copy(query = query) }
+    }
+
+    fun onSortOptionChanged(option: SavedLocationsSortOption) {
+        _uiState.update { it.copy(sortOption = option) }
+    }
+
+    fun onShowHistoryChanged(checked: Boolean) {
+        _uiState.update { current ->
+            if (!checked && !current.showFavorites) current else current.copy(showHistory = checked)
+        }
+    }
+
+    fun onShowFavoritesChanged(checked: Boolean) {
+        _uiState.update { current ->
+            if (!checked && !current.showHistory) current else current.copy(showFavorites = checked)
+        }
+    }
+
+    fun toggleFavorite(location: SavedLocation) {
         viewModelScope.launch {
-            repository.getAllLocations().collect { items ->
-                _uiState.update { it.copy(locations = items) }
-            }
+            repository.updateLocation(location.copy(isFavorite = !location.isFavorite))
         }
     }
 
@@ -47,3 +95,10 @@ class SavedLocationsViewModel @Inject constructor(
         }
     }
 }
+
+private data class QueryParams(
+    val query: String,
+    val sortOption: SavedLocationsSortOption,
+    val showHistory: Boolean,
+    val showFavorites: Boolean
+)
