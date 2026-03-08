@@ -16,9 +16,11 @@ interface MockStateRepository {
     val mockStatus: StateFlow<MockStatus>
     val currentMockLocation: StateFlow<LatLng?>
     val mockError: StateFlow<MockEngineError?>
+    val activeRouteWaypoints: StateFlow<List<LatLng>>
 
     fun setMockStatus(status: MockStatus)
     fun setCurrentMockLocation(location: LatLng?)
     fun setMockError(error: MockEngineError?)
     fun clearError()
+    fun setActiveRouteWaypoints(points: List<LatLng>)
 }

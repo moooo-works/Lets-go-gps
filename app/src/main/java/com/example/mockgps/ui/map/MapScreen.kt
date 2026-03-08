@@ -7,6 +7,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -133,7 +135,6 @@ fun MapScreen(
     }
 
     LaunchedEffect(selectedLocation, uiState.routeFitRequestToken) {
-        // Route fit has higher priority than saved-location recenter when both exist.
         if (selectedLocation != null && uiState.routeFitRequestToken == null) {
             cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(selectedLocation, 15f))
             viewModel.onCameraMove(selectedLocation)
@@ -268,10 +269,9 @@ fun MapScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background) // Color the gap Area
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
         ) {
-            // 地圖區域（準星以此容器置中）
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -320,7 +320,6 @@ fun MapScreen(
                     }
                 }
 
-                // 準星（十字線，以地圖容器置中）
                 Canvas(
                     modifier = Modifier
                         .size(48.dp)
@@ -342,7 +341,6 @@ fun MapScreen(
                     )
                 }
 
-                // 狀態徽章（地圖右上角覆蓋）
                 val statusText = when {
                     uiState.simulationState == SimulationState.PLAYING ->
                         "PLAYING  ${"%.0f".format(uiState.speedKmh)} km/h"
@@ -383,7 +381,6 @@ fun MapScreen(
                 }
             }
 
-            // 底部控制面板
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.background,
@@ -394,7 +391,35 @@ fun MapScreen(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // 座標顯示
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        listOf(MapMode.SINGLE to "單點定位", MapMode.ROUTE to "路線規劃").forEach { (mode, label) ->
+                            val selected = uiState.mapMode == mode
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .clickable { viewModel.setMapMode(mode) },
+                                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            ) {
+                                Text(
+                                    text = label,
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+
                     Text(
                         text = "${"%.4f".format(uiState.centerLocation.latitude)}° N," +
                                 "  ${"%.4f".format(uiState.centerLocation.longitude)}° E",
@@ -402,24 +427,26 @@ fun MapScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    // 主要操作按鈕
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = { viewModel.addWaypoint() },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp)
-                        ) { Text("+ 新增路點") }
+                        if (uiState.mapMode == MapMode.ROUTE) {
+                            OutlinedButton(
+                                onClick = { viewModel.addWaypoint() },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) { Text("+ 新增路點") }
+                        }
 
                         Button(
                             onClick = {
-                                when {
-                                    uiState.simulationState == SimulationState.PLAYING -> viewModel.pauseRoute()
-                                    uiState.waypoints.isNotEmpty() -> viewModel.playRoute()
-                                    uiState.isMocking -> viewModel.stopMocking()
-                                    else -> viewModel.startMocking()
+                                if (uiState.mapMode == MapMode.ROUTE) {
+                                    if (uiState.simulationState == SimulationState.PLAYING) viewModel.pauseRoute()
+                                    else if (uiState.waypoints.isNotEmpty()) viewModel.playRoute()
+                                } else {
+                                    if (uiState.isMocking) viewModel.stopMocking()
+                                    else viewModel.startMocking()
                                 }
                             },
                             modifier = Modifier.weight(1f),
@@ -432,70 +459,70 @@ fun MapScreen(
                         ) {
                             Text(
                                 when {
-                                    uiState.simulationState == SimulationState.PLAYING -> "⏸ 暫停路線"
-                                    uiState.waypoints.isNotEmpty() -> "▶ 開始模擬"
-                                    uiState.isMocking -> "⏹ 停止模擬"
+                                    uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING -> "⏸ 暫停路線"
+                                    uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() -> "▶ 開始模擬"
+                                    uiState.mapMode == MapMode.SINGLE && uiState.isMocking -> "⏹ 停止模擬"
                                     else -> "▶ 開始模擬"
                                 }
                             )
                         }
                     }
 
-                    // 速度控制
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            "${"%.0f".format(uiState.speedKmh)} km/h",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.width(52.dp)
-                        )
-                        androidx.compose.material3.Slider(
-                            value = uiState.speedKmh.toFloat(),
-                            onValueChange = { viewModel.setSpeed(it.toDouble()) },
-                            valueRange = 0f..100f,
-                            steps = 19,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    // 交通模式 + 次要操作
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            TransportMode.values().forEach { mode ->
-                                FilterChip(
-                                    selected = uiState.transportMode == mode,
-                                    onClick = { viewModel.setTransportMode(mode) },
-                                    label = {
-                                        Text(
-                                            mode.name.take(1),
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                    }
-                                )
-                            }
+                    if (uiState.mapMode == MapMode.ROUTE) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "${"%.0f".format(uiState.speedKmh)} km/h",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.width(52.dp)
+                            )
+                            androidx.compose.material3.Slider(
+                                value = uiState.speedKmh.toFloat(),
+                                onValueChange = { viewModel.setSpeed(it.toDouble()) },
+                                valueRange = 0f..100f,
+                                steps = 19,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            if (uiState.waypoints.size >= 2) {
-                                TextButton(onClick = {
-                                    routeNameInput = ""
-                                    showSaveRouteDialog = true
-                                }) { Text("儲存路線") }
-                            }
-                            if (uiState.waypoints.isNotEmpty()) {
-                                TextButton(
-                                    onClick = { viewModel.clearRoute() },
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.error
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TransportMode.values().forEach { mode ->
+                                    FilterChip(
+                                        selected = uiState.transportMode == mode,
+                                        onClick = { viewModel.setTransportMode(mode) },
+                                        label = {
+                                            Text(
+                                                mode.name.take(1),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
                                     )
-                                ) { Text("清除") }
+                                }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                if (uiState.waypoints.size >= 2) {
+                                    TextButton(onClick = {
+                                        routeNameInput = ""
+                                        showSaveRouteDialog = true
+                                    }) { Text("儲存") }
+                                }
+                                if (uiState.waypoints.isNotEmpty()) {
+                                    TextButton(
+                                        onClick = { viewModel.clearRoute() },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.error
+                                        )
+                                    ) { Text("清除") }
+                                }
                             }
                         }
                     }
@@ -503,7 +530,6 @@ fun MapScreen(
             }
         }
     }
-
 
     if (showSearchDialog) {
         var searchInput by remember { mutableStateOf("") }
@@ -597,14 +623,9 @@ fun MapScreen(
         )
     }
 
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
-            val hasLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-            val hasNotification = permissions[Manifest.permission.POST_NOTIFICATIONS] == true
-            // If any requested permission is granted, we clear error.
-            // If a permission is missing, ensuring logic in VM will catch it on next action.
             viewModel.clearError()
         }
     )

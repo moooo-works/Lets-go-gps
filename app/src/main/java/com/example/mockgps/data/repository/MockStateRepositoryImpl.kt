@@ -21,6 +21,9 @@ class MockStateRepositoryImpl @Inject constructor() : MockStateRepository {
     private val _mockError = MutableStateFlow<MockEngineError?>(null)
     override val mockError: StateFlow<MockEngineError?> = _mockError.asStateFlow()
 
+    private val _activeRouteWaypoints = MutableStateFlow<List<LatLng>>(emptyList())
+    override val activeRouteWaypoints: StateFlow<List<LatLng>> = _activeRouteWaypoints.asStateFlow()
+
     override fun setMockStatus(status: MockStatus) {
         _mockStatus.value = status
     }
@@ -35,5 +38,9 @@ class MockStateRepositoryImpl @Inject constructor() : MockStateRepository {
 
     override fun clearError() {
         _mockError.value = null
+    }
+
+    override fun setActiveRouteWaypoints(points: List<LatLng>) {
+        _activeRouteWaypoints.value = points
     }
 }
