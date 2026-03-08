@@ -38,7 +38,13 @@ enum class TransportMode(val speedKmh: Double) {
     DRIVING(40.0)
 }
 
+enum class MapMode {
+    SINGLE,
+    ROUTE
+}
+
 data class MapUiState(
+    val mapMode: MapMode = MapMode.SINGLE,
     val isMocking: Boolean = false,
     val centerLocation: LatLng = LatLng(25.0330, 121.5654),
     val mockError: MockError? = null,
@@ -68,6 +74,18 @@ class MapViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+
+    fun setMapMode(mode: MapMode) {
+        if (_uiState.value.mapMode == mode) return
+
+        if (mode == MapMode.SINGLE) {
+            // When switching to SINGLE, stop any active route simulation
+            if (_uiState.value.simulationState != SimulationState.IDLE) {
+                stopRoute()
+            }
+        }
+        _uiState.update { it.copy(mapMode = mode) }
+    }
 
     init {
         viewModelScope.launch {
@@ -110,6 +128,16 @@ class MapViewModel @Inject constructor(
             routeSimulator.currentLocation.collect { location ->
                 if (location != null) {
                     _uiState.update { it.copy(currentLocation = location) }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            mockStateRepository.activeRouteWaypoints.collect { points ->
+                _uiState.update { it.copy(waypoints = points) }
+                // Also update simulator if not playing
+                if (routeSimulator.simulationState.value == SimulationState.IDLE) {
+                    routeSimulator.setRoute(points)
                 }
             }
         }
@@ -193,11 +221,13 @@ class MapViewModel @Inject constructor(
         val currentCenter = _uiState.value.centerLocation
         val newWaypoints = _uiState.value.waypoints + currentCenter
         _uiState.update { it.copy(waypoints = newWaypoints) }
+        mockStateRepository.setActiveRouteWaypoints(newWaypoints)
         routeSimulator.setRoute(newWaypoints)
     }
 
     fun clearRoute() {
         _uiState.update { it.copy(waypoints = emptyList(), currentMockLocation = null, currentLocation = null) }
+        mockStateRepository.setActiveRouteWaypoints(emptyList())
         stopMocking()
         routeSimulator.stop()
     }
@@ -240,6 +270,7 @@ class MapViewModel @Inject constructor(
                     routeFitRequestToken = if (points.size >= 2) System.currentTimeMillis() else null
                 )
             }
+            mockStateRepository.setActiveRouteWaypoints(points)
             routeSimulator.setRoute(points)
         }
     }
