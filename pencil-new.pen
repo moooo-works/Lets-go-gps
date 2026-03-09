@@ -10439,6 +10439,423 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "vy8Rz",
+      "x": 0,
+      "y": 3734,
+      "name": "App Icon - MockGPS",
+      "clip": true,
+      "width": 1024,
+      "height": 1024,
+      "cornerRadius": 230,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "FUuTS",
+          "x": 0,
+          "y": 0,
+          "name": "bg",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 315,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0B1F35",
+                "position": 0
+              },
+              {
+                "color": "#060D18",
+                "position": 0.5
+              },
+              {
+                "color": "#030810",
+                "position": 1
+              }
+            ]
+          },
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "type": "ellipse",
+          "id": "YbwSj",
+          "x": 212,
+          "y": 100,
+          "name": "center_glow",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0F3320",
+                "position": 0
+              },
+              {
+                "color": "#00000000",
+                "position": 1
+              }
+            ]
+          },
+          "width": 600,
+          "height": 600
+        },
+        {
+          "type": "ellipse",
+          "id": "8Zd7A",
+          "x": 62,
+          "y": 62,
+          "name": "bg_ring_lg",
+          "fill": "#00000000",
+          "width": 900,
+          "height": 900,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#4ADE8012"
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "N6yXS",
+          "x": 212,
+          "y": 212,
+          "name": "bg_ring_sm",
+          "fill": "#00000000",
+          "width": 600,
+          "height": 600,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#4ADE8020"
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "pa2Mr",
+          "x": 352,
+          "y": 150,
+          "name": "sigO",
+          "innerRadius": 0.82,
+          "sweepAngle": 180,
+          "fill": "#22D3EE45",
+          "width": 320,
+          "height": 320
+        },
+        {
+          "type": "ellipse",
+          "id": "3krwu",
+          "x": 392,
+          "y": 190,
+          "name": "sigM",
+          "innerRadius": 0.8,
+          "sweepAngle": 180,
+          "fill": "#22D3EE70",
+          "width": 240,
+          "height": 240
+        },
+        {
+          "type": "ellipse",
+          "id": "E6bJ1",
+          "x": 432,
+          "y": 230,
+          "name": "sigI",
+          "innerRadius": 0.77,
+          "sweepAngle": 180,
+          "fill": "#86EFACCC",
+          "width": 160,
+          "height": 160
+        },
+        {
+          "type": "ellipse",
+          "id": "8sa2n",
+          "x": 382,
+          "y": 300,
+          "name": "pin_halo",
+          "fill": "#00000000",
+          "width": 260,
+          "height": 260,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#4ADE8050"
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "qF4Ij",
+          "x": 337,
+          "y": 255,
+          "name": "pulse",
+          "fill": "#00000000",
+          "width": 350,
+          "height": 350,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#4ADE8030"
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "AJKkS",
+          "x": 262,
+          "y": 180,
+          "name": "pin_glow",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#34D39940",
+                "position": 0
+              },
+              {
+                "color": "#34D39910",
+                "position": 0.5
+              },
+              {
+                "color": "#00000000",
+                "position": 1
+              }
+            ]
+          },
+          "width": 500,
+          "height": 500
+        },
+        {
+          "type": "path",
+          "id": "1EFOy",
+          "x": 0,
+          "y": 0,
+          "name": "pinTail",
+          "geometry": "M382 430c0 110 48 230 130 300 82-70 130-190 130-300z",
+          "fill": "#22C55E",
+          "width": 1024,
+          "height": 1024,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#4ADE8060",
+            "blur": 20,
+            "spread": 3
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "aCu5w",
+          "x": 382,
+          "y": 300,
+          "name": "pinH",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#A7F3D0",
+                "position": 0
+              },
+              {
+                "color": "#34D399",
+                "position": 0.3
+              },
+              {
+                "color": "#059669",
+                "position": 0.7
+              },
+              {
+                "color": "#047857",
+                "position": 1
+              }
+            ]
+          },
+          "width": 260,
+          "height": 260,
+          "effect": [
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#34D399CC",
+              "blur": 55,
+              "spread": 18
+            },
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#6EE7B7AA",
+              "blur": 20,
+              "spread": 5
+            }
+          ]
+        },
+        {
+          "type": "ellipse",
+          "id": "uHsI6",
+          "x": 477,
+          "y": 395,
+          "name": "pin_inner",
+          "fill": "#FFFFFF",
+          "width": 70,
+          "height": 70,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#FFFFFF99",
+            "blur": 15,
+            "spread": 4
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "gB2Xl",
+          "x": 230,
+          "y": 230,
+          "name": "dot_tl",
+          "fill": "#22D3EE80",
+          "width": 6,
+          "height": 6
+        },
+        {
+          "type": "ellipse",
+          "id": "2wq3o",
+          "x": 788,
+          "y": 230,
+          "name": "dot_tr",
+          "fill": "#22D3EE80",
+          "width": 6,
+          "height": 6
+        },
+        {
+          "type": "ellipse",
+          "id": "7Jzl9",
+          "x": 148,
+          "y": 488,
+          "name": "dot_l",
+          "fill": "#4ADE8060",
+          "width": 8,
+          "height": 8
+        },
+        {
+          "type": "ellipse",
+          "id": "LRNhm",
+          "x": 868,
+          "y": 488,
+          "name": "dot_r",
+          "fill": "#4ADE8060",
+          "width": 8,
+          "height": 8
+        },
+        {
+          "type": "ellipse",
+          "id": "v2qFn",
+          "x": 190,
+          "y": 680,
+          "name": "spk1",
+          "fill": "#34D39960",
+          "width": 10,
+          "height": 10
+        },
+        {
+          "type": "ellipse",
+          "id": "qNi41",
+          "x": 820,
+          "y": 680,
+          "name": "spk2",
+          "fill": "#22D3EE60",
+          "width": 8,
+          "height": 8
+        },
+        {
+          "type": "ellipse",
+          "id": "gDjWB",
+          "x": 130,
+          "y": 350,
+          "name": "spk3",
+          "fill": "#22D3EE50",
+          "width": 6,
+          "height": 6
+        },
+        {
+          "type": "ellipse",
+          "id": "QV2W4",
+          "x": 890,
+          "y": 350,
+          "name": "spk4",
+          "fill": "#34D39950",
+          "width": 6,
+          "height": 6
+        },
+        {
+          "type": "ellipse",
+          "id": "LkOON",
+          "x": 310,
+          "y": 810,
+          "name": "spk5",
+          "fill": "#4ADE8040",
+          "width": 5,
+          "height": 5
+        },
+        {
+          "type": "ellipse",
+          "id": "afRjA",
+          "x": 710,
+          "y": 810,
+          "name": "spk6",
+          "fill": "#4ADE8040",
+          "width": 5,
+          "height": 5
+        },
+        {
+          "type": "ellipse",
+          "id": "uzgwo",
+          "x": 438,
+          "y": 318,
+          "name": "shine",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FFFFFF55",
+                "position": 0
+              },
+              {
+                "color": "#FFFFFF00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 88,
+          "height": 58
+        }
+      ]
     }
   ]
 }
