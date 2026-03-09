@@ -58,6 +58,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -250,22 +252,7 @@ fun MapScreen(
         uiState.currentMockLocation?.let { mockMarkerState.position = it }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showSearchDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 12.dp,
-                    hoveredElevation = 10.dp
-                )
-            ) {
-                Icon(Icons.Filled.Search, contentDescription = "搜尋位置", tint = Color.White)
-            }
-        }
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -282,7 +269,20 @@ fun MapScreen(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
                     uiSettings = MapUiSettings(zoomControlsEnabled = false),
-                    properties = MapProperties(isMyLocationEnabled = false)
+                    properties = MapProperties(isMyLocationEnabled = false),
+                    onMapClick = { latLng ->
+                        when (uiState.mapMode) {
+                            MapMode.SINGLE -> coroutineScope.launch {
+                                cameraPositionState.animate(CameraUpdateFactory.newLatLng(latLng))
+                                viewModel.onCameraMove(latLng)
+                            }
+                            MapMode.ROUTE -> {
+                                val isSimulating = uiState.simulationState == SimulationState.PLAYING
+                                        || uiState.simulationState == SimulationState.PAUSED
+                                if (!isSimulating) viewModel.addWaypointAt(latLng)
+                            }
+                        }
+                    }
                 ) {
                     uiState.savedLocations.forEach { location ->
                         Marker(
@@ -298,12 +298,18 @@ fun MapScreen(
                         )
                     }
                     uiState.waypoints.forEachIndexed { index, point ->
+                        val isSimulating = uiState.simulationState == SimulationState.PLAYING
+                                || uiState.simulationState == SimulationState.PAUSED
                         Marker(
                             state = MarkerState(position = point),
                             title = "Point ${index + 1}",
                             icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
                                 com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN
-                            )
+                            ),
+                            onClick = {
+                                if (!isSimulating) viewModel.removeWaypointAt(index)
+                                true
+                            }
                         )
                     }
                     if (uiState.currentMockLocation != null) {
@@ -351,38 +357,63 @@ fun MapScreen(
                 val statusActive = uiState.isMocking || uiState.simulationState == SimulationState.PLAYING
                 Surface(
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(12.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                    shape = RoundedCornerShape(12.dp),
-                    shadowElevation = 8.dp,
-                    tonalElevation = 4.dp
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                        .align(Alignment.TopCenter)
+                        .clickable { showSearchDialog = true },
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                    shape = RoundedCornerShape(28.dp),
+                    shadowElevation = 4.dp,
+                    tonalElevation = 2.dp
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (statusActive) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = "搜尋位置",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            statusText,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold
+                            text = "${"%.4f".format(uiState.centerLocation.latitude)}° N," +
+                                    "  ${"%.4f".format(uiState.centerLocation.longitude)}° E",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
                         )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (statusActive) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                            )
+                            Text(
+                                statusText,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (statusActive) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
 
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize(animationSpec = tween(durationMillis = 250)),
                 color = MaterialTheme.colorScheme.background,
                 tonalElevation = 0.dp,
                 shadowElevation = 8.dp
@@ -419,13 +450,6 @@ fun MapScreen(
                             }
                         }
                     }
-
-                    Text(
-                        text = "${"%.4f".format(uiState.centerLocation.latitude)}° N," +
-                                "  ${"%.4f".format(uiState.centerLocation.longitude)}° E",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -495,13 +519,18 @@ fun MapScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                val transportModeLabels = mapOf(
+                                    TransportMode.WALKING to "🚶 步行",
+                                    TransportMode.CYCLING to "🚲 自行車",
+                                    TransportMode.DRIVING to "🚗 汽車"
+                                )
                                 TransportMode.values().forEach { mode ->
                                     FilterChip(
                                         selected = uiState.transportMode == mode,
                                         onClick = { viewModel.setTransportMode(mode) },
                                         label = {
                                             Text(
-                                                mode.name.take(1),
+                                                transportModeLabels[mode] ?: mode.name,
                                                 style = MaterialTheme.typography.labelSmall
                                             )
                                         }

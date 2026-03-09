@@ -218,8 +218,18 @@ class MapViewModel @Inject constructor(
     }
 
     fun addWaypoint() {
-        val currentCenter = _uiState.value.centerLocation
-        val newWaypoints = _uiState.value.waypoints + currentCenter
+        addWaypointAt(_uiState.value.centerLocation)
+    }
+
+    fun addWaypointAt(latLng: LatLng) {
+        val newWaypoints = _uiState.value.waypoints + latLng
+        _uiState.update { it.copy(waypoints = newWaypoints) }
+        mockStateRepository.setActiveRouteWaypoints(newWaypoints)
+        routeSimulator.setRoute(newWaypoints)
+    }
+
+    fun removeWaypointAt(index: Int) {
+        val newWaypoints = _uiState.value.waypoints.toMutableList().apply { removeAt(index) }
         _uiState.update { it.copy(waypoints = newWaypoints) }
         mockStateRepository.setActiveRouteWaypoints(newWaypoints)
         routeSimulator.setRoute(newWaypoints)

@@ -2,7 +2,9 @@ package com.example.mockgps.ui.settings
 
 import com.example.mockgps.ui.theme.ThemePreference
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -18,6 +20,10 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.example.mockgps.domain.MockPermissionStatus
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -35,6 +41,16 @@ fun SettingsScreen(
     onThemeChange: (ThemePreference) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val mockPermissionStatus by viewModel.mockPermissionStatus.collectAsState()
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshMockPermission()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     var showExportDialog by remember { mutableStateOf(false) }
     var exportSavedLocations by remember { mutableStateOf(true) }
@@ -125,6 +141,23 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 權限狀態卡片
+            val (dotColor, statusLabel, statusDesc) = when (mockPermissionStatus) {
+                is MockPermissionStatus.Allowed -> Triple(
+                    Color(0xFF22C55E),
+                    "Mock Location 權限",
+                    "已授權 — 可正常使用模擬功能"
+                )
+                is MockPermissionStatus.NotAllowed -> Triple(
+                    Color(0xFFF97316),
+                    "Mock Location 權限",
+                    "未授權 — 請到開發者選項選擇此 App"
+                )
+                is MockPermissionStatus.CheckFailed -> Triple(
+                    Color(0xFFEF4444),
+                    "Mock Location 權限",
+                    "權限檢查失敗"
+                )
+            }
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -142,19 +175,31 @@ fun SettingsScreen(
                         modifier = Modifier
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF22C55E))
+                            .background(dotColor)
                     )
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
                         Text(
-                            "Mock Location 權限",
+                            statusLabel,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            "已授權 — 可正常使用模擬功能",
+                            statusDesc,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                    if (mockPermissionStatus is MockPermissionStatus.NotAllowed) {
+                        TextButton(onClick = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                            )
+                        }) {
+                            Text("開發者選項", style = MaterialTheme.typography.labelMedium)
+                        }
                     }
                 }
             }

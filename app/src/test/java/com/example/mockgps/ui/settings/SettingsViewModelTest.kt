@@ -7,6 +7,8 @@ import com.example.mockgps.data.model.RoutePoint
 import com.example.mockgps.data.model.RouteSummary
 import com.example.mockgps.data.model.RouteWithPoints
 import com.example.mockgps.data.model.SavedLocation
+import com.example.mockgps.domain.LocationMockEngine
+import com.example.mockgps.domain.MockPermissionStatus
 import com.example.mockgps.domain.repository.LocationRepository
 import com.example.mockgps.domain.repository.MockStateRepository
 import com.example.mockgps.domain.repository.MockStatus
@@ -40,6 +42,7 @@ class SettingsViewModelTest {
     private lateinit var viewModel: SettingsViewModel
     private val locationRepository = mockk<LocationRepository>(relaxed = true)
     private val mockStateRepository = mockk<MockStateRepository>(relaxed = true)
+    private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
     private val contentResolver = mockk<ContentResolver>(relaxed = true)
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -55,8 +58,9 @@ class SettingsViewModelTest {
 
         val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
         every { mockStateRepository.mockStatus } returns mockStatusFlow
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
 
-        viewModel = SettingsViewModel(locationRepository, mockStateRepository, context)
+        viewModel = SettingsViewModel(locationRepository, mockStateRepository, mockEngine, context)
     }
 
     @After
