@@ -50,6 +50,7 @@ class MockLocationService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var locationPushJob: Job? = null
     private var isProviderSetup = false
+    private var currentSpeedKmh: Double = 5.0
 
     override fun onCreate() {
         super.onCreate()
@@ -60,17 +61,27 @@ class MockLocationService : Service() {
                 when (state) {
                     SimulationState.PLAYING -> {
                         mockStateRepository.setMockStatus(MockStatus.ROUTE_PLAYING)
-                        updateNotification("Route Playing")
+                        updateNotification(MockStatus.ROUTE_PLAYING)
                     }
                     SimulationState.PAUSED -> {
                         mockStateRepository.setMockStatus(MockStatus.ROUTE_PAUSED)
-                        updateNotification("Route Paused")
+                        updateNotification(MockStatus.ROUTE_PAUSED)
                     }
                     SimulationState.IDLE -> {
                         if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING || mockStateRepository.mockStatus.value == MockStatus.ROUTE_PAUSED) {
                             handleStop()
                         }
                     }
+                }
+            }
+        }
+
+        // 即時追蹤速率，路線模擬中更新通知
+        serviceScope.launch {
+            settingsRepository.observeRouteSpeed().collect { speed ->
+                currentSpeedKmh = speed
+                if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING) {
+                    updateNotification(MockStatus.ROUTE_PLAYING)
                 }
             }
         }
@@ -83,7 +94,7 @@ class MockLocationService : Service() {
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE) {
             try {
                 Log.d(TAG, "Attempting to start foreground service")
-                startForeground(NOTIFICATION_ID, buildNotification("Starting..."))
+                startForeground(NOTIFICATION_ID, buildNotification(MockStatus.IDLE))
                 Log.d(TAG, "Successfully started foreground service")
             } catch (e: SecurityException) {
                 Log.e(TAG, "Failed to start foreground service", e)
@@ -158,7 +169,7 @@ class MockLocationService : Service() {
                 val target = LatLng(lat, lng)
                 mockStateRepository.setCurrentMockLocation(target)
                 mockStateRepository.setMockStatus(MockStatus.MOCKING)
-                updateNotification("Single Location Mocking")
+                updateNotification(MockStatus.MOCKING)
 
                 // Periodically push location to keep it alive
                 locationPushJob = serviceScope.launch {
@@ -269,7 +280,7 @@ class MockLocationService : Service() {
         }
     }
 
-    private fun buildNotification(statusText: String): Notification {
+    private fun buildNotification(status: MockStatus): Notification {
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -286,39 +297,48 @@ class MockLocationService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        val contentText = when (status) {
+            MockStatus.ROUTE_PLAYING -> "路線模擬中 · ${"%.0f".format(currentSpeedKmh)} km/h"
+            MockStatus.ROUTE_PAUSED  -> "路線模擬已暫停"
+            MockStatus.MOCKING       -> "單點定位模擬中"
+            MockStatus.IDLE          -> "準備中…"
+        }
+
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Mock GPS Active")
-            .setContentText(statusText)
+            .setContentTitle("MockGPS 模擬中")
+            .setContentText(contentText)
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .addAction(android.R.drawable.ic_media_pause, "Stop", stopIntent)
+            .addAction(android.R.drawable.ic_delete, "停止", stopIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
-        if (statusText == "Route Playing") {
-            val pauseIntent = PendingIntent.getService(
-                this,
-                2,
-                Intent(this, MockLocationService::class.java).apply { action = ACTION_PAUSE_ROUTE },
-                PendingIntent.FLAG_IMMUTABLE
-            )
-            builder.addAction(android.R.drawable.ic_media_pause, "Pause", pauseIntent)
-        } else if (statusText == "Route Paused") {
-            val resumeIntent = PendingIntent.getService(
-                this,
-                3,
-                Intent(this, MockLocationService::class.java).apply { action = ACTION_RESUME_ROUTE },
-                PendingIntent.FLAG_IMMUTABLE
-            )
-            builder.addAction(android.R.drawable.ic_media_play, "Resume", resumeIntent)
+        when (status) {
+            MockStatus.ROUTE_PLAYING -> {
+                val pauseIntent = PendingIntent.getService(
+                    this, 2,
+                    Intent(this, MockLocationService::class.java).apply { action = ACTION_PAUSE_ROUTE },
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+                builder.addAction(android.R.drawable.ic_media_pause, "暫停", pauseIntent)
+            }
+            MockStatus.ROUTE_PAUSED -> {
+                val resumeIntent = PendingIntent.getService(
+                    this, 3,
+                    Intent(this, MockLocationService::class.java).apply { action = ACTION_RESUME_ROUTE },
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+                builder.addAction(android.R.drawable.ic_media_play, "繼續", resumeIntent)
+            }
+            else -> {}
         }
 
         return builder.build()
     }
 
-    private fun updateNotification(statusText: String) {
+    private fun updateNotification(status: MockStatus) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, buildNotification(statusText))
+        notificationManager.notify(NOTIFICATION_ID, buildNotification(status))
     }
 
     companion object {
