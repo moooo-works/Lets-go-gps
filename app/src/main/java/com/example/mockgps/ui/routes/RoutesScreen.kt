@@ -113,6 +113,8 @@ fun RoutesScreen(
         var renameInput by rememberSaveable(routeId) { mutableStateOf(initialName) }
         AlertDialog(
             onDismissRequest = { routePendingRename = null },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
             title = { Text("重新命名路線") },
             text = {
                 OutlinedTextField(
@@ -143,6 +145,8 @@ fun RoutesScreen(
         val routeId = routePendingDelete!!
         AlertDialog(
             onDismissRequest = { routePendingDelete = null },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
             title = { Text("刪除路線") },
             text = { Text("確定要刪除這條路線？此動作無法復原。") },
             confirmButton = {

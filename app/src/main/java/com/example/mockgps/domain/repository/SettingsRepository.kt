@@ -15,4 +15,13 @@ interface SettingsRepository {
 
     fun observeCoordinateJitter(): Flow<Boolean>
     suspend fun setCoordinateJitter(enabled: Boolean)
+
+    fun observeRouteSpeed(): Flow<Double>
+    suspend fun setRouteSpeed(value: Double)
+
+    fun observeTransportMode(): Flow<String>
+    suspend fun setTransportMode(name: String)
+
+    fun observeMapMode(): Flow<String>
+    suspend fun setMapMode(name: String)
 }

@@ -394,6 +394,8 @@ private fun ExportOptionsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
         title = { Text("Export Data") },
         text = {
             Column {
@@ -443,6 +445,8 @@ private fun ImportPreviewDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
         title = { Text("Import Preview") },
         text = {
             Column {

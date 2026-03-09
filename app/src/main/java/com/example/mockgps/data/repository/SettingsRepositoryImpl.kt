@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.mockgps.domain.repository.SettingsRepository
 import com.google.android.gms.maps.model.LatLng
@@ -30,8 +31,12 @@ class SettingsRepositoryImpl @Inject constructor(
         val ALTITUDE = doublePreferencesKey("altitude")
         val RANDOM_ALTITUDE = booleanPreferencesKey("random_altitude")
         val COORDINATE_JITTER = booleanPreferencesKey("coordinate_jitter")
+        val ROUTE_SPEED = doublePreferencesKey("route_speed")
+        val TRANSPORT_MODE = stringPreferencesKey("transport_mode")
+        val MAP_MODE = stringPreferencesKey("map_mode")
 
         const val DEFAULT_ALTITUDE = 15.0
+        const val DEFAULT_ROUTE_SPEED = 5.0
     }
 
     override fun observeLastCenter(): Flow<LatLng?> {
@@ -75,5 +80,29 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setCoordinateJitter(enabled: Boolean) {
         dataStore.edit { it[COORDINATE_JITTER] = enabled }
+    }
+
+    override fun observeRouteSpeed(): Flow<Double> {
+        return dataStore.data.map { it[ROUTE_SPEED] ?: DEFAULT_ROUTE_SPEED }
+    }
+
+    override suspend fun setRouteSpeed(value: Double) {
+        dataStore.edit { it[ROUTE_SPEED] = value }
+    }
+
+    override fun observeTransportMode(): Flow<String> {
+        return dataStore.data.map { it[TRANSPORT_MODE] ?: "WALKING" }
+    }
+
+    override suspend fun setTransportMode(name: String) {
+        dataStore.edit { it[TRANSPORT_MODE] = name }
+    }
+
+    override fun observeMapMode(): Flow<String> {
+        return dataStore.data.map { it[MAP_MODE] ?: "SINGLE" }
+    }
+
+    override suspend fun setMapMode(name: String) {
+        dataStore.edit { it[MAP_MODE] = name }
     }
 }

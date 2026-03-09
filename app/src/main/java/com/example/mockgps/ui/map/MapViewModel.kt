@@ -27,9 +27,13 @@ import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.mockgps.data.engine.MockEngineError
@@ -77,9 +81,13 @@ class MapViewModel @Inject constructor(
 
     private var saveCenterJob: Job? = null
     private var isFirstLoad = true
+    private var routeStoppedByUser = false
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+
+    private val _routeCompletionEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val routeCompletionEvent: SharedFlow<Unit> = _routeCompletionEvent.asSharedFlow()
 
     fun setMapMode(mode: MapMode) {
         if (_uiState.value.mapMode == mode) return
@@ -91,6 +99,7 @@ class MapViewModel @Inject constructor(
             }
         }
         _uiState.update { it.copy(mapMode = mode) }
+        viewModelScope.launch { settingsRepository.setMapMode(mode.name) }
     }
 
     init {
@@ -110,7 +119,19 @@ class MapViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            var wasRoutePlaying = false
             mockStateRepository.mockStatus.collect { status ->
+                when (status) {
+                    MockStatus.ROUTE_PLAYING -> wasRoutePlaying = true
+                    MockStatus.ROUTE_PAUSED -> { /* keep wasRoutePlaying */ }
+                    else -> {
+                        if (wasRoutePlaying && !routeStoppedByUser) {
+                            _routeCompletionEvent.tryEmit(Unit)
+                        }
+                        wasRoutePlaying = false
+                        routeStoppedByUser = false
+                    }
+                }
                 _uiState.update {
                     it.copy(
                         isMocking = status != MockStatus.IDLE,
@@ -154,6 +175,17 @@ class MapViewModel @Inject constructor(
                     handleEngineError(error)
                 }
             }
+        }
+
+        // Restore persisted route speed, transport mode, and map mode (read once on startup)
+        viewModelScope.launch {
+            val speed = settingsRepository.observeRouteSpeed().first()
+            val transportModeName = settingsRepository.observeTransportMode().first()
+            val mapModeName = settingsRepository.observeMapMode().first()
+            val transportMode = runCatching { TransportMode.valueOf(transportModeName) }.getOrDefault(TransportMode.WALKING)
+            val mapMode = runCatching { MapMode.valueOf(mapModeName) }.getOrDefault(MapMode.SINGLE)
+            _uiState.update { it.copy(speedKmh = speed, transportMode = transportMode, mapMode = mapMode) }
+            routeSimulator.setSpeed(speed / KMH_TO_MPS_DIVISOR)
         }
     }
 
@@ -265,6 +297,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun clearRoute() {
+        routeStoppedByUser = true
         _uiState.update { it.copy(waypoints = emptyList(), currentMockLocation = null, currentLocation = null) }
         mockStateRepository.setActiveRouteWaypoints(emptyList())
         stopMocking()
@@ -321,6 +354,10 @@ class MapViewModel @Inject constructor(
     fun setTransportMode(mode: TransportMode) {
         _uiState.update { it.copy(transportMode = mode, speedKmh = mode.speedKmh) }
         routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS_DIVISOR)
+        viewModelScope.launch {
+            settingsRepository.setTransportMode(mode.name)
+            settingsRepository.setRouteSpeed(mode.speedKmh)
+        }
     }
 
     fun setSpeed(speedKmh: Double) {
@@ -330,6 +367,7 @@ class MapViewModel @Inject constructor(
         }
         _uiState.update { it.copy(speedKmh = speedKmh) }
         routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
+        viewModelScope.launch { settingsRepository.setRouteSpeed(speedKmh) }
     }
 
     fun playRoute() {
@@ -348,7 +386,15 @@ class MapViewModel @Inject constructor(
         context.startService(intent)
     }
 
+    fun resumeRoute() {
+        val intent = Intent(context, MockLocationService::class.java).apply {
+            action = MockLocationService.ACTION_RESUME_ROUTE
+        }
+        context.startService(intent)
+    }
+
     fun stopRoute() {
+        routeStoppedByUser = true
         stopMocking()
     }
 

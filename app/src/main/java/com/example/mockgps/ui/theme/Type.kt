@@ -2,17 +2,21 @@ package com.example.mockgps.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-
-// Typography scale based on Pencil design (Sora + Inter).
-// Font files can be bundled under res/font/ to replace the system default.
-// Sizes used in design: 9, 10, 11, 13, 15, 16 sp
-// Weights: Medium (500), SemiBold (600), Bold (700)
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.example.mockgps.R
 
+// Sora — for headings and titles
+val SoraFontFamily = FontFamily(
+    Font(R.font.sora_regular, FontWeight.Normal),
+    Font(R.font.sora_medium, FontWeight.Medium),
+    Font(R.font.sora_semibold, FontWeight.SemiBold),
+    Font(R.font.sora_bold, FontWeight.Bold)
+)
+
+// Inter — for body and label text
 val InterFontFamily = FontFamily(
     Font(R.font.inter_regular, FontWeight.Normal),
     Font(R.font.inter_medium, FontWeight.Medium),
@@ -21,29 +25,51 @@ val InterFontFamily = FontFamily(
 )
 
 val MockGpsTypography = Typography(
-    // Titles
+    // Headlines (Sora) — TopAppBar titles, screen-level headings
+    headlineLarge = TextStyle(
+        fontFamily = SoraFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        lineHeight = 30.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = SoraFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = SoraFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.sp
+    ),
+    // Titles (Sora) — card titles, section headers
     titleLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = SoraFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 22.sp,
         letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = SoraFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 15.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = SoraFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 13.sp,
         lineHeight = 18.sp,
         letterSpacing = 0.sp
     ),
-    // Body
+    // Body (Inter) — descriptions, content text
     bodyLarge = TextStyle(
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
@@ -65,7 +91,7 @@ val MockGpsTypography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.sp
     ),
-    // Labels
+    // Labels (Inter) — chips, tags, captions
     labelLarge = TextStyle(
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Medium,

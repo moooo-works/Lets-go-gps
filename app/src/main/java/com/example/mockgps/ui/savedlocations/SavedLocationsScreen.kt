@@ -201,6 +201,8 @@ fun SavedLocationsScreen(
 if (locationToDelete != null) {
         AlertDialog(
             onDismissRequest = { locationToDelete = null },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
             title = { Text("刪除位置") },
             text = { Text("確定要刪除「${locationToDelete?.name}」？") },
             confirmButton = {
@@ -219,6 +221,8 @@ if (locationToDelete != null) {
         var newName by remember(locationToRename?.id) { mutableStateOf(locationToRename?.name.orEmpty()) }
         AlertDialog(
             onDismissRequest = { locationToRename = null },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
             title = { Text("重新命名") },
             text = {
                 OutlinedTextField(
