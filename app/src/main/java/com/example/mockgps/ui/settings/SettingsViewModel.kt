@@ -11,8 +11,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.mockgps.data.model.RoutePoint
 import com.example.mockgps.data.model.RouteWithPoints
 import com.example.mockgps.data.model.SavedLocation
+import com.example.mockgps.domain.LocationMockEngine
+import com.example.mockgps.domain.MockPermissionStatus
 import com.example.mockgps.domain.repository.LocationRepository
 import com.example.mockgps.domain.repository.MockStateRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,10 +68,22 @@ data class ExportRoute(
 class SettingsViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val mockStateRepository: MockStateRepository,
+    private val mockEngine: LocationMockEngine,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+
+    private val _mockPermissionStatus = MutableStateFlow<MockPermissionStatus>(MockPermissionStatus.NotAllowed)
+    val mockPermissionStatus: StateFlow<MockPermissionStatus> = _mockPermissionStatus.asStateFlow()
+
+    init {
+        refreshMockPermission()
+    }
+
+    fun refreshMockPermission() {
+        _mockPermissionStatus.value = mockEngine.getMockPermissionStatus()
+    }
 
     fun exportDataToUri(uri: Uri, includeSavedLocations: Boolean, includeRoutes: Boolean, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
