@@ -15,6 +15,7 @@ import com.example.mockgps.domain.LocationMockEngine
 import com.example.mockgps.domain.MockPermissionStatus
 import com.example.mockgps.domain.repository.LocationRepository
 import com.example.mockgps.domain.repository.MockStateRepository
+import com.example.mockgps.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,8 @@ import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -68,6 +71,7 @@ data class ExportRoute(
 class SettingsViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val mockStateRepository: MockStateRepository,
+    private val settingsRepository: SettingsRepository,
     private val mockEngine: LocationMockEngine,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -76,6 +80,33 @@ class SettingsViewModel @Inject constructor(
 
     private val _mockPermissionStatus = MutableStateFlow<MockPermissionStatus>(MockPermissionStatus.NotAllowed)
     val mockPermissionStatus: StateFlow<MockPermissionStatus> = _mockPermissionStatus.asStateFlow()
+
+    val altitude = settingsRepository.observeAltitude()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15.0)
+
+    val randomAltitude = settingsRepository.observeRandomAltitude()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val coordinateJitter = settingsRepository.observeCoordinateJitter()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun setAltitude(value: Double) {
+        viewModelScope.launch {
+            settingsRepository.setAltitude(value)
+        }
+    }
+
+    fun setRandomAltitude(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setRandomAltitude(enabled)
+        }
+    }
+
+    fun setCoordinateJitter(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setCoordinateJitter(enabled)
+        }
+    }
 
     init {
         refreshMockPermission()

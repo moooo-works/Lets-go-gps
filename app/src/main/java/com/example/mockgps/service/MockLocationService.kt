@@ -21,11 +21,13 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import com.example.mockgps.domain.LocationMockEngine
 import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.MockStateRepository
 import com.example.mockgps.domain.repository.MockStatus
+import com.example.mockgps.domain.repository.SettingsRepository
 import com.google.android.gms.maps.model.LatLng
 import javax.inject.Inject
 import com.example.mockgps.data.engine.MockEngineError
@@ -41,6 +43,9 @@ class MockLocationService : Service() {
 
     @Inject
     lateinit var routeSimulator: RouteSimulator
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var locationPushJob: Job? = null
@@ -125,24 +130,49 @@ class MockLocationService : Service() {
         if (!isProviderSetup) return
 
         try {
-            mockEngine.setLocation(lat, lng)
-            val target = LatLng(lat, lng)
-            mockStateRepository.setCurrentMockLocation(target)
-            mockStateRepository.setMockStatus(MockStatus.MOCKING)
-            updateNotification("Single Location Mocking")
+            serviceScope.launch {
+                val baseAltitude = settingsRepository.observeAltitude().first()
+                val useRandomAltitude = settingsRepository.observeRandomAltitude().first()
+                val useJitter = settingsRepository.observeCoordinateJitter().first()
+                
+                fun getAltitude(): Double {
+                    return if (useRandomAltitude) {
+                        baseAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
+                    } else {
+                        baseAltitude
+                    }
+                }
 
-            // Periodically push location to keep it alive if needed, but for single point we can just set it once
-            // Actually, we need a continuous push to prevent OS from overriding or stopping mock.
-            locationPushJob = serviceScope.launch {
-                while(true) {
-                    try {
-                        mockEngine.setLocation(lat, lng)
-                        kotlinx.coroutines.delay(1000)
-                    } catch (e: CancellationException) {
-                        break
-                    } catch (e: Exception) {
-                        mockStateRepository.setMockError(MockEngineError.SetLocation(e))
-                        break
+                fun getLatLng(lat: Double, lng: Double): LatLng {
+                    return if (useJitter) {
+                        val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                        val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                        LatLng(lat + latOffset, lng + lngOffset)
+                    } else {
+                        LatLng(lat, lng)
+                    }
+                }
+
+                val initialPoint = getLatLng(lat, lng)
+                mockEngine.setLocation(initialPoint.latitude, initialPoint.longitude, altitude = getAltitude())
+                val target = LatLng(lat, lng)
+                mockStateRepository.setCurrentMockLocation(target)
+                mockStateRepository.setMockStatus(MockStatus.MOCKING)
+                updateNotification("Single Location Mocking")
+
+                // Periodically push location to keep it alive
+                locationPushJob = serviceScope.launch {
+                    while (true) {
+                        try {
+                            val jitterPoint = getLatLng(lat, lng)
+                            mockEngine.setLocation(jitterPoint.latitude, jitterPoint.longitude, altitude = getAltitude())
+                            kotlinx.coroutines.delay(1000)
+                        } catch (e: CancellationException) {
+                            break
+                        } catch (e: Exception) {
+                            mockStateRepository.setMockError(MockEngineError.SetLocation(e))
+                            break
+                        }
                     }
                 }
             }
@@ -159,11 +189,17 @@ class MockLocationService : Service() {
         stopLocationPushJob()
 
         locationPushJob = serviceScope.launch {
-            routeSimulator.currentLocation.collect { location ->
-                if (location != null) {
+            routeSimulator.currentLocation.collect { point ->
+                if (point != null) {
                     try {
-                        mockEngine.setLocation(location.latitude, location.longitude)
-                        mockStateRepository.setCurrentMockLocation(location)
+                        mockEngine.setLocation(
+                            point.latLng.latitude,
+                            point.latLng.longitude,
+                            point.bearing,
+                            point.speed,
+                            point.altitude
+                        )
+                        mockStateRepository.setCurrentMockLocation(point.latLng)
                     } catch (e: CancellationException) {
                         // ignore
                     } catch (e: Exception) {

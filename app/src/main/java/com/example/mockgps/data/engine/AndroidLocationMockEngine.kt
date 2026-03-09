@@ -78,7 +78,13 @@ class AndroidLocationMockEngine : LocationMockEngine {
         setupFailures.clear()
     }
 
-    override fun setLocation(latitude: Double, longitude: Double) {
+    override fun setLocation(
+        latitude: Double,
+        longitude: Double,
+        bearing: Float,
+        speed: Float,
+        altitude: Double
+    ) {
         if (enabledProviders.isEmpty()) {
             val details = setupFailures.values.joinToString(separator = " | ")
             val message = "No test providers enabled${if (details.isNotBlank()) ". $details" else ""}"
@@ -89,9 +95,9 @@ class AndroidLocationMockEngine : LocationMockEngine {
 
         enabledProviders.forEach { provider ->
             try {
-                val mockLocation = createMockLocation(provider, latitude, longitude)
+                val mockLocation = createMockLocation(provider, latitude, longitude, bearing, speed, altitude)
                 locationManager.setTestProviderLocation(provider, mockLocation)
-                Log.d(TAG, "setLocation success provider=$provider lat=$latitude lng=$longitude")
+                Log.d(TAG, "setLocation success provider=$provider lat=$latitude lng=$longitude bearing=$bearing speed=$speed altitude=$altitude")
             } catch (e: Exception) {
                 val message = "Provider $provider setLocation failed: ${e::class.java.simpleName}: ${e.message}"
                 Log.e(TAG, message, e)
@@ -178,18 +184,25 @@ class AndroidLocationMockEngine : LocationMockEngine {
             .build()
     }
 
-    private fun createMockLocation(provider: String, latitude: Double, longitude: Double): Location {
+    private fun createMockLocation(
+        provider: String,
+        latitude: Double,
+        longitude: Double,
+        bearing: Float,
+        speed: Float,
+        altitude: Double
+    ): Location {
         return Location(provider).apply {
             this.latitude = latitude
             this.longitude = longitude
-            altitude = 0.0
-            accuracy = 5.0f
-            time = System.currentTimeMillis()
+            this.altitude = altitude
+            this.accuracy = 5.0f
+            this.time = System.currentTimeMillis()
             if (sdkInt >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                this.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
             }
-            speed = 0.0f
-            bearing = 0.0f
+            this.speed = speed
+            this.bearing = bearing
         }
     }
 
