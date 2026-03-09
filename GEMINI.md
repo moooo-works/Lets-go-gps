@@ -36,6 +36,11 @@ MockGPS 是一款專業級的 Android 應用程式，旨在協助開發者與 QA
 - **Lint 檢查**：`./gradlew lintDebug`
 
 ### 重要開發守則
+- **測試先行與全面覆蓋**：
+  - **新功能開發**必須包含對應的自動化單元測試（Unit Tests）。
+  - **Bug 修復**前須先撰寫能重現問題的測試案例。
+  - 每次修改核心邏輯（如 `RouteSimulator` 或 ViewModel）後，必須更新並執行相關測試，確保無回歸錯誤（Regression）。
+  - 測試案例須涵蓋**邊界情況**（如極端座標、網路中斷、權限拒絕等）。
 - **權限處理**：必須嚴格區分 `Allowed`（允許）、`NotAllowed`（未在開發者選項選取此 App）、`CheckFailed`（檢查失敗）三種狀態。
 - **地圖 UX**：準星（Crosshair）必須在地圖容器中心，平移地圖時不得出現意外的 Marker。
 - **背景服務**：`MockLocationService` 是核心背景服務，管理 mock provider 的生命週期。修改時需確保 Notification 狀態與實際狀態同步。
