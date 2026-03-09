@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -43,6 +45,11 @@ fun SettingsScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val mockPermissionStatus by viewModel.mockPermissionStatus.collectAsState()
+    val altitude by viewModel.altitude.collectAsState()
+    val randomAltitude by viewModel.randomAltitude.collectAsState()
+    val coordinateJitter by viewModel.coordinateJitter.collectAsState()
+
+    var altitudeInput by remember(altitude) { mutableStateOf(altitude.toString()) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -63,12 +70,12 @@ fun SettingsScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            viewModel.parseImportData(it) { success, preview, _ ->
+            viewModel.parseImportData(it) { success, preview, message ->
                 if (success) {
                     importPreview = preview
                     showImportDialog = true
                 } else {
-                    Toast.makeText(context, "Import failed: \$message", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Import failed: $message", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -78,11 +85,11 @@ fun SettingsScreen(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri: Uri? ->
         uri?.let {
-            viewModel.exportDataToUri(it, exportSavedLocations, exportRoutes) { success, _ ->
+            viewModel.exportDataToUri(it, exportSavedLocations, exportRoutes) { success, error ->
                 if (success) {
                     Toast.makeText(context, "Export successful", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Export failed: \$error", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Export failed: $error", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -244,6 +251,76 @@ fun SettingsScreen(
                                 )
                             }
                         }
+                    }
+                }
+            }
+
+            // 模擬設定
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(0.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        "模擬設定",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("預設高度 (公尺)", style = MaterialTheme.typography.bodyMedium)
+                        OutlinedTextField(
+                            value = altitudeInput,
+                            onValueChange = { 
+                                altitudeInput = it
+                                it.toDoubleOrNull()?.let { value -> viewModel.setAltitude(value) }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("高度隨機化", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "在基礎高度上加入 ±0.5m 的波動",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = randomAltitude,
+                            onCheckedChange = { viewModel.setRandomAltitude(it) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("座標隨機抖動", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "在經緯度上加入微小偏移 (1-5m)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = coordinateJitter,
+                            onCheckedChange = { viewModel.setCoordinateJitter(it) }
+                        )
                     }
                 }
             }

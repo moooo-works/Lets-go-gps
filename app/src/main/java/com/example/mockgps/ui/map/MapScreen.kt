@@ -8,44 +8,19 @@ import android.provider.Settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,30 +30,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.mockgps.utils.LocationQueryParser
 import com.example.mockgps.utils.ParseResult
 import com.example.mockgps.domain.SimulationState
+import com.example.mockgps.domain.repository.GeocodedLocation
 import com.example.mockgps.utils.LatLngBoundsUtil
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.min
@@ -328,10 +304,10 @@ fun MapScreen(
 
                 Canvas(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(24.dp)
                         .align(Alignment.Center)
                 ) {
-                    val stroke = 3.dp.toPx()
+                    val stroke = 2.dp.toPx()
                     val arm = size.width
                     val cx = size.width / 2f
                     val cy = size.height / 2f
@@ -561,61 +537,16 @@ fun MapScreen(
     }
 
     if (showSearchDialog) {
-        var searchInput by remember { mutableStateOf("") }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
-
-        AlertDialog(
-            onDismissRequest = { showSearchDialog = false },
-            title = { Text("Search Location") },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = searchInput,
-                        onValueChange = {
-                            searchInput = it
-                            errorMessage = null
-                        },
-                        label = { Text("Query") },
-                        supportingText = { Text("Supports Plus Code or lat,lng") },
-                        singleLine = true,
-                        isError = errorMessage != null
-                    )
-                    if (errorMessage != null) {
-                        Text(
-                            text = errorMessage!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
+        SearchDialog(
+            uiState = uiState,
+            onDismiss = { 
+                showSearchDialog = false
+                viewModel.clearSearchResults()
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val result = LocationQueryParser.parse(searchInput, uiState.centerLocation)
-                        when (result) {
-                            is ParseResult.Success -> {
-                                val targetLatLng = result.parsedLocation.latLng
-                                coroutineScope.launch {
-                                    cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(targetLatLng, 15f))
-                                }
-                                viewModel.onCameraMove(targetLatLng)
-                                showSearchDialog = false
-                            }
-                            is ParseResult.Error -> {
-                                errorMessage = result.message
-                            }
-                        }
-                    }
-                ) {
-                    Text("Locate")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSearchDialog = false }) {
-                    Text("Cancel")
-                }
+            onSearch = { viewModel.searchLocations(it) },
+            onSelectResult = {
+                viewModel.selectSearchResult(it)
+                showSearchDialog = false
             }
         )
     }
@@ -748,5 +679,227 @@ fun MapScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun SearchDialog(
+    uiState: MapUiState,
+    onDismiss: () -> Unit,
+    onSearch: (String) -> Unit,
+    onSelectResult: (GeocodedLocation) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+
+    // Helper to perform the search or direct locate
+    val performAction = { query: String ->
+        val parseResult = LocationQueryParser.parse(query, uiState.centerLocation)
+        if (parseResult is ParseResult.Success) {
+            onSelectResult(GeocodedLocation(
+                name = "經緯度定位",
+                address = query,
+                latLng = parseResult.parsedLocation.latLng
+            ))
+        } else {
+            onSearch(query)
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.85f)
+                .padding(horizontal = 20.dp, vertical = 40.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant, // Changed to surfaceVariant for better contrast against map
+            tonalElevation = 8.dp,
+            shadowElevation = 16.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "搜尋地點",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant // Match text to background
+                    )
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "關閉",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Search Bar
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { 
+                        Text(
+                            "搜尋地點、座標或 Plus Code...", 
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        ) 
+                    },
+                    leadingIcon = { 
+                        Icon(
+                            Icons.Default.Search, 
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        ) 
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "清除")
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        performAction(searchQuery)
+                        focusManager.clearFocus()
+                    }),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface, // Use surface for the input to pop out
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Transparent
+                    )
+                )
+
+                // Content Area
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) { // Added fillMaxWidth to ensure Box takes full space
+                    when {
+                        uiState.isSearching -> {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                        uiState.searchError != null -> {
+                            Text(
+                                text = "搜尋失敗: ${uiState.searchError}",
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.align(Alignment.Center).fillMaxWidth(), // Centered text horizontally too
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        uiState.searchResults.isEmpty() && searchQuery.isEmpty() -> {
+                            Column(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center // Ensure vertical centering inside column
+                            ) {
+                                Icon(
+                                    Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(56.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    "輸入關鍵字開始搜尋",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        uiState.searchResults.isEmpty() && searchQuery.isNotEmpty() && !uiState.isSearching -> {
+                            Text(
+                                "找不到相關結果",
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(bottom = 16.dp)
+                            ) {
+                                items(uiState.searchResults) { result ->
+                                    SearchResultItem(result = result, onClick = { onSelectResult(result) })
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchResultItem(result: GeocodedLocation, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        color = MaterialTheme.colorScheme.surface, // Use surface for items to contrast with surfaceVariant background
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = result.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = result.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${"%.5f".format(result.latLng.latitude)}, ${"%.5f".format(result.latLng.longitude)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                )
+            }
+        }
     }
 }

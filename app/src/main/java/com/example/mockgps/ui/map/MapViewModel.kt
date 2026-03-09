@@ -17,6 +17,8 @@ import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.LocationRepository
 import com.example.mockgps.domain.repository.MockStateRepository
 import com.example.mockgps.domain.repository.SettingsRepository
+import com.example.mockgps.domain.repository.SearchRepository
+import com.example.mockgps.domain.repository.GeocodedLocation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import com.example.mockgps.domain.repository.MockStatus
@@ -56,7 +58,10 @@ data class MapUiState(
     val transportMode: TransportMode = TransportMode.WALKING,
     val currentLocation: LatLng? = null,
     val currentMockLocation: LatLng? = null,
-    val routeFitRequestToken: Long? = null
+    val routeFitRequestToken: Long? = null,
+    val isSearching: Boolean = false,
+    val searchResults: List<GeocodedLocation> = emptyList(),
+    val searchError: String? = null
 )
 
 @HiltViewModel
@@ -65,6 +70,7 @@ class MapViewModel @Inject constructor(
     private val repository: LocationRepository,
     private val mockStateRepository: MockStateRepository,
     private val settingsRepository: SettingsRepository,
+    private val searchRepository: SearchRepository,
     private val routeSimulator: RouteSimulator,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -125,9 +131,9 @@ class MapViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            routeSimulator.currentLocation.collect { location ->
-                if (location != null) {
-                    _uiState.update { it.copy(currentLocation = location) }
+            routeSimulator.currentLocation.collect { point ->
+                if (point != null) {
+                    _uiState.update { it.copy(currentLocation = point.latLng) }
                 }
             }
         }
@@ -196,6 +202,29 @@ class MapViewModel @Inject constructor(
     fun clearError() {
         _uiState.update { it.copy(mockError = null) }
         mockStateRepository.clearError()
+    }
+
+    fun searchLocations(query: String) {
+        if (query.isBlank()) return
+        
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSearching = true, searchError = null) }
+            searchRepository.search(query)
+                .onSuccess { results ->
+                    _uiState.update { it.copy(searchResults = results, isSearching = false) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(searchError = error.message, isSearching = false) }
+                }
+        }
+    }
+
+    fun clearSearchResults() {
+        _uiState.update { it.copy(searchResults = emptyList(), searchError = null) }
+    }
+
+    fun selectSearchResult(location: GeocodedLocation) {
+        _uiState.update { it.copy(centerLocation = location.latLng, searchResults = emptyList()) }
     }
 
     private fun saveLocationIfNeeded(latLng: LatLng) {
