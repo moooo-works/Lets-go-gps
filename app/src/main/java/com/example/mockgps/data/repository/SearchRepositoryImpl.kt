@@ -56,7 +56,7 @@ class SearchRepositoryImpl @Inject constructor(
     }
 
     // Nominatim API response structure
-    private data class NominatimResponse(
+    internal data class NominatimResponse(
         val lat: String,
         val lon: String,
         val display_name: String,
