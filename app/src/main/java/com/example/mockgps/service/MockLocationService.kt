@@ -14,14 +14,8 @@ import androidx.core.app.NotificationCompat
 import com.example.mockgps.MainActivity
 import com.example.mockgps.R
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import com.example.mockgps.domain.LocationMockEngine
 import com.example.mockgps.domain.RouteSimulator
 import com.example.mockgps.domain.SimulationState
@@ -52,10 +46,27 @@ class MockLocationService : Service() {
     private var isProviderSetup = false
     private var currentSpeedKmh: Double = 5.0
 
+    // Settings Cache to avoid frequent DataStore I/O during rapid injection
+    private var cachedAltitude: Double = 15.0
+    private var cachedRandomAltitude: Boolean = false
+    private var cachedJitter: Boolean = false
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
 
+        // 1. Maintain settings cache
+        serviceScope.launch {
+            settingsRepository.observeAltitude().collect { cachedAltitude = it }
+        }
+        serviceScope.launch {
+            settingsRepository.observeRandomAltitude().collect { cachedRandomAltitude = it }
+        }
+        serviceScope.launch {
+            settingsRepository.observeCoordinateJitter().collect { cachedJitter = it }
+        }
+
+        // 2. Observe Route Simulation state
         serviceScope.launch {
             routeSimulator.simulationState.collect { state ->
                 when (state) {
@@ -68,7 +79,8 @@ class MockLocationService : Service() {
                         updateNotification(MockStatus.ROUTE_PAUSED)
                     }
                     SimulationState.IDLE -> {
-                        if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING || mockStateRepository.mockStatus.value == MockStatus.ROUTE_PAUSED) {
+                        if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING || 
+                            mockStateRepository.mockStatus.value == MockStatus.ROUTE_PAUSED) {
                             handleStop()
                         }
                     }
@@ -76,7 +88,20 @@ class MockLocationService : Service() {
             }
         }
 
-        // 即時追蹤速率，路線模擬中更新通知
+        // 3. REACTIVE INJECTION CORE: Use combine to ensure immediate response to location or status changes
+        serviceScope.launch {
+            combine(
+                mockStateRepository.currentMockLocation,
+                mockStateRepository.mockStatus
+            ) { location, status -> location to status }
+                .collect { (location, status) ->
+                    if (location != null && status == MockStatus.MOCKING) {
+                        performInjection(location)
+                    }
+                }
+        }
+
+        // 4. Track speed for notifications
         serviceScope.launch {
             settingsRepository.observeRouteSpeed().collect { speed ->
                 currentSpeedKmh = speed
@@ -87,24 +112,36 @@ class MockLocationService : Service() {
         }
     }
 
+    private fun performInjection(location: LatLng) {
+        try {
+            val altitude = if (cachedRandomAltitude) {
+                cachedAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
+            } else cachedAltitude
+
+            val target = if (cachedJitter) {
+                val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                LatLng(location.latitude + latOffset, location.longitude + lngOffset)
+            } else location
+
+            mockEngine.setLocation(target.latitude, target.longitude, altitude = altitude)
+        } catch (e: Exception) {
+            Log.e(TAG, "Location injection failed", e)
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
 
-
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE) {
             try {
-                Log.d(TAG, "Attempting to start foreground service")
                 startForeground(NOTIFICATION_ID, buildNotification(MockStatus.IDLE))
-                Log.d(TAG, "Successfully started foreground service")
             } catch (e: SecurityException) {
-                Log.e(TAG, "Failed to start foreground service", e)
                 mockStateRepository.setMockError(MockEngineError.Setup(e))
-                mockStateRepository.setMockStatus(MockStatus.IDLE)
                 stopSelf()
                 return START_NOT_STICKY
             }
         }
-
 
         when (action) {
             ACTION_START_SINGLE -> handleStartSingle(intent)
@@ -123,7 +160,6 @@ class MockLocationService : Service() {
                 mockEngine.setupMockProvider()
                 isProviderSetup = true
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to setup mock provider", e)
                 mockStateRepository.setMockError(MockEngineError.Setup(e))
                 handleStop()
             }
@@ -136,55 +172,25 @@ class MockLocationService : Service() {
 
         routeSimulator.stop()
         stopLocationPushJob()
-
         ensureProviderSetup()
         if (!isProviderSetup) return
 
         try {
-            serviceScope.launch {
-                val baseAltitude = settingsRepository.observeAltitude().first()
-                val useRandomAltitude = settingsRepository.observeRandomAltitude().first()
-                val useJitter = settingsRepository.observeCoordinateJitter().first()
-                
-                fun getAltitude(): Double {
-                    return if (useRandomAltitude) {
-                        baseAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
-                    } else {
-                        baseAltitude
-                    }
-                }
+            val target = LatLng(lat, lng)
+            // Important: Set location first then status to trigger reactive injection immediately
+            mockStateRepository.setCurrentMockLocation(target)
+            mockStateRepository.setMockStatus(MockStatus.MOCKING)
+            updateNotification(MockStatus.MOCKING)
 
-                fun getLatLng(lat: Double, lng: Double): LatLng {
-                    return if (useJitter) {
-                        val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
-                        val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
-                        LatLng(lat + latOffset, lng + lngOffset)
-                    } else {
-                        LatLng(lat, lng)
+            // Keep-alive loop: ensure the system receives updates at least once per second
+            // even if the user isn't moving the joystick
+            locationPushJob = serviceScope.launch {
+                while (true) {
+                    val current = mockStateRepository.currentMockLocation.value
+                    if (current != null && mockStateRepository.mockStatus.value == MockStatus.MOCKING) {
+                        performInjection(current)
                     }
-                }
-
-                val initialPoint = getLatLng(lat, lng)
-                mockEngine.setLocation(initialPoint.latitude, initialPoint.longitude, altitude = getAltitude())
-                val target = LatLng(lat, lng)
-                mockStateRepository.setCurrentMockLocation(target)
-                mockStateRepository.setMockStatus(MockStatus.MOCKING)
-                updateNotification(MockStatus.MOCKING)
-
-                // Periodically push location to keep it alive
-                locationPushJob = serviceScope.launch {
-                    while (true) {
-                        try {
-                            val jitterPoint = getLatLng(lat, lng)
-                            mockEngine.setLocation(jitterPoint.latitude, jitterPoint.longitude, altitude = getAltitude())
-                            kotlinx.coroutines.delay(1000)
-                        } catch (e: CancellationException) {
-                            break
-                        } catch (e: Exception) {
-                            mockStateRepository.setMockError(MockEngineError.SetLocation(e))
-                            break
-                        }
-                    }
+                    delay(1000)
                 }
             }
         } catch (e: Exception) {
@@ -196,7 +202,6 @@ class MockLocationService : Service() {
     private fun handleStartRoute() {
         ensureProviderSetup()
         if (!isProviderSetup) return
-
         stopLocationPushJob()
 
         locationPushJob = serviceScope.launch {
@@ -211,15 +216,12 @@ class MockLocationService : Service() {
                             point.altitude
                         )
                         mockStateRepository.setCurrentMockLocation(point.latLng)
-                    } catch (e: CancellationException) {
-                        // ignore
                     } catch (e: Exception) {
                         mockStateRepository.setMockError(MockEngineError.SetLocation(e))
                     }
                 }
             }
         }
-
         routeSimulator.play(serviceScope)
     }
 
@@ -236,19 +238,12 @@ class MockLocationService : Service() {
     private fun handleStop() {
         stopLocationPushJob()
         routeSimulator.stop()
-
         if (isProviderSetup) {
-            try {
-                mockEngine.teardownMockProvider()
-            } catch (e: Exception) {
-                Log.e(TAG, "Teardown error", e)
-            }
+            try { mockEngine.teardownMockProvider() } catch (e: Exception) {}
             isProviderSetup = false
         }
-
         mockStateRepository.setMockStatus(MockStatus.IDLE)
         mockStateRepository.setCurrentMockLocation(null)
-
         stopForeground(true)
         stopSelf()
     }
@@ -256,6 +251,46 @@ class MockLocationService : Service() {
     private fun stopLocationPushJob() {
         locationPushJob?.cancel()
         locationPushJob = null
+    }
+
+    private fun updateNotification(status: MockStatus) {
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.notify(NOTIFICATION_ID, buildNotification(status))
+    }
+
+    private fun buildNotification(status: MockStatus): Notification {
+        val pendingIntent = PendingIntent.getActivity(this, 0,
+            Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP },
+            PendingIntent.FLAG_IMMUTABLE)
+
+        val stopIntent = PendingIntent.getService(this, 1,
+            Intent(this, MockLocationService::class.java).apply { action = ACTION_STOP },
+            PendingIntent.FLAG_IMMUTABLE)
+
+        val contentText = when (status) {
+            MockStatus.ROUTE_PLAYING -> "路線模擬中 · ${"%.0f".format(currentSpeedKmh)} km/h"
+            MockStatus.ROUTE_PAUSED  -> "路線模擬已暫停"
+            MockStatus.MOCKING       -> "單點定位模擬中"
+            MockStatus.IDLE          -> "準備中…"
+        }
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("MockGPS 正在執行")
+            .setContentText(contentText)
+            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .addAction(android.R.drawable.ic_delete, "停止", stopIntent)
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Reduce noise
+            .build()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CHANNEL_ID, "Mock Service", NotificationManager.IMPORTANCE_LOW)
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.createNotificationChannel(channel)
+        }
     }
 
     override fun onDestroy() {
@@ -266,92 +301,15 @@ class MockLocationService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Mock Location Service",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Runs the mock location engine in the background"
-            }
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private fun buildNotification(status: MockStatus): Notification {
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            },
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val stopIntent = PendingIntent.getService(
-            this,
-            1,
-            Intent(this, MockLocationService::class.java).apply { action = ACTION_STOP },
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val contentText = when (status) {
-            MockStatus.ROUTE_PLAYING -> "路線模擬中 · ${"%.0f".format(currentSpeedKmh)} km/h"
-            MockStatus.ROUTE_PAUSED  -> "路線模擬已暫停"
-            MockStatus.MOCKING       -> "單點定位模擬中"
-            MockStatus.IDLE          -> "準備中…"
-        }
-
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("MockGPS 模擬中")
-            .setContentText(contentText)
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .setContentIntent(pendingIntent)
-            .setOngoing(true)
-            .addAction(android.R.drawable.ic_delete, "停止", stopIntent)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-        when (status) {
-            MockStatus.ROUTE_PLAYING -> {
-                val pauseIntent = PendingIntent.getService(
-                    this, 2,
-                    Intent(this, MockLocationService::class.java).apply { action = ACTION_PAUSE_ROUTE },
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-                builder.addAction(android.R.drawable.ic_media_pause, "暫停", pauseIntent)
-            }
-            MockStatus.ROUTE_PAUSED -> {
-                val resumeIntent = PendingIntent.getService(
-                    this, 3,
-                    Intent(this, MockLocationService::class.java).apply { action = ACTION_RESUME_ROUTE },
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-                builder.addAction(android.R.drawable.ic_media_play, "繼續", resumeIntent)
-            }
-            else -> {}
-        }
-
-        return builder.build()
-    }
-
-    private fun updateNotification(status: MockStatus) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, buildNotification(status))
-    }
-
     companion object {
         private const val TAG = "MockLocationService"
         const val CHANNEL_ID = "MockLocationServiceChannelV2"
         const val NOTIFICATION_ID = 1
-
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"
         const val ACTION_START_ROUTE = "ACTION_START_ROUTE"
         const val ACTION_PAUSE_ROUTE = "ACTION_PAUSE_ROUTE"
         const val ACTION_RESUME_ROUTE = "ACTION_RESUME_ROUTE"
         const val ACTION_STOP = "ACTION_STOP"
-
         const val EXTRA_LAT = "EXTRA_LAT"
         const val EXTRA_LNG = "EXTRA_LNG"
     }

@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,13 +28,9 @@ import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.mockgps.data.engine.MockEngineError
@@ -65,7 +62,8 @@ data class MapUiState(
     val routeFitRequestToken: Long? = null,
     val isSearching: Boolean = false,
     val searchResults: List<GeocodedLocation> = emptyList(),
-    val searchError: String? = null
+    val searchError: String? = null,
+    val isJoystickEnabled: Boolean = false
 )
 
 @HiltViewModel
@@ -76,30 +74,29 @@ class MapViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val searchRepository: SearchRepository,
     private val routeSimulator: RouteSimulator,
+    private val joystickOverlayManager: JoystickOverlayManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private var saveCenterJob: Job? = null
+    private var joystickTickerJob: Job? = null
     private var isFirstLoad = true
-    private var routeStoppedByUser = false
+
+    private var currentJoystickX = 0f
+    private var currentJoystickY = 0f
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
-
-    private val _routeCompletionEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val routeCompletionEvent: SharedFlow<Unit> = _routeCompletionEvent.asSharedFlow()
 
     fun setMapMode(mode: MapMode) {
         if (_uiState.value.mapMode == mode) return
 
         if (mode == MapMode.SINGLE) {
-            // When switching to SINGLE, stop any active route simulation
             if (_uiState.value.simulationState != SimulationState.IDLE) {
                 stopRoute()
             }
         }
         _uiState.update { it.copy(mapMode = mode) }
-        viewModelScope.launch { settingsRepository.setMapMode(mode.name) }
     }
 
     init {
@@ -119,19 +116,7 @@ class MapViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            var wasRoutePlaying = false
             mockStateRepository.mockStatus.collect { status ->
-                when (status) {
-                    MockStatus.ROUTE_PLAYING -> wasRoutePlaying = true
-                    MockStatus.ROUTE_PAUSED -> { /* keep wasRoutePlaying */ }
-                    else -> {
-                        if (wasRoutePlaying && !routeStoppedByUser) {
-                            _routeCompletionEvent.tryEmit(Unit)
-                        }
-                        wasRoutePlaying = false
-                        routeStoppedByUser = false
-                    }
-                }
                 _uiState.update {
                     it.copy(
                         isMocking = status != MockStatus.IDLE,
@@ -162,7 +147,6 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             mockStateRepository.activeRouteWaypoints.collect { points ->
                 _uiState.update { it.copy(waypoints = points) }
-                // Also update simulator if not playing
                 if (routeSimulator.simulationState.value == SimulationState.IDLE) {
                     routeSimulator.setRoute(points)
                 }
@@ -175,17 +159,6 @@ class MapViewModel @Inject constructor(
                     handleEngineError(error)
                 }
             }
-        }
-
-        // Restore persisted route speed, transport mode, and map mode (read once on startup)
-        viewModelScope.launch {
-            val speed = settingsRepository.observeRouteSpeed().first()
-            val transportModeName = settingsRepository.observeTransportMode().first()
-            val mapModeName = settingsRepository.observeMapMode().first()
-            val transportMode = runCatching { TransportMode.valueOf(transportModeName) }.getOrDefault(TransportMode.WALKING)
-            val mapMode = runCatching { MapMode.valueOf(mapModeName) }.getOrDefault(MapMode.SINGLE)
-            _uiState.update { it.copy(speedKmh = speed, transportMode = transportMode, mapMode = mapMode) }
-            routeSimulator.setSpeed(speed / KMH_TO_MPS_DIVISOR)
         }
     }
 
@@ -234,6 +207,77 @@ class MapViewModel @Inject constructor(
     fun clearError() {
         _uiState.update { it.copy(mockError = null) }
         mockStateRepository.clearError()
+    }
+
+    fun toggleJoystick() {
+        if (!_uiState.value.isJoystickEnabled) {
+            if (!ensureFloatingWindowPermission()) return
+            _uiState.update { it.copy(isJoystickEnabled = true) }
+            startJoystickTicker()
+            joystickOverlayManager.show {
+                JoystickOverlayView(
+                    onMove = { dx, dy -> 
+                        currentJoystickX = dx
+                        currentJoystickY = dy
+                    },
+                    onWindowDrag = { dx, dy ->
+                        joystickOverlayManager.updatePosition(dx, dy)
+                    }
+                )
+            }
+        } else {
+            _uiState.update { it.copy(isJoystickEnabled = false) }
+            stopJoystickTicker()
+            joystickOverlayManager.hide()
+        }
+    }
+
+    private fun startJoystickTicker() {
+        joystickTickerJob?.cancel()
+        joystickTickerJob = viewModelScope.launch {
+            while (true) {
+                if (currentJoystickX != 0f || currentJoystickY != 0f) {
+                    applyJoystickMovement(currentJoystickX, currentJoystickY)
+                }
+                delay(100) 
+            }
+        }
+    }
+
+    private fun stopJoystickTicker() {
+        joystickTickerJob?.cancel()
+        joystickTickerJob = null
+        currentJoystickX = 0f
+        currentJoystickY = 0f
+    }
+
+    private fun applyJoystickMovement(dx: Float, dy: Float) {
+        val uiStateValue = _uiState.value
+        val currentCenter = uiStateValue.centerLocation
+        val speedKmh = uiStateValue.speedKmh
+        
+        val metersPerTick = (speedKmh * 1000.0 / 3600.0) * 0.1
+        val degreesPerTick = metersPerTick / 111000.0
+        
+        val latDelta = -dy * degreesPerTick
+        val lngDelta = dx * degreesPerTick / kotlin.math.cos(Math.toRadians(currentCenter.latitude))
+        
+        val newCenter = LatLng(currentCenter.latitude + latDelta, currentCenter.longitude + lngDelta)
+        onCameraMove(newCenter)
+        
+        if (uiStateValue.isMocking && uiStateValue.mapMode == MapMode.SINGLE) {
+            mockStateRepository.setCurrentMockLocation(newCenter)
+        }
+    }
+
+    private fun ensureFloatingWindowPermission(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(context)) {
+                setMockError(MockError.FloatingWindowPermissionMissing)
+                return false
+            }
+        }
+        return true
     }
 
     fun searchLocations(query: String) {
@@ -297,7 +341,6 @@ class MapViewModel @Inject constructor(
     }
 
     fun clearRoute() {
-        routeStoppedByUser = true
         _uiState.update { it.copy(waypoints = emptyList(), currentMockLocation = null, currentLocation = null) }
         mockStateRepository.setActiveRouteWaypoints(emptyList())
         stopMocking()
@@ -354,10 +397,6 @@ class MapViewModel @Inject constructor(
     fun setTransportMode(mode: TransportMode) {
         _uiState.update { it.copy(transportMode = mode, speedKmh = mode.speedKmh) }
         routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS_DIVISOR)
-        viewModelScope.launch {
-            settingsRepository.setTransportMode(mode.name)
-            settingsRepository.setRouteSpeed(mode.speedKmh)
-        }
     }
 
     fun setSpeed(speedKmh: Double) {
@@ -367,7 +406,6 @@ class MapViewModel @Inject constructor(
         }
         _uiState.update { it.copy(speedKmh = speedKmh) }
         routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
-        viewModelScope.launch { settingsRepository.setRouteSpeed(speedKmh) }
     }
 
     fun playRoute() {
@@ -386,15 +424,7 @@ class MapViewModel @Inject constructor(
         context.startService(intent)
     }
 
-    fun resumeRoute() {
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            action = MockLocationService.ACTION_RESUME_ROUTE
-        }
-        context.startService(intent)
-    }
-
     fun stopRoute() {
-        routeStoppedByUser = true
         stopMocking()
     }
 
@@ -448,6 +478,8 @@ class MapViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        stopJoystickTicker()
+        joystickOverlayManager.hide()
         super.onCleared()
     }
 

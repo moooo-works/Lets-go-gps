@@ -4,6 +4,7 @@ sealed class MockError {
     object NotMockAppSelected : MockError()
     object LocationPermissionMissing : MockError()
     object NotificationPermissionMissing : MockError()
+    object FloatingWindowPermissionMissing : MockError()
     data class ProviderSetupFailed(val message: String) : MockError()
     data class SetLocationFailed(val message: String) : MockError()
     data class ProviderTeardownFailed(val message: String) : MockError()

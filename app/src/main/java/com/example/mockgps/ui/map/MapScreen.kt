@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,10 +29,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import android.graphics.Bitmap
-import android.graphics.Paint
-import android.graphics.Typeface
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -55,7 +53,6 @@ import com.example.mockgps.domain.SimulationState
 import com.example.mockgps.domain.repository.GeocodedLocation
 import com.example.mockgps.utils.LatLngBoundsUtil
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -87,25 +84,6 @@ fun MapScreen(
     val mockMarkerState = remember { MarkerState(position = uiState.centerLocation) }
     var mapContainerSize by remember { mutableStateOf(IntSize.Zero) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(viewModel) {
-        viewModel.routeCompletionEvent.collect {
-            snackbarHostState.showSnackbar("路線模擬已完成 ✓")
-        }
-    }
-
-    val primaryColorArgb = MaterialTheme.colorScheme.primary.toArgb()
-    val waypointIcons = remember(uiState.waypoints.size, primaryColorArgb) {
-        uiState.waypoints.mapIndexed { index, _ ->
-            val label = when (index) {
-                0 -> "S"
-                uiState.waypoints.size - 1 -> "E"
-                else -> "${index + 1}"
-            }
-            createNumberedMarkerBitmap(label, primaryColorArgb)
-        }
-    }
-
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
     }
@@ -130,9 +108,17 @@ fun MapScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    // Sync camera with UI state center location, but with threshold to avoid flickering during smooth joystick move
     LaunchedEffect(uiState.centerLocation) {
-        if (cameraPositionState.position.target != uiState.centerLocation) {
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
+        val currentCameraTarget = cameraPositionState.position.target
+        val distance = com.example.mockgps.utils.GeoDistanceMeters.haversineMeters(
+            currentCameraTarget.latitude, currentCameraTarget.longitude,
+            uiState.centerLocation.latitude, uiState.centerLocation.longitude
+        )
+        // Only jump if distance is significant (e.g., > 500m) or if camera is not moving
+        // This allows smooth movement without the camera "fighting" the user's manual drag or rapid updates
+        if (!cameraPositionState.isMoving && distance > 1.0) {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.centerLocation, cameraPositionState.position.zoom)
         }
     }
 
@@ -252,9 +238,7 @@ fun MapScreen(
         uiState.currentMockLocation?.let { mockMarkerState.position = it }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -304,8 +288,10 @@ fun MapScreen(
                                 || uiState.simulationState == SimulationState.PAUSED
                         Marker(
                             state = MarkerState(position = point),
-                            title = "路點 ${index + 1}",
-                            icon = waypointIcons.getOrNull(index) ?: BitmapDescriptorFactory.defaultMarker(),
+                            title = "Point ${index + 1}",
+                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
+                                com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN
+                            ),
                             onClick = {
                                 if (!isSimulating) viewModel.removeWaypointAt(index)
                                 true
@@ -322,7 +308,7 @@ fun MapScreen(
                         )
                     }
                     if (uiState.waypoints.size > 1) {
-                        Polyline(points = uiState.waypoints, color = MaterialTheme.colorScheme.primary, width = 10f)
+                        Polyline(points = uiState.waypoints, color = Color.Blue, width = 10f)
                     }
                 }
 
@@ -408,6 +394,22 @@ fun MapScreen(
                         }
                     }
                 }
+
+                // Joystick Toggle FAB
+                FloatingActionButton(
+                    onClick = { viewModel.toggleJoystick() },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .padding(bottom = 16.dp) // Offset from BottomPanel
+                        .align(Alignment.BottomEnd),
+                    containerColor = if (uiState.isJoystickEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                    contentColor = if (uiState.isJoystickEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                ) {
+                    Icon(
+                        if (uiState.isJoystickEnabled) Icons.Default.Refresh else Icons.Default.Refresh, // Placeholder icon
+                        contentDescription = "切換搖桿"
+                    )
+                }
             }
 
             Surface(
@@ -455,11 +457,7 @@ fun MapScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        val isRouteSimulating = uiState.simulationState == SimulationState.PLAYING
-                                || uiState.simulationState == SimulationState.PAUSED
-
-                        // 新增路點：僅在 IDLE 時顯示
-                        if (uiState.mapMode == MapMode.ROUTE && !isRouteSimulating) {
+                        if (uiState.mapMode == MapMode.ROUTE) {
                             OutlinedButton(
                                 onClick = { viewModel.addWaypoint() },
                                 modifier = Modifier.weight(1f),
@@ -467,26 +465,11 @@ fun MapScreen(
                             ) { Text("+ 新增路點") }
                         }
 
-                        // 停止按鈕：PAUSED 時顯示，停止但保留路點
-                        if (uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PAUSED) {
-                            OutlinedButton(
-                                onClick = { viewModel.stopRoute() },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
-                                )
-                            ) { Text("⏹ 停止") }
-                        }
-
                         Button(
                             onClick = {
                                 if (uiState.mapMode == MapMode.ROUTE) {
-                                    when (uiState.simulationState) {
-                                        SimulationState.PLAYING -> viewModel.pauseRoute()
-                                        SimulationState.PAUSED -> viewModel.resumeRoute()
-                                        SimulationState.IDLE -> if (uiState.waypoints.isNotEmpty()) viewModel.playRoute()
-                                    }
+                                    if (uiState.simulationState == SimulationState.PLAYING) viewModel.pauseRoute()
+                                    else if (uiState.waypoints.isNotEmpty()) viewModel.playRoute()
                                 } else {
                                     if (uiState.isMocking) viewModel.stopMocking()
                                     else viewModel.startMocking()
@@ -495,17 +478,14 @@ fun MapScreen(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = when {
-                                    uiState.simulationState == SimulationState.PLAYING -> MaterialTheme.colorScheme.error
-                                    uiState.isMocking -> MaterialTheme.colorScheme.error
-                                    else -> MaterialTheme.colorScheme.primary
-                                }
+                                containerColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING)
+                                    MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Text(
                                 when {
-                                    uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING -> "⏸ 暫停"
-                                    uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PAUSED -> "▶ 繼續"
+                                    uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING -> "⏸ 暫停路線"
                                     uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() -> "▶ 開始模擬"
                                     uiState.mapMode == MapMode.SINGLE && uiState.isMocking -> "⏹ 停止模擬"
                                     else -> "▶ 開始模擬"
@@ -601,13 +581,13 @@ fun MapScreen(
         val normalized = routeNameInput.trim()
         AlertDialog(
             onDismissRequest = { showSaveRouteDialog = false },
-            title = { Text("儲存路線") },
+            title = { Text("Save Route") },
             text = {
                 OutlinedTextField(
                     value = routeNameInput,
                     onValueChange = { routeNameInput = it },
                     singleLine = true,
-                    supportingText = { Text("1-40 個字元") }
+                    supportingText = { Text("1-40 chars") }
                 )
             },
             confirmButton = {
@@ -618,16 +598,14 @@ fun MapScreen(
                         showSaveRouteDialog = false
                     }
                 ) {
-                    Text("儲存")
+                    Text("Save")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSaveRouteDialog = false }) {
-                    Text("取消")
+                    Text("Cancel")
                 }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp
+            }
         )
     }
 
@@ -650,22 +628,28 @@ fun MapScreen(
 
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp,
-            title = { Text(if (error is MockError.NotMockAppSelected || error is MockError.LocationPermissionMissing || error is MockError.NotificationPermissionMissing) "需要權限" else "發生錯誤") },
+            title = { 
+                Text(
+                    if (error is MockError.NotMockAppSelected || 
+                        error is MockError.LocationPermissionMissing || 
+                        error is MockError.NotificationPermissionMissing ||
+                        error is MockError.FloatingWindowPermissionMissing) "需要權限" else "錯誤"
+                ) 
+            },
             text = {
                 Column {
                     Text(
                         text = when (error) {
-                            is MockError.NotMockAppSelected -> "請前往開發者選項 → 選取模擬位置應用程式 → 選擇本應用程式。"
-                            is MockError.LocationPermissionMissing -> "需要位置權限才能使用模擬功能。"
-                            is MockError.NotificationPermissionMissing -> "需要通知權限以顯示前景服務控制項。"
-                            is MockError.ProviderSetupFailed -> "Mock Engine 初始化失敗：${error.message}"
-                            is MockError.SetLocationFailed -> "設定位置失敗：${error.message}"
-                            is MockError.ProviderTeardownFailed -> "停止失敗：${error.message}"
-                            is MockError.InvalidInput -> "輸入無效：${error.message}"
-                            is MockError.PermissionCheckFailed -> "權限檢查失敗：${error.message}"
-                            is MockError.Unknown -> "未知錯誤：${error.message}"
+                            is MockError.NotMockAppSelected -> "請至 開發者選項 -> 選擇模擬位置應用程式 -> 選擇此 App。"
+                            is MockError.LocationPermissionMissing -> "此功能需要定位權限才能運作。"
+                            is MockError.NotificationPermissionMissing -> "此功能需要通知權限以顯示背景控制項。"
+                            is MockError.FloatingWindowPermissionMissing -> "搖桿功能需要「顯示在其他應用程式上層」權限。請在設定中開啟。"
+                            is MockError.ProviderSetupFailed -> "模擬引擎設定失敗: ${error.message}"
+                            is MockError.SetLocationFailed -> "位置推送失敗: ${error.message}"
+                            is MockError.ProviderTeardownFailed -> "停止失敗: ${error.message}"
+                            is MockError.InvalidInput -> "輸入無效: ${error.message}"
+                            is MockError.PermissionCheckFailed -> "權限檢查失敗: ${error.message}"
+                            is MockError.Unknown -> "未知錯誤: ${error.message}"
                         }
                     )
                 }
@@ -690,7 +674,20 @@ fun MapScreen(
                         },
                         enabled = isButtonEnabled
                     ) {
-                        Text(if (isButtonEnabled) "開發者選項" else "請稍候…")
+                        Text(if (isButtonEnabled) "前往設定" else "請稍候...")
+                    }
+                } else if (error is MockError.FloatingWindowPermissionMissing) {
+                    Button(
+                        onClick = {
+                            viewModel.clearError()
+                            val intent = Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:${context.packageName}")
+                            )
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text("前往開啟")
                     }
                 } else if (error is MockError.LocationPermissionMissing) {
                     Button(
@@ -704,7 +701,7 @@ fun MapScreen(
                             )
                         }
                     ) {
-                        Text("授予權限")
+                        Text("授權定位")
                     }
                 } else if (error is MockError.NotificationPermissionMissing) {
                     Button(
@@ -717,7 +714,7 @@ fun MapScreen(
                             }
                         }
                     ) {
-                        Text("授予權限")
+                        Text("授權通知")
                     }
                 } else {
                     TextButton(onClick = { viewModel.clearError() }) { Text("確定") }
@@ -730,36 +727,6 @@ fun MapScreen(
             }
         )
     }
-}
-
-private fun createNumberedMarkerBitmap(label: String, colorArgb: Int): com.google.android.gms.maps.model.BitmapDescriptor {
-    val sizePx = 80
-    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
-    val canvas = android.graphics.Canvas(bitmap)
-
-    val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = colorArgb
-        style = Paint.Style.FILL
-    }
-    canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - 4f, bgPaint)
-
-    val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = android.graphics.Color.WHITE
-        style = Paint.Style.STROKE
-        strokeWidth = 5f
-    }
-    canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - 4f, borderPaint)
-
-    val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = android.graphics.Color.WHITE
-        textSize = if (label.length > 1) 24f else 30f
-        typeface = Typeface.DEFAULT_BOLD
-        textAlign = Paint.Align.CENTER
-    }
-    val textY = sizePx / 2f - (textPaint.descent() + textPaint.ascent()) / 2f
-    canvas.drawText(label, sizePx / 2f, textY, textPaint)
-
-    return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
 
 @Composable
