@@ -9,6 +9,8 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.example.mockgps.data.model.RoutePoint
 import com.example.mockgps.data.model.SavedLocation
 import com.example.mockgps.domain.LocationMockEngine
@@ -215,20 +217,40 @@ class MapViewModel @Inject constructor(
             _uiState.update { it.copy(isJoystickEnabled = true) }
             startJoystickTicker()
             joystickOverlayManager.show {
+                val state by uiState.collectAsState()
                 JoystickOverlayView(
+                    transportMode = state.transportMode,
                     onMove = { dx, dy -> 
                         currentJoystickX = dx
                         currentJoystickY = dy
                     },
                     onWindowDrag = { dx, dy ->
                         joystickOverlayManager.updatePosition(dx, dy)
-                    }
+                    },
+                    onToggleSpeed = { cycleTransportMode() },
+                    onStop = { stopMockingFromJoystick() }
                 )
             }
         } else {
             _uiState.update { it.copy(isJoystickEnabled = false) }
             stopJoystickTicker()
             joystickOverlayManager.hide()
+        }
+    }
+
+    private fun cycleTransportMode() {
+        val nextMode = when (_uiState.value.transportMode) {
+            TransportMode.WALKING -> TransportMode.CYCLING
+            TransportMode.CYCLING -> TransportMode.DRIVING
+            TransportMode.DRIVING -> TransportMode.WALKING
+        }
+        setTransportMode(nextMode)
+    }
+
+    private fun stopMockingFromJoystick() {
+        stopMocking()
+        if (_uiState.value.isJoystickEnabled) {
+            toggleJoystick()
         }
     }
 
