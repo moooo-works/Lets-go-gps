@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -41,7 +40,7 @@ fun JoystickOverlayView(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(12.dp)
     ) {
         // 1. Controls Capsule (Expanded State)
         AnimatedVisibility(
@@ -50,7 +49,7 @@ fun JoystickOverlayView(
             exit = fadeOut() + shrinkVertically()
         ) {
             Surface(
-                color = Color(0xE61F2937), // Dark grey with alpha
+                color = Color(0xE61F2937),
                 shape = RoundedCornerShape(30.dp),
                 shadowElevation = 8.dp,
                 modifier = Modifier.width(200.dp)
@@ -111,43 +110,43 @@ fun JoystickOverlayView(
 
         // 2. Joystick Base & Handle
         Box(
-            modifier = Modifier
-                .size(140.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consume()
-                        onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
-                    }
-                },
+            modifier = Modifier.size(140.dp),
             contentAlignment = Alignment.Center
         ) {
-            // Base Disk
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .background(Color(0xE61F2937))
-            )
-
-            // Gear/Menu Icon (Visible in collapsed state)
+            // Settings Button (Positioned outside/on edge of the base)
             if (!isExpanded) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = 12.dp, end = 12.dp)
-                        .size(24.dp)
+                        .offset(x = (8).dp, y = (-8).dp)
+                        .size(36.dp)
                         .clip(CircleShape)
+                        .background(Color(0xE61F2937))
                         .clickable { isExpanded = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Settings,
                         contentDescription = "選單",
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
+
+            // Base Disk
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xE61F2937))
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
+                        }
+                    }
+            )
 
             // Move Handle
             Box(
@@ -155,7 +154,7 @@ fun JoystickOverlayView(
                     .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF22C55E)) // Primary Green
+                    .background(Color(0xFF22C55E))
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = {
