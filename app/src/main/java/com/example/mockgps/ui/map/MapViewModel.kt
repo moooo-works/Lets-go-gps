@@ -92,7 +92,6 @@ class MapViewModel @Inject constructor(
         if (_uiState.value.mapMode == mode) return
 
         if (mode == MapMode.SINGLE) {
-            // When switching to SINGLE, stop any active route simulation
             if (_uiState.value.simulationState != SimulationState.IDLE) {
                 stopRoute()
             }
@@ -148,7 +147,6 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             mockStateRepository.activeRouteWaypoints.collect { points ->
                 _uiState.update { it.copy(waypoints = points) }
-                // Also update simulator if not playing
                 if (routeSimulator.simulationState.value == SimulationState.IDLE) {
                     routeSimulator.setRoute(points)
                 }
@@ -210,25 +208,24 @@ class MapViewModel @Inject constructor(
         _uiState.update { it.copy(mockError = null) }
         mockStateRepository.clearError()
     }
-fun toggleJoystick() {
-    if (!_uiState.value.isJoystickEnabled) {
-        if (!ensureFloatingWindowPermission()) return
-        _uiState.update { it.copy(isJoystickEnabled = true) }
-        startJoystickTicker()
-        joystickOverlayManager.show {
-            JoystickOverlayView(
-                onMove = { dx, dy -> 
-                    currentJoystickX = dx
-                    currentJoystickY = dy
-                },
-                onWindowDrag = { dx, dy ->
-                    joystickOverlayManager.updatePosition(dx, dy)
-                }
-            )
-        }
-    } else {
-...
 
+    fun toggleJoystick() {
+        if (!_uiState.value.isJoystickEnabled) {
+            if (!ensureFloatingWindowPermission()) return
+            _uiState.update { it.copy(isJoystickEnabled = true) }
+            startJoystickTicker()
+            joystickOverlayManager.show {
+                JoystickOverlayView(
+                    onMove = { dx, dy -> 
+                        currentJoystickX = dx
+                        currentJoystickY = dy
+                    },
+                    onWindowDrag = { dx, dy ->
+                        joystickOverlayManager.updatePosition(dx, dy)
+                    }
+                )
+            }
+        } else {
             _uiState.update { it.copy(isJoystickEnabled = false) }
             stopJoystickTicker()
             joystickOverlayManager.hide()
@@ -242,7 +239,7 @@ fun toggleJoystick() {
                 if (currentJoystickX != 0f || currentJoystickY != 0f) {
                     applyJoystickMovement(currentJoystickX, currentJoystickY)
                 }
-                delay(100) // 10Hz update rate
+                delay(100) 
             }
         }
     }
@@ -259,8 +256,6 @@ fun toggleJoystick() {
         val currentCenter = uiStateValue.centerLocation
         val speedKmh = uiStateValue.speedKmh
         
-        // 1 km/h = 1000m / 3600s = 0.277m/s.
-        // For 100ms (0.1s tick): 0.0277m per km/h.
         val metersPerTick = (speedKmh * 1000.0 / 3600.0) * 0.1
         val degreesPerTick = metersPerTick / 111000.0
         
@@ -268,11 +263,8 @@ fun toggleJoystick() {
         val lngDelta = dx * degreesPerTick / kotlin.math.cos(Math.toRadians(currentCenter.latitude))
         
         val newCenter = LatLng(currentCenter.latitude + latDelta, currentCenter.longitude + lngDelta)
-        
-        // Use onCameraMove to ensure persistence and proper camera updates
         onCameraMove(newCenter)
         
-        // Update Repository: This is the reactive trigger for MockLocationService
         if (uiStateValue.isMocking && uiStateValue.mapMode == MapMode.SINGLE) {
             mockStateRepository.setCurrentMockLocation(newCenter)
         }
