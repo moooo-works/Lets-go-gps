@@ -14,10 +14,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
-
 @Composable
 fun JoystickOverlayView(
-    onMove: (deltaX: Float, deltaY: Float) -> Unit
+    onMove: (deltaX: Float, deltaY: Float) -> Unit,
+    onWindowDrag: (deltaX: Int, deltaY: Int) -> Unit
 ) {
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
@@ -26,9 +26,17 @@ fun JoystickOverlayView(
     Box(
         modifier = Modifier
             .size(150.dp)
-            .background(Color.Transparent),
+            .background(Color.Transparent)
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+                    onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
+...
+
         // Joystick Base
         Box(
             modifier = Modifier

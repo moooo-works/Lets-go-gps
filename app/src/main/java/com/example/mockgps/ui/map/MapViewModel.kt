@@ -210,19 +210,25 @@ class MapViewModel @Inject constructor(
         _uiState.update { it.copy(mockError = null) }
         mockStateRepository.clearError()
     }
-
-    fun toggleJoystick() {
-        if (!_uiState.value.isJoystickEnabled) {
-            if (!ensureFloatingWindowPermission()) return
-            _uiState.update { it.copy(isJoystickEnabled = true) }
-            startJoystickTicker()
-            joystickOverlayManager.show {
-                JoystickOverlayView(onMove = { dx, dy -> 
+fun toggleJoystick() {
+    if (!_uiState.value.isJoystickEnabled) {
+        if (!ensureFloatingWindowPermission()) return
+        _uiState.update { it.copy(isJoystickEnabled = true) }
+        startJoystickTicker()
+        joystickOverlayManager.show {
+            JoystickOverlayView(
+                onMove = { dx, dy -> 
                     currentJoystickX = dx
                     currentJoystickY = dy
-                })
-            }
-        } else {
+                },
+                onWindowDrag = { dx, dy ->
+                    joystickOverlayManager.updatePosition(dx, dy)
+                }
+            )
+        }
+    } else {
+...
+
             _uiState.update { it.copy(isJoystickEnabled = false) }
             stopJoystickTicker()
             joystickOverlayManager.hide()

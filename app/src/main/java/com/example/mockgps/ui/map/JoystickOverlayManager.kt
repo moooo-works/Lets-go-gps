@@ -28,6 +28,7 @@ class JoystickOverlayManager @Inject constructor(
 ) {
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var composeView: ComposeView? = null
+    private var params: WindowManager.LayoutParams? = null
 
     fun show(content: @Composable () -> Unit) {
         if (composeView != null) return
@@ -49,6 +50,7 @@ class JoystickOverlayManager @Inject constructor(
             x = 100 
             y = 500
         }
+        this.params = layoutParams
 
         composeView = ComposeView(context).apply {
             val lifecycleOwner = MyLifecycleOwner()
@@ -73,7 +75,19 @@ class JoystickOverlayManager @Inject constructor(
         composeView?.let {
             windowManager.removeView(it)
             composeView = null
+            params = null
         }
+    }
+
+    fun updatePosition(deltaX: Int, deltaY: Int) {
+        val currentParams = params ?: return
+        val currentView = composeView ?: return
+        
+        currentParams.x += deltaX
+        currentParams.y += deltaY
+        
+        // Prevent moving completely out of screen if needed, but for now simple update
+        windowManager.updateViewLayout(currentView, currentParams)
     }
 
     private class MyLifecycleOwner : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
