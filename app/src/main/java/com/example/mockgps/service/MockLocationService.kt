@@ -277,7 +277,7 @@ class MockLocationService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("MockGPS 正在執行")
             .setContentText(contentText)
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            .setSmallIcon(R.drawable.ic_stat_mockgps)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .addAction(android.R.drawable.ic_delete, "停止", stopIntent)
