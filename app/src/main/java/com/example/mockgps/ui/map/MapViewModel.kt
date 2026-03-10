@@ -282,7 +282,8 @@ class MapViewModel @Inject constructor(
         val degreesPerTick = metersPerTick / 111000.0
         
         val latDelta = -dy * degreesPerTick
-        val lngDelta = dx * degreesPerTick / kotlin.math.cos(Math.toRadians(currentCenter.latitude))
+        val cosLat = kotlin.math.cos(Math.toRadians(currentCenter.latitude)).coerceAtLeast(0.001)
+        val lngDelta = dx * degreesPerTick / cosLat
         
         val newCenter = LatLng(currentCenter.latitude + latDelta, currentCenter.longitude + lngDelta)
         onCameraMove(newCenter)

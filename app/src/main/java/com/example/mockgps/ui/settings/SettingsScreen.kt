@@ -87,9 +87,9 @@ fun SettingsScreen(
         uri?.let {
             viewModel.exportDataToUri(it, exportSavedLocations, exportRoutes) { success, error ->
                 if (success) {
-                    Toast.makeText(context, "Export successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "匯出成功", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Export failed: $error", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "匯出失敗：$error", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -396,7 +396,7 @@ private fun ExportOptionsDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("Export Data") },
+        title = { Text("匯出資料") },
         text = {
             Column {
                 Row(
@@ -407,7 +407,7 @@ private fun ExportOptionsDialog(
                         checked = exportSavedLocations,
                         onCheckedChange = onSavedLocationsChange
                     )
-                    Text("Saved Locations")
+                    Text("儲存位置")
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -417,7 +417,7 @@ private fun ExportOptionsDialog(
                         checked = exportRoutes,
                         onCheckedChange = onRoutesChange
                     )
-                    Text("Routes")
+                    Text("路線")
                 }
             }
         },
@@ -426,12 +426,12 @@ private fun ExportOptionsDialog(
                 onClick = onConfirm,
                 enabled = exportSavedLocations || exportRoutes
             ) {
-                Text("Export")
+                Text("匯出")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("取消")
             }
         }
     )
@@ -447,22 +447,22 @@ private fun ImportPreviewDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("Import Preview") },
+        title = { Text("匯入預覽") },
         text = {
             Column {
-                Text("Schema Version: ${preview.schemaVersion}")
-                Text("Saved Locations: ${preview.savedLocationsCount}")
-                Text("Routes: ${preview.routesCount}")
+                Text("資料版本：${preview.schemaVersion}")
+                Text("儲存位置：${preview.savedLocationsCount}")
+                Text("路線：${preview.routesCount}")
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Import")
+                Text("匯入")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("取消")
             }
         }
     )

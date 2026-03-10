@@ -20,7 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ControlCamera
+import com.example.mockgps.ui.theme.Accent500
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -254,7 +255,7 @@ fun MapScreen(
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
-                    uiSettings = MapUiSettings(zoomControlsEnabled = false),
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false, rotationGesturesEnabled = false),
                     properties = MapProperties(isMyLocationEnabled = false),
                     onMapClick = { latLng ->
                         when (uiState.mapMode) {
@@ -402,11 +403,11 @@ fun MapScreen(
                         .padding(16.dp)
                         .padding(bottom = 16.dp) // Offset from BottomPanel
                         .align(Alignment.BottomEnd),
-                    containerColor = if (uiState.isJoystickEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                    contentColor = if (uiState.isJoystickEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                    containerColor = if (uiState.isJoystickEnabled) Accent500 else MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (uiState.isJoystickEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                 ) {
                     Icon(
-                        if (uiState.isJoystickEnabled) Icons.Default.Refresh else Icons.Default.Refresh, // Placeholder icon
+                        Icons.Default.ControlCamera,
                         contentDescription = "切換搖桿"
                     )
                 }

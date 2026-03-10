@@ -154,7 +154,7 @@ fun JoystickOverlayView(
                     .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF22C55E))
+                    .background(Color(0xFFFF5722))
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = {
