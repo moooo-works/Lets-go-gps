@@ -56,6 +56,7 @@ class MockLocationService : Service() {
         super.onCreate()
         createNotificationChannel()
 
+        // Observe Simulation state (Route)
         serviceScope.launch {
             routeSimulator.simulationState.collect { state ->
                 when (state) {
@@ -76,7 +77,21 @@ class MockLocationService : Service() {
             }
         }
 
-        // 即時追蹤速率，路線模擬中更新通知
+        // Observe Manual Location state (Single/Joystick)
+        // This is the reactive core that pushes location whenever it changes in the repository
+        serviceScope.launch {
+            mockStateRepository.currentMockLocation.collect { location ->
+                if (location != null && mockStateRepository.mockStatus.value == MockStatus.MOCKING) {
+                    try {
+                        injectLocation(location)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to push reactive location", e)
+                    }
+                }
+            }
+        }
+
+        // Track speed for notification updates
         serviceScope.launch {
             settingsRepository.observeRouteSpeed().collect { speed ->
                 currentSpeedKmh = speed
@@ -87,9 +102,31 @@ class MockLocationService : Service() {
         }
     }
 
+    private suspend fun injectLocation(location: LatLng) {
+        val baseAltitude = settingsRepository.observeAltitude().first()
+        val useRandomAltitude = settingsRepository.observeRandomAltitude().first()
+        val useJitter = settingsRepository.observeCoordinateJitter().first()
+
+        fun getAltitude(): Double {
+            return if (useRandomAltitude) {
+                baseAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
+            } else baseAltitude
+        }
+
+        fun getLatLng(point: LatLng): LatLng {
+            return if (useJitter) {
+                val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                LatLng(point.latitude + latOffset, point.longitude + lngOffset)
+            } else point
+        }
+
+        val target = getLatLng(location)
+        mockEngine.setLocation(target.latitude, target.longitude, altitude = getAltitude())
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
-
 
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE) {
             try {
@@ -104,7 +141,6 @@ class MockLocationService : Service() {
                 return START_NOT_STICKY
             }
         }
-
 
         when (action) {
             ACTION_START_SINGLE -> handleStartSingle(intent)
@@ -141,49 +177,27 @@ class MockLocationService : Service() {
         if (!isProviderSetup) return
 
         try {
-            serviceScope.launch {
-                val baseAltitude = settingsRepository.observeAltitude().first()
-                val useRandomAltitude = settingsRepository.observeRandomAltitude().first()
-                val useJitter = settingsRepository.observeCoordinateJitter().first()
-                
-                fun getAltitude(): Double {
-                    return if (useRandomAltitude) {
-                        baseAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
-                    } else {
-                        baseAltitude
-                    }
-                }
+            val target = LatLng(lat, lng)
+            mockStateRepository.setCurrentMockLocation(target)
+            mockStateRepository.setMockStatus(MockStatus.MOCKING)
+            updateNotification(MockStatus.MOCKING)
 
-                fun getLatLng(lat: Double, lng: Double): LatLng {
-                    return if (useJitter) {
-                        val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
-                        val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
-                        LatLng(lat + latOffset, lng + lngOffset)
-                    } else {
-                        LatLng(lat, lng)
-                    }
-                }
-
-                val initialPoint = getLatLng(lat, lng)
-                mockEngine.setLocation(initialPoint.latitude, initialPoint.longitude, altitude = getAltitude())
-                val target = LatLng(lat, lng)
-                mockStateRepository.setCurrentMockLocation(target)
-                mockStateRepository.setMockStatus(MockStatus.MOCKING)
-                updateNotification(MockStatus.MOCKING)
-
-                // Periodically push location to keep it alive
-                locationPushJob = serviceScope.launch {
-                    while (true) {
-                        try {
-                            val jitterPoint = getLatLng(lat, lng)
-                            mockEngine.setLocation(jitterPoint.latitude, jitterPoint.longitude, altitude = getAltitude())
-                            kotlinx.coroutines.delay(1000)
-                        } catch (e: CancellationException) {
-                            break
-                        } catch (e: Exception) {
-                            mockStateRepository.setMockError(MockEngineError.SetLocation(e))
-                            break
+            // Keep-alive loop to prevent OS from timing out the mock provider
+            // The reactive observer in onCreate handles immediate updates, 
+            // but this loop ensures the provider stays active even if the user isn't moving the joystick.
+            locationPushJob = serviceScope.launch {
+                while (true) {
+                    try {
+                        val current = mockStateRepository.currentMockLocation.value
+                        if (current != null) {
+                            injectLocation(current)
                         }
+                        kotlinx.coroutines.delay(1000)
+                    } catch (e: CancellationException) {
+                        break
+                    } catch (e: Exception) {
+                        mockStateRepository.setMockError(MockEngineError.SetLocation(e))
+                        break
                     }
                 }
             }
