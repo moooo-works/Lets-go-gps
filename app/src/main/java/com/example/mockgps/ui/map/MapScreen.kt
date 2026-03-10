@@ -108,9 +108,17 @@ fun MapScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    // Sync camera with UI state center location, but with threshold to avoid flickering during smooth joystick move
     LaunchedEffect(uiState.centerLocation) {
-        if (cameraPositionState.position.target != uiState.centerLocation) {
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
+        val currentCameraTarget = cameraPositionState.position.target
+        val distance = com.example.mockgps.utils.GeoDistanceMeters.haversineMeters(
+            currentCameraTarget.latitude, currentCameraTarget.longitude,
+            uiState.centerLocation.latitude, uiState.centerLocation.longitude
+        )
+        // Only jump if distance is significant (e.g., > 500m) or if camera is not moving
+        // This allows smooth movement without the camera "fighting" the user's manual drag or rapid updates
+        if (!cameraPositionState.isMoving && distance > 1.0) {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.centerLocation, cameraPositionState.position.zoom)
         }
     }
 

@@ -249,8 +249,9 @@ class MapViewModel @Inject constructor(
     }
 
     private fun applyJoystickMovement(dx: Float, dy: Float) {
-        val currentCenter = _uiState.value.centerLocation
-        val speedKmh = _uiState.value.speedKmh
+        val uiStateValue = _uiState.value
+        val currentCenter = uiStateValue.centerLocation
+        val speedKmh = uiStateValue.speedKmh
         
         // 1 km/h = 1000m / 3600s = 0.277m/s.
         // For 100ms (0.1s tick): 0.0277m per km/h.
@@ -262,12 +263,11 @@ class MapViewModel @Inject constructor(
         
         val newCenter = LatLng(currentCenter.latitude + latDelta, currentCenter.longitude + lngDelta)
         
-        // Update local center for map visual
-        _uiState.update { it.copy(centerLocation = newCenter) }
+        // Use onCameraMove to ensure persistence and proper camera updates
+        onCameraMove(newCenter)
         
         // Update Repository: This is the reactive trigger for MockLocationService
-        // and also updates the map marker (azure pin) via currentMockLocation flow.
-        if (_uiState.value.isMocking && _uiState.value.mapMode == MapMode.SINGLE) {
+        if (uiStateValue.isMocking && uiStateValue.mapMode == MapMode.SINGLE) {
             mockStateRepository.setCurrentMockLocation(newCenter)
         }
     }

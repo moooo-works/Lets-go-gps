@@ -53,6 +53,7 @@ class MapViewModelTest {
     private val searchRepository = mockk<SearchRepository>(relaxed = true)
     private val mockStateRepository = mockk<MockStateRepository>(relaxed = true)
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
+    private val joystickOverlayManager = mockk<JoystickOverlayManager>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
     private val dispatcher = StandardTestDispatcher()
 
@@ -84,7 +85,7 @@ class MapViewModelTest {
     fun `init loads last center from settings repository`() = runTest {
         val lastCenter = LatLng(25.1, 121.1)
         lastCenterFlow.value = lastCenter
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, context)
         advanceUntilIdle()
         assertEquals(lastCenter, viewModel.uiState.value.centerLocation)
     }
@@ -97,7 +98,7 @@ class MapViewModelTest {
         )
         coEvery { searchRepository.search(query) } returns Result.success(mockResults)
         
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, context)
         
         viewModel.searchLocations(query)
         assertTrue(viewModel.uiState.value.isSearching)
@@ -114,7 +115,7 @@ class MapViewModelTest {
         val errorMsg = "Network Error"
         coEvery { searchRepository.search(query) } returns Result.failure(Exception(errorMsg))
         
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, context)
         
         viewModel.searchLocations(query)
         advanceUntilIdle()
@@ -125,7 +126,7 @@ class MapViewModelTest {
 
     @Test
     fun `selectSearchResult updates center location and clears results`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, context)
         val selected = GeocodedLocation("Target", "Address", LatLng(10.0, 20.0))
         
         viewModel.selectSearchResult(selected)
@@ -137,7 +138,7 @@ class MapViewModelTest {
     @Test
     fun `startMocking succeeds and sends intent when permission granted`() = runTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, context)
 
         viewModel.startMocking()
         advanceUntilIdle()
@@ -149,7 +150,7 @@ class MapViewModelTest {
 
     @Test
     fun `setSpeed rejects non positive speed`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, context)
+        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, context)
         viewModel.setSpeed(0.0)
         verify(exactly = 0) { routeSimulator.setSpeed(any()) }
         assertTrue(viewModel.uiState.value.mockError is MockError.InvalidInput)
