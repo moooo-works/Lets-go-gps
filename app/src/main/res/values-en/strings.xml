@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MockGPS</string>
+    <string name="app_name">Let\'s Go GPS</string>
 
     <!-- Navigation & Bottom Bar -->
     <string name="nav_map">Map</string>
