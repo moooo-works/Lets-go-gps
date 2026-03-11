@@ -2,7 +2,10 @@ package com.moooo_works.letsgogps.data.billing
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import com.android.billingclient.api.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,6 +71,8 @@ class BillingManager @Inject constructor(
 
     fun launchBillingFlow(activity: Activity) {
         if (!billingClient.isReady) {
+            Log.w(TAG, "BillingClient not ready, retrying connection")
+            Toast.makeText(context, "[Dev] Billing 尚未連線，請稍後再試", Toast.LENGTH_SHORT).show()
             connect()
             return
         }
@@ -81,6 +86,9 @@ class BillingManager @Inject constructor(
         billingClient.queryProductDetailsAsync(params) { result, productDetailsList ->
             if (result.responseCode != BillingClient.BillingResponseCode.OK || productDetailsList.isEmpty()) {
                 Log.w(TAG, "Product details not found: ${result.debugMessage}")
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(context, "[Dev] 商品尚未在 Play Console 建立 (${result.responseCode})", Toast.LENGTH_LONG).show()
+                }
                 return@queryProductDetailsAsync
             }
             val productDetails = productDetailsList.first()

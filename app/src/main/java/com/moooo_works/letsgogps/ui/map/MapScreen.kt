@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.res.stringResource
+import com.moooo_works.letsgogps.R
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
@@ -384,7 +386,7 @@ fun MapScreen(
                     ) {
                         Icon(
                             Icons.Filled.Search,
-                            contentDescription = "搜尋位置",
+                            contentDescription = stringResource(R.string.map_search_location),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
@@ -446,7 +448,7 @@ fun MapScreen(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ) {
-                    Icon(Icons.Default.MyLocation, contentDescription = "回到我的位置")
+                    Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.map_my_location))
                 }
                 } // end MyLocation Box
 
@@ -466,7 +468,7 @@ fun MapScreen(
                         contentColor = if (uiState.mapType == com.google.maps.android.compose.MapType.HYBRID)
                             Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     ) {
-                        Icon(Icons.Default.Layers, contentDescription = "切換地圖樣式")
+                        Icon(Icons.Default.Layers, contentDescription = stringResource(R.string.map_layer_toggle))
                     }
 
                     // Joystick Toggle FAB
@@ -477,7 +479,7 @@ fun MapScreen(
                     ) {
                         Icon(
                             if (uiState.isProActive) Icons.Default.ControlCamera else Icons.Default.Lock,
-                            contentDescription = "切換搖桿"
+                            contentDescription = stringResource(R.string.map_joystick_toggle)
                         )
                     }
                 }
@@ -503,28 +505,28 @@ fun MapScreen(
                             IconButton(onClick = { viewModel.deleteSelectedLocation() }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "刪除",
+                                    contentDescription = stringResource(R.string.action_delete),
                                     tint = MaterialTheme.colorScheme.error
                                 )
                             }
                             IconButton(onClick = { viewModel.toggleFavorite() }) {
                                 Icon(
                                     if (selected.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                    contentDescription = "最愛",
+                                    contentDescription = stringResource(R.string.action_favorite),
                                     tint = if (selected.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             IconButton(onClick = { viewModel.showEditLocationDialog() }) {
                                 Icon(
                                     Icons.Default.Edit,
-                                    contentDescription = "編輯",
+                                    contentDescription = stringResource(R.string.action_edit),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             IconButton(onClick = { viewModel.dismissSelectedLocation() }) {
                                 Icon(
                                     Icons.Default.Close,
-                                    contentDescription = "關閉",
+                                    contentDescription = stringResource(R.string.action_close),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -559,8 +561,8 @@ fun MapScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         listOf(
-                            MapMode.SINGLE to "單點定位",
-                            MapMode.ROUTE to if (uiState.isProActive) "路線規劃" else "🔒 路線規劃"
+                            MapMode.SINGLE to stringResource(R.string.map_mode_single),
+                            MapMode.ROUTE to if (uiState.isProActive) stringResource(R.string.map_mode_route) else "🔒 ${stringResource(R.string.map_mode_route)}"
                         ).forEach { (mode, label) ->
                             val selected = uiState.mapMode == mode
                             Surface(
@@ -597,7 +599,7 @@ fun MapScreen(
                                 onClick = { viewModel.addWaypoint() },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(8.dp)
-                            ) { Text("+ 新增路點") }
+                            ) { Text(stringResource(R.string.map_route_add_point)) }
                         }
 
                         Button(
@@ -625,10 +627,10 @@ fun MapScreen(
                         ) {
                             Text(
                                 when {
-                                    uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING -> "⏸ 暫停路線"
-                                    uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() -> "▶ 開始模擬"
-                                    uiState.mapMode == MapMode.SINGLE && uiState.isMocking -> "⏹ 停止模擬"
-                                    else -> "▶ 開始模擬"
+                                    uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING -> "⏸ ${stringResource(R.string.map_route_pause)}"
+                                    uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() -> "▶ ${stringResource(R.string.map_route_start)}"
+                                    uiState.mapMode == MapMode.SINGLE && uiState.isMocking -> "⏹ ${stringResource(R.string.map_mock_stop)}"
+                                    else -> "▶ ${stringResource(R.string.map_mock_start)}"
                                 }
                             )
                         }
@@ -662,9 +664,9 @@ fun MapScreen(
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 val transportModeLabels = mapOf(
-                                    TransportMode.WALKING to "🚶 步行",
-                                    TransportMode.CYCLING to "🚲 自行車",
-                                    TransportMode.DRIVING to "🚗 汽車"
+                                    TransportMode.WALKING to "🚶 ${stringResource(R.string.map_transport_walking)}",
+                                    TransportMode.CYCLING to "🚲 ${stringResource(R.string.map_transport_cycling)}",
+                                    TransportMode.DRIVING to "🚗 ${stringResource(R.string.map_transport_driving)}"
                                 )
                                 TransportMode.values().forEach { mode ->
                                     FilterChip(
@@ -684,7 +686,7 @@ fun MapScreen(
                                     TextButton(onClick = {
                                         routeNameInput = ""
                                         showSaveRouteDialog = true
-                                    }) { Text("儲存") }
+                                    }) { Text(stringResource(R.string.action_save)) }
                                 }
                                 if (uiState.waypoints.isNotEmpty()) {
                                     TextButton(
@@ -692,7 +694,7 @@ fun MapScreen(
                                         colors = ButtonDefaults.textButtonColors(
                                             contentColor = MaterialTheme.colorScheme.error
                                         )
-                                    ) { Text("清除") }
+                                    ) { Text(stringResource(R.string.action_clear)) }
                                 }
                             }
                         }
@@ -739,7 +741,7 @@ fun MapScreen(
             onDismissRequest = { showSaveRouteDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("Save Route") },
+            title = { Text(stringResource(R.string.route_save_title)) },
             text = {
                 OutlinedTextField(
                     value = routeNameInput,
@@ -756,12 +758,12 @@ fun MapScreen(
                         showSaveRouteDialog = false
                     }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.action_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSaveRouteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -793,23 +795,23 @@ fun MapScreen(
                     if (error is MockError.NotMockAppSelected ||
                         error is MockError.LocationPermissionMissing ||
                         error is MockError.NotificationPermissionMissing ||
-                        error is MockError.FloatingWindowPermissionMissing) "需要權限" else "錯誤"
+                        error is MockError.FloatingWindowPermissionMissing) stringResource(R.string.error_permission_required) else stringResource(R.string.error_title)
                 )
             },
             text = {
                 Column {
                     Text(
                         text = when (error) {
-                            is MockError.NotMockAppSelected -> "請至 開發者選項 -> 選擇模擬位置應用程式 -> 選擇此 App。"
-                            is MockError.LocationPermissionMissing -> "此功能需要定位權限才能運作。"
-                            is MockError.NotificationPermissionMissing -> "此功能需要通知權限以顯示背景控制項。"
-                            is MockError.FloatingWindowPermissionMissing -> "搖桿功能需要「顯示在其他應用程式上層」權限。請在設定中開啟。"
-                            is MockError.ProviderSetupFailed -> "模擬引擎設定失敗: ${error.message}"
-                            is MockError.SetLocationFailed -> "位置推送失敗: ${error.message}"
-                            is MockError.ProviderTeardownFailed -> "停止失敗: ${error.message}"
-                            is MockError.InvalidInput -> "輸入無效: ${error.message}"
-                            is MockError.PermissionCheckFailed -> "權限檢查失敗: ${error.message}"
-                            is MockError.Unknown -> "未知錯誤: ${error.message}"
+                            is MockError.NotMockAppSelected -> stringResource(R.string.error_mock_app_not_selected)
+                            is MockError.LocationPermissionMissing -> stringResource(R.string.error_location_permission)
+                            is MockError.NotificationPermissionMissing -> stringResource(R.string.error_notification_permission)
+                            is MockError.FloatingWindowPermissionMissing -> stringResource(R.string.error_floating_window)
+                            is MockError.ProviderSetupFailed -> stringResource(R.string.error_provider_setup_failed, error.message)
+                            is MockError.SetLocationFailed -> stringResource(R.string.error_set_location_failed, error.message)
+                            is MockError.ProviderTeardownFailed -> stringResource(R.string.error_provider_teardown_failed, error.message)
+                            is MockError.InvalidInput -> stringResource(R.string.error_invalid_input, error.message)
+                            is MockError.PermissionCheckFailed -> stringResource(R.string.error_permission_check_failed, error.message)
+                            is MockError.Unknown -> stringResource(R.string.error_unknown, error.message)
                         }
                     )
                 }
@@ -834,7 +836,7 @@ fun MapScreen(
                         },
                         enabled = isButtonEnabled
                     ) {
-                        Text(if (isButtonEnabled) "前往設定" else "請稍候...")
+                        Text(if (isButtonEnabled) stringResource(R.string.action_go_to_settings) else stringResource(R.string.action_please_wait))
                     }
                 } else if (error is MockError.FloatingWindowPermissionMissing) {
                     Button(
@@ -847,7 +849,7 @@ fun MapScreen(
                             context.startActivity(intent)
                         }
                     ) {
-                        Text("前往開啟")
+                        Text(stringResource(R.string.action_go_to_enable))
                     }
                 } else if (error is MockError.LocationPermissionMissing) {
                     Button(
@@ -861,7 +863,7 @@ fun MapScreen(
                             )
                         }
                     ) {
-                        Text("授權定位")
+                        Text(stringResource(R.string.action_grant_location))
                     }
                 } else if (error is MockError.NotificationPermissionMissing) {
                     Button(
@@ -874,15 +876,15 @@ fun MapScreen(
                             }
                         }
                     ) {
-                        Text("授權通知")
+                        Text(stringResource(R.string.action_grant_notification))
                     }
                 } else {
-                    TextButton(onClick = { viewModel.clearError() }) { Text("確定") }
+                    TextButton(onClick = { viewModel.clearError() }) { Text(stringResource(R.string.action_ok)) }
                 }
             },
             dismissButton = {
                 if (error is MockError.NotMockAppSelected) {
-                    TextButton(onClick = { viewModel.clearError() }) { Text("取消") }
+                    TextButton(onClick = { viewModel.clearError() }) { Text(stringResource(R.string.action_cancel)) }
                 }
             }
         )
@@ -899,12 +901,14 @@ fun SearchDialog(
     var searchQuery by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
+    val searchLatLngLocationTitle = stringResource(R.string.search_latlng_location)
+
     // Helper to perform the search or direct locate
     val performAction = { query: String ->
         val parseResult = LocationQueryParser.parse(query, uiState.centerLocation)
         if (parseResult is ParseResult.Success) {
             onSelectResult(GeocodedLocation(
-                name = "經緯度定位",
+                name = searchLatLngLocationTitle,
                 address = query,
                 latLng = parseResult.parsedLocation.latLng
             ))
@@ -940,7 +944,7 @@ fun SearchDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "搜尋地點",
+                        stringResource(R.string.search_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant // Match text to background
@@ -951,7 +955,7 @@ fun SearchDialog(
                     ) {
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "關閉",
+                            contentDescription = stringResource(R.string.action_close),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -964,7 +968,7 @@ fun SearchDialog(
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { 
                         Text(
-                            "搜尋地點、座標或 Plus Code...", 
+                            stringResource(R.string.search_placeholder), 
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         ) 
                     },
@@ -978,7 +982,7 @@ fun SearchDialog(
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, contentDescription = "清除")
+                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_clear))
                             }
                         }
                     },
@@ -1005,7 +1009,7 @@ fun SearchDialog(
                         }
                         uiState.searchError != null -> {
                             Text(
-                                text = "搜尋失敗: ${uiState.searchError}",
+                                text = stringResource(R.string.search_failed, uiState.searchError),
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.align(Alignment.Center).fillMaxWidth(), // Centered text horizontally too
                                 textAlign = TextAlign.Center
@@ -1025,7 +1029,7 @@ fun SearchDialog(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    "輸入關鍵字開始搜尋",
+                                    stringResource(R.string.search_hint_start),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1033,7 +1037,7 @@ fun SearchDialog(
                         }
                         uiState.searchResults.isEmpty() && searchQuery.isNotEmpty() && !uiState.isSearching -> {
                             Text(
-                                "找不到相關結果",
+                                stringResource(R.string.search_no_results),
                                 modifier = Modifier.align(Alignment.Center),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1124,20 +1128,20 @@ private fun EditLocationDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("編輯位置") },
+        title = { Text(stringResource(R.string.location_edit_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("名稱") },
+                    label = { Text(stringResource(R.string.location_edit_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("說明") },
+                    label = { Text(stringResource(R.string.location_edit_desc)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                     maxLines = 4
@@ -1148,10 +1152,10 @@ private fun EditLocationDialog(
             TextButton(
                 onClick = { onConfirm(name, description) },
                 enabled = name.isNotBlank()
-            ) { Text("確定") }
+            ) { Text(stringResource(R.string.action_ok)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }

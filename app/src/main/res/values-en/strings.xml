@@ -1,0 +1,215 @@
+<resources>
+    <string name="app_name">MockGPS</string>
+
+    <!-- Navigation & Bottom Bar -->
+    <string name="nav_map">Map</string>
+    <string name="nav_saved_locations">Locations</string>
+    <string name="nav_routes">Routes</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Location Mocking Service Status -->
+    <string name="status_route_playing">Route playing · %1$s km/h</string>
+    <string name="status_route_paused">Route paused</string>
+    <string name="status_mocking">Mocking active</string>
+    <string name="status_idle">Ready…</string>
+    <string name="status_service_running">MockGPS is running</string>
+    <string name="action_stop">Stop</string>
+
+    <!-- Map Screen -->
+    <string name="map_search_hint">Search places...</string>
+    <string name="map_search_clear">Clear</string>
+    <string name="map_layer_default">Default</string>
+    <string name="map_layer_satellite">Satellite</string>
+    <string name="map_layer_terrain">Terrain</string>
+    <string name="map_layer_hybrid">Hybrid</string>
+    
+    <string name="map_my_location">My Location</string>
+    <string name="map_save_location_title">Save Location</string>
+    <string name="map_save_location_name">Name</string>
+    <string name="map_save_location_desc">Description</string>
+    <string name="map_save_location_empty_error">Name cannot be empty</string>
+    <string name="map_action_save">Save</string>
+    <string name="map_action_cancel">Cancel</string>
+
+    <!-- Info Window Actions -->
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_unfavorite">Unfavorite</string>
+    <string name="action_start_mock">Start</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_open">Open</string>
+    <string name="action_grant_location">Grant Location</string>
+    <string name="action_grant_notification">Grant Notification</string>
+    <string name="action_ok">OK</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_close">Close</string>
+    <string name="action_go_to_settings">Go to Settings</string>
+    <string name="action_please_wait">Please wait...</string>
+    <string name="action_go_to_enable">Enable</string>
+
+    <string name="error_title">Error</string>
+    <string name="error_permission_required">Permission Required</string>
+    <string name="error_mock_app_not_selected">Please set MockGPS as the mock location app in Developer Options.</string>
+    <string name="error_location_permission">Location permission is required for this feature.</string>
+    <string name="error_notification_permission">Notification permission is required for background controls.</string>
+    <string name="error_floating_window">Floating window permission is required for the joystick. Please enable it in Settings.</string>
+    <string name="error_provider_setup_failed">Engine setup failed: %1$s</string>
+    <string name="error_set_location_failed">Location push failed: %1$s</string>
+    <string name="error_provider_teardown_failed">Stop failed: %1$s</string>
+    <string name="error_invalid_input">Invalid input: %1$s</string>
+    <string name="error_permission_check_failed">Permission check failed: %1$s</string>
+    <string name="error_unknown">Unknown error: %1$s</string>
+
+    <string name="transport_walk">🚶 Walk</string>
+    <string name="transport_bike">🚲 Bike</string>
+    <string name="transport_car">🚗 Car</string>
+
+    <string name="route_add_waypoint">+ Add Waypoint</string>
+    <string name="route_pause">⏸ Pause Route</string>
+    <string name="route_play">▶ Play Route</string>
+    <string name="route_stop">⏹ Stop Route</string>
+    <string name="route_save_title">Save Route</string>
+
+    <string name="search_latlng">Lat / Lng</string>
+    <string name="search_latlng_location">Coordinate Location</string>
+    <string name="search_title">Search Location</string>
+    <string name="search_failed">Search failed: %1$s</string>
+    <string name="search_hint_start">Enter keyword to start search</string>
+    <string name="search_placeholder">Search places, coords, or Plus Code...</string>
+    <string name="search_hint">Enter keyword to search</string>
+    <string name="search_no_results">No results found</string>
+    <string name="location_edit_title">Edit Location</string>
+    <string name="location_edit_name">Location Name</string>
+    <string name="location_edit_desc">Description or note</string>
+
+    <!-- Joystick & Control -->
+    <string name="joystick_collapse">Collapse</string>
+    <string name="joystick_expand">Expand</string>
+    <string name="joystick_speed">Speed: %1$s</string>
+    <string name="joystick_menu">Menu</string>
+    
+    <!-- Saved Locations -->
+    <string name="saved_locations_title">Saved Locations</string>
+    <string name="saved_locations_search_hint">Search locations...</string>
+    <string name="saved_locations_all">All</string>
+    <string name="saved_locations_favorites">Favorites</string>
+    <string name="sort_recent">Recent</string>
+    <string name="sort_name_asc">Name A→Z</string>
+    
+    <string name="saved_locations_empty_title">No saved locations</string>
+    <string name="saved_locations_empty_desc">Add a location from the map to view it here</string>
+    
+    <string name="saved_locations_clear_non_favorites">Clear non-favorites</string>
+    <string name="saved_locations_clear_non_favorites_confirm_msg">Are you sure you want to delete all non-favorite saved locations? This action cannot be undone.</string>
+    <string name="saved_locations_delete_confirm_title">Delete location</string>
+    <string name="saved_locations_delete_confirm_msg">Are you sure you want to delete "%1$s"?</string>
+
+    <string name="saved_locations_edit_title">Edit Location</string>
+    <string name="saved_locations_rename">Rename</string>
+    <string name="saved_locations_more_options">More options</string>
+    <string name="action_add_favorite">Add to favorites</string>
+
+    <!-- Routes -->
+    <string name="routes_title">Routes</string>
+    <string name="routes_empty_title">No routes available</string>
+    <string name="routes_empty_desc">Set waypoints on the map to save a route</string>
+    <string name="routes_rename_title">Rename Route</string>
+    <string name="routes_name_label">Route name</string>
+    <string name="routes_delete_title">Delete Route</string>
+    <string name="routes_delete_desc">Are you sure you want to delete this route? This action cannot be undone.</string>
+    <string name="routes_action_load">Load</string>
+    <string name="routes_point_count">%1$d points</string>
+
+    <string name="map_route_active">A route is currently active</string>
+    <string name="map_route_recording">Selecting points (%1$d)</string>
+    <string name="map_route_record">Add Route</string>
+    <string name="map_route_done">Done</string>
+    <string name="map_route_cancel">Cancel</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_title">Theme Appearance</string>
+    <string name="settings_theme_system">System Default</string>
+    <string name="settings_theme_light">Light Mode</string>
+    <string name="settings_theme_dark">Dark Mode</string>
+    <string name="settings_language_title">Display Language</string>
+    <string name="settings_language_system">Follow System</string>
+    <string name="settings_language_zh">繁體中文</string>
+    <string name="settings_language_en">English</string>
+
+    <string name="settings_altitude_title">Global Altitude</string>
+    <string name="settings_altitude_desc">Altitude applied to all mock locations</string>
+    
+    <string name="settings_jitter_title">Enable Location Jitter</string>
+    <string name="settings_jitter_desc">Simulate realistic minor GPS coordinate drifting</string>
+
+    <!-- Permissions and System -->
+    <string name="permission_required_title">Permission Required</string>
+    <string name="permission_required_desc">MockGPS requires notifications and precise location permissions to run in the background. Please grant them in System Settings.</string>
+    <string name="permission_go_to_settings">Go to Settings</string>
+    
+    <string name="mock_app_required_title">Mock Location Permission</string>
+    <string name="mock_app_required_desc">Please go to Developer Options, find "Select mock location app", and choose MockGPS.</string>
+    <string name="mock_app_go_to_developer_options">Open Developer Options</string>
+    <string name="mock_app_restart_required">After applying, please restart MockGPS.</string>
+
+    <string name="mock_app_authorized">Authorized — Mock features are ready</string>
+    <string name="mock_app_unauthorized">Unauthorized — Please select this app in Developer Options</string>
+    <string name="mock_app_check_failed">Permission check failed</string>
+
+    <string name="settings_sim_title">Simulation Settings</string>
+    <string name="settings_sim_altitude">Default Altitude (Meters)</string>
+    <string name="settings_sim_random_alt">Randomize Altitude</string>
+    <string name="settings_sim_random_alt_desc">Add a ±0.5m variance to base altitude</string>
+    <string name="settings_sim_jitter">Coordinate Jitter</string>
+    <string name="settings_sim_jitter_desc">Add minor offset to coordinates (1-5m)</string>
+    <string name="settings_export_data">Export Data</string>
+    <string name="settings_import_data">Import Data</string>
+    <string name="settings_copy_diag">Copy Diagnostics</string>
+    <string name="settings_diag_copied">Copied to clipboard</string>
+    
+    <string name="export_success">Export successful</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="import_failed">Import failed: %1$s</string>
+    <string name="import_preview_title">Import Preview</string>
+    <string name="import_preview_version">Data Version: %1$s</string>
+    <string name="import_preview_locations">Saved Locations: %1$d</string>
+    <string name="import_preview_routes">Routes: %1$d</string>
+
+    <!-- Pro Upgrade -->
+    <string name="pro_dialog_title">Upgrade to Pro</string>
+    <string name="pro_dialog_desc">Try free for 7 days, then $2.99/month. Unlock all pro features:</string>
+    <string name="pro_dialog_feature_routes">Create &amp; Play Custom Routes</string>
+    <string name="pro_dialog_feature_joystick">Direction Control via Joystick</string>
+    <string name="pro_dialog_feature_storage">Unlimited Saved Locations</string>
+    <string name="pro_dialog_feature_export">Import &amp; Export Data</string>
+    <string name="pro_dialog_feature_ads">Remove All Ads</string>
+    <string name="pro_dialog_action_upgrade">Try Free for 7 Days</string>
+    
+    <string name="export_import_title">Data Export / Import</string>
+    <string name="export_data">Export All Data</string>
+    <string name="import_data">Import Data</string>
+
+    <string name="about_title">About</string>
+    <string name="about_privacy">Privacy Policy</string>
+    <string name="about_developer_options">Android Developer Options</string>
+    <string name="app_version">Version %1$s</string>
+
+    <string name="map_route_pause">Pause</string>
+    <string name="map_route_start">Start Route</string>
+    <string name="map_mock_stop">Stop</string>
+    <string name="map_mock_start">Start Mock</string>
+    <string name="map_transport_walking">Walk</string>
+    <string name="map_transport_cycling">Bike</string>
+    <string name="map_transport_driving">Drive</string>
+
+    <string name="map_search_location">Search Location</string>
+    <string name="map_layer_toggle">Toggle Map Layer</string>
+    <string name="map_joystick_toggle">Toggle Joystick</string>
+    <string name="map_mode_single">Single Point</string>
+    <string name="map_mode_route">Route Simulation</string>
+    <string name="map_route_add_point">Tap on map to add waypoint</string>
+</resources>
