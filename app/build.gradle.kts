@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mockgps"
+    namespace = "com.moooo_works.letsgogps"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.mockgps"
+        applicationId = "com.moooo_works.letsgogps"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -47,7 +47,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     lint {
         disable += "WrongConstant"
@@ -86,6 +86,12 @@ dependencies {
     // Maps
     implementation(libs.google.maps.compose)
     implementation(libs.play.services.maps)
+
+    // AdMob
+    implementation(libs.admob)
+
+    // Billing
+    implementation(libs.billing)
 
     // Hilt
     implementation(libs.hilt.android)
