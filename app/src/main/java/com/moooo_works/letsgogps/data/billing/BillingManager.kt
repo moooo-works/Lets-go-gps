@@ -22,9 +22,11 @@ class BillingManager @Inject constructor(
     companion object {
         private const val TAG = "MockGPS/Billing"
         const val SUBSCRIPTION_ID = "mockgps_pro_monthly"
+        // 開發用：設為 true 強制解鎖所有 Pro 功能，上架前務必改回 false
+        const val DEV_FORCE_PRO = true
     }
 
-    private val _isProActive = MutableStateFlow(false)
+    private val _isProActive = MutableStateFlow(DEV_FORCE_PRO)
     val isProActive: StateFlow<Boolean> = _isProActive.asStateFlow()
 
     private val billingClient = BillingClient.newBuilder(context)
@@ -61,7 +63,7 @@ class BillingManager @Inject constructor(
             .build()
         billingClient.queryPurchasesAsync(params) { result, purchases ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                val active = purchases.any { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+                val active = DEV_FORCE_PRO || purchases.any { it.purchaseState == Purchase.PurchaseState.PURCHASED }
                 _isProActive.value = active
                 Log.d(TAG, "Pro active: $active (${purchases.size} purchases)")
                 purchases.filter { !it.isAcknowledged }.forEach { acknowledgePurchase(it) }
