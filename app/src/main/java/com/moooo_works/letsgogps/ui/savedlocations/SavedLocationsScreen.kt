@@ -48,8 +48,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.size
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.data.model.SavedLocation
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -73,7 +75,7 @@ fun SavedLocationsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "儲存位置",
+                        stringResource(R.string.saved_locations_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -84,7 +86,7 @@ fun SavedLocationsScreen(
                 actions = {
                     Box {
                         IconButton(onClick = { overflowMenuExpanded = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "更多選項")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.saved_locations_more_options))
                         }
                         DropdownMenu(
                             expanded = overflowMenuExpanded,
@@ -93,7 +95,7 @@ fun SavedLocationsScreen(
                             tonalElevation = 0.dp
                         ) {
                             DropdownMenuItem(
-                                text = { Text("清除非最愛位置") },
+                                text = { Text(stringResource(R.string.saved_locations_clear_non_favorites)) },
                                 onClick = {
                                     overflowMenuExpanded = false
                                     showClearConfirmDialog = true
@@ -118,7 +120,7 @@ fun SavedLocationsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("搜尋儲存位置...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                placeholder = { Text(stringResource(R.string.saved_locations_search_hint), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 singleLine = true,
                 shape = RoundedCornerShape(26.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -139,7 +141,7 @@ fun SavedLocationsScreen(
             ) {
                 // 全部 pill
                 FilterPill(
-                    label = "全部",
+                    label = stringResource(R.string.saved_locations_all),
                     selected = uiState.showHistory && uiState.showFavorites,
                     onClick = {
                         viewModel.onShowHistoryChanged(true)
@@ -148,7 +150,7 @@ fun SavedLocationsScreen(
                 )
                 // 我的最愛 pill
                 FilterPill(
-                    label = "我的最愛",
+                    label = stringResource(R.string.saved_locations_favorites),
                     selected = !uiState.showHistory && uiState.showFavorites,
                     onClick = {
                         viewModel.onShowHistoryChanged(false)
@@ -162,8 +164,8 @@ fun SavedLocationsScreen(
                 TextButton(onClick = { sortMenuExpanded = true }) {
                     Text(
                         when (uiState.sortOption) {
-                            SavedLocationsSortOption.RECENT -> "最近新增"
-                            SavedLocationsSortOption.NAME_ASC -> "名稱 A→Z"
+                            SavedLocationsSortOption.RECENT -> stringResource(R.string.sort_recent)
+                            SavedLocationsSortOption.NAME_ASC -> stringResource(R.string.sort_name_asc)
                         },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -174,14 +176,14 @@ fun SavedLocationsScreen(
                     onDismissRequest = { sortMenuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("最近新增") },
+                        text = { Text(stringResource(R.string.sort_recent)) },
                         onClick = {
                             viewModel.onSortOptionChanged(SavedLocationsSortOption.RECENT)
                             sortMenuExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("名稱 A→Z") },
+                        text = { Text(stringResource(R.string.sort_name_asc)) },
                         onClick = {
                             viewModel.onSortOptionChanged(SavedLocationsSortOption.NAME_ASC)
                             sortMenuExpanded = false
@@ -199,8 +201,8 @@ fun SavedLocationsScreen(
                             modifier = Modifier.size(64.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
-                        Text("目前沒有儲存的位置", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("請至地圖新增你要保存的座標", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                        Text(stringResource(R.string.saved_locations_empty_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.saved_locations_empty_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                     }
                 }
             } else {
@@ -228,16 +230,16 @@ if (showClearConfirmDialog) {
             onDismissRequest = { showClearConfirmDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("清除非最愛位置") },
-            text = { Text("確定要刪除所有未設為最愛的儲存位置？此操作無法復原。") },
+            title = { Text(stringResource(R.string.saved_locations_clear_non_favorites)) },
+            text = { Text(stringResource(R.string.saved_locations_clear_non_favorites_confirm_msg)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clearNonFavorites()
                     showClearConfirmDialog = false
-                }) { Text("清除", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.map_search_clear), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirmDialog = false }) { Text("取消") }
+                TextButton(onClick = { showClearConfirmDialog = false }) { Text(stringResource(R.string.map_action_cancel)) }
             }
         )
     }
@@ -247,16 +249,16 @@ if (locationToDelete != null) {
             onDismissRequest = { locationToDelete = null },
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("刪除位置") },
-            text = { Text("確定要刪除「${locationToDelete?.name}」？") },
+            title = { Text(stringResource(R.string.saved_locations_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.saved_locations_delete_confirm_msg, locationToDelete?.name ?: "")) },
             confirmButton = {
                 TextButton(onClick = {
                     locationToDelete?.let { viewModel.deleteLocation(it) }
                     locationToDelete = null
-                }) { Text("刪除", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { locationToDelete = null }) { Text("取消") }
+                TextButton(onClick = { locationToDelete = null }) { Text(stringResource(R.string.map_action_cancel)) }
             }
         )
     }
@@ -267,12 +269,12 @@ if (locationToDelete != null) {
             onDismissRequest = { locationToRename = null },
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("重新命名") },
+            title = { Text(stringResource(R.string.saved_locations_rename)) },
             text = {
                 OutlinedTextField(
                     value = newName,
                     onValueChange = { if (it.length <= 40) newName = it },
-                    label = { Text("名稱") },
+                    label = { Text(stringResource(R.string.map_save_location_name)) },
                     singleLine = true
                 )
             },
@@ -283,10 +285,10 @@ if (locationToDelete != null) {
                         locationToRename = null
                     },
                     enabled = newName.trim().isNotEmpty()
-                ) { Text("儲存") }
+                ) { Text(stringResource(R.string.map_action_save)) }
             },
             dismissButton = {
-                TextButton(onClick = { locationToRename = null }) { Text("取消") }
+                TextButton(onClick = { locationToRename = null }) { Text(stringResource(R.string.map_action_cancel)) }
             }
         )
     }
@@ -355,16 +357,16 @@ fun SavedLocationItem(
         IconButton(onClick = onFavoriteClick) {
             Icon(
                 imageVector = if (location.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = if (location.isFavorite) "取消收藏" else "加入收藏",
+                contentDescription = if (location.isFavorite) stringResource(R.string.action_unfavorite) else stringResource(R.string.action_add_favorite),
                 tint = if (location.isFavorite) MaterialTheme.colorScheme.primary
                        else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         IconButton(onClick = onRenameClick) {
-            Icon(Icons.Default.Edit, contentDescription = "重新命名", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.saved_locations_rename), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         IconButton(onClick = onDeleteClick) {
-            Icon(Icons.Default.Delete, contentDescription = "刪除", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

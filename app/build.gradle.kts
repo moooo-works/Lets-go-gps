@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.appcompat)
 
     // Compose
     implementation(libs.ui)

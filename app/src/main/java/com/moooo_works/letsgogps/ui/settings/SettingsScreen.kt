@@ -37,6 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import com.moooo_works.letsgogps.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,11 +101,11 @@ fun SettingsScreen(
         uri?.let {
             viewModel.exportDataToUri(it, exportSavedLocations, exportRoutes) { success, error ->
                 if (success) {
-                    Toast.makeText(context, "匯出成功", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.export_success), Toast.LENGTH_SHORT).show()
                 } else if (error == "PRO_REQUIRED") {
                     viewModel.requestProUpgrade()
                 } else {
-                    Toast.makeText(context, "匯出失敗：$error", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, context.getString(R.string.export_failed, error), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -147,7 +151,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "設定",
+                        stringResource(R.string.settings_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -171,18 +175,18 @@ fun SettingsScreen(
             val (dotColor, statusLabel, statusDesc) = when (mockPermissionStatus) {
                 is MockPermissionStatus.Allowed -> Triple(
                     Color(0xFF22C55E),
-                    "Mock Location 權限",
-                    "已授權 — 可正常使用模擬功能"
+                    stringResource(R.string.mock_app_required_title),
+                    stringResource(R.string.mock_app_authorized)
                 )
                 is MockPermissionStatus.NotAllowed -> Triple(
                     Color(0xFFF97316),
-                    "Mock Location 權限",
-                    "未授權 — 請到開發者選項選擇此 App"
+                    stringResource(R.string.mock_app_required_title),
+                    stringResource(R.string.mock_app_unauthorized)
                 )
                 is MockPermissionStatus.CheckFailed -> Triple(
                     Color(0xFFEF4444),
-                    "Mock Location 權限",
-                    "權限檢查失敗"
+                    stringResource(R.string.mock_app_required_title),
+                    stringResource(R.string.mock_app_check_failed)
                 )
             }
             Card(
@@ -225,7 +229,7 @@ fun SettingsScreen(
                                 Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                             )
                         }) {
-                            Text("開發者選項", style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(R.string.about_developer_options), style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -240,16 +244,16 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "外觀主題",
+                        stringResource(R.string.settings_theme_title),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(
-                            ThemePreference.SYSTEM to "跟隨系統",
-                            ThemePreference.LIGHT  to "淺色",
-                            ThemePreference.DARK   to "深色"
+                            ThemePreference.SYSTEM to stringResource(R.string.settings_theme_system),
+                            ThemePreference.LIGHT  to stringResource(R.string.settings_theme_light),
+                            ThemePreference.DARK   to stringResource(R.string.settings_theme_dark)
                         ).forEach { (pref, label) ->
                             val selected = themePreference == pref
                             Box(
@@ -275,6 +279,94 @@ fun SettingsScreen(
                 }
             }
 
+            // 語言設定
+            var showLanguageDialog by remember { mutableStateOf(false) }
+            val currentLangCode by remember {
+                mutableStateOf(AppCompatDelegate.getApplicationLocales().toLanguageTags())
+            }
+            val langOptions = listOf(
+                "" to stringResource(R.string.settings_language_system),
+                "zh-TW" to stringResource(R.string.settings_language_zh),
+                "en" to stringResource(R.string.settings_language_en)
+            )
+            val currentLangLabel = langOptions.firstOrNull { it.first == currentLangCode }?.second
+                ?: stringResource(R.string.settings_language_system)
+
+            if (showLanguageDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLanguageDialog = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp,
+                    title = { Text(stringResource(R.string.settings_language_title)) },
+                    text = {
+                        Column {
+                            langOptions.forEach { (code, label) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            val locales = if (code.isEmpty())
+                                                LocaleListCompat.getEmptyLocaleList()
+                                            else
+                                                LocaleListCompat.forLanguageTags(code)
+                                            AppCompatDelegate.setApplicationLocales(locales)
+                                            showLanguageDialog = false
+                                        }
+                                        .padding(vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = currentLangCode == code,
+                                        onClick = null
+                                    )
+                                    Text(label, style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {}
+                )
+            }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showLanguageDialog = true },
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(0.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.settings_language_title),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            currentLangLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Icon(
+                            Icons.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // 模擬設定
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -284,14 +376,14 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        "模擬設定",
+                        stringResource(R.string.settings_sim_title),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("預設高度 (公尺)", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.settings_sim_altitude), style = MaterialTheme.typography.bodyMedium)
                         OutlinedTextField(
                             value = altitudeInput,
                             onValueChange = { 
@@ -311,9 +403,9 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("高度隨機化", style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(R.string.settings_sim_random_alt), style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                "在基礎高度上加入 ±0.5m 的波動",
+                                stringResource(R.string.settings_sim_random_alt_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -330,9 +422,9 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("座標隨機抖動", style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(R.string.settings_sim_jitter), style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                "在經緯度上加入微小偏移 (1-5m)",
+                                stringResource(R.string.settings_sim_jitter_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -353,7 +445,7 @@ fun SettingsScreen(
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 SettingsMenuItem(
-                    label = "匯出資料",
+                    label = stringResource(R.string.settings_export_data),
                     locked = !isProActive,
                     onClick = {
                         if (!isProActive) viewModel.requestProUpgrade()
@@ -365,7 +457,7 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
                 SettingsMenuItem(
-                    label = "匯入資料",
+                    label = stringResource(R.string.settings_import_data),
                     locked = !isProActive,
                     onClick = {
                         if (!isProActive) viewModel.requestProUpgrade()
@@ -377,13 +469,13 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
                 SettingsMenuItem(
-                    label = "複製診斷資訊",
+                    label = stringResource(R.string.settings_copy_diag),
                     onClick = {
                         val diagText = viewModel.generateDiagnostics()
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("MockGPS Diagnostics", diagText)
                         clipboard.setPrimaryClip(clip)
-                        Toast.makeText(context, "已複製到剪貼簿", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.settings_diag_copied), Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -396,7 +488,7 @@ fun SettingsScreen(
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 SettingsMenuItem(
-                    label = "清除非最愛位置",
+                    label = stringResource(R.string.saved_locations_clear_non_favorites),
                     onClick = { showClearNonFavoritesDialog = true }
                 )
             }
@@ -409,7 +501,7 @@ fun SettingsScreen(
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 SettingsMenuItem(
-                    label = "開發者選項",
+                    label = stringResource(R.string.about_developer_options),
                     onClick = {
                         context.startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
                     }
@@ -419,7 +511,7 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
                 SettingsMenuItem(
-                    label = "隱私政策",
+                    label = stringResource(R.string.about_privacy),
                     onClick = {
                         val url = "https://moooo-works.github.io/letsgogps-privacy"
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -432,16 +524,16 @@ fun SettingsScreen(
                     onDismissRequest = { showClearNonFavoritesDialog = false },
                     containerColor = MaterialTheme.colorScheme.surface,
                     tonalElevation = 0.dp,
-                    title = { Text("清除非最愛位置") },
-                    text = { Text("確定要刪除所有未設為最愛的儲存位置？此操作無法復原。") },
+                    title = { Text(stringResource(R.string.saved_locations_clear_non_favorites)) },
+                    text = { Text(stringResource(R.string.saved_locations_clear_non_favorites_confirm_msg)) },
                     confirmButton = {
                         TextButton(onClick = {
                             viewModel.clearNonFavorites()
                             showClearNonFavoritesDialog = false
-                        }) { Text("清除", color = MaterialTheme.colorScheme.error) }
+                        }) { Text(stringResource(R.string.map_search_clear), color = MaterialTheme.colorScheme.error) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showClearNonFavoritesDialog = false }) { Text("取消") }
+                        TextButton(onClick = { showClearNonFavoritesDialog = false }) { Text(stringResource(R.string.map_action_cancel)) }
                     }
                 )
             }
@@ -486,7 +578,7 @@ private fun ExportOptionsDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("匯出資料") },
+        title = { Text(stringResource(R.string.settings_export_data)) },
         text = {
             Column {
                 Row(
@@ -497,7 +589,7 @@ private fun ExportOptionsDialog(
                         checked = exportSavedLocations,
                         onCheckedChange = onSavedLocationsChange
                     )
-                    Text("儲存位置")
+                    Text(stringResource(R.string.saved_locations_title))
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -507,7 +599,7 @@ private fun ExportOptionsDialog(
                         checked = exportRoutes,
                         onCheckedChange = onRoutesChange
                     )
-                    Text("路線")
+                    Text(stringResource(R.string.routes_title))
                 }
             }
         },
@@ -516,12 +608,12 @@ private fun ExportOptionsDialog(
                 onClick = onConfirm,
                 enabled = exportSavedLocations || exportRoutes
             ) {
-                Text("匯出")
+                Text(stringResource(R.string.settings_export_data))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.map_action_cancel))
             }
         }
     )
@@ -537,22 +629,22 @@ private fun ImportPreviewDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("匯入預覽") },
+        title = { Text(stringResource(R.string.import_preview_title)) },
         text = {
             Column {
-                Text("資料版本：${preview.schemaVersion}")
-                Text("儲存位置：${preview.savedLocationsCount}")
-                Text("路線：${preview.routesCount}")
+                Text(stringResource(R.string.import_preview_version, preview.schemaVersion))
+                Text(stringResource(R.string.import_preview_locations, preview.savedLocationsCount))
+                Text(stringResource(R.string.import_preview_routes, preview.routesCount))
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("匯入")
+                Text(stringResource(R.string.settings_import_data))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.map_action_cancel))
             }
         }
     )

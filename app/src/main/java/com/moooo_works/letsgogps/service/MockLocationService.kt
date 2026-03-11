@@ -268,19 +268,19 @@ class MockLocationService : Service() {
             PendingIntent.FLAG_IMMUTABLE)
 
         val contentText = when (status) {
-            MockStatus.ROUTE_PLAYING -> "路線模擬中 · ${"%.0f".format(currentSpeedKmh)} km/h"
-            MockStatus.ROUTE_PAUSED  -> "路線模擬已暫停"
-            MockStatus.MOCKING       -> "單點定位模擬中"
-            MockStatus.IDLE          -> "準備中…"
+            MockStatus.ROUTE_PLAYING -> getString(R.string.status_route_playing, "%.0f".format(currentSpeedKmh))
+            MockStatus.ROUTE_PAUSED  -> getString(R.string.status_route_paused)
+            MockStatus.MOCKING       -> getString(R.string.status_mocking)
+            MockStatus.IDLE          -> getString(R.string.status_idle)
         }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("MockGPS 正在執行")
+            .setContentTitle(getString(R.string.status_service_running))
             .setContentText(contentText)
             .setSmallIcon(R.drawable.ic_stat_mockgps)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .addAction(android.R.drawable.ic_delete, "停止", stopIntent)
+            .addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
     }

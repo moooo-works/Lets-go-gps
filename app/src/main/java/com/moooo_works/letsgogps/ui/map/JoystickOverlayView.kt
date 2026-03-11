@@ -15,6 +15,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import com.moooo_works.letsgogps.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -99,7 +101,7 @@ fun JoystickOverlayView(
                     ) {
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "收合",
+                            contentDescription = stringResource(R.string.joystick_collapse),
                             tint = Color(0xFF9CA3AF),
                             modifier = Modifier.size(18.dp)
                         )
@@ -127,7 +129,7 @@ fun JoystickOverlayView(
                 ) {
                     Icon(
                         Icons.Default.Settings,
-                        contentDescription = "選單",
+                        contentDescription = stringResource(R.string.joystick_menu),
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )

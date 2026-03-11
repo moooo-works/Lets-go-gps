@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
@@ -50,11 +51,27 @@ import com.moooo_works.letsgogps.ui.savedlocations.SavedLocationsViewModel
 import com.moooo_works.letsgogps.ui.settings.SettingsScreen
 import com.moooo_works.letsgogps.ui.settings.SettingsViewModel
 import com.moooo_works.letsgogps.ui.theme.MockGpsTheme
+import android.os.LocaleList
 import com.moooo_works.letsgogps.ui.theme.ThemePreference
 import dagger.hilt.android.AndroidEntryPoint
 
+fun applyLocale(base: Context): Context {
+    val prefs = base.getSharedPreferences("mockgps_prefs", Context.MODE_PRIVATE)
+    val langCode = prefs.getString("language_pref", "") ?: ""
+    if (langCode.isEmpty()) return base
+    val locale = java.util.Locale.forLanguageTag(langCode)
+    val config = base.resources.configuration
+    config.setLocale(locale)
+    config.setLocales(LocaleList(locale))
+    return base.createConfigurationContext(config)
+}
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(applyLocale(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -117,8 +134,8 @@ fun AppNavigation(
                 tonalElevation = 0.dp
             ) {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Place, contentDescription = "地圖") },
-                    label = { Text("地圖") },
+                    icon = { Icon(Icons.Default.Place, contentDescription = stringResource(R.string.nav_map)) },
+                    label = { Text(stringResource(R.string.nav_map)) },
                     selected = currentRoute == "map",
                     colors = navItemColors,
                     onClick = {
@@ -132,8 +149,8 @@ fun AppNavigation(
                     }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.List, contentDescription = "位置") },
-                    label = { Text("位置") },
+                    icon = { Icon(Icons.Default.List, contentDescription = stringResource(R.string.nav_saved_locations)) },
+                    label = { Text(stringResource(R.string.nav_saved_locations)) },
                     selected = currentRoute == "saved_locations",
                     colors = navItemColors,
                     onClick = {
@@ -147,8 +164,8 @@ fun AppNavigation(
                     }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Refresh, contentDescription = "路線") },
-                    label = { Text("路線") },
+                    icon = { Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.nav_routes)) },
+                    label = { Text(stringResource(R.string.nav_routes)) },
                     selected = currentRoute == "routes",
                     colors = navItemColors,
                     onClick = {
@@ -162,8 +179,8 @@ fun AppNavigation(
                     }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "設定") },
-                    label = { Text("設定") },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings)) },
+                    label = { Text(stringResource(R.string.nav_settings)) },
                     selected = currentRoute == "settings",
                     colors = navItemColors,
                     onClick = {

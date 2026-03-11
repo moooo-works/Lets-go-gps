@@ -1,3 +1,215 @@
 <resources>
     <string name="app_name">MockGPS</string>
+
+    <!-- Navigation & Bottom Bar -->
+    <string name="nav_map">地圖</string>
+    <string name="nav_saved_locations">位置</string>
+    <string name="nav_routes">路線</string>
+    <string name="nav_settings">設定</string>
+
+    <!-- Location Mocking Service Status -->
+    <string name="status_route_playing">路線模擬中 · %1$s km/h</string>
+    <string name="status_route_paused">路線模擬已暫停</string>
+    <string name="status_mocking">單點定位模擬中</string>
+    <string name="status_idle">準備中…</string>
+    <string name="status_service_running">MockGPS 正在執行</string>
+    <string name="action_stop">停止</string>
+
+    <!-- Map Screen -->
+    <string name="map_search_hint">搜尋地點...</string>
+    <string name="map_search_clear">清除</string>
+    <string name="map_layer_default">預設</string>
+    <string name="map_layer_satellite">衛星</string>
+    <string name="map_layer_terrain">地形</string>
+    <string name="map_layer_hybrid">混合</string>
+    
+    <string name="map_my_location">定位至目前位置</string>
+    <string name="map_save_location_title">儲存位置</string>
+    <string name="map_save_location_name">名稱</string>
+    <string name="map_save_location_desc">說明</string>
+    <string name="map_save_location_empty_error">名稱不能為空</string>
+    <string name="map_action_save">儲存</string>
+    <string name="map_action_cancel">取消</string>
+
+    <!-- Info Window Actions -->
+    <string name="action_delete">刪除</string>
+    <string name="action_edit">編輯</string>
+    <string name="action_favorite">最愛</string>
+    <string name="action_unfavorite">取消最愛</string>
+    <string name="action_start_mock">開始模擬</string>
+    <string name="action_settings">前往設定</string>
+    <string name="action_open">前往開啟</string>
+    <string name="action_grant_location">授權定位</string>
+    <string name="action_grant_notification">授權通知</string>
+    <string name="action_ok">確定</string>
+    <string name="action_save">儲存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_clear">清除</string>
+    <string name="action_close">關閉</string>
+    <string name="action_go_to_settings">前往設定</string>
+    <string name="action_please_wait">請稍候...</string>
+    <string name="action_go_to_enable">前往啟用</string>
+
+    <string name="error_title">錯誤</string>
+    <string name="error_permission_required">需要權限</string>
+    <string name="error_mock_app_not_selected">請至 開發者選項 -\u003E 選擇模擬位置應用程式 -\u003E 選擇此 App。</string>
+    <string name="error_location_permission">此功能需要定位權限才能運作。</string>
+    <string name="error_notification_permission">此功能需要通知權限以顯示背景控制項。</string>
+    <string name="error_floating_window">搖桿功能需要「顯示在其他應用程式上層」權限。請在設定中開啟。</string>
+    <string name="error_provider_setup_failed">模擬引擎設定失敗: %1$s</string>
+    <string name="error_set_location_failed">位置推送失敗: %1$s</string>
+    <string name="error_provider_teardown_failed">停止失敗: %1$s</string>
+    <string name="error_invalid_input">輸入無效: %1$s</string>
+    <string name="error_permission_check_failed">權限檢查失敗: %1$s</string>
+    <string name="error_unknown">未知錯誤: %1$s</string>
+
+    <string name="transport_walk">🚶 步行</string>
+    <string name="transport_bike">🚲 自行車</string>
+    <string name="transport_car">🚗 汽車</string>
+
+    <string name="route_add_waypoint">+ 新增路點</string>
+    <string name="route_pause">⏸ 暫停路線</string>
+    <string name="route_play">▶ 開始模擬</string>
+    <string name="route_stop">⏹ 停止模擬</string>
+    <string name="route_save_title">儲存路線</string>
+
+    <string name="search_latlng">經緯度定位</string>
+    <string name="search_latlng_location">經緯度定位</string>
+    <string name="search_title">搜尋地點</string>
+    <string name="search_failed">搜尋失敗: %1$s</string>
+    <string name="search_hint_start">輸入關鍵字開始搜尋</string>
+    <string name="search_placeholder">搜尋地點、座標或 Plus Code...</string>
+    <string name="search_hint">輸入關鍵字開始搜尋</string>
+    <string name="search_no_results">找不到相關結果</string>
+    <string name="location_edit_title">編輯地點</string>
+    <string name="location_edit_name">地點名稱</string>
+    <string name="location_edit_desc">說明或備註</string>
+
+    <!-- Joystick & Control -->
+    <string name="joystick_collapse">收合</string>
+    <string name="joystick_expand">展開</string>
+    <string name="joystick_speed">速度: %1$s</string>
+    <string name="joystick_menu">選單</string>
+    
+    <!-- Saved Locations -->
+    <string name="saved_locations_title">儲存位置</string>
+    <string name="saved_locations_search_hint">搜尋儲存位置...</string>
+    <string name="saved_locations_all">全部</string>
+    <string name="saved_locations_favorites">我的最愛</string>
+    <string name="sort_recent">最近新增</string>
+    <string name="sort_name_asc">名稱 A→Z</string>
+    
+    <string name="saved_locations_empty_title">目前沒有儲存的位置</string>
+    <string name="saved_locations_empty_desc">請至地圖新增你要保存的座標</string>
+    
+    <string name="saved_locations_clear_non_favorites">清除非最愛位置</string>
+    <string name="saved_locations_clear_non_favorites_confirm_msg">確定要刪除所有未設為最愛的儲存位置？此操作無法復原。</string>
+    <string name="saved_locations_delete_confirm_title">刪除位置</string>
+    <string name="saved_locations_delete_confirm_msg">確定要刪除「%1$s」？</string>
+
+    <string name="saved_locations_edit_title">編輯位置</string>
+    <string name="saved_locations_rename">重新命名</string>
+    <string name="saved_locations_more_options">更多選項</string>
+    <string name="action_add_favorite">加入收藏</string>
+
+    <!-- Routes -->
+    <string name="routes_title">路線</string>
+    <string name="routes_empty_title">尚未建立任何路線</string>
+    <string name="routes_empty_desc">在地圖上設定多個路點即可保存路線</string>
+    <string name="routes_rename_title">重新命名路線</string>
+    <string name="routes_name_label">路線名稱</string>
+    <string name="routes_delete_title">刪除路線</string>
+    <string name="routes_delete_desc">確定要刪除這條路線？此動作無法復原。</string>
+    <string name="routes_action_load">載入</string>
+    <string name="routes_point_count">%1$d 個路點</string>
+
+    <string name="map_route_active">目前有路線正在進行</string>
+    <string name="map_route_recording">路點選擇中 (%1$d)</string>
+    <string name="map_route_record">新增路線</string>
+    <string name="map_route_done">完成</string>
+    <string name="map_route_cancel">取消路線</string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="settings_theme_title">外觀主題</string>
+    <string name="settings_theme_system">跟隨系統</string>
+    <string name="settings_theme_light">淺色模式</string>
+    <string name="settings_theme_dark">深色模式</string>
+    <string name="settings_language_title">顯示語言</string>
+    <string name="settings_language_system">跟隨系統</string>
+    <string name="settings_language_zh">繁體中文</string>
+    <string name="settings_language_en">English</string>
+
+    <string name="settings_altitude_title">全域高度設定</string>
+    <string name="settings_altitude_desc">所有模擬定位皆會套用此海拔高度</string>
+    
+    <string name="settings_jitter_title">啟用定位抖動 (Jitter)</string>
+    <string name="settings_jitter_desc">模擬真實 GPS 的輕微座標飄移</string>
+
+    <!-- Permissions and System -->
+    <string name="permission_required_title">需要權限</string>
+    <string name="permission_required_desc">MockGPS 必須有通知與精確定位權限才能在背景運作，請在系統設定中開放。</string>
+    <string name="permission_go_to_settings">前往設定</string>
+    
+    <string name="mock_app_required_title">Mock Location 權限</string>
+    <string name="mock_app_required_desc">請至「開發者選項」中找到「選取模擬位置應用程式」，並選擇 MockGPS。</string>
+    <string name="mock_app_go_to_developer_options">開啟開發者選項</string>
+    <string name="mock_app_restart_required">套用後，請重新啟動 MockGPS</string>
+
+    <string name="mock_app_authorized">已授權 — 可正常使用模擬功能</string>
+    <string name="mock_app_unauthorized">未授權 — 請到開發者選項選擇此 App</string>
+    <string name="mock_app_check_failed">權限檢查失敗</string>
+
+    <string name="settings_sim_title">模擬設定</string>
+    <string name="settings_sim_altitude">預設高度 (公尺)</string>
+    <string name="settings_sim_random_alt">高度隨機化</string>
+    <string name="settings_sim_random_alt_desc">在基礎高度上加入 ±0.5m 的波動</string>
+    <string name="settings_sim_jitter">座標隨機抖動</string>
+    <string name="settings_sim_jitter_desc">在經緯度上加入微小偏移 (1-5m)</string>
+    <string name="settings_export_data">匯出資料</string>
+    <string name="settings_import_data">匯入資料</string>
+    <string name="settings_copy_diag">複製診斷資訊</string>
+    <string name="settings_diag_copied">已複製到剪貼簿</string>
+    
+    <string name="export_success">匯出成功</string>
+    <string name="export_failed">匯出失敗：%1$s</string>
+    <string name="import_failed">匯入失敗：%1$s</string>
+    <string name="import_preview_title">匯入預覽</string>
+    <string name="import_preview_version">資料版本：%1$s</string>
+    <string name="import_preview_locations">儲存位置：%1$d</string>
+    <string name="import_preview_routes">路線：%1$d</string>
+
+    <!-- Pro Upgrade -->
+    <string name="pro_dialog_title">升級至 Pro</string>
+    <string name="pro_dialog_desc">免費試用 7 天，之後每月 $2.99。解鎖以下所有進階功能：</string>
+    <string name="pro_dialog_feature_routes">建立與播放自訂路線</string>
+    <string name="pro_dialog_feature_joystick">搖桿自由控制方向</string>
+    <string name="pro_dialog_feature_storage">無限儲存位置</string>
+    <string name="pro_dialog_feature_export">匯入／匯出資料</string>
+    <string name="pro_dialog_feature_ads">移除全部廣告</string>
+    <string name="pro_dialog_action_upgrade">免費試用 7 天</string>
+    
+    <string name="export_import_title">資料匯出 / 匯入</string>
+    <string name="export_data">匯出所有資料</string>
+    <string name="import_data">匯入資料</string>
+
+    <string name="about_title">關於</string>
+    <string name="about_privacy">隱私權政策</string>
+    <string name="about_developer_options">Android 開發者選項</string>
+    <string name="app_version">版本 %1$s</string>
+
+    <string name="map_route_pause">暫停</string>
+    <string name="map_route_start">開始路線</string>
+    <string name="map_mock_stop">停止</string>
+    <string name="map_mock_start">開始模擬</string>
+    <string name="map_transport_walking">步行</string>
+    <string name="map_transport_cycling">自行車</string>
+    <string name="map_transport_driving">開車</string>
+
+    <string name="map_search_location">搜尋地點</string>
+    <string name="map_layer_toggle">切換地圖圖層</string>
+    <string name="map_joystick_toggle">開啟搖桿控制器</string>
+    <string name="map_mode_single">單點定位</string>
+    <string name="map_mode_route">路線模擬</string>
+    <string name="map_route_add_point">在地圖上點擊以新增路點</string>
 </resources>

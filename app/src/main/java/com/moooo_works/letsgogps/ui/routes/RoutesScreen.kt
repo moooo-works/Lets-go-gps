@@ -33,12 +33,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.filled.Place
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.data.model.RouteSummary
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +59,7 @@ fun RoutesScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "路線",
+                        stringResource(R.string.nav_routes),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -81,8 +83,8 @@ fun RoutesScreen(
                         modifier = Modifier.size(64.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
-                    Text("尚未建立任何路線", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("在地圖上設定多個路點即可保存路線", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                    Text(stringResource(R.string.routes_empty_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.routes_empty_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                 }
             }
         } else {
@@ -115,12 +117,12 @@ fun RoutesScreen(
             onDismissRequest = { routePendingRename = null },
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("重新命名路線") },
+            title = { Text(stringResource(R.string.routes_rename_title)) },
             text = {
                 OutlinedTextField(
                     value = renameInput,
                     onValueChange = { renameInput = it },
-                    label = { Text("路線名稱") },
+                    label = { Text(stringResource(R.string.routes_name_label)) },
                     singleLine = true,
                     supportingText = { Text("${renameInput.length}/40") }
                 )
@@ -133,10 +135,10 @@ fun RoutesScreen(
                         viewModel.renameRoute(routeId, normalized)
                         routePendingRename = null
                     }
-                ) { Text("儲存") }
+                ) { Text(stringResource(R.string.map_action_save)) }
             },
             dismissButton = {
-                TextButton(onClick = { routePendingRename = null }) { Text("取消") }
+                TextButton(onClick = { routePendingRename = null }) { Text(stringResource(R.string.map_action_cancel)) }
             }
         )
     }
@@ -147,8 +149,8 @@ fun RoutesScreen(
             onDismissRequest = { routePendingDelete = null },
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("刪除路線") },
-            text = { Text("確定要刪除這條路線？此動作無法復原。") },
+            title = { Text(stringResource(R.string.routes_delete_title)) },
+            text = { Text(stringResource(R.string.routes_delete_desc)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -156,10 +158,10 @@ fun RoutesScreen(
                         routePendingDelete = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text("刪除") }
+                ) { Text(stringResource(R.string.action_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { routePendingDelete = null }) { Text("取消") }
+                TextButton(onClick = { routePendingDelete = null }) { Text(stringResource(R.string.map_action_cancel)) }
             }
         )
     }
@@ -185,7 +187,7 @@ private fun RouteCard(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "${route.pointCount} 個路點",
+                text = stringResource(R.string.routes_point_count, route.pointCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -194,16 +196,16 @@ private fun RouteCard(
                     onClick = onLoadClick,
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) { Text("載入") }
+                ) { Text(stringResource(R.string.routes_action_load)) }
                 OutlinedButton(
                     onClick = onRenameClick,
                     shape = RoundedCornerShape(8.dp)
-                ) { Text("重新命名") }
+                ) { Text(stringResource(R.string.saved_locations_rename)) }
                 OutlinedButton(
                     onClick = onDeleteClick,
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) { Text("刪除") }
+                ) { Text(stringResource(R.string.action_delete)) }
             }
         }
     }
