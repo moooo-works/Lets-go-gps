@@ -1,0 +1,117 @@
+package com.moooo_works.letsgogps.data.repository
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import com.moooo_works.letsgogps.domain.repository.SettingsRepository
+import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+@Singleton
+class SettingsRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context
+) : SettingsRepository {
+
+    private val dataStore = context.dataStore
+
+    companion object {
+        val LAST_CENTER_LAT = doublePreferencesKey("last_center_lat")
+        val LAST_CENTER_LNG = doublePreferencesKey("last_center_lng")
+        val ALTITUDE = doublePreferencesKey("altitude")
+        val RANDOM_ALTITUDE = booleanPreferencesKey("random_altitude")
+        val COORDINATE_JITTER = booleanPreferencesKey("coordinate_jitter")
+        val ROUTE_SPEED = doublePreferencesKey("route_speed")
+        val TRANSPORT_MODE = stringPreferencesKey("transport_mode")
+        val MAP_MODE = stringPreferencesKey("map_mode")
+        val MAP_TYPE = stringPreferencesKey("map_type")
+
+        const val DEFAULT_ALTITUDE = 15.0
+        const val DEFAULT_ROUTE_SPEED = 5.0
+    }
+
+    override fun observeLastCenter(): Flow<LatLng?> {
+        return dataStore.data.map { preferences ->
+            val lat = preferences[LAST_CENTER_LAT]
+            val lng = preferences[LAST_CENTER_LNG]
+            if (lat != null && lng != null) {
+                LatLng(lat, lng)
+            } else {
+                null
+            }
+        }
+    }
+
+    override suspend fun setLastCenter(latLng: LatLng) {
+        dataStore.edit { preferences ->
+            preferences[LAST_CENTER_LAT] = latLng.latitude
+            preferences[LAST_CENTER_LNG] = latLng.longitude
+        }
+    }
+
+    override fun observeAltitude(): Flow<Double> {
+        return dataStore.data.map { it[ALTITUDE] ?: DEFAULT_ALTITUDE }
+    }
+
+    override suspend fun setAltitude(altitude: Double) {
+        dataStore.edit { it[ALTITUDE] = altitude }
+    }
+
+    override fun observeRandomAltitude(): Flow<Boolean> {
+        return dataStore.data.map { it[RANDOM_ALTITUDE] ?: false }
+    }
+
+    override suspend fun setRandomAltitude(enabled: Boolean) {
+        dataStore.edit { it[RANDOM_ALTITUDE] = enabled }
+    }
+
+    override fun observeCoordinateJitter(): Flow<Boolean> {
+        return dataStore.data.map { it[COORDINATE_JITTER] ?: false }
+    }
+
+    override suspend fun setCoordinateJitter(enabled: Boolean) {
+        dataStore.edit { it[COORDINATE_JITTER] = enabled }
+    }
+
+    override fun observeRouteSpeed(): Flow<Double> {
+        return dataStore.data.map { it[ROUTE_SPEED] ?: DEFAULT_ROUTE_SPEED }
+    }
+
+    override suspend fun setRouteSpeed(value: Double) {
+        dataStore.edit { it[ROUTE_SPEED] = value }
+    }
+
+    override fun observeTransportMode(): Flow<String> {
+        return dataStore.data.map { it[TRANSPORT_MODE] ?: "WALKING" }
+    }
+
+    override suspend fun setTransportMode(name: String) {
+        dataStore.edit { it[TRANSPORT_MODE] = name }
+    }
+
+    override fun observeMapMode(): Flow<String> {
+        return dataStore.data.map { it[MAP_MODE] ?: "SINGLE" }
+    }
+
+    override suspend fun setMapMode(name: String) {
+        dataStore.edit { it[MAP_MODE] = name }
+    }
+
+    override fun observeMapType(): Flow<String> {
+        return dataStore.data.map { it[MAP_TYPE] ?: "NORMAL" }
+    }
+
+    override suspend fun setMapType(name: String) {
+        dataStore.edit { it[MAP_TYPE] = name }
+    }
+}
