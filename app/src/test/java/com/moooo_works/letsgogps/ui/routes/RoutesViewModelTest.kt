@@ -103,6 +103,7 @@ private class FakeLocationRepository : LocationRepository {
     ): Flow<List<SavedLocation>> = flowOf(emptyList())
     override suspend fun saveLocation(location: SavedLocation) = Unit
     override suspend fun deleteLocation(location: SavedLocation) = Unit
+    override suspend fun deleteNonFavorites() = Unit
     override suspend fun updateLocation(location: SavedLocation) = Unit
 
     override fun observeRoutes(): Flow<List<RouteSummary>> = routeFlow

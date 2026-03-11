@@ -12,6 +12,7 @@ import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
+import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.ui.settings.ImportPreview
 import io.mockk.coEvery
@@ -45,6 +46,7 @@ class SettingsViewModelTest {
     private val mockStateRepository = mockk<MockStateRepository>(relaxed = true)
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
     private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
+    private val proRepository = mockk<ProRepository>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
     private val contentResolver = mockk<ContentResolver>(relaxed = true)
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -61,8 +63,9 @@ class SettingsViewModelTest {
         val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
         every { mockStateRepository.mockStatus } returns mockStatusFlow
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { proRepository.isProActive } returns MutableStateFlow(true)
 
-        viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, context)
+        viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, proRepository, context)
     }
 
     @After

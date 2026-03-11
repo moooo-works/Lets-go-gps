@@ -5,6 +5,8 @@ import com.moooo_works.letsgogps.data.model.RouteSummary
 import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
+import com.moooo_works.letsgogps.domain.repository.ProRepository
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +29,7 @@ import org.junit.Test
 class SavedLocationsViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private lateinit var repository: FakeSavedLocationsRepository
+    private val proRepository = mockk<ProRepository>(relaxed = true)
 
     @Before
     fun setup() {
@@ -46,7 +49,7 @@ class SavedLocationsViewModelTest {
             SavedLocation(id = 2, name = "B", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
 
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         advanceTimeBy(350)
         advanceUntilIdle()
@@ -62,7 +65,7 @@ class SavedLocationsViewModelTest {
             SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
 
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         viewModel.onShowHistoryChanged(false)
         advanceTimeBy(350)
@@ -79,7 +82,7 @@ class SavedLocationsViewModelTest {
             SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
 
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         viewModel.onShowFavoritesChanged(false)
         advanceTimeBy(350)
@@ -91,7 +94,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `cannot disable both filters`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         viewModel.onShowHistoryChanged(false)
         viewModel.onShowFavoritesChanged(false)
         advanceUntilIdle()
@@ -101,7 +104,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `deleteLocation calls repository delete`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val location = SavedLocation(id = 1, name = "Test", latitude = 0.0, longitude = 0.0)
 
         viewModel.deleteLocation(location)
@@ -112,7 +115,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `renameLocation calls repository update with valid name`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
 
         viewModel.renameLocation(location, "New Name")
@@ -123,7 +126,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `renameLocation ignores empty name`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
 
         viewModel.renameLocation(location, "   ")
@@ -134,7 +137,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `renameLocation ignores too long name`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
 
         viewModel.renameLocation(location, "A".repeat(41))
@@ -180,6 +183,10 @@ private class FakeSavedLocationsRepository : LocationRepository {
 
     override suspend fun deleteLocation(location: SavedLocation) {
         deleted += location
+    }
+
+    override suspend fun deleteNonFavorites() {
+        savedLocations.value = savedLocations.value.filter { it.isFavorite }
     }
 
     override suspend fun updateLocation(location: SavedLocation) {
