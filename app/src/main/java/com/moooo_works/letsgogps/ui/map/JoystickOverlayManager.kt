@@ -1,6 +1,7 @@
 package com.moooo_works.letsgogps.ui.map
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Build
 import android.view.Gravity
@@ -30,8 +31,15 @@ class JoystickOverlayManager @Inject constructor(
     private var composeView: ComposeView? = null
     private var params: WindowManager.LayoutParams? = null
 
+    private val prefs: SharedPreferences by lazy {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
     fun show(content: @Composable () -> Unit) {
         if (composeView != null) return
+
+        val savedX = prefs.getInt(KEY_X, 100)
+        val savedY = prefs.getInt(KEY_Y, 500)
 
         val layoutParams = WindowManager.LayoutParams().apply {
             type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -41,14 +49,14 @@ class JoystickOverlayManager @Inject constructor(
                 WindowManager.LayoutParams.TYPE_PHONE
             }
             format = PixelFormat.TRANSLUCENT
-            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            
+
             width = WindowManager.LayoutParams.WRAP_CONTENT
             height = WindowManager.LayoutParams.WRAP_CONTENT
             gravity = Gravity.TOP or Gravity.START
-            x = 100 
-            y = 500
+            x = savedX
+            y = savedY
         }
         this.params = layoutParams
 
@@ -82,12 +90,49 @@ class JoystickOverlayManager @Inject constructor(
     fun updatePosition(deltaX: Int, deltaY: Int) {
         val currentParams = params ?: return
         val currentView = composeView ?: return
-        
-        currentParams.x += deltaX
-        currentParams.y += deltaY
-        
-        // Prevent moving completely out of screen if needed, but for now simple update
+
+        val dm = context.resources.displayMetrics
+        val screenWidth = dm.widthPixels
+        val screenHeight = dm.heightPixels
+        val viewWidth = currentView.width.takeIf { it > 0 }
+            ?: (164 * dm.density).toInt()
+        val viewHeight = currentView.height.takeIf { it > 0 }
+            ?: (200 * dm.density).toInt()
+
+        currentParams.x = (currentParams.x + deltaX).coerceIn(0, screenWidth - viewWidth)
+        currentParams.y = (currentParams.y + deltaY).coerceIn(0, screenHeight - viewHeight)
+
         windowManager.updateViewLayout(currentView, currentParams)
+    }
+
+    fun snapToEdge() {
+        val currentParams = params ?: return
+        val currentView = composeView ?: return
+
+        val dm = context.resources.displayMetrics
+        val screenWidth = dm.widthPixels
+        val screenHeight = dm.heightPixels
+        val viewWidth = currentView.width.takeIf { it > 0 }
+            ?: (164 * dm.density).toInt()
+        val viewHeight = currentView.height.takeIf { it > 0 }
+            ?: (200 * dm.density).toInt()
+
+        val midScreen = screenWidth / 2
+        currentParams.x = if (currentParams.x + viewWidth / 2 < midScreen) 0
+                           else screenWidth - viewWidth
+        currentParams.y = currentParams.y.coerceIn(0, screenHeight - viewHeight)
+
+        windowManager.updateViewLayout(currentView, currentParams)
+        prefs.edit()
+            .putInt(KEY_X, currentParams.x)
+            .putInt(KEY_Y, currentParams.y)
+            .apply()
+    }
+
+    companion object {
+        private const val PREFS_NAME = "joystick_overlay_prefs"
+        private const val KEY_X = "joystick_x"
+        private const val KEY_Y = "joystick_y"
     }
 
     private class MyLifecycleOwner : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {

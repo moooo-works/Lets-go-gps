@@ -9,9 +9,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-
-// TODO: 上架前換回真實 ID: ca-app-pub-8495982996587452/2988295108
-private const val BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
+import com.moooo_works.letsgogps.BuildConfig
 
 @Composable
 fun BannerAdView(modifier: Modifier = Modifier) {
@@ -22,7 +20,7 @@ fun BannerAdView(modifier: Modifier = Modifier) {
         factory = { context ->
             AdView(context).apply {
                 setAdSize(AdSize.BANNER)
-                adUnitId = BANNER_AD_UNIT_ID
+                adUnitId = BuildConfig.BANNER_AD_UNIT_ID
                 loadAd(AdRequest.Builder().build())
             }
         }

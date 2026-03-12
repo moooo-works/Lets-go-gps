@@ -212,4 +212,18 @@
     <string name="map_mode_single">單點定位</string>
     <string name="map_mode_route">路線模擬</string>
     <string name="map_route_add_point">在地圖上點擊以新增路點</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_of">%1$d / %2$d</string>
+    <string name="onboarding_step1_title">歡迎使用 Fake GPS</string>
+    <string name="onboarding_step1_desc">這款 App 讓你輕鬆在任何 App 中模擬 GPS 位置。\n\n開始前，需要完成以下 2 個設定步驟。</string>
+    <string name="onboarding_step2_title">開啟開發者選項</string>
+    <string name="onboarding_step2_desc">前往「設定 → 關於手機」，連續點擊「版本號」7 次，即可啟用開發者選項。</string>
+    <string name="onboarding_step2_action">開啟設定</string>
+    <string name="onboarding_step3_title">選擇模擬位置 App</string>
+    <string name="onboarding_step3_desc">前往「設定 → 開發者選項 → 選擇模擬位置應用程式」，選擇 Fake GPS。</string>
+    <string name="onboarding_step3_action">前往開發者選項</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_done">完成設定</string>
+    <string name="onboarding_skip">跳過</string>
 </resources>

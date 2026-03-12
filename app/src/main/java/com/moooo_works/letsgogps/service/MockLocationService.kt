@@ -45,6 +45,7 @@ class MockLocationService : Service() {
     private var locationPushJob: Job? = null
     private var isProviderSetup = false
     private var currentSpeedKmh: Double = 5.0
+    private var consecutiveInjectionFailures = 0
 
     // Settings Cache to avoid frequent DataStore I/O during rapid injection
     private var cachedAltitude: Double = 15.0
@@ -125,8 +126,18 @@ class MockLocationService : Service() {
             } else location
 
             mockEngine.setLocation(target.latitude, target.longitude, altitude = altitude)
+            consecutiveInjectionFailures = 0
         } catch (e: Exception) {
             Log.e(TAG, "Location injection failed", e)
+            consecutiveInjectionFailures++
+
+            // SecurityException 表示模擬位置權限已被撤銷，立即停止
+            val isPermissionRevoked = e is SecurityException || e.cause is SecurityException
+            if (isPermissionRevoked || consecutiveInjectionFailures >= MAX_INJECTION_FAILURES) {
+                Log.w(TAG, "Stopping service: permission revoked=$isPermissionRevoked failures=$consecutiveInjectionFailures")
+                mockStateRepository.setMockError(MockEngineError.SetLocation(e))
+                handleStop()
+            }
         }
     }
 
@@ -218,6 +229,7 @@ class MockLocationService : Service() {
                         mockStateRepository.setCurrentMockLocation(point.latLng)
                     } catch (e: Exception) {
                         mockStateRepository.setMockError(MockEngineError.SetLocation(e))
+                        handleStop()
                     }
                 }
             }
@@ -236,6 +248,7 @@ class MockLocationService : Service() {
     }
 
     private fun handleStop() {
+        consecutiveInjectionFailures = 0
         stopLocationPushJob()
         routeSimulator.stop()
         if (isProviderSetup) {
@@ -303,6 +316,7 @@ class MockLocationService : Service() {
 
     companion object {
         private const val TAG = "MockLocationService"
+        private const val MAX_INJECTION_FAILURES = 5  // 連續失敗 5 次（約 5 秒）後停止
         const val CHANNEL_ID = "MockLocationServiceChannelV3"
         const val NOTIFICATION_ID = 1
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"

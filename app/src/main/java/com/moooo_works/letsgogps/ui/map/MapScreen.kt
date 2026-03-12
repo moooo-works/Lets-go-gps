@@ -66,6 +66,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
 import com.moooo_works.letsgogps.ui.components.BannerAdView
+import com.moooo_works.letsgogps.ui.onboarding.OnboardingSheet
 import com.moooo_works.letsgogps.ui.pro.ProUpgradeDialog
 import com.moooo_works.letsgogps.utils.LocationQueryParser
 import com.moooo_works.letsgogps.utils.ParseResult
@@ -717,6 +718,10 @@ fun MapScreen(
                 }
             }
         }
+    }
+
+    if (uiState.showOnboarding) {
+        OnboardingSheet(onDismiss = { viewModel.dismissOnboarding() })
     }
 
     if (uiState.showProUpgrade) {

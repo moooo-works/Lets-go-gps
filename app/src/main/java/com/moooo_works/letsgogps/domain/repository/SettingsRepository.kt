@@ -27,4 +27,7 @@ interface SettingsRepository {
 
     fun observeMapType(): Flow<String>
     suspend fun setMapType(name: String)
+
+    fun hasSeenOnboarding(): Flow<Boolean>
+    suspend fun setOnboardingDone()
 }

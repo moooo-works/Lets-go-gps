@@ -31,6 +31,7 @@ fun JoystickOverlayView(
     transportMode: TransportMode,
     onMove: (deltaX: Float, deltaY: Float) -> Unit,
     onWindowDrag: (deltaX: Int, deltaY: Int) -> Unit,
+    onWindowDragEnd: () -> Unit = {},
     onToggleSpeed: () -> Unit,
     onStop: () -> Unit
 ) {
@@ -143,10 +144,13 @@ fun JoystickOverlayView(
                     .clip(CircleShape)
                     .background(Color(0xE61F2937))
                     .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
-                        }
+                        detectDragGestures(
+                            onDragEnd = { onWindowDragEnd() },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
+                            }
+                        )
                     }
             )
 
