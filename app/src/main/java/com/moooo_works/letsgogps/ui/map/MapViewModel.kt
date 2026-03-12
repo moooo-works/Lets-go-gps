@@ -512,6 +512,7 @@ class MapViewModel @Inject constructor(
     fun setTransportMode(mode: TransportMode) {
         _uiState.update { it.copy(transportMode = mode, speedKmh = mode.speedKmh) }
         routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS_DIVISOR)
+        viewModelScope.launch { settingsRepository.setRouteSpeed(mode.speedKmh) }
     }
 
     fun setSpeed(speedKmh: Double) {
@@ -521,6 +522,7 @@ class MapViewModel @Inject constructor(
         }
         _uiState.update { it.copy(speedKmh = speedKmh) }
         routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
+        viewModelScope.launch { settingsRepository.setRouteSpeed(speedKmh) }
     }
 
     fun playRoute() {

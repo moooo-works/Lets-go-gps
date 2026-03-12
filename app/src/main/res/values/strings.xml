@@ -12,7 +12,7 @@
     <string name="status_route_paused">路線模擬已暫停</string>
     <string name="status_mocking">單點定位模擬中</string>
     <string name="status_idle">準備中…</string>
-    <string name="status_service_running">MockGPS 正在執行</string>
+    <string name="status_service_running">Fake GPS 正在執行</string>
     <string name="action_stop">停止</string>
 
     <!-- Map Screen -->
@@ -148,13 +148,13 @@
 
     <!-- Permissions and System -->
     <string name="permission_required_title">需要權限</string>
-    <string name="permission_required_desc">MockGPS 必須有通知與精確定位權限才能在背景運作，請在系統設定中開放。</string>
+    <string name="permission_required_desc">Fake GPS 必須有通知與精確定位權限才能在背景運作，請在系統設定中開放。</string>
     <string name="permission_go_to_settings">前往設定</string>
     
     <string name="mock_app_required_title">Mock Location 權限</string>
-    <string name="mock_app_required_desc">請至「開發者選項」中找到「選取模擬位置應用程式」，並選擇 MockGPS。</string>
+    <string name="mock_app_required_desc">請至「開發者選項」中找到「選取模擬位置應用程式」，並選擇 Fake GPS。</string>
     <string name="mock_app_go_to_developer_options">開啟開發者選項</string>
-    <string name="mock_app_restart_required">套用後，請重新啟動 MockGPS</string>
+    <string name="mock_app_restart_required">套用後，請重新啟動 Fake GPS</string>
 
     <string name="mock_app_authorized">已授權 — 可正常使用模擬功能</string>
     <string name="mock_app_unauthorized">未授權 — 請到開發者選項選擇此 App</string>

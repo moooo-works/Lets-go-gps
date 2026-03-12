@@ -39,7 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.Typeface
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -68,6 +72,7 @@ import com.moooo_works.letsgogps.utils.ParseResult
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import com.moooo_works.letsgogps.utils.LatLngBoundsUtil
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -101,6 +106,18 @@ fun MapScreen(
     var routeNameInput by remember { mutableStateOf("") }
     val mockMarkerState = remember { MarkerState(position = uiState.centerLocation) }
     var mapContainerSize by remember { mutableStateOf(IntSize.Zero) }
+
+    val primaryColorArgb = MaterialTheme.colorScheme.primary.toArgb()
+    val waypointIcons = remember(uiState.waypoints.size, primaryColorArgb) {
+        uiState.waypoints.mapIndexed { index, _ ->
+            val label = when (index) {
+                0 -> "S"
+                uiState.waypoints.size - 1 -> "E"
+                else -> "${index + 1}"
+            }
+            createNumberedMarkerBitmap(label, primaryColorArgb)
+        }
+    }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
@@ -310,10 +327,8 @@ fun MapScreen(
                                 || uiState.simulationState == SimulationState.PAUSED
                         Marker(
                             state = MarkerState(position = point),
-                            title = "Point ${index + 1}",
-                            icon = com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(
-                                com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN
-                            ),
+                            title = "路點 ${index + 1}",
+                            icon = waypointIcons.getOrNull(index) ?: BitmapDescriptorFactory.defaultMarker(),
                             onClick = {
                                 if (!isSimulating) viewModel.removeWaypointAt(index)
                                 true
@@ -599,7 +614,7 @@ fun MapScreen(
                                 onClick = { viewModel.addWaypoint() },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(8.dp)
-                            ) { Text(stringResource(R.string.map_route_add_point)) }
+                            ) { Text(stringResource(R.string.route_add_waypoint)) }
                         }
 
                         Button(
@@ -638,15 +653,15 @@ fun MapScreen(
 
                     if (uiState.mapMode == MapMode.ROUTE) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 "${"%.0f".format(uiState.speedKmh)} km/h",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.width(52.dp)
+                                modifier = Modifier.width(60.dp)
                             )
                             androidx.compose.material3.Slider(
                                 value = uiState.speedKmh.toFloat(),
@@ -675,7 +690,7 @@ fun MapScreen(
                                         label = {
                                             Text(
                                                 transportModeLabels[mode] ?: mode.name,
-                                                style = MaterialTheme.typography.labelSmall
+                                                style = MaterialTheme.typography.labelMedium
                                             )
                                         }
                                     )
@@ -1158,4 +1173,34 @@ private fun EditLocationDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
+}
+
+private fun createNumberedMarkerBitmap(label: String, colorArgb: Int): com.google.android.gms.maps.model.BitmapDescriptor {
+    val sizePx = 80
+    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+
+    val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = colorArgb
+        style = Paint.Style.FILL
+    }
+    canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - 4f, bgPaint)
+
+    val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = 5f
+    }
+    canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - 4f, borderPaint)
+
+    val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE
+        textSize = if (label.length > 1) 24f else 30f
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
+    }
+    val textY = sizePx / 2f - (textPaint.descent() + textPaint.ascent()) / 2f
+    canvas.drawText(label, sizePx / 2f, textY, textPaint)
+
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
 }

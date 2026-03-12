@@ -12,7 +12,7 @@
     <string name="status_route_paused">Route paused</string>
     <string name="status_mocking">Mocking active</string>
     <string name="status_idle">Ready…</string>
-    <string name="status_service_running">MockGPS is running</string>
+    <string name="status_service_running">Fake GPS is running</string>
     <string name="action_stop">Stop</string>
 
     <!-- Map Screen -->
@@ -52,7 +52,7 @@
 
     <string name="error_title">Error</string>
     <string name="error_permission_required">Permission Required</string>
-    <string name="error_mock_app_not_selected">Please set MockGPS as the mock location app in Developer Options.</string>
+    <string name="error_mock_app_not_selected">Please set Fake GPS as the mock location app in Developer Options.</string>
     <string name="error_location_permission">Location permission is required for this feature.</string>
     <string name="error_notification_permission">Notification permission is required for background controls.</string>
     <string name="error_floating_window">Floating window permission is required for the joystick. Please enable it in Settings.</string>
@@ -148,13 +148,13 @@
 
     <!-- Permissions and System -->
     <string name="permission_required_title">Permission Required</string>
-    <string name="permission_required_desc">MockGPS requires notifications and precise location permissions to run in the background. Please grant them in System Settings.</string>
+    <string name="permission_required_desc">Fake GPS requires notifications and precise location permissions to run in the background. Please grant them in System Settings.</string>
     <string name="permission_go_to_settings">Go to Settings</string>
     
     <string name="mock_app_required_title">Mock Location Permission</string>
-    <string name="mock_app_required_desc">Please go to Developer Options, find "Select mock location app", and choose MockGPS.</string>
+    <string name="mock_app_required_desc">Please go to Developer Options, find "Select mock location app", and choose Fake GPS.</string>
     <string name="mock_app_go_to_developer_options">Open Developer Options</string>
-    <string name="mock_app_restart_required">After applying, please restart MockGPS.</string>
+    <string name="mock_app_restart_required">After applying, please restart Fake GPS.</string>
 
     <string name="mock_app_authorized">Authorized — Mock features are ready</string>
     <string name="mock_app_unauthorized">Unauthorized — Please select this app in Developer Options</string>

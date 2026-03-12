@@ -301,7 +301,7 @@ class SettingsViewModelTest {
     @Test
     fun testGenerateDiagnostics() {
         val diag = viewModel.generateDiagnostics()
-        assertTrue(diag.contains("MockGPS Diagnostics"))
+        assertTrue(diag.contains("Fake GPS Diagnostics"))
         assertTrue(diag.contains("Mock Status: IDLE"))
         assertTrue(diag.contains("Target SDK: 34"))
     }
