@@ -38,8 +38,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import com.moooo_works.letsgogps.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,7 +126,7 @@ fun SettingsScreen(
             onConfirm = {
                 showExportDialog = false
                 val dateStr = java.text.SimpleDateFormat("yyyyMMdd_HHmm", java.util.Locale.US).format(java.util.Date())
-                exportLauncher.launch("mockgps_export_${dateStr}.json")
+                exportLauncher.launch("fakegps_export_${dateStr}.json")
             }
         )
     }
@@ -282,7 +280,10 @@ fun SettingsScreen(
             // 語言設定
             var showLanguageDialog by remember { mutableStateOf(false) }
             val currentLangCode by remember {
-                mutableStateOf(AppCompatDelegate.getApplicationLocales().toLanguageTags())
+                mutableStateOf(
+                    context.getSharedPreferences("mockgps_prefs", Context.MODE_PRIVATE)
+                        .getString("language_pref", "") ?: ""
+                )
             }
             val langOptions = listOf(
                 "" to stringResource(R.string.settings_language_system),
@@ -305,12 +306,10 @@ fun SettingsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            val locales = if (code.isEmpty())
-                                                LocaleListCompat.getEmptyLocaleList()
-                                            else
-                                                LocaleListCompat.forLanguageTags(code)
-                                            AppCompatDelegate.setApplicationLocales(locales)
+                                            context.getSharedPreferences("mockgps_prefs", Context.MODE_PRIVATE)
+                                                .edit().putString("language_pref", code).apply()
                                             showLanguageDialog = false
+                                            (context as? android.app.Activity)?.recreate()
                                         }
                                         .padding(vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -473,7 +472,7 @@ fun SettingsScreen(
                     onClick = {
                         val diagText = viewModel.generateDiagnostics()
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("MockGPS Diagnostics", diagText)
+                        val clip = ClipData.newPlainText("Fake GPS Diagnostics", diagText)
                         clipboard.setPrimaryClip(clip)
                         Toast.makeText(context, context.getString(R.string.settings_diag_copied), Toast.LENGTH_SHORT).show()
                     }

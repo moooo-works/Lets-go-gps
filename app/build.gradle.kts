@@ -1,3 +1,5 @@
+import java.util.Properties
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.androidApplication)
@@ -5,6 +7,15 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
+
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
+val versionMajor = 1
+val versionMinor = 0
+val versionPatch = 0
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -14,17 +25,18 @@ android {
         applicationId = "com.moooo_works.letsgogps"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName = "$versionMajor.$versionMinor.$versionPatch"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
 
-        // Use a placeholder if not present.
-        // User should add MAPS_API_KEY in local.properties or env var
-        manifestPlaceholders["MAPS_API_KEY"] = (project.findProperty("MAPS_API_KEY") as? String) ?: "AIzaSyAPMSfHEhF1OLWw6v6KSm164AH9PHskdVM"
+        // MAPS_API_KEY: local.properties (local dev) or MAPS_API_KEY env var (CI)
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY")
+            ?: System.getenv("MAPS_API_KEY")
+            ?: error("MAPS_API_KEY not found. Set it in local.properties or as an environment variable.")
     }
 
     buildTypes {
@@ -32,7 +44,8 @@ android {
             isDebuggable = true
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

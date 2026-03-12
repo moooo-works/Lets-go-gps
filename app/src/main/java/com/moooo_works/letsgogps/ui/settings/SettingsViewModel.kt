@@ -402,7 +402,7 @@ class SettingsViewModel @Inject constructor(
         }
 
         return """
-            MockGPS Diagnostics
+            Fake GPS Diagnostics
             -------------------
             Version Name: $versionName
             Version Code: $versionCode

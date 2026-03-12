@@ -24,6 +24,10 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build
+      env:
+        MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
 
     - name: Run Unit Tests
       run: ./gradlew test
+      env:
+        MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
