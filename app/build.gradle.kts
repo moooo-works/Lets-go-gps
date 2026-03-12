@@ -33,9 +33,10 @@ android {
             useSupportLibrary = true
         }
 
-        // MAPS_API_KEY must be set in local.properties (not committed to VCS)
+        // MAPS_API_KEY: local.properties (local dev) or MAPS_API_KEY env var (CI)
         manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY")
-            ?: error("MAPS_API_KEY not found. Please add it to local.properties.")
+            ?: System.getenv("MAPS_API_KEY")
+            ?: error("MAPS_API_KEY not found. Set it in local.properties or as an environment variable.")
     }
 
     buildTypes {
