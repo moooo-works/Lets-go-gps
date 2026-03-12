@@ -73,7 +73,8 @@ data class MapUiState(
     val showProUpgrade: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,
-    val showEditLocationDialog: Boolean = false
+    val showEditLocationDialog: Boolean = false,
+    val showOnboarding: Boolean = false
 )
 
 @HiltViewModel
@@ -184,6 +185,17 @@ class MapViewModel @Inject constructor(
                 _uiState.update { it.copy(mapType = type) }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.hasSeenOnboarding().collect { seen ->
+                if (!seen) _uiState.update { it.copy(showOnboarding = true) }
+            }
+        }
+    }
+
+    fun dismissOnboarding() {
+        _uiState.update { it.copy(showOnboarding = false) }
+        viewModelScope.launch { settingsRepository.setOnboardingDone() }
     }
 
     private fun checkMockPermission(): MockPermissionStatus {
@@ -252,6 +264,9 @@ class MapViewModel @Inject constructor(
                     },
                     onWindowDrag = { dx, dy ->
                         joystickOverlayManager.updatePosition(dx, dy)
+                    },
+                    onWindowDragEnd = {
+                        joystickOverlayManager.snapToEdge()
                     },
                     onToggleSpeed = { cycleTransportMode() },
                     onStop = { stopMockingFromJoystick() }

@@ -35,6 +35,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val TRANSPORT_MODE = stringPreferencesKey("transport_mode")
         val MAP_MODE = stringPreferencesKey("map_mode")
         val MAP_TYPE = stringPreferencesKey("map_type")
+        val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
 
         const val DEFAULT_ALTITUDE = 15.0
         const val DEFAULT_ROUTE_SPEED = 5.0
@@ -113,5 +114,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setMapType(name: String) {
         dataStore.edit { it[MAP_TYPE] = name }
+    }
+
+    override fun hasSeenOnboarding(): Flow<Boolean> {
+        return dataStore.data.map { it[HAS_SEEN_ONBOARDING] ?: false }
+    }
+
+    override suspend fun setOnboardingDone() {
+        dataStore.edit { it[HAS_SEEN_ONBOARDING] = true }
     }
 }
