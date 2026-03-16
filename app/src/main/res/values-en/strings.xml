@@ -139,6 +139,8 @@
     <string name="settings_language_system">Follow System</string>
     <string name="settings_language_zh">繁體中文</string>
     <string name="settings_language_en">English</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
 
     <string name="settings_altitude_title">Global Altitude</string>
     <string name="settings_altitude_desc">Altitude applied to all mock locations</string>
@@ -181,7 +183,7 @@
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Upgrade to Pro</string>
-    <string name="pro_dialog_desc">Try free for 7 days, then $2.99/month. Unlock all pro features:</string>
+    <string name="pro_dialog_desc">Try free for 7 days, then $3.99/month. Unlock all pro features:</string>
     <string name="pro_dialog_feature_routes">Create &amp; Play Custom Routes</string>
     <string name="pro_dialog_feature_joystick">Direction Control via Joystick</string>
     <string name="pro_dialog_feature_storage">Unlimited Saved Locations</string>

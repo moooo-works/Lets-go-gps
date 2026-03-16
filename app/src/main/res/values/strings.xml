@@ -139,6 +139,8 @@
     <string name="settings_language_system">跟隨系統</string>
     <string name="settings_language_zh">繁體中文</string>
     <string name="settings_language_en">English</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
 
     <string name="settings_altitude_title">全域高度設定</string>
     <string name="settings_altitude_desc">所有模擬定位皆會套用此海拔高度</string>
@@ -181,7 +183,7 @@
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">升級至 Pro</string>
-    <string name="pro_dialog_desc">免費試用 7 天，之後每月 $2.99。解鎖以下所有進階功能：</string>
+    <string name="pro_dialog_desc">免費試用 7 天，之後每月 $3.99。解鎖以下所有進階功能：</string>
     <string name="pro_dialog_feature_routes">建立與播放自訂路線</string>
     <string name="pro_dialog_feature_joystick">搖桿自由控制方向</string>
     <string name="pro_dialog_feature_storage">無限儲存位置</string>

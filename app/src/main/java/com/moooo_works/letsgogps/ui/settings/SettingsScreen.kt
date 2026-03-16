@@ -288,7 +288,9 @@ fun SettingsScreen(
             val langOptions = listOf(
                 "" to stringResource(R.string.settings_language_system),
                 "zh-TW" to stringResource(R.string.settings_language_zh),
-                "en" to stringResource(R.string.settings_language_en)
+                "en" to stringResource(R.string.settings_language_en),
+                "ja" to stringResource(R.string.settings_language_ja),
+                "ko" to stringResource(R.string.settings_language_ko)
             )
             val currentLangLabel = langOptions.firstOrNull { it.first == currentLangCode }?.second
                 ?: stringResource(R.string.settings_language_system)

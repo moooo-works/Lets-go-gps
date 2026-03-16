@@ -34,7 +34,7 @@ class BillingManager @Inject constructor(
         private const val TAG = "MockGPS/Billing"
         const val SUBSCRIPTION_ID = "mockgps_pro_monthly"
         // 開發用：設為 true 強制解鎖所有 Pro 功能，上架前務必改回 false
-        const val DEV_FORCE_PRO = true
+        const val DEV_FORCE_PRO = false
 
         private val KEY_PRO_CACHE = booleanPreferencesKey("pro_state_cache")
         private const val MAX_RETRY = 3
