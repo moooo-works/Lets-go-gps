@@ -1,0 +1,231 @@
+<resources>
+    <string name="app_name">Let\'s Go GPS</string>
+
+    <!-- Navigation & Bottom Bar -->
+    <string name="nav_map">지도</string>
+    <string name="nav_saved_locations">위치</string>
+    <string name="nav_routes">경로</string>
+    <string name="nav_settings">설정</string>
+
+    <!-- Location Mocking Service Status -->
+    <string name="status_route_playing">경로 재생 중 · %1$s km/h</string>
+    <string name="status_route_paused">경로 일시 정지됨</string>
+    <string name="status_mocking">위치 위장 중</string>
+    <string name="status_idle">준비 중…</string>
+    <string name="status_service_running">Fake GPS 실행 중</string>
+    <string name="action_stop">정지</string>
+
+    <!-- Map Screen -->
+    <string name="map_search_hint">장소 검색...</string>
+    <string name="map_search_clear">지우기</string>
+    <string name="map_layer_default">기본</string>
+    <string name="map_layer_satellite">위성</string>
+    <string name="map_layer_terrain">지형</string>
+    <string name="map_layer_hybrid">하이브리드</string>
+
+    <string name="map_my_location">현재 위치</string>
+    <string name="map_save_location_title">위치 저장</string>
+    <string name="map_save_location_name">이름</string>
+    <string name="map_save_location_desc">설명</string>
+    <string name="map_save_location_empty_error">이름을 입력해 주세요</string>
+    <string name="map_action_save">저장</string>
+    <string name="map_action_cancel">취소</string>
+
+    <!-- Info Window Actions -->
+    <string name="action_delete">삭제</string>
+    <string name="action_edit">편집</string>
+    <string name="action_favorite">즐겨찾기</string>
+    <string name="action_unfavorite">즐겨찾기 해제</string>
+    <string name="action_start_mock">위장 시작</string>
+    <string name="action_settings">설정</string>
+    <string name="action_open">열기</string>
+    <string name="action_grant_location">위치 권한 허용</string>
+    <string name="action_grant_notification">알림 권한 허용</string>
+    <string name="action_ok">확인</string>
+    <string name="action_save">저장</string>
+    <string name="action_cancel">취소</string>
+    <string name="action_clear">지우기</string>
+    <string name="action_close">닫기</string>
+    <string name="action_go_to_settings">설정으로 이동</string>
+    <string name="action_please_wait">잠시 기다려 주세요...</string>
+    <string name="action_go_to_enable">활성화</string>
+
+    <string name="error_title">오류</string>
+    <string name="error_permission_required">권한이 필요합니다</string>
+    <string name="error_mock_app_not_selected">개발자 옵션에서 Fake GPS를 모의 위치 앱으로 선택해 주세요.</string>
+    <string name="error_location_permission">이 기능을 사용하려면 위치 권한이 필요합니다.</string>
+    <string name="error_notification_permission">백그라운드 제어를 위해 알림 권한이 필요합니다.</string>
+    <string name="error_floating_window">조이스틱 기능을 사용하려면 다른 앱 위에 표시 권한이 필요합니다. 설정에서 활성화해 주세요.</string>
+    <string name="error_provider_setup_failed">엔진 설정 실패: %1$s</string>
+    <string name="error_set_location_failed">위치 전송 실패: %1$s</string>
+    <string name="error_provider_teardown_failed">정지 실패: %1$s</string>
+    <string name="error_invalid_input">잘못된 입력: %1$s</string>
+    <string name="error_permission_check_failed">권한 확인 실패: %1$s</string>
+    <string name="error_unknown">알 수 없는 오류: %1$s</string>
+
+    <string name="transport_walk">🚶 도보</string>
+    <string name="transport_bike">🚲 자전거</string>
+    <string name="transport_car">🚗 자동차</string>
+
+    <string name="route_add_waypoint">+ 경유지 추가</string>
+    <string name="route_pause">⏸ 경로 일시 정지</string>
+    <string name="route_play">▶ 경로 재생</string>
+    <string name="route_stop">⏹ 경로 정지</string>
+    <string name="route_save_title">경로 저장</string>
+
+    <string name="search_latlng">위도 / 경도</string>
+    <string name="search_latlng_location">좌표로 검색</string>
+    <string name="search_title">장소 검색</string>
+    <string name="search_failed">검색 실패: %1$s</string>
+    <string name="search_hint_start">키워드를 입력하여 검색</string>
+    <string name="search_placeholder">장소, 좌표 또는 Plus Code 검색...</string>
+    <string name="search_hint">키워드를 입력하여 검색</string>
+    <string name="search_no_results">결과를 찾을 수 없습니다</string>
+    <string name="location_edit_title">위치 편집</string>
+    <string name="location_edit_name">위치 이름</string>
+    <string name="location_edit_desc">설명 또는 메모</string>
+
+    <!-- Joystick & Control -->
+    <string name="joystick_collapse">접기</string>
+    <string name="joystick_expand">펼치기</string>
+    <string name="joystick_speed">속도: %1$s</string>
+    <string name="joystick_menu">메뉴</string>
+
+    <!-- Saved Locations -->
+    <string name="saved_locations_title">저장된 위치</string>
+    <string name="saved_locations_search_hint">저장된 위치 검색...</string>
+    <string name="saved_locations_all">전체</string>
+    <string name="saved_locations_favorites">즐겨찾기</string>
+    <string name="sort_recent">최근 추가</string>
+    <string name="sort_name_asc">이름 A→Z</string>
+
+    <string name="saved_locations_empty_title">저장된 위치가 없습니다</string>
+    <string name="saved_locations_empty_desc">지도에서 위치를 추가해 주세요</string>
+
+    <string name="saved_locations_clear_non_favorites">즐겨찾기 외 모두 삭제</string>
+    <string name="saved_locations_clear_non_favorites_confirm_msg">즐겨찾기에 추가되지 않은 모든 저장 위치를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="saved_locations_delete_confirm_title">위치 삭제</string>
+    <string name="saved_locations_delete_confirm_msg">"%1$s"을(를) 삭제하시겠습니까?</string>
+
+    <string name="saved_locations_edit_title">위치 편집</string>
+    <string name="saved_locations_rename">이름 변경</string>
+    <string name="saved_locations_more_options">더 보기</string>
+    <string name="action_add_favorite">즐겨찾기에 추가</string>
+
+    <!-- Routes -->
+    <string name="routes_title">경로</string>
+    <string name="routes_empty_title">경로가 없습니다</string>
+    <string name="routes_empty_desc">지도에서 경유지를 설정하여 경로를 저장하세요</string>
+    <string name="routes_rename_title">경로 이름 변경</string>
+    <string name="routes_name_label">경로 이름</string>
+    <string name="routes_delete_title">경로 삭제</string>
+    <string name="routes_delete_desc">이 경로를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="routes_action_load">불러오기</string>
+    <string name="routes_point_count">%1$d 개 지점</string>
+
+    <string name="map_route_active">경로가 실행 중입니다</string>
+    <string name="map_route_recording">지점 선택 중 (%1$d)</string>
+    <string name="map_route_record">경로 추가</string>
+    <string name="map_route_done">완료</string>
+    <string name="map_route_cancel">취소</string>
+
+    <!-- Settings -->
+    <string name="settings_title">설정</string>
+    <string name="settings_theme_title">테마</string>
+    <string name="settings_theme_system">시스템 기본값</string>
+    <string name="settings_theme_light">라이트 모드</string>
+    <string name="settings_theme_dark">다크 모드</string>
+    <string name="settings_language_title">표시 언어</string>
+    <string name="settings_language_system">시스템 설정 따르기</string>
+    <string name="settings_language_zh">繁體中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
+
+    <string name="settings_altitude_title">전역 고도 설정</string>
+    <string name="settings_altitude_desc">모든 모의 위치에 적용되는 고도</string>
+
+    <string name="settings_jitter_title">위치 지터 활성화</string>
+    <string name="settings_jitter_desc">실제 GPS의 미세한 좌표 드리프트를 시뮬레이션</string>
+
+    <!-- Permissions and System -->
+    <string name="permission_required_title">권한이 필요합니다</string>
+    <string name="permission_required_desc">Fake GPS가 백그라운드에서 실행되려면 알림 및 정밀 위치 권한이 필요합니다. 시스템 설정에서 허용해 주세요.</string>
+    <string name="permission_go_to_settings">설정으로 이동</string>
+
+    <string name="mock_app_required_title">모의 위치 권한</string>
+    <string name="mock_app_required_desc">개발자 옵션에서 모의 위치 앱 선택을 열고 Fake GPS를 선택해 주세요.</string>
+    <string name="mock_app_go_to_developer_options">개발자 옵션 열기</string>
+    <string name="mock_app_restart_required">적용 후 Fake GPS를 다시 시작해 주세요.</string>
+
+    <string name="mock_app_authorized">인증됨 — 모의 기능을 사용할 수 있습니다</string>
+    <string name="mock_app_unauthorized">미인증 — 개발자 옵션에서 이 앱을 선택해 주세요</string>
+    <string name="mock_app_check_failed">권한 확인 실패</string>
+
+    <string name="settings_sim_title">시뮬레이션 설정</string>
+    <string name="settings_sim_altitude">기본 고도 (미터)</string>
+    <string name="settings_sim_random_alt">고도 무작위화</string>
+    <string name="settings_sim_random_alt_desc">기본 고도에 ±0.5m 변동 추가</string>
+    <string name="settings_sim_jitter">좌표 지터</string>
+    <string name="settings_sim_jitter_desc">좌표에 미세한 오프셋 추가 (1~5m)</string>
+    <string name="settings_export_data">데이터 내보내기</string>
+    <string name="settings_import_data">데이터 가져오기</string>
+    <string name="settings_copy_diag">진단 정보 복사</string>
+    <string name="settings_diag_copied">클립보드에 복사됨</string>
+
+    <string name="export_success">내보내기 성공</string>
+    <string name="export_failed">내보내기 실패: %1$s</string>
+    <string name="import_failed">가져오기 실패: %1$s</string>
+    <string name="import_preview_title">가져오기 미리보기</string>
+    <string name="import_preview_version">데이터 버전: %1$s</string>
+    <string name="import_preview_locations">저장된 위치: %1$d</string>
+    <string name="import_preview_routes">경로: %1$d</string>
+
+    <!-- Pro Upgrade -->
+    <string name="pro_dialog_title">Pro로 업그레이드</string>
+    <string name="pro_dialog_desc">7일 무료 체험 후 월 $3.99. 모든 Pro 기능 잠금 해제:</string>
+    <string name="pro_dialog_feature_routes">커스텀 경로 생성 및 재생</string>
+    <string name="pro_dialog_feature_joystick">조이스틱으로 방향 제어</string>
+    <string name="pro_dialog_feature_storage">무제한 위치 저장</string>
+    <string name="pro_dialog_feature_export">데이터 가져오기/내보내기</string>
+    <string name="pro_dialog_feature_ads">모든 광고 제거</string>
+    <string name="pro_dialog_action_upgrade">7일 무료로 시작</string>
+
+    <string name="export_import_title">데이터 내보내기 / 가져오기</string>
+    <string name="export_data">모든 데이터 내보내기</string>
+    <string name="import_data">데이터 가져오기</string>
+
+    <string name="about_title">정보</string>
+    <string name="about_privacy">개인정보 처리방침</string>
+    <string name="about_developer_options">Android 개발자 옵션</string>
+    <string name="app_version">버전 %1$s</string>
+
+    <string name="map_route_pause">일시 정지</string>
+    <string name="map_route_start">경로 시작</string>
+    <string name="map_mock_stop">정지</string>
+    <string name="map_mock_start">위장 시작</string>
+    <string name="map_transport_walking">도보</string>
+    <string name="map_transport_cycling">자전거</string>
+    <string name="map_transport_driving">자동차</string>
+
+    <string name="map_search_location">장소 검색</string>
+    <string name="map_layer_toggle">지도 레이어 전환</string>
+    <string name="map_joystick_toggle">조이스틱 전환</string>
+    <string name="map_mode_single">단일 지점</string>
+    <string name="map_mode_route">경로 시뮬레이션</string>
+    <string name="map_route_add_point">지도를 탭하여 경유지 추가</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_of">%1$d / %2$d</string>
+    <string name="onboarding_step1_title">Fake GPS에 오신 것을 환영합니다</string>
+    <string name="onboarding_step1_desc">Fake GPS를 사용하면 모든 앱에서 GPS 위치를 위장할 수 있습니다.\n\n시작하기 전에 아래 2가지 설정을 완료해 주세요.</string>
+    <string name="onboarding_step2_title">개발자 옵션 활성화</string>
+    <string name="onboarding_step2_desc">설정 → 휴대폰 정보로 이동하여 빌드 번호를 7번 탭하면 개발자 옵션이 활성화됩니다.</string>
+    <string name="onboarding_step2_action">설정 열기</string>
+    <string name="onboarding_step3_title">모의 위치 앱 선택</string>
+    <string name="onboarding_step3_desc">설정 → 개발자 옵션 → 모의 위치 앱 선택으로 이동하여 Fake GPS를 선택해 주세요.</string>
+    <string name="onboarding_step3_action">개발자 옵션 열기</string>
+    <string name="onboarding_next">다음</string>
+    <string name="onboarding_done">완료</string>
+    <string name="onboarding_skip">건너뛰기</string>
+</resources>

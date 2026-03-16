@@ -1,0 +1,231 @@
+<resources>
+    <string name="app_name">Let\'s Go GPS</string>
+
+    <!-- Navigation & Bottom Bar -->
+    <string name="nav_map">マップ</string>
+    <string name="nav_saved_locations">位置</string>
+    <string name="nav_routes">ルート</string>
+    <string name="nav_settings">設定</string>
+
+    <!-- Location Mocking Service Status -->
+    <string name="status_route_playing">ルート再生中 · %1$s km/h</string>
+    <string name="status_route_paused">ルート一時停止中</string>
+    <string name="status_mocking">位置偽装中</string>
+    <string name="status_idle">準備中…</string>
+    <string name="status_service_running">Fake GPS 実行中</string>
+    <string name="action_stop">停止</string>
+
+    <!-- Map Screen -->
+    <string name="map_search_hint">場所を検索...</string>
+    <string name="map_search_clear">クリア</string>
+    <string name="map_layer_default">デフォルト</string>
+    <string name="map_layer_satellite">衛星</string>
+    <string name="map_layer_terrain">地形</string>
+    <string name="map_layer_hybrid">ハイブリッド</string>
+
+    <string name="map_my_location">現在地</string>
+    <string name="map_save_location_title">位置を保存</string>
+    <string name="map_save_location_name">名前</string>
+    <string name="map_save_location_desc">説明</string>
+    <string name="map_save_location_empty_error">名前を入力してください</string>
+    <string name="map_action_save">保存</string>
+    <string name="map_action_cancel">キャンセル</string>
+
+    <!-- Info Window Actions -->
+    <string name="action_delete">削除</string>
+    <string name="action_edit">編集</string>
+    <string name="action_favorite">お気に入り</string>
+    <string name="action_unfavorite">お気に入り解除</string>
+    <string name="action_start_mock">偽装開始</string>
+    <string name="action_settings">設定</string>
+    <string name="action_open">開く</string>
+    <string name="action_grant_location">位置情報を許可</string>
+    <string name="action_grant_notification">通知を許可</string>
+    <string name="action_ok">OK</string>
+    <string name="action_save">保存</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="action_clear">クリア</string>
+    <string name="action_close">閉じる</string>
+    <string name="action_go_to_settings">設定を開く</string>
+    <string name="action_please_wait">しばらくお待ちください...</string>
+    <string name="action_go_to_enable">有効にする</string>
+
+    <string name="error_title">エラー</string>
+    <string name="error_permission_required">権限が必要です</string>
+    <string name="error_mock_app_not_selected">開発者オプションで Fake GPS を模擬位置情報アプリとして選択してください。</string>
+    <string name="error_location_permission">この機能には位置情報の権限が必要です。</string>
+    <string name="error_notification_permission">バックグラウンド操作には通知の権限が必要です。</string>
+    <string name="error_floating_window">ジョイスティック機能には「他のアプリの上に重ねて表示」の権限が必要です。設定で有効にしてください。</string>
+    <string name="error_provider_setup_failed">エンジン設定失敗: %1$s</string>
+    <string name="error_set_location_failed">位置情報の送信失敗: %1$s</string>
+    <string name="error_provider_teardown_failed">停止失敗: %1$s</string>
+    <string name="error_invalid_input">無効な入力: %1$s</string>
+    <string name="error_permission_check_failed">権限チェック失敗: %1$s</string>
+    <string name="error_unknown">不明なエラー: %1$s</string>
+
+    <string name="transport_walk">🚶 徒歩</string>
+    <string name="transport_bike">🚲 自転車</string>
+    <string name="transport_car">🚗 車</string>
+
+    <string name="route_add_waypoint">+ 経由地を追加</string>
+    <string name="route_pause">⏸ ルート一時停止</string>
+    <string name="route_play">▶ ルート再生</string>
+    <string name="route_stop">⏹ ルート停止</string>
+    <string name="route_save_title">ルートを保存</string>
+
+    <string name="search_latlng">緯度 / 経度</string>
+    <string name="search_latlng_location">座標で検索</string>
+    <string name="search_title">場所を検索</string>
+    <string name="search_failed">検索失敗: %1$s</string>
+    <string name="search_hint_start">キーワードを入力して検索</string>
+    <string name="search_placeholder">場所、座標、または Plus Code を検索...</string>
+    <string name="search_hint">キーワードを入力して検索</string>
+    <string name="search_no_results">結果が見つかりません</string>
+    <string name="location_edit_title">位置を編集</string>
+    <string name="location_edit_name">位置の名前</string>
+    <string name="location_edit_desc">説明またはメモ</string>
+
+    <!-- Joystick & Control -->
+    <string name="joystick_collapse">折りたたむ</string>
+    <string name="joystick_expand">展開</string>
+    <string name="joystick_speed">速度: %1$s</string>
+    <string name="joystick_menu">メニュー</string>
+
+    <!-- Saved Locations -->
+    <string name="saved_locations_title">保存した位置</string>
+    <string name="saved_locations_search_hint">保存した位置を検索...</string>
+    <string name="saved_locations_all">すべて</string>
+    <string name="saved_locations_favorites">お気に入り</string>
+    <string name="sort_recent">最近追加</string>
+    <string name="sort_name_asc">名前 A→Z</string>
+
+    <string name="saved_locations_empty_title">保存した位置はありません</string>
+    <string name="saved_locations_empty_desc">マップから位置を追加してください</string>
+
+    <string name="saved_locations_clear_non_favorites">お気に入り以外を削除</string>
+    <string name="saved_locations_clear_non_favorites_confirm_msg">お気に入りに登録していない保存位置をすべて削除しますか？この操作は元に戻せません。</string>
+    <string name="saved_locations_delete_confirm_title">位置を削除</string>
+    <string name="saved_locations_delete_confirm_msg">「%1$s」を削除してもよろしいですか？</string>
+
+    <string name="saved_locations_edit_title">位置を編集</string>
+    <string name="saved_locations_rename">名前を変更</string>
+    <string name="saved_locations_more_options">その他のオプション</string>
+    <string name="action_add_favorite">お気に入りに追加</string>
+
+    <!-- Routes -->
+    <string name="routes_title">ルート</string>
+    <string name="routes_empty_title">ルートがありません</string>
+    <string name="routes_empty_desc">マップで経由地を設定してルートを保存してください</string>
+    <string name="routes_rename_title">ルート名を変更</string>
+    <string name="routes_name_label">ルート名</string>
+    <string name="routes_delete_title">ルートを削除</string>
+    <string name="routes_delete_desc">このルートを削除してもよろしいですか？この操作は元に戻せません。</string>
+    <string name="routes_action_load">読み込む</string>
+    <string name="routes_point_count">%1$d 地点</string>
+
+    <string name="map_route_active">ルートが実行中です</string>
+    <string name="map_route_recording">地点を選択中 (%1$d)</string>
+    <string name="map_route_record">ルートを追加</string>
+    <string name="map_route_done">完了</string>
+    <string name="map_route_cancel">キャンセル</string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="settings_theme_title">テーマ</string>
+    <string name="settings_theme_system">システム設定に従う</string>
+    <string name="settings_theme_light">ライトモード</string>
+    <string name="settings_theme_dark">ダークモード</string>
+    <string name="settings_language_title">表示言語</string>
+    <string name="settings_language_system">システム設定に従う</string>
+    <string name="settings_language_zh">繁體中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
+
+    <string name="settings_altitude_title">グローバル高度設定</string>
+    <string name="settings_altitude_desc">すべての模擬位置に適用される高度</string>
+
+    <string name="settings_jitter_title">位置ジッターを有効にする</string>
+    <string name="settings_jitter_desc">リアルな GPS の微小な座標ドリフトをシミュレート</string>
+
+    <!-- Permissions and System -->
+    <string name="permission_required_title">権限が必要です</string>
+    <string name="permission_required_desc">Fake GPS はバックグラウンドで動作するために通知と正確な位置情報の権限が必要です。システム設定で許可してください。</string>
+    <string name="permission_go_to_settings">設定を開く</string>
+
+    <string name="mock_app_required_title">模擬位置情報の権限</string>
+    <string name="mock_app_required_desc">開発者オプションで「模擬位置情報アプリを選択」を開き、Fake GPS を選択してください。</string>
+    <string name="mock_app_go_to_developer_options">開発者オプションを開く</string>
+    <string name="mock_app_restart_required">適用後、Fake GPS を再起動してください。</string>
+
+    <string name="mock_app_authorized">認証済み — 模擬機能が使用可能です</string>
+    <string name="mock_app_unauthorized">未認証 — 開発者オプションでこのアプリを選択してください</string>
+    <string name="mock_app_check_failed">権限チェック失敗</string>
+
+    <string name="settings_sim_title">シミュレーション設定</string>
+    <string name="settings_sim_altitude">デフォルト高度（メートル）</string>
+    <string name="settings_sim_random_alt">高度をランダム化</string>
+    <string name="settings_sim_random_alt_desc">基本高度に ±0.5m の変動を追加</string>
+    <string name="settings_sim_jitter">座標ジッター</string>
+    <string name="settings_sim_jitter_desc">座標に微小なオフセットを追加（1〜5m）</string>
+    <string name="settings_export_data">データをエクスポート</string>
+    <string name="settings_import_data">データをインポート</string>
+    <string name="settings_copy_diag">診断情報をコピー</string>
+    <string name="settings_diag_copied">クリップボードにコピーしました</string>
+
+    <string name="export_success">エクスポート成功</string>
+    <string name="export_failed">エクスポート失敗: %1$s</string>
+    <string name="import_failed">インポート失敗: %1$s</string>
+    <string name="import_preview_title">インポートプレビュー</string>
+    <string name="import_preview_version">データバージョン: %1$s</string>
+    <string name="import_preview_locations">保存した位置: %1$d</string>
+    <string name="import_preview_routes">ルート: %1$d</string>
+
+    <!-- Pro Upgrade -->
+    <string name="pro_dialog_title">Pro にアップグレード</string>
+    <string name="pro_dialog_desc">7日間無料体験、その後月額 $3.99。すべての Pro 機能をアンロック：</string>
+    <string name="pro_dialog_feature_routes">カスタムルートの作成と再生</string>
+    <string name="pro_dialog_feature_joystick">ジョイスティックによる方向制御</string>
+    <string name="pro_dialog_feature_storage">無制限の保存位置</string>
+    <string name="pro_dialog_feature_export">データのインポート／エクスポート</string>
+    <string name="pro_dialog_feature_ads">すべての広告を削除</string>
+    <string name="pro_dialog_action_upgrade">7日間無料で試す</string>
+
+    <string name="export_import_title">データのエクスポート／インポート</string>
+    <string name="export_data">すべてのデータをエクスポート</string>
+    <string name="import_data">データをインポート</string>
+
+    <string name="about_title">このアプリについて</string>
+    <string name="about_privacy">プライバシーポリシー</string>
+    <string name="about_developer_options">Android 開発者オプション</string>
+    <string name="app_version">バージョン %1$s</string>
+
+    <string name="map_route_pause">一時停止</string>
+    <string name="map_route_start">ルート開始</string>
+    <string name="map_mock_stop">停止</string>
+    <string name="map_mock_start">偽装開始</string>
+    <string name="map_transport_walking">徒歩</string>
+    <string name="map_transport_cycling">自転車</string>
+    <string name="map_transport_driving">車</string>
+
+    <string name="map_search_location">場所を検索</string>
+    <string name="map_layer_toggle">マップレイヤーを切替</string>
+    <string name="map_joystick_toggle">ジョイスティックを切替</string>
+    <string name="map_mode_single">単点偽装</string>
+    <string name="map_mode_route">ルートシミュレーション</string>
+    <string name="map_route_add_point">マップをタップして経由地を追加</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_of">%1$d / %2$d</string>
+    <string name="onboarding_step1_title">Fake GPS へようこそ</string>
+    <string name="onboarding_step1_desc">Fake GPS を使えば、どのアプリでも GPS 位置を偽装できます。\n\n始める前に、以下の 2 つの設定を完了してください。</string>
+    <string name="onboarding_step2_title">開発者オプションを有効にする</string>
+    <string name="onboarding_step2_desc">「設定 → 端末情報」を開き、「ビルド番号」を 7 回タップして開発者オプションを有効にしてください。</string>
+    <string name="onboarding_step2_action">設定を開く</string>
+    <string name="onboarding_step3_title">模擬位置情報アプリを選択</string>
+    <string name="onboarding_step3_desc">「設定 → 開発者オプション → 模擬位置情報アプリを選択」を開き、Fake GPS を選択してください。</string>
+    <string name="onboarding_step3_action">開発者オプションを開く</string>
+    <string name="onboarding_next">次へ</string>
+    <string name="onboarding_done">完了</string>
+    <string name="onboarding_skip">スキップ</string>
+</resources>
