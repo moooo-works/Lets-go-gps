@@ -54,6 +54,11 @@ fun ProUpgradeDialog(
                         Text(feature, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
+                Text(
+                    stringResource(R.string.pro_dialog_cancel_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         },
         confirmButton = {
