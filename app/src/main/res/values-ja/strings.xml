@@ -189,6 +189,7 @@
     <string name="pro_dialog_feature_storage">無制限の保存位置</string>
     <string name="pro_dialog_feature_export">データのインポート／エクスポート</string>
     <string name="pro_dialog_feature_ads">すべての広告を削除</string>
+    <string name="pro_dialog_cancel_note">試用期間終了まで料金は発生しません。Google Play でいつでもキャンセルできます。</string>
     <string name="pro_dialog_action_upgrade">7日間無料で試す</string>
 
     <string name="export_import_title">データのエクスポート／インポート</string>

@@ -189,6 +189,7 @@
     <string name="pro_dialog_feature_storage">무제한 위치 저장</string>
     <string name="pro_dialog_feature_export">데이터 가져오기/내보내기</string>
     <string name="pro_dialog_feature_ads">모든 광고 제거</string>
+    <string name="pro_dialog_cancel_note">체험 기간 종료 전까지 요금이 청구되지 않습니다. Google Play에서 언제든지 취소할 수 있습니다.</string>
     <string name="pro_dialog_action_upgrade">7일 무료로 시작</string>
 
     <string name="export_import_title">데이터 내보내기 / 가져오기</string>

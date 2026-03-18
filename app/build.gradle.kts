@@ -15,7 +15,7 @@ val localProperties = Properties().apply {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 2
+val versionPatch = 3
 
 android {
     namespace = "com.moooo_works.letsgogps"
