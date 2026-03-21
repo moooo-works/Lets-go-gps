@@ -13,6 +13,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.google.android.play.core.review.ReviewManagerFactory
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
@@ -203,6 +205,18 @@ fun AppNavigation(
         ) {
             composable("map") { backStackEntry ->
                 val viewModel: MapViewModel = hiltViewModel(backStackEntry)
+                val activity = LocalContext.current as android.app.Activity
+
+                LaunchedEffect(viewModel) {
+                    viewModel.triggerReview.collect {
+                        val manager = ReviewManagerFactory.create(activity)
+                        manager.requestReviewFlow().addOnCompleteListener { request ->
+                            if (request.isSuccessful) {
+                                manager.launchReviewFlow(activity, request.result)
+                            }
+                        }
+                    }
+                }
 
                 val selectedLat by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLat", null).collectAsState()
                 val selectedLng by backStackEntry.savedStateHandle.getStateFlow<Double?>("selectedLng", null).collectAsState()

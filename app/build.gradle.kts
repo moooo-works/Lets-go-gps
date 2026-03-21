@@ -15,7 +15,7 @@ val localProperties = Properties().apply {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 3
+val versionPatch = 4
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -133,6 +133,7 @@ dependencies {
 
     // Billing
     implementation(libs.billing)
+    implementation(libs.play.review)
 
     // Hilt
     implementation(libs.hilt.android)
