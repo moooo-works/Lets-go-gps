@@ -196,7 +196,7 @@ class AndroidLocationMockEngine : LocationMockEngine {
             this.latitude = latitude
             this.longitude = longitude
             this.altitude = altitude
-            this.accuracy = 5.0f
+            this.accuracy = 0.1f
             this.time = System.currentTimeMillis()
             if (sdkInt >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 this.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()

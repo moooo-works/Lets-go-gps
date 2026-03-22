@@ -110,7 +110,7 @@ class RouteSimulator @Inject constructor(
 
                 delay(TICK_DELAY_MS)
 
-                distanceCoveredInSegment += speedMps
+                distanceCoveredInSegment += speedMps * TICK_DELAY_MS / 1000.0
                 while (distanceCoveredInSegment >= segmentDistance && currentSegmentIndex < waypoints.size - 1) {
                     distanceCoveredInSegment -= segmentDistance
                     currentSegmentIndex++
@@ -187,7 +187,7 @@ class RouteSimulator @Inject constructor(
     }
 
     private companion object {
-        const val TICK_DELAY_MS = 1_000L
+        const val TICK_DELAY_MS = 50L
         const val DEFAULT_SPEED_MPS = 1.3888889 // ~5 km/h
         const val MIN_SPEED_MPS = 0.1
     }

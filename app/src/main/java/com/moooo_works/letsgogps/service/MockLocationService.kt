@@ -18,6 +18,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.RouteSimulator
+import com.moooo_works.letsgogps.domain.SimulationPoint
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
@@ -201,7 +202,7 @@ class MockLocationService : Service() {
                     if (current != null && mockStateRepository.mockStatus.value == MockStatus.MOCKING) {
                         performInjection(current)
                     }
-                    delay(200)
+                    delay(50)
                 }
             }
         } catch (e: Exception) {
@@ -215,8 +216,21 @@ class MockLocationService : Service() {
         if (!isProviderSetup) return
         stopLocationPushJob()
 
+        var lastRoutePoint: SimulationPoint? = null
+
         locationPushJob = serviceScope.launch {
-            routeSimulator.currentLocation.collect { point ->
+            // Collect route updates
+            launch {
+                routeSimulator.currentLocation.collect { point ->
+                    if (point != null) {
+                        lastRoutePoint = point
+                        mockStateRepository.setCurrentMockLocation(point.latLng)
+                    }
+                }
+            }
+            // Keep-alive: re-inject last known route location at 50ms to suppress real GPS
+            while (true) {
+                val point = lastRoutePoint
                 if (point != null) {
                     try {
                         mockEngine.setLocation(
@@ -226,12 +240,13 @@ class MockLocationService : Service() {
                             point.speed,
                             point.altitude
                         )
-                        mockStateRepository.setCurrentMockLocation(point.latLng)
                     } catch (e: Exception) {
                         mockStateRepository.setMockError(MockEngineError.SetLocation(e))
                         handleStop()
+                        break
                     }
                 }
+                delay(50)
             }
         }
         routeSimulator.play(serviceScope)
