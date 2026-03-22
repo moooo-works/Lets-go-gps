@@ -201,7 +201,7 @@ class MockLocationService : Service() {
                     if (current != null && mockStateRepository.mockStatus.value == MockStatus.MOCKING) {
                         performInjection(current)
                     }
-                    delay(1000)
+                    delay(200)
                 }
             }
         } catch (e: Exception) {

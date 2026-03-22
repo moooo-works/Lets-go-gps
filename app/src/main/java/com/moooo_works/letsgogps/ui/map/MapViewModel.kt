@@ -138,6 +138,10 @@ class MapViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isMocking = status != MockStatus.IDLE,
+                        mapMode = when (status) {
+                            MockStatus.ROUTE_PLAYING, MockStatus.ROUTE_PAUSED -> MapMode.ROUTE
+                            else -> it.mapMode
+                        },
                         simulationState = when (status) {
                             MockStatus.ROUTE_PLAYING -> SimulationState.PLAYING
                             MockStatus.ROUTE_PAUSED -> SimulationState.PAUSED
@@ -145,6 +149,16 @@ class MapViewModel @Inject constructor(
                         }
                     )
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            settingsRepository.observeRouteSpeed().collect { speed ->
+                val mode = TransportMode.values().find { it.speedKmh == speed }
+                _uiState.update { it.copy(
+                    speedKmh = speed,
+                    transportMode = mode ?: it.transportMode
+                ) }
             }
         }
 
