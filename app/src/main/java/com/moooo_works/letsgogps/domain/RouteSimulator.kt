@@ -74,14 +74,10 @@ class RouteSimulator @Inject constructor(
             }
 
             fun applyJitter(point: LatLng): LatLng {
-                return if (useJitter) {
-                    // Approx 1-5 meters jitter (0.00001 deg is ~1.1m)
-                    val latOffset = Random.nextDouble(-0.00003, 0.00003)
-                    val lngOffset = Random.nextDouble(-0.00003, 0.00003)
-                    LatLng(point.latitude + latOffset, point.longitude + lngOffset)
-                } else {
-                    point
-                }
+                // IMPORTANT: For route simulation, we generally want smooth movement.
+                // Jitter during a 4Hz-20Hz update makes the map icon shake violently.
+                // We disable it here for simulation stability.
+                return point
             }
 
             if (currentSegmentIndex == 0 && distanceCoveredInSegment == 0.0) {
@@ -187,7 +183,7 @@ class RouteSimulator @Inject constructor(
     }
 
     private companion object {
-        const val TICK_DELAY_MS = 50L
+        const val TICK_DELAY_MS = 250L
         const val DEFAULT_SPEED_MPS = 1.3888889 // ~5 km/h
         const val MIN_SPEED_MPS = 0.1
     }
