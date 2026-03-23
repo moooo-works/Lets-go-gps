@@ -114,21 +114,23 @@ class MockLocationService : Service() {
         }
     }
 
-    private fun performInjection(location: LatLng, bearing: Float = 0f, speed: Float = 0f) {
+    private fun performInjection(location: LatLng, bearing: Float = 0f, speed: Float = 0f, applyJitter: Boolean = true) {
         try {
             val altitude = if (cachedRandomAltitude) {
                 cachedAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
             } else cachedAltitude
 
-            // Important: We only apply jitter if NOT in route mode or if specifically needed for "stationary" mocking
-            // For routes, we pass the raw location from simulator to ensure a straight line
-            val target = location
+            val target = if (applyJitter && cachedJitter) {
+                val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
+                LatLng(location.latitude + latOffset, location.longitude + lngOffset)
+            } else location
 
             mockEngine.setLocation(
-                target.latitude, 
-                target.longitude, 
-                bearing = bearing, 
-                speed = speed, 
+                target.latitude,
+                target.longitude,
+                bearing = bearing,
+                speed = speed,
                 altitude = altitude
             )
             consecutiveInjectionFailures = 0
@@ -226,7 +228,7 @@ class MockLocationService : Service() {
                 routeSimulator.currentLocation.collect { point ->
                     if (point != null) {
                         mockStateRepository.setCurrentMockLocation(point.latLng)
-                        performInjection(point.latLng, point.bearing, point.speed)
+                        performInjection(point.latLng, point.bearing, point.speed, applyJitter = false)
                     }
                 }
             }

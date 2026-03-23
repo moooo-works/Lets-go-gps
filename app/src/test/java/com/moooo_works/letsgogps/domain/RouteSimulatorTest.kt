@@ -85,10 +85,10 @@ class RouteSimulatorTest {
     }
 
     @Test
-    fun `jitter is applied when enabled`() = runTest {
+    fun `jitter is disabled during route simulation for smooth movement`() = runTest {
         every { settingsRepository.observeCoordinateJitter() } returns flowOf(true)
         val simulator = RouteSimulator(settingsRepository)
-        
+
         val start = LatLng(25.0, 121.0)
         val end = LatLng(25.1, 121.1)
         simulator.setRoute(listOf(start, end))
@@ -103,13 +103,11 @@ class RouteSimulatorTest {
         advanceUntilIdle()
 
         val firstPoint = emittedPoints.filterNotNull().first()
-        // The emitted lat/lng should be slightly different from the exact waypoint due to jitter
-        assertNotEquals(start.latitude, firstPoint.latLng.latitude, 0.0)
-        assertNotEquals(start.longitude, firstPoint.latLng.longitude, 0.0)
-        
-        // Offset should be within ~5 meters (approx 0.00005 degrees)
-        assertTrue(Math.abs(firstPoint.latLng.latitude - start.latitude) < 0.0001)
-        
+        // Jitter is intentionally disabled during route simulation to prevent map icon shaking.
+        // The emitted lat/lng must exactly match the waypoint.
+        assertEquals(start.latitude, firstPoint.latLng.latitude, 0.0)
+        assertEquals(start.longitude, firstPoint.latLng.longitude, 0.0)
+
         job.cancel()
     }
 }
