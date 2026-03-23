@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Process
 import android.os.SystemClock
 import android.util.Log
+import com.google.android.gms.location.LocationServices
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,8 +40,15 @@ class AndroidLocationMockEngine : LocationMockEngine {
         this.sdkInt = sdkInt
         this.locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         this.appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        this.fusedClient = LocationServices.getFusedLocationProviderClient(context)
     }
-    private val mockProviders = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+    private lateinit var fusedClient: com.google.android.gms.location.FusedLocationProviderClient
+
+    private val mockProviders = listOf(
+        LocationManager.GPS_PROVIDER,
+        LocationManager.NETWORK_PROVIDER,
+        "passive"
+    )
     private val enabledProviders = linkedSetOf<String>()
     private val setupFailures = linkedMapOf<String, String>()
 
@@ -62,6 +70,14 @@ class AndroidLocationMockEngine : LocationMockEngine {
             reportError(MockEngineError.Setup(error), message)
             throw error
         }
+
+        // Enable FLP mock mode to directly override Fused Location Provider
+        try {
+            fusedClient.setMockMode(true)
+            Log.d(TAG, "FusedLocationProviderClient mock mode enabled")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to enable FLP mock mode: ${e.message}")
+        }
     }
 
     override fun teardownMockProvider() {
@@ -76,6 +92,13 @@ class AndroidLocationMockEngine : LocationMockEngine {
         }
         enabledProviders.clear()
         setupFailures.clear()
+
+        try {
+            fusedClient.setMockMode(false)
+            Log.d(TAG, "FusedLocationProviderClient mock mode disabled")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to disable FLP mock mode: ${e.message}")
+        }
     }
 
     override fun setLocation(
@@ -93,17 +116,33 @@ class AndroidLocationMockEngine : LocationMockEngine {
             throw error
         }
 
+        // CRITICAL: Synchronize timestamps for all providers to avoid flickering
+        val nowMs = System.currentTimeMillis()
+        val nowNanos = if (sdkInt >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            SystemClock.elapsedRealtimeNanos()
+        } else 0L
+
         enabledProviders.forEach { provider ->
             try {
-                val mockLocation = createMockLocation(provider, latitude, longitude, bearing, speed, altitude)
+                val mockLocation = createMockLocation(
+                    provider, latitude, longitude, bearing, speed, altitude, nowMs, nowNanos
+                )
                 locationManager.setTestProviderLocation(provider, mockLocation)
-                Log.d(TAG, "setLocation success provider=$provider lat=$latitude lng=$longitude bearing=$bearing speed=$speed altitude=$altitude")
             } catch (e: Exception) {
                 val message = "Provider $provider setLocation failed: ${e::class.java.simpleName}: ${e.message}"
                 Log.e(TAG, message, e)
                 reportError(MockEngineError.SetLocation(e), message)
-                throw IllegalStateException(message, e)
             }
+        }
+
+        // Inject directly into FusedLocationProviderClient to override Play Services FLP
+        try {
+            val flpLocation = createMockLocation(
+                "fused", latitude, longitude, bearing, speed, altitude, nowMs, nowNanos
+            )
+            fusedClient.setMockLocation(flpLocation)
+        } catch (e: Exception) {
+            Log.w(TAG, "FLP setMockLocation failed: ${e.message}")
         }
     }
 
@@ -190,19 +229,29 @@ class AndroidLocationMockEngine : LocationMockEngine {
         longitude: Double,
         bearing: Float,
         speed: Float,
-        altitude: Double
+        altitude: Double,
+        timeMs: Long,
+        elapsedNanos: Long
     ): Location {
         return Location(provider).apply {
             this.latitude = latitude
             this.longitude = longitude
             this.altitude = altitude
-            this.accuracy = 5.0f
-            this.time = System.currentTimeMillis()
+            this.accuracy = 2.0f 
+            this.time = timeMs
             if (sdkInt >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                this.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                this.elapsedRealtimeNanos = elapsedNanos
+            }
+            if (sdkInt >= Build.VERSION_CODES.Q) {
+                this.elapsedRealtimeUncertaintyNanos = 0.0
             }
             this.speed = speed
             this.bearing = bearing
+            if (sdkInt >= Build.VERSION_CODES.O) {
+                this.verticalAccuracyMeters = 2.0f
+                this.speedAccuracyMetersPerSecond = 0.5f
+                this.bearingAccuracyDegrees = 1.0f
+            }
         }
     }
 

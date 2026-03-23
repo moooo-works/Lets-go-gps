@@ -31,8 +31,11 @@ import com.google.maps.android.compose.MapType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -100,6 +103,9 @@ class MapViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
+    private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val triggerReview: SharedFlow<Unit> = _triggerReview.asSharedFlow()
+
     fun setMapMode(mode: MapMode) {
         if (_uiState.value.mapMode == mode) return
 
@@ -132,6 +138,10 @@ class MapViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isMocking = status != MockStatus.IDLE,
+                        mapMode = when (status) {
+                            MockStatus.ROUTE_PLAYING, MockStatus.ROUTE_PAUSED -> MapMode.ROUTE
+                            else -> it.mapMode
+                        },
                         simulationState = when (status) {
                             MockStatus.ROUTE_PLAYING -> SimulationState.PLAYING
                             MockStatus.ROUTE_PAUSED -> SimulationState.PAUSED
@@ -139,6 +149,16 @@ class MapViewModel @Inject constructor(
                         }
                     )
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            settingsRepository.observeRouteSpeed().collect { speed ->
+                val mode = TransportMode.values().find { it.speedKmh == speed }
+                _uiState.update { it.copy(
+                    speedKmh = speed,
+                    transportMode = mode ?: it.transportMode
+                ) }
             }
         }
 
@@ -230,6 +250,18 @@ class MapViewModel @Inject constructor(
         ContextCompat.startForegroundService(context, intent)
 
         saveLocationIfNeeded(target)
+        checkAndTriggerReview()
+    }
+
+    private fun checkAndTriggerReview() {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_REVIEW_SHOWN, false)) return
+        val count = prefs.getInt(KEY_MOCK_COUNT, 0) + 1
+        prefs.edit().putInt(KEY_MOCK_COUNT, count).apply()
+        if (count >= REVIEW_TRIGGER_COUNT) {
+            prefs.edit().putBoolean(KEY_REVIEW_SHOWN, true).apply()
+            viewModelScope.launch { _triggerReview.emit(Unit) }
+        }
     }
 
     fun stopMocking() {
@@ -622,5 +654,9 @@ class MapViewModel @Inject constructor(
     private companion object {
         const val KMH_TO_MPS_DIVISOR = 3.6
         const val FREE_LOCATION_LIMIT = 5
+        const val PREFS_NAME = "mockgps_prefs"
+        const val KEY_MOCK_COUNT = "mock_start_count"
+        const val KEY_REVIEW_SHOWN = "review_shown"
+        const val REVIEW_TRIGGER_COUNT = 3
     }
 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.RouteSimulator
+import com.moooo_works.letsgogps.domain.SimulationPoint
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
@@ -113,19 +114,25 @@ class MockLocationService : Service() {
         }
     }
 
-    private fun performInjection(location: LatLng) {
+    private fun performInjection(location: LatLng, bearing: Float = 0f, speed: Float = 0f, applyJitter: Boolean = true) {
         try {
             val altitude = if (cachedRandomAltitude) {
                 cachedAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
             } else cachedAltitude
 
-            val target = if (cachedJitter) {
+            val target = if (applyJitter && cachedJitter) {
                 val latOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
                 val lngOffset = kotlin.random.Random.nextDouble(-0.00003, 0.00003)
                 LatLng(location.latitude + latOffset, location.longitude + lngOffset)
             } else location
 
-            mockEngine.setLocation(target.latitude, target.longitude, altitude = altitude)
+            mockEngine.setLocation(
+                target.latitude,
+                target.longitude,
+                bearing = bearing,
+                speed = speed,
+                altitude = altitude
+            )
             consecutiveInjectionFailures = 0
         } catch (e: Exception) {
             Log.e(TAG, "Location injection failed", e)
@@ -193,15 +200,15 @@ class MockLocationService : Service() {
             mockStateRepository.setMockStatus(MockStatus.MOCKING)
             updateNotification(MockStatus.MOCKING)
 
-            // Keep-alive loop: ensure the system receives updates at least once per second
-            // even if the user isn't moving the joystick
+            // Keep-alive loop: ensure the system receives updates at least once per 500ms
+            // even if the user isn't moving the joystick. 500ms (2Hz) is enough.
             locationPushJob = serviceScope.launch {
                 while (true) {
                     val current = mockStateRepository.currentMockLocation.value
                     if (current != null && mockStateRepository.mockStatus.value == MockStatus.MOCKING) {
                         performInjection(current)
                     }
-                    delay(1000)
+                    delay(500)
                 }
             }
         } catch (e: Exception) {
@@ -216,22 +223,26 @@ class MockLocationService : Service() {
         stopLocationPushJob()
 
         locationPushJob = serviceScope.launch {
-            routeSimulator.currentLocation.collect { point ->
-                if (point != null) {
-                    try {
-                        mockEngine.setLocation(
-                            point.latLng.latitude,
-                            point.latLng.longitude,
-                            point.bearing,
-                            point.speed,
-                            point.altitude
-                        )
+            // 1. COLLECT & INJECT: When simulator emits, we inject immediately
+            launch {
+                routeSimulator.currentLocation.collect { point ->
+                    if (point != null) {
                         mockStateRepository.setCurrentMockLocation(point.latLng)
-                    } catch (e: Exception) {
-                        mockStateRepository.setMockError(MockEngineError.SetLocation(e))
-                        handleStop()
+                        performInjection(point.latLng, point.bearing, point.speed, applyJitter = false)
                     }
                 }
+            }
+
+            // 2. KEEP-ALIVE: If the simulator is idle/paused, re-inject last point every 1s 
+            // to prevent system from reclaiming the location, but don't do it rapidly.
+            while (isActive) {
+                if (routeSimulator.simulationState.value != SimulationState.PLAYING) {
+                    val current = mockStateRepository.currentMockLocation.value
+                    if (current != null) {
+                        performInjection(current)
+                    }
+                }
+                delay(1000) // Lower frequency for keep-alive to avoid interference
             }
         }
         routeSimulator.play(serviceScope)

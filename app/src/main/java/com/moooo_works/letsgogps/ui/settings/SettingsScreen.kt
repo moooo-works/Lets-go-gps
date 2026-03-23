@@ -520,6 +520,18 @@ fun SettingsScreen(
                 )
             }
 
+            // 版本號
+            val versionName = remember {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            }
+            Text(
+                text = "v$versionName",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
             if (showClearNonFavoritesDialog) {
                 AlertDialog(
                     onDismissRequest = { showClearNonFavoritesDialog = false },
