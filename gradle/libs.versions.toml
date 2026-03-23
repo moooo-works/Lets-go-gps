@@ -22,7 +22,7 @@ robolectric = "4.10.3"
 datastore = "1.0.0"
 openlocationcode = "1.0.4"
 admob = "23.1.0"
-billing = "6.2.1"
+billing = "7.1.0"
 play-review = "2.0.2"
 appcompat = "1.6.1"
 
