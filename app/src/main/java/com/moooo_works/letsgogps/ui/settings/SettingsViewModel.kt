@@ -36,8 +36,11 @@ import javax.inject.Inject
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.utils.GeoDistanceMeters
 import com.google.gson.annotations.SerializedName
-import org.xmlpull.v1.XmlPullParser
-import android.util.Xml
+import org.w3c.dom.Element
+import org.w3c.dom.NodeList
+import org.xml.sax.InputSource
+import java.io.StringReader
+import javax.xml.parsers.DocumentBuilderFactory
 
 @Keep
 data class ImportPreview(
@@ -403,95 +406,80 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun parseGpxContent(content: String): ExportData {
-        val parser = Xml.newPullParser()
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-        parser.setInput(content.reader())
+        val document = DocumentBuilderFactory.newInstance().apply {
+            isNamespaceAware = true
+        }.newDocumentBuilder().parse(InputSource(StringReader(content)))
+
+        fun Element.tagNameLocal(): String = localName ?: tagName.substringAfter(':')
+        fun NodeList.elements(): List<Element> =
+            (0 until length).mapNotNull { item(it) as? Element }
+        fun Element.directChildText(localTag: String): String {
+            val child = (0 until childNodes.length)
+                .mapNotNull { childNodes.item(it) as? Element }
+                .firstOrNull { it.tagNameLocal().equals(localTag, ignoreCase = true) }
+            return child?.textContent?.trim().orEmpty()
+        }
+        fun Element.descendants(localTag: String): List<Element> {
+            val namespaced = getElementsByTagNameNS("*", localTag).elements()
+            return if (namespaced.isNotEmpty()) namespaced else getElementsByTagName(localTag).elements()
+        }
 
         val waypoints = mutableListOf<ExportSavedLocation>()
         val routes = mutableListOf<ExportRoute>()
 
-        var inWpt = false; var inTrk = false; var inRte = false
-        var inTrkpt = false; var inRtept = false; var inMetadata = false
-
-        var currentWptLat = 0.0; var currentWptLon = 0.0; var currentWptName = ""
-        var currentTrkName = ""; var currentTrkPoints = mutableListOf<ExportRoutePoint>()
-        var currentRteName = ""; var currentRtePoints = mutableListOf<ExportRoutePoint>()
-        val currentText = StringBuilder()
-
-        var eventType = parser.eventType
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            when (eventType) {
-                XmlPullParser.START_TAG -> {
-                    currentText.clear()
-                    when (parser.name.lowercase()) {
-                        "metadata" -> inMetadata = true
-                        "wpt" -> {
-                            inWpt = true
-                            currentWptLat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull() ?: 0.0
-                            currentWptLon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull() ?: 0.0
-                            currentWptName = ""
-                        }
-                        "trk" -> { inTrk = true; currentTrkName = ""; currentTrkPoints = mutableListOf() }
-                        "trkpt" -> {
-                            inTrkpt = true
-                            val lat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull()
-                            val lon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull()
-                            if (lat != null && lon != null) currentTrkPoints.add(ExportRoutePoint(lat = lat, lng = lon))
-                        }
-                        "rte" -> { inRte = true; currentRteName = ""; currentRtePoints = mutableListOf() }
-                        "rtept" -> {
-                            inRtept = true
-                            val lat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull()
-                            val lon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull()
-                            if (lat != null && lon != null) currentRtePoints.add(ExportRoutePoint(lat = lat, lng = lon))
-                        }
-                    }
-                }
-                XmlPullParser.TEXT -> currentText.append(parser.text ?: "")
-                XmlPullParser.END_TAG -> {
-                    val text = currentText.toString().trim()
-                    when (parser.name.lowercase()) {
-                        "metadata" -> inMetadata = false
-                        "name" -> when {
-                            inMetadata || inTrkpt || inRtept -> { /* skip */ }
-                            inWpt -> currentWptName = text
-                            inTrk -> currentTrkName = text
-                            inRte -> currentRteName = text
-                        }
-                        "wpt" -> {
-                            if (currentWptLat != 0.0 || currentWptLon != 0.0) {
-                                waypoints.add(ExportSavedLocation(
-                                    name = currentWptName.ifBlank { "Waypoint ${waypoints.size + 1}" },
-                                    lat = currentWptLat,
-                                    lng = currentWptLon
-                                ))
-                            }
-                            inWpt = false
-                        }
-                        "trkpt" -> inTrkpt = false
-                        "trk" -> {
-                            if (currentTrkPoints.isNotEmpty()) {
-                                routes.add(ExportRoute(
-                                    name = currentTrkName.ifBlank { "Track ${routes.size + 1}" },
-                                    points = currentTrkPoints.toList()
-                                ))
-                            }
-                            inTrk = false
-                        }
-                        "rtept" -> inRtept = false
-                        "rte" -> {
-                            if (currentRtePoints.isNotEmpty()) {
-                                routes.add(ExportRoute(
-                                    name = currentRteName.ifBlank { "Route ${routes.size + 1}" },
-                                    points = currentRtePoints.toList()
-                                ))
-                            }
-                            inRte = false
-                        }
-                    }
-                }
+        val waypointNodes = document.getElementsByTagNameNS("*", "wpt").elements().ifEmpty {
+            document.getElementsByTagName("wpt").elements()
+        }
+        waypointNodes.forEach { waypoint ->
+            val lat = waypoint.getAttribute("lat").toDoubleOrNull()
+            val lon = waypoint.getAttribute("lon").toDoubleOrNull()
+            if (lat != null && lon != null) {
+                waypoints.add(
+                    ExportSavedLocation(
+                        name = waypoint.directChildText("name").ifBlank { "Waypoint ${waypoints.size + 1}" },
+                        lat = lat,
+                        lng = lon
+                    )
+                )
             }
-            eventType = parser.next()
+        }
+
+        val trackNodes = document.getElementsByTagNameNS("*", "trk").elements().ifEmpty {
+            document.getElementsByTagName("trk").elements()
+        }
+        trackNodes.forEach { track ->
+            val points = track.descendants("trkpt").mapNotNull { point ->
+                val lat = point.getAttribute("lat").toDoubleOrNull()
+                val lon = point.getAttribute("lon").toDoubleOrNull()
+                if (lat != null && lon != null) ExportRoutePoint(lat = lat, lng = lon) else null
+            }
+            if (points.isNotEmpty()) {
+                routes.add(
+                    ExportRoute(
+                        name = track.directChildText("name").ifBlank { "Track ${routes.size + 1}" },
+                        points = points
+                    )
+                )
+            }
+        }
+
+        val routeNodes = document.getElementsByTagNameNS("*", "rte").elements().ifEmpty {
+            document.getElementsByTagName("rte").elements()
+        }
+        routeNodes.forEach { route ->
+            val points = route.descendants("rtept").mapNotNull { point ->
+                val lat = point.getAttribute("lat").toDoubleOrNull()
+                val lon = point.getAttribute("lon").toDoubleOrNull()
+                if (lat != null && lon != null) ExportRoutePoint(lat = lat, lng = lon) else null
+            }
+            if (points.isNotEmpty()) {
+                routes.add(
+                    ExportRoute(
+                        name = route.directChildText("name").ifBlank { "Route ${routes.size + 1}" },
+                        points = points
+                    )
+                )
+            }
         }
 
         return ExportData(schemaVersion = 0, savedLocations = waypoints, routes = routes)
