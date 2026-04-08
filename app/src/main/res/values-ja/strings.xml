@@ -175,9 +175,12 @@
 
     <string name="export_success">エクスポート成功</string>
     <string name="export_failed">エクスポート失敗: %1$s</string>
+    <string name="export_format_hint">エクスポート形式：JSON</string>
     <string name="import_failed">インポート失敗: %1$s</string>
+    <string name="import_format_hint">対応形式：JSON、GPX</string>
     <string name="import_preview_title">インポートプレビュー</string>
     <string name="import_preview_version">データバージョン: %1$s</string>
+    <string name="import_preview_format">形式：%1$s</string>
     <string name="import_preview_locations">保存した位置: %1$d</string>
     <string name="import_preview_routes">ルート: %1$d</string>
 

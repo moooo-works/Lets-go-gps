@@ -175,9 +175,12 @@
 
     <string name="export_success">내보내기 성공</string>
     <string name="export_failed">내보내기 실패: %1$s</string>
+    <string name="export_format_hint">내보내기 형식: JSON</string>
     <string name="import_failed">가져오기 실패: %1$s</string>
+    <string name="import_format_hint">지원 형식: JSON, GPX</string>
     <string name="import_preview_title">가져오기 미리보기</string>
     <string name="import_preview_version">데이터 버전: %1$s</string>
+    <string name="import_preview_format">형식: %1$s</string>
     <string name="import_preview_locations">저장된 위치: %1$d</string>
     <string name="import_preview_routes">경로: %1$d</string>
 
