@@ -35,13 +35,16 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import com.moooo_works.letsgogps.utils.GeoDistanceMeters
 import com.google.gson.annotations.SerializedName
+import org.xmlpull.v1.XmlPullParser
+import android.util.Xml
 
 @Keep
 data class ImportPreview(
     val uri: Uri,
     val schemaVersion: Int,
     val savedLocationsCount: Int,
-    val routesCount: Int
+    val routesCount: Int,
+    val isGpx: Boolean = false
 )
 
 @Keep
@@ -233,22 +236,42 @@ class SettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                var jsonString = ""
+                var fileContent = ""
                 withContext(Dispatchers.IO) {
                     val inputStream = context.contentResolver.openInputStream(uri)
                         ?: throw java.io.IOException("openInputStream returned null")
                     inputStream.use { stream ->
-                        jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
+                        fileContent = stream.bufferedReader(Charsets.UTF_8).readText()
                     }
                 }
 
-                if (jsonString.isBlank()) {
+                if (fileContent.isBlank()) {
                     withContext(Dispatchers.Main) { onResult(false, null, "File is empty") }
                     return@launch
                 }
 
+                val isGpx = fileContent.trimStart().startsWith("<")
+
+                if (isGpx) {
+                    val exportData = try {
+                        parseGpxContent(fileContent)
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) { onResult(false, null, "Invalid GPX: ${e.message}") }
+                        return@launch
+                    }
+                    val preview = ImportPreview(
+                        uri = uri,
+                        schemaVersion = 0,
+                        savedLocationsCount = exportData.savedLocations.size,
+                        routesCount = exportData.routes.size,
+                        isGpx = true
+                    )
+                    withContext(Dispatchers.Main) { onResult(true, preview, null) }
+                    return@launch
+                }
+
                 val exportData = try {
-                    gson.fromJson(jsonString, ExportData::class.java)
+                    gson.fromJson(fileContent, ExportData::class.java)
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) { onResult(false, null, "Invalid JSON format: ${e.message}") }
                     return@launch
@@ -285,16 +308,20 @@ class SettingsViewModel @Inject constructor(
     fun applyImportData(preview: ImportPreview, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
             try {
-                var jsonString = ""
+                var fileContent = ""
                 withContext(Dispatchers.IO) {
                     val inputStream = context.contentResolver.openInputStream(preview.uri)
                         ?: throw java.io.IOException("openInputStream returned null")
                     inputStream.use { stream ->
-                        jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
+                        fileContent = stream.bufferedReader(Charsets.UTF_8).readText()
                     }
                 }
 
-                val exportData = gson.fromJson(jsonString, ExportData::class.java)
+                val exportData = if (preview.isGpx) {
+                    parseGpxContent(fileContent)
+                } else {
+                    gson.fromJson(fileContent, ExportData::class.java)
+                }
 
                 var importedLocations = 0
                 var skippedLocations = 0
@@ -371,6 +398,101 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun parseGpxContent(content: String): ExportData {
+        val parser = Xml.newPullParser()
+        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
+        parser.setInput(content.reader())
+
+        val waypoints = mutableListOf<ExportSavedLocation>()
+        val routes = mutableListOf<ExportRoute>()
+
+        var inWpt = false; var inTrk = false; var inRte = false
+        var inTrkpt = false; var inRtept = false; var inMetadata = false
+
+        var currentWptLat = 0.0; var currentWptLon = 0.0; var currentWptName = ""
+        var currentTrkName = ""; var currentTrkPoints = mutableListOf<ExportRoutePoint>()
+        var currentRteName = ""; var currentRtePoints = mutableListOf<ExportRoutePoint>()
+        val currentText = StringBuilder()
+
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            when (eventType) {
+                XmlPullParser.START_TAG -> {
+                    currentText.clear()
+                    when (parser.name.lowercase()) {
+                        "metadata" -> inMetadata = true
+                        "wpt" -> {
+                            inWpt = true
+                            currentWptLat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull() ?: 0.0
+                            currentWptLon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull() ?: 0.0
+                            currentWptName = ""
+                        }
+                        "trk" -> { inTrk = true; currentTrkName = ""; currentTrkPoints = mutableListOf() }
+                        "trkpt" -> {
+                            inTrkpt = true
+                            val lat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull()
+                            val lon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull()
+                            if (lat != null && lon != null) currentTrkPoints.add(ExportRoutePoint(lat = lat, lng = lon))
+                        }
+                        "rte" -> { inRte = true; currentRteName = ""; currentRtePoints = mutableListOf() }
+                        "rtept" -> {
+                            inRtept = true
+                            val lat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull()
+                            val lon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull()
+                            if (lat != null && lon != null) currentRtePoints.add(ExportRoutePoint(lat = lat, lng = lon))
+                        }
+                    }
+                }
+                XmlPullParser.TEXT -> currentText.append(parser.text ?: "")
+                XmlPullParser.END_TAG -> {
+                    val text = currentText.toString().trim()
+                    when (parser.name.lowercase()) {
+                        "metadata" -> inMetadata = false
+                        "name" -> when {
+                            inMetadata || inTrkpt || inRtept -> { /* skip */ }
+                            inWpt -> currentWptName = text
+                            inTrk -> currentTrkName = text
+                            inRte -> currentRteName = text
+                        }
+                        "wpt" -> {
+                            if (currentWptLat != 0.0 || currentWptLon != 0.0) {
+                                waypoints.add(ExportSavedLocation(
+                                    name = currentWptName.ifBlank { "Waypoint ${waypoints.size + 1}" },
+                                    lat = currentWptLat,
+                                    lng = currentWptLon
+                                ))
+                            }
+                            inWpt = false
+                        }
+                        "trkpt" -> inTrkpt = false
+                        "trk" -> {
+                            if (currentTrkPoints.isNotEmpty()) {
+                                routes.add(ExportRoute(
+                                    name = currentTrkName.ifBlank { "Track ${routes.size + 1}" },
+                                    points = currentTrkPoints.toList()
+                                ))
+                            }
+                            inTrk = false
+                        }
+                        "rtept" -> inRtept = false
+                        "rte" -> {
+                            if (currentRtePoints.isNotEmpty()) {
+                                routes.add(ExportRoute(
+                                    name = currentRteName.ifBlank { "Route ${routes.size + 1}" },
+                                    points = currentRtePoints.toList()
+                                ))
+                            }
+                            inRte = false
+                        }
+                    }
+                }
+            }
+            eventType = parser.next()
+        }
+
+        return ExportData(schemaVersion = 0, savedLocations = waypoints, routes = routes)
     }
 
     private suspend fun insertRoute(locationRepository: LocationRepository, name: String, points: List<ExportRoutePoint>) {
