@@ -183,6 +183,8 @@
     <string name="import_preview_format">形式：%1$s</string>
     <string name="import_preview_locations">保存した位置: %1$d</string>
     <string name="import_preview_routes">ルート: %1$d</string>
+    <string name="import_result_locations">位置：%1$d 件インポート、%2$d 件スキップ。</string>
+    <string name="import_result_routes">ルート：%1$d 件インポート、%2$d 件スキップ。</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Pro にアップグレード</string>

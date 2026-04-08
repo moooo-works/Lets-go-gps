@@ -183,6 +183,8 @@
     <string name="import_preview_format">Format: %1$s</string>
     <string name="import_preview_locations">Saved Locations: %1$d</string>
     <string name="import_preview_routes">Routes: %1$d</string>
+    <string name="import_result_locations">Locations: %1$d imported, %2$d skipped.</string>
+    <string name="import_result_routes">Routes: %1$d imported, %2$d skipped.</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Upgrade to Pro</string>

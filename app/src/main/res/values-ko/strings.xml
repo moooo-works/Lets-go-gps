@@ -183,6 +183,8 @@
     <string name="import_preview_format">형식: %1$s</string>
     <string name="import_preview_locations">저장된 위치: %1$d</string>
     <string name="import_preview_routes">경로: %1$d</string>
+    <string name="import_result_locations">위치: %1$d 가져옴, %2$d 건너뜀.</string>
+    <string name="import_result_routes">경로: %1$d 가져옴, %2$d 건너뜀.</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Pro로 업그레이드</string>

@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.utils.GeoDistanceMeters
 import com.google.gson.annotations.SerializedName
 import org.xmlpull.v1.XmlPullParser
@@ -387,7 +388,8 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
 
-                val summaryMsg = "Locations: ${importedLocations} imported, ${skippedLocations} skipped.\nRoutes: ${importedRoutes} imported, ${skippedRoutes} skipped."
+                val summaryMsg = context.getString(R.string.import_result_locations, importedLocations, skippedLocations) + "\n" +
+                    context.getString(R.string.import_result_routes, importedRoutes, skippedRoutes)
                 withContext(Dispatchers.Main) {
                     onResult(true, summaryMsg)
                 }

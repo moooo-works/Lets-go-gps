@@ -183,6 +183,8 @@
     <string name="import_preview_format">格式：%1$s</string>
     <string name="import_preview_locations">儲存位置：%1$d</string>
     <string name="import_preview_routes">路線：%1$d</string>
+    <string name="import_result_locations">位置：%1$d 已匯入，%2$d 已略過。</string>
+    <string name="import_result_routes">路線：%1$d 已匯入，%2$d 已略過。</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">升級至 Pro</string>
