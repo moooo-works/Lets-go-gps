@@ -170,6 +170,83 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun testExportData_RoundTripParseAndApply_Success() = runTest {
+        val exportUri = mockk<Uri>()
+        val importUri = mockk<Uri>()
+        val outputStream = ByteArrayOutputStream()
+        every { contentResolver.openOutputStream(exportUri) } returns outputStream
+
+        coEvery { locationRepository.getAllLocations() } returnsMany listOf(
+            flowOf(
+                listOf(SavedLocation(id = 1, name = "Loc 1", latitude = 10.0, longitude = 20.0, createdAt = 123L))
+            ),
+            flowOf(emptyList())
+        )
+        coEvery { locationRepository.observeRoutes() } returnsMany listOf(
+            flowOf(listOf(RouteSummary(id = 1, name = "Route 1", pointCount = 2, createdAt = 123L))),
+            flowOf(emptyList())
+        )
+        coEvery { locationRepository.getRouteWithPoints(1) } returns RouteWithPoints(
+            route = com.moooo_works.letsgogps.data.model.Route(id = 1, name = "Route 1", createdAt = 123L),
+            points = listOf(
+                RoutePoint(id = 1, routeId = 1, orderIndex = 0, latitude = 10.0, longitude = 20.0, dwellSeconds = 5),
+                RoutePoint(id = 2, routeId = 1, orderIndex = 1, latitude = 11.0, longitude = 21.0, dwellSeconds = 0)
+            )
+        )
+
+        var exportSuccess: Boolean? = null
+        val exportLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.exportDataToUri(exportUri, true, true) { success, _ ->
+            exportSuccess = success
+            exportLatch.countDown()
+        }
+        exportLatch.await()
+
+        assertEquals(true, exportSuccess)
+        val exportedJson = outputStream.toString()
+        assertTrue(exportedJson.contains("\"schemaVersion\""))
+        assertTrue(exportedJson.contains("\"savedLocations\""))
+        assertTrue(exportedJson.contains("\"routes\""))
+
+        every { contentResolver.openInputStream(importUri) } answers {
+            ByteArrayInputStream(exportedJson.toByteArray())
+        }
+
+        var previewResult: ImportPreview? = null
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(importUri) { success, preview, error ->
+            parseSuccess = success
+            previewResult = preview
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertEquals(true, parseSuccess)
+        assertEquals(null, parseError)
+        assertEquals(1, previewResult!!.savedLocationsCount)
+        assertEquals(1, previewResult!!.routesCount)
+
+        var applySuccess: Boolean? = null
+        var applyMessage: String? = null
+        val applyLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.applyImportData(previewResult!!) { success, message ->
+            applySuccess = success
+            applyMessage = message
+            applyLatch.countDown()
+        }
+        applyLatch.await()
+
+        assertEquals(true, applySuccess)
+        assertTrue(applyMessage!!.contains("Locations: 1 imported, 0 skipped"))
+        assertTrue(applyMessage!!.contains("Routes: 1 imported, 0 skipped"))
+        coVerify(exactly = 1) { locationRepository.saveLocation(match { it.name == "Loc 1" }) }
+        coVerify(exactly = 1) { locationRepository.insertRouteWithPoints("Route 1", any()) }
+    }
+
+    @Test
     fun testApplyImportData_SavedLocationsDeduplication_19m_21m() = runTest {
         val jsonInput = """
             {

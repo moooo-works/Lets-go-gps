@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.annotation.Keep
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moooo_works.letsgogps.data.model.RoutePoint
@@ -33,7 +34,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import com.moooo_works.letsgogps.utils.GeoDistanceMeters
+import com.google.gson.annotations.SerializedName
 
+@Keep
 data class ImportPreview(
     val uri: Uri,
     val schemaVersion: Int,
@@ -41,31 +44,51 @@ data class ImportPreview(
     val routesCount: Int
 )
 
+@Keep
 data class ExportData(
+    @SerializedName("schemaVersion")
     val schemaVersion: Int = 2,
+    @SerializedName("exportedAt")
     val exportedAt: Long? = null,
+    @SerializedName("savedLocations")
     val savedLocations: List<ExportSavedLocation> = emptyList(),
+    @SerializedName("routes")
     val routes: List<ExportRoute> = emptyList()
 )
 
+@Keep
 data class ExportSavedLocation(
+    @SerializedName("id")
     val id: Int? = null,
+    @SerializedName("name")
     val name: String,
+    @SerializedName("lat")
     val lat: Double,
+    @SerializedName("lng")
     val lng: Double,
+    @SerializedName("createdAt")
     val createdAt: Long? = null
 )
 
+@Keep
 data class ExportRoutePoint(
+    @SerializedName("lat")
     val lat: Double,
+    @SerializedName("lng")
     val lng: Double,
+    @SerializedName("dwellSeconds")
     val dwellSeconds: Int = 0
 )
 
+@Keep
 data class ExportRoute(
+    @SerializedName("routeId")
     val routeId: Int? = null,
+    @SerializedName("name")
     val name: String,
+    @SerializedName("points")
     val points: List<ExportRoutePoint> = emptyList(),
+    @SerializedName("createdAt")
     val createdAt: Long? = null
 )
 
@@ -289,7 +312,7 @@ class SettingsViewModel @Inject constructor(
                     if (!isDuplicate) {
                         locationRepository.saveLocation(
                             SavedLocation(
-                                name = exportedLoc.name ?: "Imported Location",
+                                name = exportedLoc.name,
                                 latitude = exportedLoc.lat,
                                 longitude = exportedLoc.lng,
                                 createdAt = exportedLoc.createdAt ?: System.currentTimeMillis()
@@ -307,7 +330,7 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 exportData.routes.forEach { exportedRoute ->
-                    val exportedName = exportedRoute.name ?: "Imported Route"
+                    val exportedName = exportedRoute.name
                     val exportedNameClean = exportedName.trim().lowercase()
                     val exportedPoints = exportedRoute.points
 

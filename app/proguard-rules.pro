@@ -21,6 +21,10 @@
 # 保留所有資料模型（用於 JSON 序列化）
 -keep class com.moooo_works.letsgogps.data.** { *; }
 -keep class com.moooo_works.letsgogps.domain.model.** { *; }
+-keep class com.moooo_works.letsgogps.ui.settings.ExportData { *; }
+-keep class com.moooo_works.letsgogps.ui.settings.ExportSavedLocation { *; }
+-keep class com.moooo_works.letsgogps.ui.settings.ExportRoute { *; }
+-keep class com.moooo_works.letsgogps.ui.settings.ExportRoutePoint { *; }
 
 # ===== Google Maps =====
 -keep class com.google.android.gms.maps.** { *; }
