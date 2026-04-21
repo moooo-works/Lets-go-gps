@@ -46,6 +46,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.moooo_works.letsgogps.ui.map.MapScreen
 import com.moooo_works.letsgogps.ui.map.MapViewModel
+import com.moooo_works.letsgogps.ui.map.SearchViewModel
 import com.moooo_works.letsgogps.ui.routes.RoutesScreen
 import com.moooo_works.letsgogps.ui.routes.RoutesViewModel
 import com.moooo_works.letsgogps.ui.savedlocations.SavedLocationsScreen
@@ -205,6 +206,7 @@ fun AppNavigation(
         ) {
             composable("map") { backStackEntry ->
                 val viewModel: MapViewModel = hiltViewModel(backStackEntry)
+                val searchViewModel: SearchViewModel = hiltViewModel(backStackEntry)
                 val activity = LocalContext.current as android.app.Activity
 
                 LaunchedEffect(viewModel) {
@@ -230,6 +232,7 @@ fun AppNavigation(
 
                 MapScreen(
                     viewModel = viewModel,
+                    searchViewModel = searchViewModel,
                     selectedLocation = if (selectedLat != null && selectedLng != null) {
                         com.google.android.gms.maps.model.LatLng(selectedLat!!, selectedLng!!)
                     } else {

@@ -20,7 +20,6 @@ import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
-import com.moooo_works.letsgogps.domain.repository.SearchRepository
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,42 +42,7 @@ import com.moooo_works.letsgogps.data.engine.MockEngineError
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import android.app.Activity
 
-enum class TransportMode(val speedKmh: Double) {
-    WALKING(5.0),
-    CYCLING(15.0),
-    DRIVING(40.0)
-}
-
-enum class MapMode {
-    SINGLE,
-    ROUTE
-}
-
-data class MapUiState(
-    val mapMode: MapMode = MapMode.SINGLE,
-    val isMocking: Boolean = false,
-    val centerLocation: LatLng = LatLng(25.0330, 121.5654),
-    val mockError: MockError? = null,
-    val hasMockPermission: Boolean = false,
-    val savedLocations: List<SavedLocation> = emptyList(),
-    val waypoints: List<LatLng> = emptyList(),
-    val simulationState: SimulationState = SimulationState.IDLE,
-    val speedKmh: Double = 5.0,
-    val transportMode: TransportMode = TransportMode.WALKING,
-    val currentLocation: LatLng? = null,
-    val currentMockLocation: LatLng? = null,
-    val routeFitRequestToken: Long? = null,
-    val isSearching: Boolean = false,
-    val searchResults: List<GeocodedLocation> = emptyList(),
-    val searchError: String? = null,
-    val isJoystickEnabled: Boolean = false,
-    val isProActive: Boolean = false,
-    val showProUpgrade: Boolean = false,
-    val mapType: MapType = MapType.NORMAL,
-    val selectedLocation: SavedLocation? = null,
-    val showEditLocationDialog: Boolean = false,
-    val showOnboarding: Boolean = false
-)
+// State definitions are in MapState.kt
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -86,7 +50,6 @@ class MapViewModel @Inject constructor(
     private val repository: LocationRepository,
     private val mockStateRepository: MockStateRepository,
     private val settingsRepository: SettingsRepository,
-    private val searchRepository: SearchRepository,
     private val routeSimulator: RouteSimulator,
     private val joystickOverlayManager: JoystickOverlayManager,
     private val proRepository: ProRepository,
@@ -376,27 +339,8 @@ class MapViewModel @Inject constructor(
         return true
     }
 
-    fun searchLocations(query: String) {
-        if (query.isBlank()) return
-        
-        viewModelScope.launch {
-            _uiState.update { it.copy(isSearching = true, searchError = null) }
-            searchRepository.search(query)
-                .onSuccess { results ->
-                    _uiState.update { it.copy(searchResults = results, isSearching = false) }
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(searchError = error.message, isSearching = false) }
-                }
-        }
-    }
-
-    fun clearSearchResults() {
-        _uiState.update { it.copy(searchResults = emptyList(), searchError = null) }
-    }
-
     fun selectSearchResult(location: GeocodedLocation) {
-        _uiState.update { it.copy(centerLocation = location.latLng, searchResults = emptyList()) }
+        _uiState.update { it.copy(centerLocation = location.latLng) }
     }
 
     fun showProUpgradeDialog() {
