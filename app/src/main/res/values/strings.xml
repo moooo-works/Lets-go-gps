@@ -98,6 +98,7 @@
     <string name="saved_locations_favorites">我的最愛</string>
     <string name="sort_recent">最近新增</string>
     <string name="sort_name_asc">名稱 A→Z</string>
+    <string name="sort_custom">自訂排序</string>
     
     <string name="saved_locations_empty_title">目前沒有儲存的位置</string>
     <string name="saved_locations_empty_desc">請至地圖新增你要保存的座標</string>
@@ -234,4 +235,18 @@
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_done">完成設定</string>
     <string name="onboarding_skip">跳過</string>
+    <!-- Route loop / bounce mode -->
+    <string name="route_loop_none">一次</string>
+    <string name="route_loop_loop">循環</string>
+    <string name="route_loop_bounce">折返</string>
+    <string name="route_loop_cd">切換播放模式</string>
+    <string name="route_loop_active_loop">🔁 循環中</string>
+    <string name="route_loop_active_bounce">↔ 折返中</string>
+    <string name="route_progress_distance">%1$.1f / %2$.1f 公里</string>
+    <!-- Loop/Bounce new-feature tip -->
+    <string name="tip_loop_bounce_title">🆕 路線播放新功能</string>
+    <string name="tip_loop_bounce_body">現已支援「循環播放」與「折返模式」！路線播放時，點擊按鈕即可切換。</string>
+    <string name="tip_sort_title">🆕 全新功能：手動排序</string>
+    <string name="tip_sort_body">現在你可以在「自訂排序」模式下，長按列表右側把手上下拖曳，將最愛的位置自由排序囉！</string>
+    <string name="tip_dismiss">好，我知道了</string>
 </resources>

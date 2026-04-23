@@ -234,4 +234,16 @@
     <string name="onboarding_next">次へ</string>
     <string name="onboarding_done">完了</string>
     <string name="onboarding_skip">スキップ</string>
+    <!-- Route loop / bounce mode -->
+    <string name="route_loop_none">1回</string>
+    <string name="route_loop_loop">ループ</string>
+    <string name="route_loop_bounce">往復</string>
+    <string name="route_loop_cd">再生モード切替</string>
+    <string name="route_loop_active_loop">🔁 ループ中</string>
+    <string name="route_loop_active_bounce">↔ 往復中</string>
+    <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
+    <!-- Loop/Bounce new-feature tip -->
+    <string name="tip_loop_bounce_title">🆕 新機能：ルート再生モード</string>
+    <string name="tip_loop_bounce_body">ループと往復モードが追加されました！ルート再生中にボタンをタップして切り替えてください。</string>
+    <string name="tip_dismiss">了解しました</string>
 </resources>

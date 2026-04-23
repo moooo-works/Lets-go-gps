@@ -188,12 +188,10 @@ class AndroidLocationMockEngine : LocationMockEngine {
             }
             Log.d(TAG, "addTestProvider success provider=$provider")
         }.onFailure { addError ->
-            if (addError !is IllegalArgumentException) {
-                val message = "Provider $provider setup failed: ${addError::class.java.simpleName}: ${addError.message}"
-                setupFailures[provider] = message
-                Log.e(TAG, message, addError)
-                reportError(MockEngineError.Setup(addError), message)
-            }
+            val message = "Provider $provider setup failed: ${addError::class.java.simpleName}: ${addError.message}"
+            setupFailures[provider] = message
+            Log.w(TAG, message, addError)
+            return
         }
 
         runCatching {
@@ -202,10 +200,9 @@ class AndroidLocationMockEngine : LocationMockEngine {
             setupFailures.remove(provider)
             Log.d(TAG, "setTestProviderEnabled success provider=$provider")
         }.onFailure { enableError ->
-            val message = "Provider $provider setup failed: ${enableError::class.java.simpleName}: ${enableError.message}"
+            val message = "Provider $provider setEnabled failed: ${enableError::class.java.simpleName}: ${enableError.message}"
             setupFailures[provider] = message
-            Log.e(TAG, message, enableError)
-            reportError(MockEngineError.Setup(enableError), message)
+            Log.w(TAG, message, enableError)
         }
     }
 

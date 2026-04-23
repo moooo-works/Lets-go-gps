@@ -234,4 +234,16 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_done">Done</string>
     <string name="onboarding_skip">Skip</string>
+    <!-- Route loop / bounce mode -->
+    <string name="route_loop_none">Once</string>
+    <string name="route_loop_loop">Loop</string>
+    <string name="route_loop_bounce">Bounce</string>
+    <string name="route_loop_cd">Cycle playback mode</string>
+    <string name="route_loop_active_loop">🔁 Looping</string>
+    <string name="route_loop_active_bounce">↔ Bouncing</string>
+    <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
+    <!-- Loop/Bounce new-feature tip -->
+    <string name="tip_loop_bounce_title">🆕 New: Route Playback Modes</string>
+    <string name="tip_loop_bounce_body">Loop and Bounce modes are now available! Tap the mode button while a route is playing to switch.</string>
+    <string name="tip_dismiss">Got it</string>
 </resources>

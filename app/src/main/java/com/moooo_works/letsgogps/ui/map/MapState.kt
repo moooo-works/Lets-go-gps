@@ -3,6 +3,8 @@ package com.moooo_works.letsgogps.ui.map
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.MapType
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import com.moooo_works.letsgogps.domain.LoopMode
+import com.moooo_works.letsgogps.domain.RouteProgress
 import com.moooo_works.letsgogps.domain.SimulationState
 
 enum class TransportMode(val speedKmh: Double) {
@@ -36,5 +38,11 @@ data class MapUiState(
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,
     val showEditLocationDialog: Boolean = false,
-    val showOnboarding: Boolean = false
+    val showOnboarding: Boolean = false,
+    /** Current loop/bounce playback mode for route simulation. */
+    val loopMode: LoopMode = LoopMode.NONE,
+    /** Non-null while the route simulation is PLAYING or PAUSED; null when IDLE. */
+    val routeProgress: RouteProgress? = null,
+    /** Show a "what's new" tip card about loop/bounce modes. */
+    val showLoopBounceTip: Boolean = false
 )

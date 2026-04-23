@@ -234,4 +234,16 @@
     <string name="onboarding_next">다음</string>
     <string name="onboarding_done">완료</string>
     <string name="onboarding_skip">건너뛰기</string>
+    <!-- Route loop / bounce mode -->
+    <string name="route_loop_none">1회</string>
+    <string name="route_loop_loop">루프</string>
+    <string name="route_loop_bounce">왕복</string>
+    <string name="route_loop_cd">재생 모드 전환</string>
+    <string name="route_loop_active_loop">🔁 루프 중</string>
+    <string name="route_loop_active_bounce">↔ 왕복 중</string>
+    <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
+    <!-- Loop/Bounce new-feature tip -->
+    <string name="tip_loop_bounce_title">🆕 신규: 경로 재생 모드</string>
+    <string name="tip_loop_bounce_body">루프와 왕복 모드가 추가되었습니다! 경로 재생 중 버튼을 탭하여 전환하세요.</string>
+    <string name="tip_dismiss">알겠습니다</string>
 </resources>

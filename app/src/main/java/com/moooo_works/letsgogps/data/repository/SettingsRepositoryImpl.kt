@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
@@ -36,6 +37,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val MAP_MODE = stringPreferencesKey("map_mode")
         val MAP_TYPE = stringPreferencesKey("map_type")
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
+        val LOOP_BOUNCE_TIP_SEEN_VERSION = intPreferencesKey("loop_bounce_tip_seen_version")
+        val HAS_SEEN_SORT_TIP = booleanPreferencesKey("has_seen_sort_tip")
 
         const val DEFAULT_ALTITUDE = 15.0
         const val DEFAULT_ROUTE_SPEED = 5.0
@@ -122,5 +125,21 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setOnboardingDone() {
         dataStore.edit { it[HAS_SEEN_ONBOARDING] = true }
+    }
+
+    override fun getLoopBounceTipSeenVersion(): Flow<Int> {
+        return dataStore.data.map { it[LOOP_BOUNCE_TIP_SEEN_VERSION] ?: 0 }
+    }
+
+    override suspend fun setLoopBounceTipSeen(version: Int) {
+        dataStore.edit { it[LOOP_BOUNCE_TIP_SEEN_VERSION] = version }
+    }
+
+    override fun hasSeenSortTip(): Flow<Boolean> {
+        return dataStore.data.map { it[HAS_SEEN_SORT_TIP] ?: false }
+    }
+
+    override suspend fun setSortTipSeen() {
+        dataStore.edit { it[HAS_SEEN_SORT_TIP] = true }
     }
 }

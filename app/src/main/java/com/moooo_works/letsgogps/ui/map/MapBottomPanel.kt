@@ -1,42 +1,59 @@
 package com.moooo_works.letsgogps.ui.map
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moooo_works.letsgogps.R
+import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
+import com.moooo_works.letsgogps.ui.theme.Accent500
 
 /**
  * Bottom control panel containing the mode selector tabs, the primary
- * action button (start/stop mock / play/pause route), and the route-specific
- * controls (speed slider, transport chips, save/clear buttons).
+ * action button (start/stop mock / play/pause route), the loop-mode
+ * cycle button (NONE → LOOP → BOUNCE), an animated progress bar when
+ * a route is active, and the route-specific controls.
  */
 @Composable
 fun MapBottomPanel(
@@ -54,6 +71,7 @@ fun MapBottomPanel(
     onSetTransportMode: (TransportMode) -> Unit,
     onShowSaveRoute: () -> Unit,
     onClearRoute: () -> Unit,
+    onCycleLoopMode: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -78,7 +96,8 @@ fun MapBottomPanel(
             // Primary action buttons row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (uiState.mapMode == MapMode.ROUTE) {
                     OutlinedButton(
@@ -123,6 +142,14 @@ fun MapBottomPanel(
                         }
                     )
                 }
+
+                // Loop/Bounce cycle button — only shown in ROUTE mode with ≥ 2 waypoints
+                if (uiState.mapMode == MapMode.ROUTE && uiState.waypoints.size >= 2) {
+                    LoopModeButton(
+                        loopMode = uiState.loopMode,
+                        onClick = onCycleLoopMode
+                    )
+                }
             }
 
             // Route-only controls
@@ -138,6 +165,46 @@ fun MapBottomPanel(
         }
     }
 }
+
+// ─── Loop mode cycle button ───────────────────────────────────────────────────
+
+@Composable
+private fun LoopModeButton(loopMode: LoopMode, onClick: () -> Unit) {
+    val isActive = loopMode != LoopMode.NONE
+    val (icon, label) = when (loopMode) {
+        LoopMode.NONE   -> Icons.Filled.Repeat  to stringResource(R.string.route_loop_none)
+        LoopMode.LOOP   -> Icons.Filled.Repeat  to stringResource(R.string.route_loop_loop)
+        LoopMode.BOUNCE -> Icons.Filled.SyncAlt to stringResource(R.string.route_loop_bounce)
+    }
+    Surface(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick),
+        color = if (isActive) Accent500 else MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = stringResource(R.string.route_loop_cd),
+                modifier = Modifier.size(16.dp),
+                tint = if (isActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                color = if (isActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+// ─── Mode selector ────────────────────────────────────────────────────────────
 
 @Composable
 private fun MapModeSelector(
@@ -185,6 +252,8 @@ private fun MapModeSelector(
         }
     }
 }
+
+// ─── Route controls ───────────────────────────────────────────────────────────
 
 @Composable
 private fun RouteControls(

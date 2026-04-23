@@ -11,5 +11,6 @@ data class SavedLocation(
     val longitude: Double,
     val isFavorite: Boolean = false,
     val description: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val sortOrder: Long = System.currentTimeMillis()
 )

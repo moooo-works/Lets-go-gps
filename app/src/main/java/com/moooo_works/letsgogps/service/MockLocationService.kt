@@ -47,6 +47,7 @@ class MockLocationService : Service() {
     private var isProviderSetup = false
     private var currentSpeedKmh: Double = 5.0
     private var consecutiveInjectionFailures = 0
+    private var currentRouteProgress: com.moooo_works.letsgogps.domain.RouteProgress? = null
 
     // Settings Cache to avoid frequent DataStore I/O during rapid injection
     private var cachedAltitude: Double = 15.0
@@ -109,6 +110,18 @@ class MockLocationService : Service() {
                 currentSpeedKmh = speed
                 if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING) {
                     updateNotification(MockStatus.ROUTE_PLAYING)
+                }
+            }
+        }
+
+        // 5. Track route progress for notifications
+        @OptIn(FlowPreview::class)
+        serviceScope.launch {
+            routeSimulator.routeProgress.sample(1000).collect { progress ->
+                currentRouteProgress = progress
+                val status = mockStateRepository.mockStatus.value
+                if (status == MockStatus.ROUTE_PLAYING || status == MockStatus.ROUTE_PAUSED) {
+                    updateNotification(status)
                 }
             }
         }
@@ -292,13 +305,21 @@ class MockLocationService : Service() {
             PendingIntent.FLAG_IMMUTABLE)
 
         val contentText = when (status) {
-            MockStatus.ROUTE_PLAYING -> getString(R.string.status_route_playing, "%.0f".format(currentSpeedKmh))
-            MockStatus.ROUTE_PAUSED  -> getString(R.string.status_route_paused)
+            MockStatus.ROUTE_PLAYING -> {
+                val base = getString(R.string.status_route_playing, "%.0f".format(currentSpeedKmh))
+                val p = currentRouteProgress
+                if (p != null) "$base (${String.format(java.util.Locale.getDefault(), "%.1f / %.1f km", p.coveredKm, p.totalKm)})" else base
+            }
+            MockStatus.ROUTE_PAUSED  -> {
+                val base = getString(R.string.status_route_paused)
+                val p = currentRouteProgress
+                if (p != null) "$base (${String.format(java.util.Locale.getDefault(), "%.1f / %.1f km", p.coveredKm, p.totalKm)})" else base
+            }
             MockStatus.MOCKING       -> getString(R.string.status_mocking)
             MockStatus.IDLE          -> getString(R.string.status_idle)
         }
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.status_service_running))
             .setContentText(contentText)
             .setSmallIcon(R.drawable.ic_stat_mockgps)
@@ -306,7 +327,16 @@ class MockLocationService : Service() {
             .setOngoing(true)
             .addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+            .setOnlyAlertOnce(true)
+
+        val p = currentRouteProgress
+        if ((status == MockStatus.ROUTE_PLAYING || status == MockStatus.ROUTE_PAUSED) && p != null) {
+            builder.setProgress(100, (p.fraction * 100).toInt(), false)
+        } else {
+            builder.setProgress(0, 0, false)
+        }
+
+        return builder.build()
     }
 
     private fun createNotificationChannel() {
@@ -328,7 +358,7 @@ class MockLocationService : Service() {
     companion object {
         private const val TAG = "MockLocationService"
         private const val MAX_INJECTION_FAILURES = 5  // 連續失敗 5 次（約 5 秒）後停止
-        const val CHANNEL_ID = "MockLocationServiceChannelV3"
+        const val CHANNEL_ID = "MockLocationServiceChannelV5"
         const val NOTIFICATION_ID = 1
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"
         const val ACTION_START_ROUTE = "ACTION_START_ROUTE"

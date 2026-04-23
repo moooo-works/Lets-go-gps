@@ -30,4 +30,11 @@ interface SettingsRepository {
 
     fun hasSeenOnboarding(): Flow<Boolean>
     suspend fun setOnboardingDone()
+
+    /** Returns the feature-tip version the user has already acknowledged (0 = never). */
+    fun getLoopBounceTipSeenVersion(): Flow<Int>
+    suspend fun setLoopBounceTipSeen(version: Int)
+
+    fun hasSeenSortTip(): Flow<Boolean>
+    suspend fun setSortTipSeen()
 }
