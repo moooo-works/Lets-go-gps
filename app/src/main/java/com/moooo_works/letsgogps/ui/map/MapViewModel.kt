@@ -20,7 +20,6 @@ import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
-import com.moooo_works.letsgogps.domain.repository.SearchRepository
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -40,45 +39,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.moooo_works.letsgogps.data.engine.MockEngineError
+import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import android.app.Activity
 
-enum class TransportMode(val speedKmh: Double) {
-    WALKING(5.0),
-    CYCLING(15.0),
-    DRIVING(40.0)
-}
-
-enum class MapMode {
-    SINGLE,
-    ROUTE
-}
-
-data class MapUiState(
-    val mapMode: MapMode = MapMode.SINGLE,
-    val isMocking: Boolean = false,
-    val centerLocation: LatLng = LatLng(25.0330, 121.5654),
-    val mockError: MockError? = null,
-    val hasMockPermission: Boolean = false,
-    val savedLocations: List<SavedLocation> = emptyList(),
-    val waypoints: List<LatLng> = emptyList(),
-    val simulationState: SimulationState = SimulationState.IDLE,
-    val speedKmh: Double = 5.0,
-    val transportMode: TransportMode = TransportMode.WALKING,
-    val currentLocation: LatLng? = null,
-    val currentMockLocation: LatLng? = null,
-    val routeFitRequestToken: Long? = null,
-    val isSearching: Boolean = false,
-    val searchResults: List<GeocodedLocation> = emptyList(),
-    val searchError: String? = null,
-    val isJoystickEnabled: Boolean = false,
-    val isProActive: Boolean = false,
-    val showProUpgrade: Boolean = false,
-    val mapType: MapType = MapType.NORMAL,
-    val selectedLocation: SavedLocation? = null,
-    val showEditLocationDialog: Boolean = false,
-    val showOnboarding: Boolean = false
-)
+// State definitions are in MapState.kt
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -86,7 +51,6 @@ class MapViewModel @Inject constructor(
     private val repository: LocationRepository,
     private val mockStateRepository: MockStateRepository,
     private val settingsRepository: SettingsRepository,
-    private val searchRepository: SearchRepository,
     private val routeSimulator: RouteSimulator,
     private val joystickOverlayManager: JoystickOverlayManager,
     private val proRepository: ProRepository,
@@ -211,11 +175,49 @@ class MapViewModel @Inject constructor(
                 if (!seen) _uiState.update { it.copy(showOnboarding = true) }
             }
         }
+
+        // Collect route simulation progress
+        viewModelScope.launch {
+            routeSimulator.routeProgress.collect { progress ->
+                _uiState.update { it.copy(routeProgress = progress) }
+            }
+        }
+
+        // Show "what's new" tip if user hasn't seen this feature version yet
+        viewModelScope.launch {
+            settingsRepository.getLoopBounceTipSeenVersion().collect { seenVersion ->
+                if (seenVersion < LOOP_BOUNCE_TIP_VERSION) {
+                    _uiState.update { it.copy(showLoopBounceTip = true) }
+                }
+            }
+        }
     }
 
     fun dismissOnboarding() {
         _uiState.update { it.copy(showOnboarding = false) }
         viewModelScope.launch { settingsRepository.setOnboardingDone() }
+    }
+
+    /**
+     * Cycles the loop mode through NONE → LOOP → BOUNCE → NONE.
+     * Propagates the new mode to [RouteSimulator] immediately.
+     */
+    fun cycleLoopMode() {
+        val next = when (_uiState.value.loopMode) {
+            LoopMode.NONE -> LoopMode.LOOP
+            LoopMode.LOOP -> LoopMode.BOUNCE
+            LoopMode.BOUNCE -> LoopMode.NONE
+        }
+        routeSimulator.setLoopMode(next)
+        _uiState.update { it.copy(loopMode = next) }
+    }
+
+    /** Dismiss the "loop/bounce is available" new-feature tip and persist the ack. */
+    fun dismissLoopBounceTip() {
+        _uiState.update { it.copy(showLoopBounceTip = false) }
+        viewModelScope.launch {
+            settingsRepository.setLoopBounceTipSeen(LOOP_BOUNCE_TIP_VERSION)
+        }
     }
 
     private fun checkMockPermission(): MockPermissionStatus {
@@ -376,27 +378,8 @@ class MapViewModel @Inject constructor(
         return true
     }
 
-    fun searchLocations(query: String) {
-        if (query.isBlank()) return
-        
-        viewModelScope.launch {
-            _uiState.update { it.copy(isSearching = true, searchError = null) }
-            searchRepository.search(query)
-                .onSuccess { results ->
-                    _uiState.update { it.copy(searchResults = results, isSearching = false) }
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(searchError = error.message, isSearching = false) }
-                }
-        }
-    }
-
-    fun clearSearchResults() {
-        _uiState.update { it.copy(searchResults = emptyList(), searchError = null) }
-    }
-
     fun selectSearchResult(location: GeocodedLocation) {
-        _uiState.update { it.copy(centerLocation = location.latLng, searchResults = emptyList()) }
+        _uiState.update { it.copy(centerLocation = location.latLng) }
     }
 
     fun showProUpgradeDialog() {
@@ -464,9 +447,6 @@ class MapViewModel @Inject constructor(
 
     private fun saveLocationIfNeeded(latLng: LatLng) {
         viewModelScope.launch {
-            if (!_uiState.value.isProActive && _uiState.value.savedLocations.size >= FREE_LOCATION_LIMIT) {
-                return@launch
-            }
             val epsilon = 0.0001
             val exists = _uiState.value.savedLocations.any {
                 kotlin.math.abs(it.latitude - latLng.latitude) < epsilon &&
@@ -653,10 +633,11 @@ class MapViewModel @Inject constructor(
 
     private companion object {
         const val KMH_TO_MPS_DIVISOR = 3.6
-        const val FREE_LOCATION_LIMIT = 5
         const val PREFS_NAME = "mockgps_prefs"
         const val KEY_MOCK_COUNT = "mock_start_count"
         const val KEY_REVIEW_SHOWN = "review_shown"
         const val REVIEW_TRIGGER_COUNT = 3
+        /** Bump this when a new feature tip should be shown again to existing users. */
+        const val LOOP_BOUNCE_TIP_VERSION = 1
     }
 }

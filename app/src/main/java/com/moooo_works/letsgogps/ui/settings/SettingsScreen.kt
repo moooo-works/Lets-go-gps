@@ -459,6 +459,7 @@ fun SettingsScreen(
                 )
                 SettingsMenuItem(
                     label = stringResource(R.string.settings_import_data),
+                    subtitle = stringResource(R.string.import_format_hint),
                     locked = !isProActive,
                     onClick = {
                         if (!isProActive) viewModel.requestProUpgrade()
@@ -555,21 +556,30 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsMenuItem(label: String, locked: Boolean = false, onClick: () -> Unit) {
+private fun SettingsMenuItem(label: String, subtitle: String? = null, locked: Boolean = false, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .heightIn(min = 56.dp)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (locked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (locked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+            )
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
         Icon(
             if (locked) Icons.Default.Lock else Icons.Default.KeyboardArrowRight,
             contentDescription = null,
@@ -614,6 +624,12 @@ private fun ExportOptionsDialog(
                     )
                     Text(stringResource(R.string.routes_title))
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.export_format_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         },
         confirmButton = {
@@ -645,7 +661,7 @@ private fun ImportPreviewDialog(
         title = { Text(stringResource(R.string.import_preview_title)) },
         text = {
             Column {
-                Text(stringResource(R.string.import_preview_version, preview.schemaVersion))
+                Text(stringResource(R.string.import_preview_format, if (preview.isGpx) "GPX" else "JSON"))
                 Text(stringResource(R.string.import_preview_locations, preview.savedLocationsCount))
                 Text(stringResource(R.string.import_preview_routes, preview.routesCount))
             }

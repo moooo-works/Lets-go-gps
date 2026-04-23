@@ -8,7 +8,7 @@ import com.moooo_works.letsgogps.data.model.Route
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.SavedLocation
 
-@Database(entities = [SavedLocation::class, Route::class, RoutePoint::class], version = 3, exportSchema = false)
+@Database(entities = [SavedLocation::class, Route::class, RoutePoint::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
     abstract fun routeDao(): RouteDao
@@ -25,6 +25,16 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
                     "ALTER TABLE saved_locations ADD COLUMN description TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "ALTER TABLE saved_locations ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0"
+                )
+                database.execSQL(
+                    "UPDATE saved_locations SET sortOrder = createdAt"
                 )
             }
         }

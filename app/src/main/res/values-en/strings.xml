@@ -175,11 +175,16 @@
     
     <string name="export_success">Export successful</string>
     <string name="export_failed">Export failed: %1$s</string>
+    <string name="export_format_hint">Export format: JSON</string>
     <string name="import_failed">Import failed: %1$s</string>
+    <string name="import_format_hint">Supported formats: JSON, GPX</string>
     <string name="import_preview_title">Import Preview</string>
     <string name="import_preview_version">Data Version: %1$s</string>
+    <string name="import_preview_format">Format: %1$s</string>
     <string name="import_preview_locations">Saved Locations: %1$d</string>
     <string name="import_preview_routes">Routes: %1$d</string>
+    <string name="import_result_locations">Locations: %1$d imported, %2$d skipped.</string>
+    <string name="import_result_routes">Routes: %1$d imported, %2$d skipped.</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Upgrade to Pro</string>
@@ -229,4 +234,16 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_done">Done</string>
     <string name="onboarding_skip">Skip</string>
+    <!-- Route loop / bounce mode -->
+    <string name="route_loop_none">Once</string>
+    <string name="route_loop_loop">Loop</string>
+    <string name="route_loop_bounce">Bounce</string>
+    <string name="route_loop_cd">Cycle playback mode</string>
+    <string name="route_loop_active_loop">🔁 Looping</string>
+    <string name="route_loop_active_bounce">↔ Bouncing</string>
+    <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
+    <!-- Loop/Bounce new-feature tip -->
+    <string name="tip_loop_bounce_title">🆕 New: Route Playback Modes</string>
+    <string name="tip_loop_bounce_body">Loop and Bounce modes are now available! Tap the mode button while a route is playing to switch.</string>
+    <string name="tip_dismiss">Got it</string>
 </resources>

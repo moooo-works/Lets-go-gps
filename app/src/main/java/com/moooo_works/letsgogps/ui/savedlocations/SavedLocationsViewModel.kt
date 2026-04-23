@@ -21,13 +21,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 enum class SavedLocationsSortOption {
+    CUSTOM,
     RECENT,
     NAME_ASC
 }
 
 data class SavedLocationsUiState(
     val query: String = "",
-    val sortOption: SavedLocationsSortOption = SavedLocationsSortOption.RECENT,
+    val sortOption: SavedLocationsSortOption = SavedLocationsSortOption.CUSTOM,
     val showHistory: Boolean = true,
     val showFavorites: Boolean = true
 )
@@ -35,7 +36,8 @@ data class SavedLocationsUiState(
 @HiltViewModel
 class SavedLocationsViewModel @Inject constructor(
     private val repository: LocationRepository,
-    private val proRepository: ProRepository
+    private val proRepository: ProRepository,
+    private val settingsRepository: com.moooo_works.letsgogps.domain.repository.SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SavedLocationsUiState())
@@ -43,17 +45,27 @@ class SavedLocationsViewModel @Inject constructor(
 
     val isProActive: StateFlow<Boolean> = proRepository.isProActive
 
-    private val totalLocationsCount: StateFlow<Int> = repository
-        .observeSavedLocations("", SavedLocationsSortOption.RECENT.name, showHistory = true, showFavorites = true)
-        .map { it.size }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
-    val canAddMoreLocations: StateFlow<Boolean> = combine(isProActive, totalLocationsCount) { isPro, count ->
-        isPro || count < FREE_LOCATION_LIMIT
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+    val canAddMoreLocations: StateFlow<Boolean> = MutableStateFlow(true).asStateFlow()
 
     private val _showProUpgrade = MutableStateFlow(false)
     val showProUpgrade: StateFlow<Boolean> = _showProUpgrade.asStateFlow()
+
+    val showSortTip: StateFlow<Boolean> = combine(
+        settingsRepository.hasSeenOnboarding(),
+        settingsRepository.hasSeenSortTip()
+    ) { onboardingDone, tipSeen ->
+        onboardingDone && !tipSeen
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    fun dismissSortTip() {
+        viewModelScope.launch {
+            settingsRepository.setSortTipSeen()
+        }
+    }
 
     fun dismissProUpgrade() { _showProUpgrade.value = false }
 
@@ -126,6 +138,18 @@ class SavedLocationsViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateSortOrder(locations: List<SavedLocation>) {
+        val baseTime = System.currentTimeMillis()
+        viewModelScope.launch {
+            locations.forEachIndexed { index, location ->
+                val newOrder = baseTime - index
+                if (location.sortOrder != newOrder) {
+                    repository.updateLocation(location.copy(sortOrder = newOrder))
+                }
+            }
+        }
+    }
 }
 
 private data class QueryParams(
@@ -135,4 +159,3 @@ private data class QueryParams(
     val showFavorites: Boolean
 )
 
-private const val FREE_LOCATION_LIMIT = 5

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let's Go GPS - Feature Graphic Generator</title>
+    <!-- 使用 Google Fonts 引入現代感字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet">
+    <!-- 引入 html2canvas 幫助直接儲存圖片 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #2c2c2c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: white;
+        }
+
+        /* 這裡定義 1024x500 的 Feature Graphic */
+        .feature-graphic {
+            width: 1024px;
+            height: 500px;
+            /* 與 icon 相同的粉紫漸層 */
+            background: linear-gradient(135deg, #FFD6E0 0%, #C8B6FF 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 8px; /* 預覽用，存檔其實是方形的 */
+        }
+
+        /* 左側：放大版的 icon 元素 */
+        .left-content {
+            width: 55%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon-image {
+            /* 放大 icon 來顯示地圖格線、pin、虛線路徑 */
+            width: 650px;
+            height: 650px;
+            object-fit: contain;
+            /* 稍微位移與放大，製造截取放大的視覺效果 */
+            transform: scale(1.15) translateX(30px) translateY(10px);
+            /* 增加柔和、立體的投影 */
+            filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.15));
+        }
+
+        /* 右側：文字區塊 */
+        .right-content {
+            width: 45%;
+            padding-right: 60px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Glassmorphism 風格文字卡片 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 28px;
+            padding: 40px 45px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 68px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.95);
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            margin-top: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #e0e0e0;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            line-height: 1.6;
+            color: #bbb;
+        }
+        
+        .instructions code {
+            background: #444;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1024x500 Feature Graphic 區塊 -->
+    <div class="feature-graphic" id="capture">
+        <div class="left-content">
+            <!-- 來源圖片為同目錄下的 play_store_icon_512.png -->
+            <img src="play_store_icon_512.png" alt="Map Icon" class="icon-image" id="previewIcon" onerror="this.src='https://placehold.co/512x512?text=找不到+play_store_icon_512.png'">
+        </div>
+        
+        <div class="right-content">
+            <div class="glass-card">
+                <h1 class="title">Let's Go GPS</h1>
+                <div class="subtitle">模擬 GPS · 測試定位 App</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="downloadImage()">⬇️ 下載 1024x500 宣傳圖</button>
+    </div>
+
+    <div class="instructions">
+        <p>1. 將 <code>play_store_icon_512.png</code> 放在與此 HTML 同一個資料夾下。<br>
+        2. 若圖片沒有顯示，請確保檔名完全正確。<br>
+        3. 點擊下載按鈕即可另存為 <code>feature_graphic_1024x500.png</code>，或直接使用 Mac 的 Cmd+Shift+4 截圖。</p>
+    </div>
+
+    <script>
+        function downloadImage() {
+            const captureDiv = document.getElementById('capture');
+            // 由於圓角是為了預覽好看，截圖時暫時移除圓角以達到精確的方形邊緣
+            captureDiv.style.borderRadius = '0';
+            
+            html2canvas(captureDiv, {
+                scale: 1, // 確保以 1:1 的比例 (1024x500) 輸出
+                useCORS: true,
+                backgroundColor: null,
+                width: 1024,
+                height: 500
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'feature_graphic_1024x500.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // 截圖完成後恢復圓角
+                captureDiv.style.borderRadius = '8px';
+            });
+        }
+    </script>
+</body>
+</html>

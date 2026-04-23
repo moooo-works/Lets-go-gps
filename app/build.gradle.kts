@@ -15,7 +15,7 @@ val localProperties = Properties().apply {
 
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 9
+val versionPatch = 13
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -119,6 +119,7 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
     implementation(libs.material.icons.extended)
+    implementation(libs.reorderable)
 
     // Gson
     implementation(libs.gson)

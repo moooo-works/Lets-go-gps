@@ -25,6 +25,7 @@ admob = "23.1.0"
 billing = "7.1.0"
 play-review = "2.0.2"
 appcompat = "1.6.1"
+reorderable = "0.9.6"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -63,6 +64,7 @@ admob = { group = "com.google.android.gms", name = "play-services-ads", version.
 billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 play-review = { group = "com.google.android.play", name = "review-ktx", version.ref = "play-review" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+reorderable = { group = "org.burnoutcrew.composereorderable", name = "reorderable", version.ref = "reorderable" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

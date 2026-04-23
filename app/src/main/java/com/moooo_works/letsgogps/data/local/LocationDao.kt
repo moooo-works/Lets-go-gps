@@ -26,6 +26,7 @@ interface LocationDao {
         ORDER BY
             CASE WHEN :sortOption = 'NAME_ASC' THEN name END COLLATE NOCASE ASC,
             CASE WHEN :sortOption = 'RECENT' THEN createdAt END DESC,
+            CASE WHEN :sortOption = 'CUSTOM' THEN sortOrder END DESC,
             id DESC
         """
     )

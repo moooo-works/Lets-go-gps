@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -53,6 +55,12 @@ import androidx.compose.foundation.layout.size
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
+import org.burnoutcrew.reorderable.ReorderableItem
+import org.burnoutcrew.reorderable.detectReorder
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -63,12 +71,38 @@ fun SavedLocationsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val locations by viewModel.filteredLocations.collectAsStateWithLifecycle()
+    val showSortTip by viewModel.showSortTip.collectAsStateWithLifecycle()
 
     var locationToDelete by remember { mutableStateOf<SavedLocation?>(null) }
     var locationToRename by remember { mutableStateOf<SavedLocation?>(null) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
     var overflowMenuExpanded by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+
+    val canReorder = uiState.sortOption == SavedLocationsSortOption.CUSTOM &&
+        uiState.query.trim().isEmpty() &&
+        uiState.showHistory &&
+        uiState.showFavorites
+
+    var tempLocations by remember { mutableStateOf(locations) }
+
+    LaunchedEffect(locations, canReorder) {
+        tempLocations = locations
+    }
+
+    val reorderState = rememberReorderableLazyListState(
+        onMove = { from, to ->
+            tempLocations = tempLocations.toMutableList().apply {
+                add(to.index, removeAt(from.index))
+            }
+        },
+        canDragOver = { draggedOver, dragging -> canReorder },
+        onDragEnd = { _, _ ->
+            if (canReorder) {
+                viewModel.updateSortOrder(tempLocations)
+            }
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -164,6 +198,7 @@ fun SavedLocationsScreen(
                 TextButton(onClick = { sortMenuExpanded = true }) {
                     Text(
                         when (uiState.sortOption) {
+                            SavedLocationsSortOption.CUSTOM -> stringResource(R.string.sort_custom)
                             SavedLocationsSortOption.RECENT -> stringResource(R.string.sort_recent)
                             SavedLocationsSortOption.NAME_ASC -> stringResource(R.string.sort_name_asc)
                         },
@@ -175,6 +210,13 @@ fun SavedLocationsScreen(
                     expanded = sortMenuExpanded,
                     onDismissRequest = { sortMenuExpanded = false }
                 ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.sort_custom)) },
+                        onClick = {
+                            viewModel.onSortOptionChanged(SavedLocationsSortOption.CUSTOM)
+                            sortMenuExpanded = false
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.sort_recent)) },
                         onClick = {
@@ -206,26 +248,44 @@ fun SavedLocationsScreen(
                     }
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(locations, key = { it.id }) { location ->
-                    SavedLocationItem(
-                        location = location,
-                        onClick = { onLocationSelected(location.latitude, location.longitude) },
-                        onFavoriteClick = { viewModel.toggleFavorite(location) },
-                        onDeleteClick = { locationToDelete = location },
-                        onRenameClick = { locationToRename = location }
-                    )
-                    Divider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
+                LazyColumn(state = reorderState.listState, modifier = Modifier.fillMaxSize().reorderable(reorderState)) {
+                    items(tempLocations, key = { it.id }) { location ->
+                        ReorderableItem(reorderState, key = location.id) { isDragging ->
+                            val elevation = if (isDragging) 8.dp else 0.dp
+                            androidx.compose.material3.Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                tonalElevation = elevation,
+                                shadowElevation = elevation,
+                                color = MaterialTheme.colorScheme.background
+                            ) {
+                                Column {
+                                    SavedLocationItem(
+                                        location = location,
+                                        canReorder = canReorder,
+                                        reorderModifier = Modifier.detectReorder(reorderState),
+                                        onClick = { onLocationSelected(location.latitude, location.longitude) },
+                                        onFavoriteClick = { viewModel.toggleFavorite(location) },
+                                        onDeleteClick = { locationToDelete = location },
+                                        onRenameClick = { locationToRename = location }
+                                    )
+                                    Divider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.outlineVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
-            }
         }
     }
 }
 
-if (showClearConfirmDialog) {
+    if (showSortTip) {
+        SortTipCard(onDismiss = { viewModel.dismissSortTip() })
+    }
+
+    if (showClearConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showClearConfirmDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -319,6 +379,8 @@ private fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 fun SavedLocationItem(
     location: SavedLocation,
+    canReorder: Boolean,
+    reorderModifier: Modifier = Modifier,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -365,8 +427,61 @@ fun SavedLocationItem(
         IconButton(onClick = onRenameClick) {
             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.saved_locations_rename), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        IconButton(onClick = onDeleteClick) {
-            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (canReorder) {
+            IconButton(onClick = {}, modifier = reorderModifier) {
+                Icon(Icons.Default.Menu, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        } else {
+            IconButton(onClick = onDeleteClick) {
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SortTipCard(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.3f))
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.tip_sort_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.tip_sort_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                androidx.compose.material3.Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.tip_dismiss),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }

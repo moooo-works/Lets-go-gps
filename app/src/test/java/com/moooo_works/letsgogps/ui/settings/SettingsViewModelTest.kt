@@ -15,6 +15,7 @@ import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.ui.settings.ImportPreview
+import com.moooo_works.letsgogps.R
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -59,6 +60,14 @@ class SettingsViewModelTest {
         every { context.packageManager } returns mockk(relaxed = true)
         every { context.packageName } returns "com.moooo_works.letsgogps"
         every { context.applicationInfo } returns mockk { targetSdkVersion = 34 }
+        every { context.getString(R.string.import_result_locations, *anyVararg()) } answers {
+            val formatArgs = args[1] as Array<*>
+            "Locations: ${formatArgs[0]} imported, ${formatArgs[1]} skipped."
+        }
+        every { context.getString(R.string.import_result_routes, *anyVararg()) } answers {
+            val formatArgs = args[1] as Array<*>
+            "Routes: ${formatArgs[0]} imported, ${formatArgs[1]} skipped."
+        }
 
         val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
         every { mockStateRepository.mockStatus } returns mockStatusFlow
@@ -167,6 +176,145 @@ class SettingsViewModelTest {
         assertEquals(1, previewResult!!.routesCount)
         assertEquals(2, previewResult!!.schemaVersion)
         assertEquals(null, errorResult)
+    }
+
+    @Test
+    fun testExportData_RoundTripParseAndApply_Success() = runTest {
+        val exportUri = mockk<Uri>()
+        val importUri = mockk<Uri>()
+        val outputStream = ByteArrayOutputStream()
+        every { contentResolver.openOutputStream(exportUri) } returns outputStream
+
+        coEvery { locationRepository.getAllLocations() } returnsMany listOf(
+            flowOf(
+                listOf(SavedLocation(id = 1, name = "Loc 1", latitude = 10.0, longitude = 20.0, createdAt = 123L))
+            ),
+            flowOf(emptyList())
+        )
+        coEvery { locationRepository.observeRoutes() } returnsMany listOf(
+            flowOf(listOf(RouteSummary(id = 1, name = "Route 1", pointCount = 2, createdAt = 123L))),
+            flowOf(emptyList())
+        )
+        coEvery { locationRepository.getRouteWithPoints(1) } returns RouteWithPoints(
+            route = com.moooo_works.letsgogps.data.model.Route(id = 1, name = "Route 1", createdAt = 123L),
+            points = listOf(
+                RoutePoint(id = 1, routeId = 1, orderIndex = 0, latitude = 10.0, longitude = 20.0, dwellSeconds = 5),
+                RoutePoint(id = 2, routeId = 1, orderIndex = 1, latitude = 11.0, longitude = 21.0, dwellSeconds = 0)
+            )
+        )
+
+        var exportSuccess: Boolean? = null
+        val exportLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.exportDataToUri(exportUri, true, true) { success, _ ->
+            exportSuccess = success
+            exportLatch.countDown()
+        }
+        exportLatch.await()
+
+        assertEquals(true, exportSuccess)
+        val exportedJson = outputStream.toString()
+        assertTrue(exportedJson.contains("\"schemaVersion\""))
+        assertTrue(exportedJson.contains("\"savedLocations\""))
+        assertTrue(exportedJson.contains("\"routes\""))
+
+        every { contentResolver.openInputStream(importUri) } answers {
+            ByteArrayInputStream(exportedJson.toByteArray())
+        }
+
+        var previewResult: ImportPreview? = null
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(importUri) { success, preview, error ->
+            parseSuccess = success
+            previewResult = preview
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertEquals(true, parseSuccess)
+        assertEquals(null, parseError)
+        assertEquals(1, previewResult!!.savedLocationsCount)
+        assertEquals(1, previewResult!!.routesCount)
+
+        var applySuccess: Boolean? = null
+        var applyMessage: String? = null
+        val applyLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.applyImportData(previewResult!!) { success, message ->
+            applySuccess = success
+            applyMessage = message
+            applyLatch.countDown()
+        }
+        applyLatch.await()
+
+        assertEquals(true, applySuccess)
+        assertTrue(applyMessage!!.contains("Locations: 1 imported, 0 skipped"))
+        assertTrue(applyMessage!!.contains("Routes: 1 imported, 0 skipped"))
+        coVerify(exactly = 1) { locationRepository.saveLocation(match { it.name == "Loc 1" }) }
+        coVerify(exactly = 1) { locationRepository.insertRouteWithPoints("Route 1", any()) }
+    }
+
+    @Test
+    fun testParseAndApplyImportData_Gpx_Success() = runTest {
+        val gpxInput = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <gpx version="1.1" creator="test">
+              <wpt lat="25.0330" lon="121.5654">
+                <name>Taipei 101</name>
+              </wpt>
+              <trk>
+                <name>Morning Walk</name>
+                <trkseg>
+                  <trkpt lat="25.0330" lon="121.5654" />
+                  <trkpt lat="25.0340" lon="121.5664" />
+                </trkseg>
+              </trk>
+            </gpx>
+        """.trimIndent()
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(gpxInput.toByteArray())
+        }
+
+        coEvery { locationRepository.getAllLocations() } returns flowOf(emptyList())
+        coEvery { locationRepository.observeRoutes() } returns flowOf(emptyList())
+
+        var previewResult: ImportPreview? = null
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, preview, error ->
+            parseSuccess = success
+            previewResult = preview
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertTrue("GPX parse failed: $parseError", parseSuccess == true)
+        assertEquals(null, parseError)
+        assertEquals(true, previewResult!!.isGpx)
+        assertEquals(0, previewResult!!.schemaVersion)
+        assertEquals(1, previewResult!!.savedLocationsCount)
+        assertEquals(1, previewResult!!.routesCount)
+
+        var applySuccess: Boolean? = null
+        var applyMessage: String? = null
+        val applyLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.applyImportData(previewResult!!) { success, message ->
+            applySuccess = success
+            applyMessage = message
+            applyLatch.countDown()
+        }
+        applyLatch.await()
+
+        assertEquals(true, applySuccess)
+        assertTrue(applyMessage!!.contains("Locations: 1 imported, 0 skipped"))
+        assertTrue(applyMessage!!.contains("Routes: 1 imported, 0 skipped"))
+        coVerify(exactly = 1) { locationRepository.saveLocation(match { it.name == "Taipei 101" }) }
+        coVerify(exactly = 1) { locationRepository.insertRouteWithPoints("Morning Walk", any()) }
     }
 
     @Test

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.annotation.Keep
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moooo_works.letsgogps.data.model.RoutePoint
@@ -32,40 +33,69 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.utils.GeoDistanceMeters
+import com.google.gson.annotations.SerializedName
+import org.w3c.dom.Element
+import org.w3c.dom.NodeList
+import org.xml.sax.InputSource
+import java.io.StringReader
+import javax.xml.parsers.DocumentBuilderFactory
 
+@Keep
 data class ImportPreview(
     val uri: Uri,
     val schemaVersion: Int,
     val savedLocationsCount: Int,
-    val routesCount: Int
+    val routesCount: Int,
+    val isGpx: Boolean = false
 )
 
+@Keep
 data class ExportData(
+    @SerializedName("schemaVersion")
     val schemaVersion: Int = 2,
+    @SerializedName("exportedAt")
     val exportedAt: Long? = null,
+    @SerializedName("savedLocations")
     val savedLocations: List<ExportSavedLocation> = emptyList(),
+    @SerializedName("routes")
     val routes: List<ExportRoute> = emptyList()
 )
 
+@Keep
 data class ExportSavedLocation(
+    @SerializedName("id")
     val id: Int? = null,
+    @SerializedName("name")
     val name: String,
+    @SerializedName("lat")
     val lat: Double,
+    @SerializedName("lng")
     val lng: Double,
+    @SerializedName("createdAt")
     val createdAt: Long? = null
 )
 
+@Keep
 data class ExportRoutePoint(
+    @SerializedName("lat")
     val lat: Double,
+    @SerializedName("lng")
     val lng: Double,
+    @SerializedName("dwellSeconds")
     val dwellSeconds: Int = 0
 )
 
+@Keep
 data class ExportRoute(
+    @SerializedName("routeId")
     val routeId: Int? = null,
+    @SerializedName("name")
     val name: String,
+    @SerializedName("points")
     val points: List<ExportRoutePoint> = emptyList(),
+    @SerializedName("createdAt")
     val createdAt: Long? = null
 )
 
@@ -210,22 +240,42 @@ class SettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                var jsonString = ""
+                var fileContent = ""
                 withContext(Dispatchers.IO) {
                     val inputStream = context.contentResolver.openInputStream(uri)
                         ?: throw java.io.IOException("openInputStream returned null")
                     inputStream.use { stream ->
-                        jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
+                        fileContent = stream.bufferedReader(Charsets.UTF_8).readText()
                     }
                 }
 
-                if (jsonString.isBlank()) {
+                if (fileContent.isBlank()) {
                     withContext(Dispatchers.Main) { onResult(false, null, "File is empty") }
                     return@launch
                 }
 
+                val isGpx = fileContent.trimStart().startsWith("<")
+
+                if (isGpx) {
+                    val exportData = try {
+                        parseGpxContent(fileContent)
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) { onResult(false, null, "Invalid GPX: ${e.message}") }
+                        return@launch
+                    }
+                    val preview = ImportPreview(
+                        uri = uri,
+                        schemaVersion = 0,
+                        savedLocationsCount = exportData.savedLocations.size,
+                        routesCount = exportData.routes.size,
+                        isGpx = true
+                    )
+                    withContext(Dispatchers.Main) { onResult(true, preview, null) }
+                    return@launch
+                }
+
                 val exportData = try {
-                    gson.fromJson(jsonString, ExportData::class.java)
+                    gson.fromJson(fileContent, ExportData::class.java)
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) { onResult(false, null, "Invalid JSON format: ${e.message}") }
                     return@launch
@@ -262,16 +312,20 @@ class SettingsViewModel @Inject constructor(
     fun applyImportData(preview: ImportPreview, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
             try {
-                var jsonString = ""
+                var fileContent = ""
                 withContext(Dispatchers.IO) {
                     val inputStream = context.contentResolver.openInputStream(preview.uri)
                         ?: throw java.io.IOException("openInputStream returned null")
                     inputStream.use { stream ->
-                        jsonString = stream.bufferedReader(Charsets.UTF_8).readText()
+                        fileContent = stream.bufferedReader(Charsets.UTF_8).readText()
                     }
                 }
 
-                val exportData = gson.fromJson(jsonString, ExportData::class.java)
+                val exportData = if (preview.isGpx) {
+                    parseGpxContent(fileContent)
+                } else {
+                    gson.fromJson(fileContent, ExportData::class.java)
+                }
 
                 var importedLocations = 0
                 var skippedLocations = 0
@@ -289,7 +343,7 @@ class SettingsViewModel @Inject constructor(
                     if (!isDuplicate) {
                         locationRepository.saveLocation(
                             SavedLocation(
-                                name = exportedLoc.name ?: "Imported Location",
+                                name = exportedLoc.name,
                                 latitude = exportedLoc.lat,
                                 longitude = exportedLoc.lng,
                                 createdAt = exportedLoc.createdAt ?: System.currentTimeMillis()
@@ -307,7 +361,7 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 exportData.routes.forEach { exportedRoute ->
-                    val exportedName = exportedRoute.name ?: "Imported Route"
+                    val exportedName = exportedRoute.name
                     val exportedNameClean = exportedName.trim().lowercase()
                     val exportedPoints = exportedRoute.points
 
@@ -337,7 +391,8 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
 
-                val summaryMsg = "Locations: ${importedLocations} imported, ${skippedLocations} skipped.\nRoutes: ${importedRoutes} imported, ${skippedRoutes} skipped."
+                val summaryMsg = context.getString(R.string.import_result_locations, importedLocations, skippedLocations) + "\n" +
+                    context.getString(R.string.import_result_routes, importedRoutes, skippedRoutes)
                 withContext(Dispatchers.Main) {
                     onResult(true, summaryMsg)
                 }
@@ -348,6 +403,86 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun parseGpxContent(content: String): ExportData {
+        val document = DocumentBuilderFactory.newInstance().apply {
+            isNamespaceAware = true
+        }.newDocumentBuilder().parse(InputSource(StringReader(content)))
+
+        fun Element.tagNameLocal(): String = localName ?: tagName.substringAfter(':')
+        fun NodeList.elements(): List<Element> =
+            (0 until length).mapNotNull { item(it) as? Element }
+        fun Element.directChildText(localTag: String): String {
+            val child = (0 until childNodes.length)
+                .mapNotNull { childNodes.item(it) as? Element }
+                .firstOrNull { it.tagNameLocal().equals(localTag, ignoreCase = true) }
+            return child?.textContent?.trim().orEmpty()
+        }
+        fun Element.descendants(localTag: String): List<Element> {
+            val namespaced = getElementsByTagNameNS("*", localTag).elements()
+            return if (namespaced.isNotEmpty()) namespaced else getElementsByTagName(localTag).elements()
+        }
+
+        val waypoints = mutableListOf<ExportSavedLocation>()
+        val routes = mutableListOf<ExportRoute>()
+
+        val waypointNodes = document.getElementsByTagNameNS("*", "wpt").elements().ifEmpty {
+            document.getElementsByTagName("wpt").elements()
+        }
+        waypointNodes.forEach { waypoint ->
+            val lat = waypoint.getAttribute("lat").toDoubleOrNull()
+            val lon = waypoint.getAttribute("lon").toDoubleOrNull()
+            if (lat != null && lon != null) {
+                waypoints.add(
+                    ExportSavedLocation(
+                        name = waypoint.directChildText("name").ifBlank { "Waypoint ${waypoints.size + 1}" },
+                        lat = lat,
+                        lng = lon
+                    )
+                )
+            }
+        }
+
+        val trackNodes = document.getElementsByTagNameNS("*", "trk").elements().ifEmpty {
+            document.getElementsByTagName("trk").elements()
+        }
+        trackNodes.forEach { track ->
+            val points = track.descendants("trkpt").mapNotNull { point ->
+                val lat = point.getAttribute("lat").toDoubleOrNull()
+                val lon = point.getAttribute("lon").toDoubleOrNull()
+                if (lat != null && lon != null) ExportRoutePoint(lat = lat, lng = lon) else null
+            }
+            if (points.isNotEmpty()) {
+                routes.add(
+                    ExportRoute(
+                        name = track.directChildText("name").ifBlank { "Track ${routes.size + 1}" },
+                        points = points
+                    )
+                )
+            }
+        }
+
+        val routeNodes = document.getElementsByTagNameNS("*", "rte").elements().ifEmpty {
+            document.getElementsByTagName("rte").elements()
+        }
+        routeNodes.forEach { route ->
+            val points = route.descendants("rtept").mapNotNull { point ->
+                val lat = point.getAttribute("lat").toDoubleOrNull()
+                val lon = point.getAttribute("lon").toDoubleOrNull()
+                if (lat != null && lon != null) ExportRoutePoint(lat = lat, lng = lon) else null
+            }
+            if (points.isNotEmpty()) {
+                routes.add(
+                    ExportRoute(
+                        name = route.directChildText("name").ifBlank { "Route ${routes.size + 1}" },
+                        points = points
+                    )
+                )
+            }
+        }
+
+        return ExportData(schemaVersion = 0, savedLocations = waypoints, routes = routes)
     }
 
     private suspend fun insertRoute(locationRepository: LocationRepository, name: String, points: List<ExportRoutePoint>) {

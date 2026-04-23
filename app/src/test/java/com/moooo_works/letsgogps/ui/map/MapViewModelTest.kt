@@ -11,7 +11,6 @@ import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
-import com.moooo_works.letsgogps.domain.repository.SearchRepository
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.service.MockLocationService
@@ -51,7 +50,6 @@ class MapViewModelTest {
     private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
     private val repository = mockk<LocationRepository>(relaxed = true)
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
-    private val searchRepository = mockk<SearchRepository>(relaxed = true)
     private val mockStateRepository = mockk<MockStateRepository>(relaxed = true)
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
     private val joystickOverlayManager = mockk<JoystickOverlayManager>(relaxed = true)
@@ -83,64 +81,34 @@ class MapViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private fun createViewModel() = MapViewModel(
+        mockEngine, repository, mockStateRepository, settingsRepository,
+        routeSimulator, joystickOverlayManager, proRepository, context
+    )
+
     @Test
     fun `init loads last center from settings repository`() = runTest {
         val lastCenter = LatLng(25.1, 121.1)
         lastCenterFlow.value = lastCenter
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, proRepository, context)
+        val viewModel = createViewModel()
         advanceUntilIdle()
         assertEquals(lastCenter, viewModel.uiState.value.centerLocation)
     }
 
     @Test
-    fun `searchLocations updates uiState with results`() = runTest {
-        val query = "Taipei 101"
-        val mockResults = listOf(
-            GeocodedLocation("Taipei 101", "Xinyi Road", LatLng(25.0330, 121.5654))
-        )
-        coEvery { searchRepository.search(query) } returns Result.success(mockResults)
-        
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, proRepository, context)
-        
-        viewModel.searchLocations(query)
-        assertTrue(viewModel.uiState.value.isSearching)
-        
-        advanceUntilIdle()
-        
-        assertFalse(viewModel.uiState.value.isSearching)
-        assertEquals(mockResults, viewModel.uiState.value.searchResults)
-    }
-
-    @Test
-    fun `searchLocations sets error on failure`() = runTest {
-        val query = "Unknown Place"
-        val errorMsg = "Network Error"
-        coEvery { searchRepository.search(query) } returns Result.failure(Exception(errorMsg))
-        
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, proRepository, context)
-        
-        viewModel.searchLocations(query)
-        advanceUntilIdle()
-        
-        assertFalse(viewModel.uiState.value.isSearching)
-        assertEquals(errorMsg, viewModel.uiState.value.searchError)
-    }
-
-    @Test
-    fun `selectSearchResult updates center location and clears results`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, proRepository, context)
+    fun `selectSearchResult updates center location`() = runTest {
+        val viewModel = createViewModel()
         val selected = GeocodedLocation("Target", "Address", LatLng(10.0, 20.0))
-        
+
         viewModel.selectSearchResult(selected)
-        
+
         assertEquals(selected.latLng, viewModel.uiState.value.centerLocation)
-        assertTrue(viewModel.uiState.value.searchResults.isEmpty())
     }
 
     @Test
     fun `startMocking succeeds and sends intent when permission granted`() = runTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, proRepository, context)
+        val viewModel = createViewModel()
 
         viewModel.startMocking()
         advanceUntilIdle()
@@ -152,7 +120,7 @@ class MapViewModelTest {
 
     @Test
     fun `setSpeed rejects non positive speed`() = runTest {
-        val viewModel = MapViewModel(mockEngine, repository, mockStateRepository, settingsRepository, searchRepository, routeSimulator, joystickOverlayManager, proRepository, context)
+        val viewModel = createViewModel()
         viewModel.setSpeed(0.0)
         verify(exactly = 0) { routeSimulator.setSpeed(any()) }
         assertTrue(viewModel.uiState.value.mockError is MockError.InvalidInput)
