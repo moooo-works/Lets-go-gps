@@ -40,4 +40,7 @@ interface SettingsRepository {
 
     fun observeClipboardHintEnabled(): Flow<Boolean>
     suspend fun setClipboardHintEnabled(enabled: Boolean)
+
+    fun hasSeenClipboardHintTip(): Flow<Boolean>
+    suspend fun setClipboardHintTipSeen()
 }

@@ -191,6 +191,14 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.hasSeenClipboardHintTip().collect { seen ->
+                if (!seen) {
+                    _uiState.update { it.copy(showClipboardHintTip = true) }
+                }
+            }
+        }
     }
 
     fun dismissOnboarding() {
@@ -210,6 +218,12 @@ class MapViewModel @Inject constructor(
         }
         routeSimulator.setLoopMode(next)
         _uiState.update { it.copy(loopMode = next) }
+    }
+
+    /** Dismiss the "clipboard hint" new-feature tip and persist the ack. */
+    fun dismissClipboardHintTip() {
+        _uiState.update { it.copy(showClipboardHintTip = false) }
+        viewModelScope.launch { settingsRepository.setClipboardHintTipSeen() }
     }
 
     /** Dismiss the "loop/bounce is available" new-feature tip and persist the ack. */

@@ -44,5 +44,7 @@ data class MapUiState(
     /** Non-null while the route simulation is PLAYING or PAUSED; null when IDLE. */
     val routeProgress: RouteProgress? = null,
     /** Show a "what's new" tip card about loop/bounce modes. */
-    val showLoopBounceTip: Boolean = false
+    val showLoopBounceTip: Boolean = false,
+    /** Show a "what's new" tip card about clipboard detection. */
+    val showClipboardHintTip: Boolean = false
 )
