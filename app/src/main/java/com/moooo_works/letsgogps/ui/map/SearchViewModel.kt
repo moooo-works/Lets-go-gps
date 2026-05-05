@@ -2,25 +2,34 @@ package com.moooo_works.letsgogps.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import com.moooo_works.letsgogps.domain.repository.SearchRepository
+import com.moooo_works.letsgogps.domain.repository.SettingsRepository
+import com.moooo_works.letsgogps.utils.LocationQueryParser
+import com.moooo_works.letsgogps.utils.ParseResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+data class ClipboardHint(val rawText: String, val latLng: LatLng)
 
 data class SearchUiState(
     val isSearching: Boolean = false,
     val searchResults: List<GeocodedLocation> = emptyList(),
-    val searchError: String? = null
+    val searchError: String? = null,
+    val clipboardHint: ClipboardHint? = null
 )
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val searchRepository: SearchRepository
+    private val searchRepository: SearchRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -43,5 +52,24 @@ class SearchViewModel @Inject constructor(
 
     fun clearSearchResults() {
         _uiState.update { it.copy(searchResults = emptyList(), searchError = null) }
+    }
+
+    fun onResumeCheckClipboard(clipText: String?, currentCenter: LatLng) {
+        if (clipText.isNullOrBlank()) return
+        viewModelScope.launch {
+            val enabled = settingsRepository.observeClipboardHintEnabled().first()
+            if (!enabled) return@launch
+            val trimmed = clipText.trim()
+            val parseResult = LocationQueryParser.parse(trimmed, currentCenter)
+            if (parseResult is ParseResult.Success) {
+                _uiState.update {
+                    it.copy(clipboardHint = ClipboardHint(trimmed, parseResult.parsedLocation.latLng))
+                }
+            }
+        }
+    }
+
+    fun dismissClipboardHint() {
+        _uiState.update { it.copy(clipboardHint = null) }
     }
 }
