@@ -73,6 +73,7 @@ class SettingsViewModelTest {
         every { mockStateRepository.mockStatus } returns mockStatusFlow
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { proRepository.isProActive } returns MutableStateFlow(true)
+        every { settingsRepository.observeClipboardHintEnabled() } returns MutableStateFlow(true)
 
         viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, proRepository, context)
     }
@@ -476,5 +477,12 @@ class SettingsViewModelTest {
 
         assertEquals(false, successResult)
         assertTrue(errorResult?.contains("openOutputStream returned null") == true)
+    }
+
+    @Test
+    fun `setClipboardHintEnabled calls repository`() = runTest {
+        viewModel.setClipboardHintEnabled(false)
+        advanceUntilIdle()
+        coVerify { settingsRepository.setClipboardHintEnabled(false) }
     }
 }

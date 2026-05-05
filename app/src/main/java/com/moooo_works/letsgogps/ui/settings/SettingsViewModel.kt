@@ -137,6 +137,9 @@ class SettingsViewModel @Inject constructor(
     val coordinateJitter = settingsRepository.observeCoordinateJitter()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val clipboardHintEnabled = settingsRepository.observeClipboardHintEnabled()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     fun setAltitude(value: Double) {
         viewModelScope.launch {
             settingsRepository.setAltitude(value)
@@ -152,6 +155,12 @@ class SettingsViewModel @Inject constructor(
     fun setCoordinateJitter(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setCoordinateJitter(enabled)
+        }
+    }
+
+    fun setClipboardHintEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setClipboardHintEnabled(enabled)
         }
     }
 

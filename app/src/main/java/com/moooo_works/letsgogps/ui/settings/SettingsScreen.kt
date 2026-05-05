@@ -57,6 +57,7 @@ fun SettingsScreen(
     val altitude by viewModel.altitude.collectAsState()
     val randomAltitude by viewModel.randomAltitude.collectAsState()
     val coordinateJitter by viewModel.coordinateJitter.collectAsState()
+    val clipboardHintEnabled by viewModel.clipboardHintEnabled.collectAsState()
 
     var altitudeInput by remember(altitude) { mutableStateOf(altitude.toString()) }
 
@@ -433,6 +434,25 @@ fun SettingsScreen(
                         Switch(
                             checked = coordinateJitter,
                             onCheckedChange = { viewModel.setCoordinateJitter(it) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.settings_clipboard_hint_title), style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                stringResource(R.string.settings_clipboard_hint_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = clipboardHintEnabled,
+                            onCheckedChange = { viewModel.setClipboardHintEnabled(it) }
                         )
                     }
                 }
