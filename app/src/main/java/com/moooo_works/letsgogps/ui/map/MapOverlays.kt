@@ -251,3 +251,48 @@ fun SelectedLocationActionBar(
         }
     }
 }
+
+/** Banner 顯示於搜尋列下方，提示剪貼簿中偵測到座標或 Plus Code。 */
+@Composable
+fun ClipboardHintBanner(
+    onUse: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                stringResource(R.string.clipboard_hint_banner_text),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.weight(1f)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    Text(
+                        stringResource(R.string.clipboard_hint_banner_dismiss),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                androidx.compose.material3.TextButton(onClick = onUse) {
+                    Text(
+                        stringResource(R.string.clipboard_hint_banner_use),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}

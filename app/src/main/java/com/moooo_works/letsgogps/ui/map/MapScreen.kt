@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,10 +105,15 @@ fun MapScreen(
         viewModel.refreshMockPermission()
     }
 
+    val currentCenter by rememberUpdatedState(uiState.centerLocation)
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refreshMockPermission()
+                val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+                val text = clipboard?.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
+                searchViewModel.onResumeCheckClipboard(text, currentCenter)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -314,6 +321,28 @@ fun MapScreen(
                         onEdit = { viewModel.showEditLocationDialog() },
                         onDismiss = { viewModel.dismissSelectedLocation() },
                         modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
+
+                val clipboardHint = searchUiState.clipboardHint
+                if (clipboardHint != null && uiState.selectedLocation == null) {
+                    val locationTitle = stringResource(R.string.search_latlng_location)
+                    ClipboardHintBanner(
+                        onUse = {
+                            viewModel.selectSearchResult(
+                                com.moooo_works.letsgogps.domain.repository.GeocodedLocation(
+                                    name = locationTitle,
+                                    address = clipboardHint.rawText,
+                                    latLng = clipboardHint.latLng
+                                )
+                            )
+                            searchViewModel.dismissClipboardHint()
+                        },
+                        onDismiss = { searchViewModel.dismissClipboardHint() },
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .statusBarsPadding()
+                            .padding(top = 64.dp, start = 12.dp, end = 12.dp)
                     )
                 }
             }
