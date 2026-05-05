@@ -246,4 +246,10 @@
     <string name="tip_loop_bounce_title">🆕 New: Route Playback Modes</string>
     <string name="tip_loop_bounce_body">Loop and Bounce modes are now available! Tap the mode button while a route is playing to switch.</string>
     <string name="tip_dismiss">Got it</string>
+    <!-- Clipboard Hint Banner -->
+    <string name="settings_clipboard_hint_title">Smart Clipboard Detection</string>
+    <string name="settings_clipboard_hint_desc">Detect coordinates or Plus Codes in clipboard when returning to the app</string>
+    <string name="clipboard_hint_banner_text">Coordinates or Plus Code detected in clipboard</string>
+    <string name="clipboard_hint_banner_use">Use</string>
+    <string name="clipboard_hint_banner_dismiss">Dismiss</string>
 </resources>

@@ -249,4 +249,10 @@
     <string name="tip_sort_title">🆕 全新功能：手動排序</string>
     <string name="tip_sort_body">現在你可以在「自訂排序」模式下，長按列表右側把手上下拖曳，將最愛的位置自由排序囉！</string>
     <string name="tip_dismiss">好，我知道了</string>
+    <!-- Clipboard Hint Banner -->
+    <string name="settings_clipboard_hint_title">剪貼簿智慧偵測</string>
+    <string name="settings_clipboard_hint_desc">返回 App 時自動偵測剪貼簿中的座標或 Plus Code</string>
+    <string name="clipboard_hint_banner_text">偵測到剪貼簿中有座標或 Plus Code</string>
+    <string name="clipboard_hint_banner_use">使用</string>
+    <string name="clipboard_hint_banner_dismiss">略過</string>
 </resources>

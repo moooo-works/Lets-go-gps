@@ -246,4 +246,10 @@
     <string name="tip_loop_bounce_title">🆕 신규: 경로 재생 모드</string>
     <string name="tip_loop_bounce_body">루프와 왕복 모드가 추가되었습니다! 경로 재생 중 버튼을 탭하여 전환하세요.</string>
     <string name="tip_dismiss">알겠습니다</string>
+    <!-- Clipboard Hint Banner -->
+    <string name="settings_clipboard_hint_title">클립보드 자동 감지</string>
+    <string name="settings_clipboard_hint_desc">앱으로 돌아올 때 클립보드의 좌표 또는 Plus Code를 자동으로 감지합니다</string>
+    <string name="clipboard_hint_banner_text">클립보드에서 좌표 또는 Plus Code가 감지되었습니다</string>
+    <string name="clipboard_hint_banner_use">사용</string>
+    <string name="clipboard_hint_banner_dismiss">무시</string>
 </resources>

@@ -246,4 +246,10 @@
     <string name="tip_loop_bounce_title">🆕 新機能：ルート再生モード</string>
     <string name="tip_loop_bounce_body">ループと往復モードが追加されました！ルート再生中にボタンをタップして切り替えてください。</string>
     <string name="tip_dismiss">了解しました</string>
+    <!-- Clipboard Hint Banner -->
+    <string name="settings_clipboard_hint_title">クリップボード自動検出</string>
+    <string name="settings_clipboard_hint_desc">アプリに戻ったとき、クリップボードの座標や Plus Code を自動検出します</string>
+    <string name="clipboard_hint_banner_text">クリップボードに座標または Plus Code を検出しました</string>
+    <string name="clipboard_hint_banner_use">使用</string>
+    <string name="clipboard_hint_banner_dismiss">無視</string>
 </resources>
