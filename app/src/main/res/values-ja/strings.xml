@@ -252,4 +252,7 @@
     <string name="clipboard_hint_banner_text">クリップボードに座標または Plus Code を検出しました</string>
     <string name="clipboard_hint_banner_use">使用</string>
     <string name="clipboard_hint_banner_dismiss">無視</string>
+    <!-- Clipboard Hint Tip Card -->
+    <string name="tip_clipboard_hint_title">🆕 クリップボード自動検出</string>
+    <string name="tip_clipboard_hint_body">座標や Plus Code をコピーしてアプリに戻ると、マップ画面にヒントが表示されます。タップするとその場所に移動できます。設定でオフにできます。</string>
 </resources>

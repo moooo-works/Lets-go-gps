@@ -255,4 +255,7 @@
     <string name="clipboard_hint_banner_text">偵測到剪貼簿中有座標或 Plus Code</string>
     <string name="clipboard_hint_banner_use">使用</string>
     <string name="clipboard_hint_banner_dismiss">略過</string>
+    <!-- Clipboard Hint Tip Card -->
+    <string name="tip_clipboard_hint_title">🆕 剪貼簿智慧偵測</string>
+    <string name="tip_clipboard_hint_body">複製座標或 Plus Code 後返回 App，地圖頁會自動顯示提示，點一下即可移動到該位置。可在設定中關閉此功能。</string>
 </resources>

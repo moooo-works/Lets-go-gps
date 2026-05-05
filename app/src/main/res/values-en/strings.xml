@@ -252,4 +252,7 @@
     <string name="clipboard_hint_banner_text">Coordinates or Plus Code detected in clipboard</string>
     <string name="clipboard_hint_banner_use">Use</string>
     <string name="clipboard_hint_banner_dismiss">Dismiss</string>
+    <!-- Clipboard Hint Tip Card -->
+    <string name="tip_clipboard_hint_title">🆕 Smart Clipboard Detection</string>
+    <string name="tip_clipboard_hint_body">Copy coordinates or a Plus Code, then return to the app — a hint will appear on the map. Tap it to jump to that location. You can turn this off in Settings.</string>
 </resources>
