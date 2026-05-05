@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
@@ -106,18 +107,51 @@ fun MapScreen(
     }
 
     val currentCenter by rememberUpdatedState(uiState.centerLocation)
+    val view = LocalView.current
 
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, view) {
+        val clipboardManager = context.getSystemService(android.content.ClipboardManager::class.java)
+
+        fun readAndCheck() {
+            val text = clipboardManager?.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
+            searchViewModel.onResumeCheckClipboard(text, currentCenter)
+        }
+
+        // 1. App comes from background: window focus regained
+        val windowFocusListener = android.view.ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+            if (hasFocus && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                readAndCheck()
+            }
+        }
+        view.viewTreeObserver.addOnWindowFocusChangeListener(windowFocusListener)
+
+        // 2. Tab switch within app: NavBackStackEntry ON_RESUME fires
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refreshMockPermission()
-                val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
-                val text = clipboard?.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
-                searchViewModel.onResumeCheckClipboard(text, currentCenter)
+                readAndCheck()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+
+        // 3. Clipboard changes while map is already in foreground
+        val clipChangedListener = android.content.ClipboardManager.OnPrimaryClipChangedListener {
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                readAndCheck()
+            }
+        }
+        clipboardManager?.addPrimaryClipChangedListener(clipChangedListener)
+
+        // 4. Initial check on first composition
+        if (view.hasWindowFocus() && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            readAndCheck()
+        }
+
+        onDispose {
+            view.viewTreeObserver.removeOnWindowFocusChangeListener(windowFocusListener)
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            clipboardManager?.removePrimaryClipChangedListener(clipChangedListener)
+        }
     }
 
     // Sync camera with UI state centre location (threshold prevents flickering during joystick move)
