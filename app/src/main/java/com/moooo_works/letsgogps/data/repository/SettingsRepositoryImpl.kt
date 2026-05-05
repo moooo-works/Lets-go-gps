@@ -39,6 +39,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
         val LOOP_BOUNCE_TIP_SEEN_VERSION = intPreferencesKey("loop_bounce_tip_seen_version")
         val HAS_SEEN_SORT_TIP = booleanPreferencesKey("has_seen_sort_tip")
+        val CLIPBOARD_HINT_ENABLED = booleanPreferencesKey("clipboard_hint_enabled")
 
         const val DEFAULT_ALTITUDE = 15.0
         const val DEFAULT_ROUTE_SPEED = 5.0
@@ -141,5 +142,12 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setSortTipSeen() {
         dataStore.edit { it[HAS_SEEN_SORT_TIP] = true }
+    }
+
+    override fun observeClipboardHintEnabled(): Flow<Boolean> =
+        dataStore.data.map { it[CLIPBOARD_HINT_ENABLED] ?: true }
+
+    override suspend fun setClipboardHintEnabled(enabled: Boolean) {
+        dataStore.edit { it[CLIPBOARD_HINT_ENABLED] = enabled }
     }
 }

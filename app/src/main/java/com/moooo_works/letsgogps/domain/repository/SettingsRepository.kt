@@ -37,4 +37,7 @@ interface SettingsRepository {
 
     fun hasSeenSortTip(): Flow<Boolean>
     suspend fun setSortTipSeen()
+
+    fun observeClipboardHintEnabled(): Flow<Boolean>
+    suspend fun setClipboardHintEnabled(enabled: Boolean)
 }
