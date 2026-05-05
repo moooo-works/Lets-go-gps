@@ -117,19 +117,26 @@ fun MapScreen(
             searchViewModel.onResumeCheckClipboard(text, currentCenter)
         }
 
-        // 1. App comes from background: window focus regained
+        // 1. App returns from background: only trigger on focus REGAIN, not cold launch.
+        //    windowFocusLost gates the listener so the first hasFocus=true (cold start) is skipped.
+        var windowFocusLost = false
         val windowFocusListener = android.view.ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
-            if (hasFocus && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            if (!hasFocus) {
+                windowFocusLost = true
+            } else if (windowFocusLost) {
                 readAndCheck()
             }
         }
         view.viewTreeObserver.addOnWindowFocusChangeListener(windowFocusListener)
 
-        // 2. Tab switch within app: NavBackStackEntry ON_RESUME fires
+        // 2. Tab switch within app: NavBackStackEntry ON_RESUME fires.
+        //    hasResumedOnce skips the first ON_RESUME (cold launch) so clipboard is
+        //    only checked on subsequent resumes (tab switch / return from background).
+        var hasResumedOnce = false
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refreshMockPermission()
-                readAndCheck()
+                if (hasResumedOnce) readAndCheck() else hasResumedOnce = true
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -141,11 +148,6 @@ fun MapScreen(
             }
         }
         clipboardManager?.addPrimaryClipChangedListener(clipChangedListener)
-
-        // 4. Initial check on first composition
-        if (view.hasWindowFocus() && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            readAndCheck()
-        }
 
         onDispose {
             view.viewTreeObserver.removeOnWindowFocusChangeListener(windowFocusListener)
