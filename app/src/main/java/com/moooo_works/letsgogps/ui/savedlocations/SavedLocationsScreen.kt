@@ -342,6 +342,10 @@ fun SavedLocationsScreen(
         SortTipCard(onDismiss = { viewModel.dismissSortTip() })
     }
 
+    if (showFolderTip) {
+        FolderTipCard(onDismiss = { viewModel.dismissFolderTip() })
+    }
+
     if (showClearConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showClearConfirmDialog = false },
@@ -476,9 +480,6 @@ fun SavedLocationsScreen(
         )
     }
 
-    if (showFolderTip) {
-        FolderTipCard(onDismiss = { viewModel.dismissFolderTip() })
-    }
 }
 
 @Composable

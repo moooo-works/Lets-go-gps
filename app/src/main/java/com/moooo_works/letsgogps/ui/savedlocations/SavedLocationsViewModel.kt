@@ -67,9 +67,10 @@ class SavedLocationsViewModel @Inject constructor(
 
     val showFolderTip: StateFlow<Boolean> = combine(
         settingsRepository.hasSeenOnboarding(),
+        settingsRepository.hasSeenSortTip(),
         settingsRepository.hasSeenFolderTip()
-    ) { onboardingDone, tipSeen ->
-        onboardingDone && !tipSeen
+    ) { onboardingDone, sortTipSeen, folderTipSeen ->
+        onboardingDone && sortTipSeen && !folderTipSeen
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
