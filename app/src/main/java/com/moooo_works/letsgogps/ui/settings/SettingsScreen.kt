@@ -146,6 +146,49 @@ fun SettingsScreen(
         )
     }
 
+    if (showImportFormatDialog) {
+        AlertDialog(
+            onDismissRequest = { showImportFormatDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
+            title = { Text(stringResource(R.string.import_format_dialog_title)) },
+            text = {
+                Column {
+                    TextButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            showImportFormatDialog = false
+                            importLauncher.launch(arrayOf("application/json"))
+                        }
+                    ) {
+                        Text(
+                            stringResource(R.string.import_format_json),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    TextButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            showImportFormatDialog = false
+                            importLauncher.launch(arrayOf("*/*"))
+                        }
+                    ) {
+                        Text(
+                            stringResource(R.string.import_format_gpx),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showImportFormatDialog = false }) {
+                    Text(stringResource(R.string.map_action_cancel))
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -573,48 +616,6 @@ fun SettingsScreen(
                 )
             }
 
-            if (showImportFormatDialog) {
-                AlertDialog(
-                    onDismissRequest = { showImportFormatDialog = false },
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 0.dp,
-                    title = { Text(stringResource(R.string.import_format_dialog_title)) },
-                    text = {
-                        Column {
-                            TextButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    showImportFormatDialog = false
-                                    importLauncher.launch(arrayOf("application/json"))
-                                }
-                            ) {
-                                Text(
-                                    stringResource(R.string.import_format_json),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                            TextButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    showImportFormatDialog = false
-                                    importLauncher.launch(arrayOf("*/*"))
-                                }
-                            ) {
-                                Text(
-                                    stringResource(R.string.import_format_gpx),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-                    },
-                    confirmButton = {},
-                    dismissButton = {
-                        TextButton(onClick = { showImportFormatDialog = false }) {
-                            Text(stringResource(R.string.map_action_cancel))
-                        }
-                    }
-                )
-            }
         }
     }
 }

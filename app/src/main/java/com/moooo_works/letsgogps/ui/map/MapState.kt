@@ -13,6 +13,10 @@ enum class TransportMode(val speedKmh: Double) {
     DRIVING(40.0)
 }
 
+const val ROUTE_SPEED_MIN_KMH = 1f
+const val ROUTE_SPEED_MAX_KMH = 100f
+const val ROUTE_SPEED_STEPS = 0
+
 enum class MapMode {
     SINGLE,
     ROUTE

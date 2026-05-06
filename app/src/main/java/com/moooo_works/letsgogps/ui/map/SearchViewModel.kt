@@ -54,12 +54,17 @@ class SearchViewModel @Inject constructor(
         _uiState.update { it.copy(searchResults = emptyList(), searchError = null) }
     }
 
+    // Tracks the last clipboard text the user explicitly dismissed or used,
+    // so the same content doesn't re-trigger the banner on subsequent resumes.
+    private var lastAcknowledgedText: String? = null
+
     fun onResumeCheckClipboard(clipText: String?, currentCenter: LatLng) {
         if (clipText.isNullOrBlank()) return
         viewModelScope.launch {
             val enabled = settingsRepository.observeClipboardHintEnabled().first()
             if (!enabled) return@launch
             val trimmed = clipText.trim()
+            if (trimmed == lastAcknowledgedText) return@launch
             val parseResult = LocationQueryParser.parse(trimmed, currentCenter)
             if (parseResult is ParseResult.Success) {
                 _uiState.update {
@@ -70,6 +75,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun dismissClipboardHint() {
+        lastAcknowledgedText = _uiState.value.clipboardHint?.rawText
         _uiState.update { it.copy(clipboardHint = null) }
     }
 }

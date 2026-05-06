@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moooo_works.letsgogps.R
+import kotlin.math.roundToInt
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
@@ -279,9 +280,9 @@ private fun RouteControls(
         )
         Slider(
             value = uiState.speedKmh.toFloat(),
-            onValueChange = { onSetSpeed(it.toDouble()) },
-            valueRange = 0f..100f,
-            steps = 19,
+            onValueChange = { onSetSpeed(it.roundToInt().toDouble()) },
+            valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH,
+            steps = ROUTE_SPEED_STEPS,
             modifier = Modifier.weight(1f)
         )
     }
