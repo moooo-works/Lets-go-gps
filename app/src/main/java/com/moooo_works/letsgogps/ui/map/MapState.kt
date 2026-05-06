@@ -50,5 +50,7 @@ data class MapUiState(
     /** Show a "what's new" tip card about loop/bounce modes. */
     val showLoopBounceTip: Boolean = false,
     /** Show a "what's new" tip card about clipboard detection. */
-    val showClipboardHintTip: Boolean = false
+    val showClipboardHintTip: Boolean = false,
+    /** Show a "what's new" tip card about GPX import. */
+    val showGpxTip: Boolean = false
 )

@@ -278,4 +278,7 @@
     <!-- Folder Feature Tip -->
     <string name="tip_folder_title">資料夾功能上線了！</string>
     <string name="tip_folder_body">• 搜尋列下方可依資料夾篩選位置\n• 長按位置進入多選模式，可批次移到資料夾\n• 右上角「管理」可新增、重命名、刪除資料夾</string>
+    <!-- GPX Import Tip Card -->
+    <string name="tip_gpx_title">支援 GPX 匯入了！</string>
+    <string name="tip_gpx_body">到設定頁 → 資料管理 → 匯入，選擇「從 GPX 匯入」，即可從 .gpx 檔案匯入路線與位置。</string>
 </resources>

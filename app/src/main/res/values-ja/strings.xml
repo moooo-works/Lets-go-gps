@@ -275,4 +275,7 @@
     <!-- Folder Feature Tip -->
     <string name="tip_folder_title">フォルダー機能が登場！</string>
     <string name="tip_folder_body">• 検索欄下のチップでフォルダーフィルタリング可能\n• 長押しで複数選択モードに入り、フォルダーに移動できます\n• 右上の「管理」でフォルダーの追加・名前変更・削除ができます</string>
+    <!-- GPX Import Tip Card -->
+    <string name="tip_gpx_title">GPXインポートに対応！</string>
+    <string name="tip_gpx_body">設定 → データ管理 → インポートから「GPXからインポート」を選ぶと、.gpxファイルからルートと場所をインポートできます。</string>
 </resources>

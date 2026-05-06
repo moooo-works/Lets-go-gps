@@ -199,6 +199,14 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.hasSeenGpxTip().collect { seen ->
+                if (!seen) {
+                    _uiState.update { it.copy(showGpxTip = true) }
+                }
+            }
+        }
     }
 
     fun dismissOnboarding() {
@@ -224,6 +232,12 @@ class MapViewModel @Inject constructor(
     fun dismissClipboardHintTip() {
         _uiState.update { it.copy(showClipboardHintTip = false) }
         viewModelScope.launch { settingsRepository.setClipboardHintTipSeen() }
+    }
+
+    /** Dismiss the "GPX import" new-feature tip and persist the ack. */
+    fun dismissGpxTip() {
+        _uiState.update { it.copy(showGpxTip = false) }
+        viewModelScope.launch { settingsRepository.setGpxTipSeen() }
     }
 
     /** Dismiss the "loop/bounce is available" new-feature tip and persist the ack. */

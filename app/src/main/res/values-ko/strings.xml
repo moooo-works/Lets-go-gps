@@ -275,4 +275,7 @@
     <!-- Folder Feature Tip -->
     <string name="tip_folder_title">폴더 기능이 추가되었어요!</string>
     <string name="tip_folder_body">• 검색창 아래 칩으로 폴더별 필터링 가능\n• 길게 눌러 다중 선택 모드에서 폴더로 이동할 수 있어요\n• 우측 상단 \"관리\"에서 폴더를 추가·이름 변경·삭제할 수 있어요</string>
+    <!-- GPX Import Tip Card -->
+    <string name="tip_gpx_title">GPX 가져오기 지원!</string>
+    <string name="tip_gpx_body">설정 → 데이터 관리 → 가져오기에서 \"GPX에서 가져오기\"를 선택하면 .gpx 파일에서 경로와 위치를 가져올 수 있어요.</string>
 </resources>
