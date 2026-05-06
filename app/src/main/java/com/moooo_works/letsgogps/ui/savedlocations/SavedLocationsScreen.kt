@@ -477,18 +477,7 @@ fun SavedLocationsScreen(
     }
 
     if (showFolderTip) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissFolderTip() },
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp,
-            title = { Text(stringResource(R.string.tip_folder_title)) },
-            text = { Text(stringResource(R.string.tip_folder_body)) },
-            confirmButton = {
-                Button(onClick = { viewModel.dismissFolderTip() }) {
-                    Text(stringResource(R.string.tip_dismiss))
-                }
-            }
-        )
+        FolderTipCard(onDismiss = { viewModel.dismissFolderTip() })
     }
 }
 
@@ -586,6 +575,53 @@ fun SavedLocationItem(
         } else {
             IconButton(onClick = onDeleteClick) {
                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FolderTipCard(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.3f))
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.tip_folder_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.tip_folder_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Start
+                )
+                androidx.compose.material3.Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.tip_dismiss),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
