@@ -524,7 +524,7 @@ fun SavedLocationItem(
         if (isBatchMode) {
             Checkbox(
                 checked = isSelected,
-                onCheckedChange = { onClick() },
+                onCheckedChange = null,
                 modifier = Modifier.padding(end = 4.dp)
             )
         }
