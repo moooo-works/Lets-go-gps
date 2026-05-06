@@ -317,6 +317,7 @@ fun SavedLocationsScreen(
                                             { viewModel.enterBatchSelection(location.id) }
                                         } else null,
                                         isSelected = batchSelection.selectedIds.contains(location.id),
+                                        isBatchMode = batchSelection.active,
                                         onFavoriteClick = { viewModel.toggleFavorite(location) },
                                         onDeleteClick = { locationToDelete = location },
                                         onRenameClick = { locationToRename = location }
@@ -504,6 +505,7 @@ fun SavedLocationItem(
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
     isSelected: Boolean = false,
+    isBatchMode: Boolean = false,
     onFavoriteClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onRenameClick: () -> Unit
@@ -519,7 +521,7 @@ fun SavedLocationItem(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (onLongClick != null) {
+        if (isBatchMode) {
             Checkbox(
                 checked = isSelected,
                 onCheckedChange = { onClick() },
