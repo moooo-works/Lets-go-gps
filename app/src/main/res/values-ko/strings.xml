@@ -272,4 +272,7 @@
     <string name="folder_delete_title">폴더 삭제</string>
     <string name="folder_delete_msg">폴더 안의 위치는 미분류로 이동됩니다. 위치 자체는 삭제되지 않습니다.</string>
     <string name="folder_location_count">%1$d개</string>
+    <!-- Folder Feature Tip -->
+    <string name="tip_folder_title">폴더 기능이 추가되었어요!</string>
+    <string name="tip_folder_body">• 검색창 아래 칩으로 폴더별 필터링 가능\n• 길게 눌러 다중 선택 모드에서 폴더로 이동할 수 있어요\n• 우측 상단 \"관리\"에서 폴더를 추가·이름 변경·삭제할 수 있어요</string>
 </resources>

@@ -79,6 +79,7 @@ fun SavedLocationsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val locations by viewModel.filteredLocations.collectAsStateWithLifecycle()
     val showSortTip by viewModel.showSortTip.collectAsStateWithLifecycle()
+    val showFolderTip by viewModel.showFolderTip.collectAsStateWithLifecycle()
 
     var locationToDelete by remember { mutableStateOf<SavedLocation?>(null) }
     var locationToRename by remember { mutableStateOf<SavedLocation?>(null) }
@@ -470,6 +471,21 @@ fun SavedLocationsScreen(
             dismissButton = {
                 TextButton(onClick = { showFolderPickerDialog = false }) {
                     Text(stringResource(R.string.map_action_cancel))
+                }
+            }
+        )
+    }
+
+    if (showFolderTip) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissFolderTip() },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
+            title = { Text(stringResource(R.string.tip_folder_title)) },
+            text = { Text(stringResource(R.string.tip_folder_body)) },
+            confirmButton = {
+                Button(onClick = { viewModel.dismissFolderTip() }) {
+                    Text(stringResource(R.string.tip_dismiss))
                 }
             }
         )

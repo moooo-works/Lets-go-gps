@@ -43,6 +43,7 @@ class SavedLocationsViewModelTest {
         repository = FakeSavedLocationsRepository()
         every { settingsRepository.hasSeenOnboarding() } returns flowOf(true)
         every { settingsRepository.hasSeenSortTip() } returns flowOf(true)
+        every { settingsRepository.hasSeenFolderTip() } returns flowOf(true)
     }
 
     @After

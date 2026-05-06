@@ -272,4 +272,7 @@
     <string name="folder_delete_title">Delete Folder</string>
     <string name="folder_delete_msg">Locations in this folder will be moved to Uncategorized. The locations themselves will not be affected.</string>
     <string name="folder_location_count">%1$d locations</string>
+    <!-- Folder Feature Tip -->
+    <string name="tip_folder_title">Folders are here!</string>
+    <string name="tip_folder_body">• Filter locations by folder using the chips below the search bar\n• Long-press to enter multi-select mode and move locations to a folder\n• Tap \"Manage\" in the top bar to create, rename, or delete folders</string>
 </resources>

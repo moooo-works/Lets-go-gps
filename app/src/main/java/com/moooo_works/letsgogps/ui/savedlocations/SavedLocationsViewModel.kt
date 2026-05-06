@@ -65,6 +65,17 @@ class SavedLocationsViewModel @Inject constructor(
         initialValue = false
     )
 
+    val showFolderTip: StateFlow<Boolean> = combine(
+        settingsRepository.hasSeenOnboarding(),
+        settingsRepository.hasSeenFolderTip()
+    ) { onboardingDone, tipSeen ->
+        onboardingDone && !tipSeen
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
     // Folder state
     val folders: StateFlow<List<LocationFolder>> = repository.observeFolders()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -93,6 +104,10 @@ class SavedLocationsViewModel @Inject constructor(
 
     fun dismissSortTip() {
         viewModelScope.launch { settingsRepository.setSortTipSeen() }
+    }
+
+    fun dismissFolderTip() {
+        viewModelScope.launch { settingsRepository.setFolderTipSeen() }
     }
 
     fun dismissProUpgrade() { _showProUpgrade.value = false }
