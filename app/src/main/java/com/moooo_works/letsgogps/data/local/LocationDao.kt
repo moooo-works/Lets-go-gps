@@ -14,27 +14,25 @@ interface LocationDao {
     @Query("SELECT * FROM saved_locations ORDER BY createdAt DESC")
     fun getAllLocations(): Flow<List<SavedLocation>>
 
-    @Query(
-        """
+    @Query("""
         SELECT * FROM saved_locations
         WHERE name LIKE '%' || :query || '%'
           AND (
-            (:showHistory = 1 AND :showFavorites = 1)
-            OR (:showHistory = 1 AND :showFavorites = 0 AND isFavorite = 0)
-            OR (:showHistory = 0 AND :showFavorites = 1 AND isFavorite = 1)
+            :filterMode = 'ALL'
+            OR (:filterMode = 'FAVORITES' AND isFavorite = 1)
+            OR (:filterMode = 'FOLDER' AND folderId = :folderId)
           )
         ORDER BY
             CASE WHEN :sortOption = 'NAME_ASC' THEN name END COLLATE NOCASE ASC,
             CASE WHEN :sortOption = 'RECENT' THEN createdAt END DESC,
             CASE WHEN :sortOption = 'CUSTOM' THEN sortOrder END DESC,
             id DESC
-        """
-    )
+        """)
     fun observeSavedLocations(
         query: String,
         sortOption: String,
-        showHistory: Boolean,
-        showFavorites: Boolean
+        filterMode: String,
+        folderId: Int
     ): Flow<List<SavedLocation>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

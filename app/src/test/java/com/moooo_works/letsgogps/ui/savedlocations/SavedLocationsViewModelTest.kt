@@ -1,5 +1,7 @@
 package com.moooo_works.letsgogps.ui.savedlocations
 
+import com.moooo_works.letsgogps.data.model.FolderWithCount
+import com.moooo_works.letsgogps.data.model.LocationFolder
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.RouteSummary
 import com.moooo_works.letsgogps.data.model.RouteWithPoints
@@ -9,7 +11,6 @@ import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -49,7 +51,7 @@ class SavedLocationsViewModelTest {
     }
 
     @Test
-    fun `default filters show all locations`() = runTest {
+    fun `default filter shows all locations`() = runTest {
         repository.savedLocations.value = listOf(
             SavedLocation(id = 1, name = "A", latitude = 0.0, longitude = 0.0, isFavorite = false),
             SavedLocation(id = 2, name = "B", latitude = 0.0, longitude = 0.0, isFavorite = true)
@@ -65,7 +67,7 @@ class SavedLocationsViewModelTest {
     }
 
     @Test
-    fun `favorites only shows favorite locations`() = runTest {
+    fun `favorites filter shows only favorite locations`() = runTest {
         repository.savedLocations.value = listOf(
             SavedLocation(id = 1, name = "History", latitude = 0.0, longitude = 0.0, isFavorite = false),
             SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
@@ -73,7 +75,7 @@ class SavedLocationsViewModelTest {
 
         val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
-        viewModel.onShowHistoryChanged(false)
+        viewModel.onFilterChanged(LocationFilter.Favorites)
         advanceTimeBy(350)
         advanceUntilIdle()
 
@@ -82,30 +84,20 @@ class SavedLocationsViewModelTest {
     }
 
     @Test
-    fun `history only shows non-favorite locations`() = runTest {
+    fun `folder filter shows only locations in that folder`() = runTest {
         repository.savedLocations.value = listOf(
-            SavedLocation(id = 1, name = "History", latitude = 0.0, longitude = 0.0, isFavorite = false),
-            SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
+            SavedLocation(id = 1, name = "In Folder", latitude = 0.0, longitude = 0.0, folderId = 10),
+            SavedLocation(id = 2, name = "No Folder", latitude = 0.0, longitude = 0.0, folderId = null)
         )
 
         val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
-        viewModel.onShowFavoritesChanged(false)
+        viewModel.onFilterChanged(LocationFilter.Folder(folderId = 10, folderName = "Test"))
         advanceTimeBy(350)
         advanceUntilIdle()
 
         assertEquals(listOf(1), viewModel.filteredLocations.value.map { it.id })
         collectJob.cancel()
-    }
-
-    @Test
-    fun `cannot disable both filters`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
-        viewModel.onShowHistoryChanged(false)
-        viewModel.onShowFavoritesChanged(false)
-        advanceUntilIdle()
-
-        assertTrue(viewModel.uiState.value.showHistory || viewModel.uiState.value.showFavorites)
     }
 
     @Test
@@ -151,29 +143,73 @@ class SavedLocationsViewModelTest {
 
         assertTrue(repository.updated.isEmpty())
     }
+
+    @Test
+    fun `enterBatchSelection activates batch mode with one id selected`() = runTest {
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+
+        viewModel.enterBatchSelection(locationId = 5)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.batchSelection.value.active)
+        assertEquals(setOf(5), viewModel.batchSelection.value.selectedIds)
+    }
+
+    @Test
+    fun `toggleBatchSelection adds and removes ids`() = runTest {
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        viewModel.enterBatchSelection(locationId = 1)
+        viewModel.toggleBatchSelection(locationId = 2)
+        viewModel.toggleBatchSelection(locationId = 1)
+        advanceUntilIdle()
+
+        assertEquals(setOf(2), viewModel.batchSelection.value.selectedIds)
+    }
+
+    @Test
+    fun `exitBatchSelection clears batch mode`() = runTest {
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        viewModel.enterBatchSelection(locationId = 1)
+        viewModel.exitBatchSelection()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.batchSelection.value.active)
+        assertTrue(viewModel.batchSelection.value.selectedIds.isEmpty())
+    }
+
+    @Test
+    fun `deleteFolder resets filter to All when current folder is deleted`() = runTest {
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        viewModel.onFilterChanged(LocationFilter.Folder(folderId = 99, folderName = "Old"))
+        viewModel.deleteFolder(id = 99)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.filter is LocationFilter.All)
+    }
 }
 
 private class FakeSavedLocationsRepository : LocationRepository {
     val savedLocations = MutableStateFlow<List<SavedLocation>>(emptyList())
     val deleted = mutableListOf<SavedLocation>()
     val updated = mutableListOf<SavedLocation>()
+    val deletedFolderIds = mutableListOf<Int>()
+    val movedLocations = mutableListOf<Pair<List<Int>, Int?>>()
 
     override fun getAllLocations(): Flow<List<SavedLocation>> = savedLocations
 
     override fun observeSavedLocations(
         query: String,
         sortOption: String,
-        showHistory: Boolean,
-        showFavorites: Boolean
+        filterMode: String,
+        folderId: Int
     ): Flow<List<SavedLocation>> {
         val filtered = savedLocations.value
             .filter { it.name.contains(query, ignoreCase = true) }
             .filter {
-                when {
-                    showHistory && showFavorites -> true
-                    showHistory && !showFavorites -> !it.isFavorite
-                    !showHistory && showFavorites -> it.isFavorite
-                    else -> false
+                when (filterMode) {
+                    "FAVORITES" -> it.isFavorite
+                    "FOLDER" -> it.folderId == folderId
+                    else -> true
                 }
             }
             .let { list ->
@@ -204,4 +240,13 @@ private class FakeSavedLocationsRepository : LocationRepository {
     override suspend fun insertRouteWithPoints(name: String, points: List<RoutePoint>) = Unit
     override suspend fun deleteRoute(routeId: Int) = Unit
     override suspend fun updateRouteName(routeId: Int, name: String) = Unit
+
+    override fun observeFolders(): Flow<List<LocationFolder>> = flowOf(emptyList())
+    override fun observeFoldersWithCount(): Flow<List<FolderWithCount>> = flowOf(emptyList())
+    override suspend fun createFolder(name: String): Int = 0
+    override suspend fun renameFolder(id: Int, name: String) = Unit
+    override suspend fun deleteFolder(id: Int) { deletedFolderIds += id }
+    override suspend fun moveLocationsToFolder(locationIds: List<Int>, folderId: Int?) {
+        movedLocations += locationIds to folderId
+    }
 }

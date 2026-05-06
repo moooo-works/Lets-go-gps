@@ -84,11 +84,16 @@ class SavedLocationsViewModel @Inject constructor(
     ) { query, sort, showHistory, showFavorites ->
         QueryParams(query, sort, showHistory, showFavorites)
     }.flatMapLatest { params ->
+        val filterMode = when {
+            params.showHistory && params.showFavorites -> "ALL"
+            params.showFavorites -> "FAVORITES"
+            else -> "ALL"
+        }
         repository.observeSavedLocations(
             query = params.query,
             sortOption = params.sortOption.name,
-            showHistory = params.showHistory,
-            showFavorites = params.showFavorites
+            filterMode = filterMode,
+            folderId = 0
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 

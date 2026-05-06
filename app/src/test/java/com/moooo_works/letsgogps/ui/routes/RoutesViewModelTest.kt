@@ -1,5 +1,7 @@
 package com.moooo_works.letsgogps.ui.routes
 
+import com.moooo_works.letsgogps.data.model.FolderWithCount
+import com.moooo_works.letsgogps.data.model.LocationFolder
 import com.moooo_works.letsgogps.data.model.Route
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.RouteSummary
@@ -98,8 +100,8 @@ private class FakeLocationRepository : LocationRepository {
     override fun observeSavedLocations(
         query: String,
         sortOption: String,
-        showHistory: Boolean,
-        showFavorites: Boolean
+        filterMode: String,
+        folderId: Int
     ): Flow<List<SavedLocation>> = flowOf(emptyList())
     override suspend fun saveLocation(location: SavedLocation) = Unit
     override suspend fun deleteLocation(location: SavedLocation) = Unit
@@ -145,4 +147,11 @@ private class FakeLocationRepository : LocationRepository {
             )
         }
     }
+
+    override fun observeFolders(): Flow<List<LocationFolder>> = flowOf(emptyList())
+    override fun observeFoldersWithCount(): Flow<List<FolderWithCount>> = flowOf(emptyList())
+    override suspend fun createFolder(name: String): Int = 0
+    override suspend fun renameFolder(id: Int, name: String) = Unit
+    override suspend fun deleteFolder(id: Int) = Unit
+    override suspend fun moveLocationsToFolder(locationIds: List<Int>, folderId: Int?) = Unit
 }
