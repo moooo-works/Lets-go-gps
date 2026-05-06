@@ -1,16 +1,20 @@
 package com.moooo_works.letsgogps.ui.savedlocations
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -20,12 +24,15 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,12 +41,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,26 +56,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.layout.size
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.data.model.SavedLocation
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorder
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.runtime.LaunchedEffect
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun SavedLocationsScreen(
     onNavigateBack: () -> Unit,
     onLocationSelected: (Double, Double) -> Unit,
+    onNavigateToFolderManagement: () -> Unit = {},
     viewModel: SavedLocationsViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,6 +85,10 @@ fun SavedLocationsScreen(
     var sortMenuExpanded by remember { mutableStateOf(false) }
     var overflowMenuExpanded by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+
+    val folders by viewModel.folders.collectAsStateWithLifecycle()
+    val batchSelection by viewModel.batchSelection.collectAsStateWithLifecycle()
+    var showFolderPickerDialog by remember { mutableStateOf(false) }
 
     val canReorder = uiState.sortOption == SavedLocationsSortOption.CUSTOM &&
         uiState.query.trim().isEmpty() &&
@@ -117,6 +128,9 @@ fun SavedLocationsScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    TextButton(onClick = onNavigateToFolderManagement) {
+                        Text(stringResource(R.string.folder_manage_button), color = MaterialTheme.colorScheme.primary)
+                    }
                     Box {
                         IconButton(onClick = { overflowMenuExpanded = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.saved_locations_more_options))
@@ -138,6 +152,28 @@ fun SavedLocationsScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (batchSelection.active) {
+                BottomAppBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp
+                ) {
+                    TextButton(
+                        onClick = { showFolderPickerDialog = true },
+                        enabled = batchSelection.selectedIds.isNotEmpty()
+                    ) {
+                        Text(
+                            stringResource(R.string.batch_move_to_folder, batchSelection.selectedIds.size),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(onClick = { viewModel.exitBatchSelection() }) {
+                        Text(stringResource(R.string.map_action_cancel))
+                    }
+                }
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
@@ -164,30 +200,44 @@ fun SavedLocationsScreen(
                 )
             )
 
-            // 篩選 + 排序列
-            Row(
+            // 資料夾 chip 列（可橫向捲動）
+            LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    FilterPill(
+                        label = stringResource(R.string.saved_locations_all),
+                        selected = uiState.filter is LocationFilter.All,
+                        onClick = { viewModel.onFilterChanged(LocationFilter.All) }
+                    )
+                }
+                item {
+                    FilterPill(
+                        label = stringResource(R.string.saved_locations_favorites),
+                        selected = uiState.filter is LocationFilter.Favorites,
+                        onClick = { viewModel.onFilterChanged(LocationFilter.Favorites) }
+                    )
+                }
+                items(folders) { folder ->
+                    FilterPill(
+                        label = folder.name,
+                        selected = uiState.filter.let { it is LocationFilter.Folder && it.folderId == folder.id },
+                        onClick = { viewModel.onFilterChanged(LocationFilter.Folder(folder.id, folder.name)) }
+                    )
+                }
+            }
+
+            // 排序列
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 0.dp),
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 全部 pill
-                FilterPill(
-                    label = stringResource(R.string.saved_locations_all),
-                    selected = uiState.filter is LocationFilter.All,
-                    onClick = { viewModel.onFilterChanged(LocationFilter.All) }
-                )
-                // 我的最愛 pill
-                FilterPill(
-                    label = stringResource(R.string.saved_locations_favorites),
-                    selected = uiState.filter is LocationFilter.Favorites,
-                    onClick = { viewModel.onFilterChanged(LocationFilter.Favorites) }
-                )
-
-                Box(modifier = Modifier.weight(1f))
-
-                // 排序
                 TextButton(onClick = { sortMenuExpanded = true }) {
                     Text(
                         when (uiState.sortOption) {
@@ -254,9 +304,19 @@ fun SavedLocationsScreen(
                                 Column {
                                     SavedLocationItem(
                                         location = location,
-                                        canReorder = canReorder,
-                                        reorderModifier = Modifier.detectReorder(reorderState),
-                                        onClick = { onLocationSelected(location.latitude, location.longitude) },
+                                        canReorder = canReorder && !batchSelection.active,
+                                        reorderModifier = if (!batchSelection.active) Modifier.detectReorder(reorderState) else Modifier,
+                                        onClick = {
+                                            if (batchSelection.active) {
+                                                viewModel.toggleBatchSelection(location.id)
+                                            } else {
+                                                onLocationSelected(location.latitude, location.longitude)
+                                            }
+                                        },
+                                        onLongClick = if (!batchSelection.active) {
+                                            { viewModel.enterBatchSelection(location.id) }
+                                        } else null,
+                                        isSelected = batchSelection.selectedIds.contains(location.id),
                                         onFavoriteClick = { viewModel.toggleFavorite(location) },
                                         onDeleteClick = { locationToDelete = location },
                                         onRenameClick = { locationToRename = location }
@@ -270,9 +330,9 @@ fun SavedLocationsScreen(
                         }
                     }
                 }
+            }
         }
     }
-}
 
     if (showSortTip) {
         SortTipCard(onDismiss = { viewModel.dismissSortTip() })
@@ -297,7 +357,7 @@ fun SavedLocationsScreen(
         )
     }
 
-if (locationToDelete != null) {
+    if (locationToDelete != null) {
         AlertDialog(
             onDismissRequest = { locationToDelete = null },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -345,6 +405,72 @@ if (locationToDelete != null) {
             }
         )
     }
+
+    if (showFolderPickerDialog) {
+        var selectedFolderId by remember { mutableStateOf<Int?>(-1) }
+        AlertDialog(
+            onDismissRequest = { showFolderPickerDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
+            title = { Text(stringResource(R.string.folder_move_to_title)) },
+            text = {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedFolderId = null }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedFolderId == null,
+                            onClick = { selectedFolderId = null }
+                        )
+                        Text(
+                            stringResource(R.string.folder_uncategorized),
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                    folders.forEach { folder ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedFolderId = folder.id }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedFolderId == folder.id,
+                                onClick = { selectedFolderId = folder.id }
+                            )
+                            Text(
+                                folder.name,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (selectedFolderId != -1) {
+                            viewModel.moveBatchToFolder(selectedFolderId)
+                            showFolderPickerDialog = false
+                        }
+                    },
+                    enabled = selectedFolderId != -1
+                ) {
+                    Text(stringResource(R.string.map_action_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFolderPickerDialog = false }) {
+                    Text(stringResource(R.string.map_action_cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -369,12 +495,15 @@ private fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SavedLocationItem(
     location: SavedLocation,
     canReorder: Boolean,
     reorderModifier: Modifier = Modifier,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    isSelected: Boolean = false,
     onFavoriteClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onRenameClick: () -> Unit
@@ -383,10 +512,20 @@ fun SavedLocationItem(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 72.dp)
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (onLongClick != null) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { onClick() },
+                modifier = Modifier.padding(end = 4.dp)
+            )
+        }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = location.name,

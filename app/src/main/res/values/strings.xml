@@ -261,4 +261,10 @@
     <!-- Clipboard Hint Tip Card -->
     <string name="tip_clipboard_hint_title">🆕 剪貼簿智慧偵測</string>
     <string name="tip_clipboard_hint_body">複製座標或 Plus Code 後返回 App，地圖頁會自動顯示提示，點一下即可移動到該位置。可在設定中關閉此功能。</string>
+    <!-- Folder & Batch Mode -->
+    <string name="folder_manage_button">管理</string>
+    <string name="folder_move_to_title">移到資料夾</string>
+    <string name="folder_uncategorized">未分類</string>
+    <string name="batch_move_to_folder">移到資料夾 (%1$d)</string>
+    <string name="map_action_confirm">確認</string>
 </resources>

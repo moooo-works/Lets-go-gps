@@ -258,4 +258,10 @@
     <!-- Clipboard Hint Tip Card -->
     <string name="tip_clipboard_hint_title">🆕 クリップボード自動検出</string>
     <string name="tip_clipboard_hint_body">座標や Plus Code をコピーしてアプリに戻ると、マップ画面にヒントが表示されます。タップするとその場所に移動できます。設定でオフにできます。</string>
+    <!-- Folder & Batch Mode -->
+    <string name="folder_manage_button">管理</string>
+    <string name="folder_move_to_title">フォルダーに移動</string>
+    <string name="folder_uncategorized">未分類</string>
+    <string name="batch_move_to_folder">フォルダーに移動 (%1$d)</string>
+    <string name="map_action_confirm">確認</string>
 </resources>

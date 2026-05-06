@@ -258,4 +258,10 @@
     <!-- Clipboard Hint Tip Card -->
     <string name="tip_clipboard_hint_title">🆕 클립보드 자동 감지</string>
     <string name="tip_clipboard_hint_body">좌표 또는 Plus Code를 복사하고 앱으로 돌아오면 지도 화면에 힌트가 표시됩니다. 탭하면 해당 위치로 이동합니다. 설정에서 끌 수 있습니다.</string>
+    <!-- Folder & Batch Mode -->
+    <string name="folder_manage_button">관리</string>
+    <string name="folder_move_to_title">폴더로 이동</string>
+    <string name="folder_uncategorized">미분류</string>
+    <string name="batch_move_to_folder">폴더로 이동 (%1$d)</string>
+    <string name="map_action_confirm">확인</string>
 </resources>

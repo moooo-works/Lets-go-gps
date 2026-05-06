@@ -258,4 +258,10 @@
     <!-- Clipboard Hint Tip Card -->
     <string name="tip_clipboard_hint_title">🆕 Smart Clipboard Detection</string>
     <string name="tip_clipboard_hint_body">Copy coordinates or a Plus Code, then return to the app — a hint will appear on the map. Tap it to jump to that location. You can turn this off in Settings.</string>
+    <!-- Folder & Batch Mode -->
+    <string name="folder_manage_button">Manage</string>
+    <string name="folder_move_to_title">Move to Folder</string>
+    <string name="folder_uncategorized">Uncategorized</string>
+    <string name="batch_move_to_folder">Move to Folder (%1$d)</string>
+    <string name="map_action_confirm">Confirm</string>
 </resources>
