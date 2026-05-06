@@ -251,7 +251,9 @@ fun SavedLocationsScreen(
                 }
                 DropdownMenu(
                     expanded = sortMenuExpanded,
-                    onDismissRequest = { sortMenuExpanded = false }
+                    onDismissRequest = { sortMenuExpanded = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp
                 ) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.sort_custom)) },
