@@ -185,6 +185,9 @@
     <string name="import_preview_routes">Routes: %1$d</string>
     <string name="import_result_locations">Locations: %1$d imported, %2$d skipped.</string>
     <string name="import_result_routes">Routes: %1$d imported, %2$d skipped.</string>
+    <string name="import_format_dialog_title">Select Import Format</string>
+    <string name="import_format_json">Import from backup (.json)</string>
+    <string name="import_format_gpx">Import from GPX (.gpx)</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Upgrade to Pro</string>

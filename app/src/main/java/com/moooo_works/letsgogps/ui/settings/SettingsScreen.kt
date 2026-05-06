@@ -71,6 +71,7 @@ fun SettingsScreen(
 
     var showClearNonFavoritesDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
+    var showImportFormatDialog by remember { mutableStateOf(false) }
     var exportSavedLocations by remember { mutableStateOf(true) }
     var exportRoutes by remember { mutableStateOf(true) }
 
@@ -483,7 +484,7 @@ fun SettingsScreen(
                     locked = !isProActive,
                     onClick = {
                         if (!isProActive) viewModel.requestProUpgrade()
-                        else importLauncher.launch(arrayOf("application/json", "*/*"))
+                        else showImportFormatDialog = true
                     }
                 )
                 Divider(
@@ -568,6 +569,49 @@ fun SettingsScreen(
                     },
                     dismissButton = {
                         TextButton(onClick = { showClearNonFavoritesDialog = false }) { Text(stringResource(R.string.map_action_cancel)) }
+                    }
+                )
+            }
+
+            if (showImportFormatDialog) {
+                AlertDialog(
+                    onDismissRequest = { showImportFormatDialog = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp,
+                    title = { Text(stringResource(R.string.import_format_dialog_title)) },
+                    text = {
+                        Column {
+                            TextButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    showImportFormatDialog = false
+                                    importLauncher.launch(arrayOf("application/json"))
+                                }
+                            ) {
+                                Text(
+                                    stringResource(R.string.import_format_json),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            TextButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    showImportFormatDialog = false
+                                    importLauncher.launch(arrayOf("*/*"))
+                                }
+                            ) {
+                                Text(
+                                    stringResource(R.string.import_format_gpx),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        TextButton(onClick = { showImportFormatDialog = false }) {
+                            Text(stringResource(R.string.map_action_cancel))
+                        }
                     }
                 )
             }
