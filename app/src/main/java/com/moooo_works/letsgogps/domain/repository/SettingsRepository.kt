@@ -43,4 +43,10 @@ interface SettingsRepository {
 
     fun hasSeenClipboardHintTip(): Flow<Boolean>
     suspend fun setClipboardHintTipSeen()
+
+    fun hasSeenFolderTip(): Flow<Boolean>
+    suspend fun setFolderTipSeen()
+
+    fun hasSeenGpxTip(): Flow<Boolean>
+    suspend fun setGpxTipSeen()
 }

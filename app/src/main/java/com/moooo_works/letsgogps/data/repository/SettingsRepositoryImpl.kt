@@ -41,6 +41,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val HAS_SEEN_SORT_TIP = booleanPreferencesKey("has_seen_sort_tip")
         val CLIPBOARD_HINT_ENABLED = booleanPreferencesKey("clipboard_hint_enabled")
         val HAS_SEEN_CLIPBOARD_HINT_TIP = booleanPreferencesKey("has_seen_clipboard_hint_tip")
+        val HAS_SEEN_FOLDER_TIP = booleanPreferencesKey("has_seen_folder_tip")
+        val HAS_SEEN_GPX_TIP = booleanPreferencesKey("has_seen_gpx_tip")
 
         const val DEFAULT_ALTITUDE = 15.0
         const val DEFAULT_ROUTE_SPEED = 5.0
@@ -157,5 +159,19 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setClipboardHintTipSeen() {
         dataStore.edit { it[HAS_SEEN_CLIPBOARD_HINT_TIP] = true }
+    }
+
+    override fun hasSeenFolderTip(): Flow<Boolean> =
+        dataStore.data.map { it[HAS_SEEN_FOLDER_TIP] ?: false }
+
+    override suspend fun setFolderTipSeen() {
+        dataStore.edit { it[HAS_SEEN_FOLDER_TIP] = true }
+    }
+
+    override fun hasSeenGpxTip(): Flow<Boolean> =
+        dataStore.data.map { it[HAS_SEEN_GPX_TIP] ?: false }
+
+    override suspend fun setGpxTipSeen() {
+        dataStore.edit { it[HAS_SEEN_GPX_TIP] = true }
     }
 }
