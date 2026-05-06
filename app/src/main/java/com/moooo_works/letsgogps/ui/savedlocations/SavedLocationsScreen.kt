@@ -81,8 +81,7 @@ fun SavedLocationsScreen(
 
     val canReorder = uiState.sortOption == SavedLocationsSortOption.CUSTOM &&
         uiState.query.trim().isEmpty() &&
-        uiState.showHistory &&
-        uiState.showFavorites
+        uiState.filter is LocationFilter.All
 
     var tempLocations by remember { mutableStateOf(locations) }
 
@@ -176,20 +175,14 @@ fun SavedLocationsScreen(
                 // 全部 pill
                 FilterPill(
                     label = stringResource(R.string.saved_locations_all),
-                    selected = uiState.showHistory && uiState.showFavorites,
-                    onClick = {
-                        viewModel.onShowHistoryChanged(true)
-                        viewModel.onShowFavoritesChanged(true)
-                    }
+                    selected = uiState.filter is LocationFilter.All,
+                    onClick = { viewModel.onFilterChanged(LocationFilter.All) }
                 )
                 // 我的最愛 pill
                 FilterPill(
                     label = stringResource(R.string.saved_locations_favorites),
-                    selected = !uiState.showHistory && uiState.showFavorites,
-                    onClick = {
-                        viewModel.onShowHistoryChanged(false)
-                        viewModel.onShowFavoritesChanged(true)
-                    }
+                    selected = uiState.filter is LocationFilter.Favorites,
+                    onClick = { viewModel.onFilterChanged(LocationFilter.Favorites) }
                 )
 
                 Box(modifier = Modifier.weight(1f))

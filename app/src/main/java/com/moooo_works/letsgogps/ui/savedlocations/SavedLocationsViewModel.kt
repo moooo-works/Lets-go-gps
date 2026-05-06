@@ -3,6 +3,8 @@ package com.moooo_works.letsgogps.ui.savedlocations
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.moooo_works.letsgogps.data.model.FolderWithCount
+import com.moooo_works.letsgogps.data.model.LocationFolder
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
@@ -29,8 +31,12 @@ enum class SavedLocationsSortOption {
 data class SavedLocationsUiState(
     val query: String = "",
     val sortOption: SavedLocationsSortOption = SavedLocationsSortOption.CUSTOM,
-    val showHistory: Boolean = true,
-    val showFavorites: Boolean = true
+    val filter: LocationFilter = LocationFilter.All
+)
+
+data class BatchSelectionState(
+    val active: Boolean = false,
+    val selectedIds: Set<Int> = emptySet()
 )
 
 @HiltViewModel
@@ -61,41 +67,43 @@ class SavedLocationsViewModel @Inject constructor(
         initialValue = false
     )
 
+    // Folder state
+    val folders: StateFlow<List<LocationFolder>> = repository.observeFolders()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val foldersWithCount: StateFlow<List<FolderWithCount>> = repository.observeFoldersWithCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Batch selection state
+    private val _batchSelection = MutableStateFlow(BatchSelectionState())
+    val batchSelection: StateFlow<BatchSelectionState> = _batchSelection.asStateFlow()
+
+    val filteredLocations: StateFlow<List<SavedLocation>> = combine(
+        _uiState.map { it.query.trim() }.debounce(300),
+        _uiState.map { it.sortOption },
+        _uiState.map { it.filter }
+    ) { query, sort, filter ->
+        FilterParams(query, sort, filter)
+    }.flatMapLatest { params ->
+        repository.observeSavedLocations(
+            query = params.query,
+            sortOption = params.sortOption.name,
+            filterMode = params.filter.filterMode,
+            folderId = params.filter.folderIdOrZero
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun dismissSortTip() {
-        viewModelScope.launch {
-            settingsRepository.setSortTipSeen()
-        }
+        viewModelScope.launch { settingsRepository.setSortTipSeen() }
     }
 
     fun dismissProUpgrade() { _showProUpgrade.value = false }
-
     fun requestProUpgrade() { _showProUpgrade.value = true }
 
     fun launchBillingFlow(activity: Activity) {
         proRepository.launchBillingFlow(activity)
         dismissProUpgrade()
     }
-
-    val filteredLocations: StateFlow<List<SavedLocation>> = combine(
-        _uiState.map { it.query.trim() }.debounce(300),
-        _uiState.map { it.sortOption },
-        _uiState.map { it.showHistory },
-        _uiState.map { it.showFavorites }
-    ) { query, sort, showHistory, showFavorites ->
-        QueryParams(query, sort, showHistory, showFavorites)
-    }.flatMapLatest { params ->
-        val filterMode = when {
-            params.showHistory && params.showFavorites -> "ALL"
-            params.showFavorites -> "FAVORITES"
-            else -> "ALL"
-        }
-        repository.observeSavedLocations(
-            query = params.query,
-            sortOption = params.sortOption.name,
-            filterMode = filterMode,
-            folderId = 0
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun onQueryChanged(query: String) {
         _uiState.update { it.copy(query = query) }
@@ -105,16 +113,8 @@ class SavedLocationsViewModel @Inject constructor(
         _uiState.update { it.copy(sortOption = option) }
     }
 
-    fun onShowHistoryChanged(checked: Boolean) {
-        _uiState.update { current ->
-            if (!checked && !current.showFavorites) current else current.copy(showHistory = checked)
-        }
-    }
-
-    fun onShowFavoritesChanged(checked: Boolean) {
-        _uiState.update { current ->
-            if (!checked && !current.showHistory) current else current.copy(showFavorites = checked)
-        }
+    fun onFilterChanged(filter: LocationFilter) {
+        _uiState.update { it.copy(filter = filter) }
     }
 
     fun toggleFavorite(location: SavedLocation) {
@@ -124,15 +124,11 @@ class SavedLocationsViewModel @Inject constructor(
     }
 
     fun deleteLocation(location: SavedLocation) {
-        viewModelScope.launch {
-            repository.deleteLocation(location)
-        }
+        viewModelScope.launch { repository.deleteLocation(location) }
     }
 
     fun clearNonFavorites() {
-        viewModelScope.launch {
-            repository.deleteNonFavorites()
-        }
+        viewModelScope.launch { repository.deleteNonFavorites() }
     }
 
     fun renameLocation(location: SavedLocation, newName: String) {
@@ -155,12 +151,62 @@ class SavedLocationsViewModel @Inject constructor(
             }
         }
     }
+
+    // Batch selection
+    fun enterBatchSelection(locationId: Int) {
+        _batchSelection.value = BatchSelectionState(active = true, selectedIds = setOf(locationId))
+    }
+
+    fun toggleBatchSelection(locationId: Int) {
+        _batchSelection.update { state ->
+            val newIds = if (locationId in state.selectedIds) {
+                state.selectedIds - locationId
+            } else {
+                state.selectedIds + locationId
+            }
+            state.copy(selectedIds = newIds)
+        }
+    }
+
+    fun exitBatchSelection() {
+        _batchSelection.value = BatchSelectionState()
+    }
+
+    fun moveBatchToFolder(folderId: Int?) {
+        val ids = _batchSelection.value.selectedIds.toList()
+        if (ids.isEmpty()) return
+        viewModelScope.launch {
+            repository.moveLocationsToFolder(ids, folderId)
+            exitBatchSelection()
+        }
+    }
+
+    // Folder management
+    fun createFolder(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank() || trimmed.length > 30) return
+        viewModelScope.launch { repository.createFolder(trimmed) }
+    }
+
+    fun renameFolder(id: Int, name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank() || trimmed.length > 30) return
+        viewModelScope.launch { repository.renameFolder(id, trimmed) }
+    }
+
+    fun deleteFolder(id: Int) {
+        viewModelScope.launch {
+            repository.deleteFolder(id)
+            val currentFilter = _uiState.value.filter
+            if (currentFilter is LocationFilter.Folder && currentFilter.folderId == id) {
+                _uiState.update { it.copy(filter = LocationFilter.All) }
+            }
+        }
+    }
 }
 
-private data class QueryParams(
+private data class FilterParams(
     val query: String,
     val sortOption: SavedLocationsSortOption,
-    val showHistory: Boolean,
-    val showFavorites: Boolean
+    val filter: LocationFilter
 )
-
