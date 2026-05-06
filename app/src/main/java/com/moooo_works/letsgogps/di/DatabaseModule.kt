@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.moooo_works.letsgogps.data.local.AppDatabase
 import com.moooo_works.letsgogps.data.local.LocationDao
+import com.moooo_works.letsgogps.data.local.LocationFolderDao
 import com.moooo_works.letsgogps.data.local.RouteDao
 import dagger.Module
 import dagger.Provides
@@ -19,7 +20,12 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(context, AppDatabase::class.java, "mockgps.db")
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
+            .addMigrations(
+                AppDatabase.MIGRATION_1_2,
+                AppDatabase.MIGRATION_2_3,
+                AppDatabase.MIGRATION_3_4,
+                AppDatabase.MIGRATION_4_5
+            )
             .build()
     }
 
@@ -28,4 +34,7 @@ object DatabaseModule {
 
     @Provides
     fun provideRouteDao(db: AppDatabase): RouteDao = db.routeDao()
+
+    @Provides
+    fun provideLocationFolderDao(db: AppDatabase): LocationFolderDao = db.locationFolderDao()
 }

@@ -12,5 +12,6 @@ data class SavedLocation(
     val isFavorite: Boolean = false,
     val description: String = "",
     val createdAt: Long = System.currentTimeMillis(),
-    val sortOrder: Long = System.currentTimeMillis()
+    val sortOrder: Long = System.currentTimeMillis(),
+    val folderId: Int? = null
 )

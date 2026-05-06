@@ -4,14 +4,20 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.moooo_works.letsgogps.data.model.LocationFolder
 import com.moooo_works.letsgogps.data.model.Route
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.SavedLocation
 
-@Database(entities = [SavedLocation::class, Route::class, RoutePoint::class], version = 4, exportSchema = false)
+@Database(
+    entities = [SavedLocation::class, Route::class, RoutePoint::class, LocationFolder::class],
+    version = 5,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
     abstract fun routeDao(): RouteDao
+    abstract fun locationFolderDao(): LocationFolderDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -35,6 +41,19 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 database.execSQL(
                     "UPDATE saved_locations SET sortOrder = createdAt"
+                )
+            }
+        }
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE location_folders (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "name TEXT NOT NULL, " +
+                    "createdAt INTEGER NOT NULL DEFAULT 0)"
+                )
+                database.execSQL(
+                    "ALTER TABLE saved_locations ADD COLUMN folderId INTEGER"
                 )
             }
         }
