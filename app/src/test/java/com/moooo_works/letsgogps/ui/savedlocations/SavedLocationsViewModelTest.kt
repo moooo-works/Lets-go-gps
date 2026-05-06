@@ -186,6 +186,19 @@ class SavedLocationsViewModelTest {
 
         assertTrue(viewModel.uiState.value.filter is LocationFilter.All)
     }
+
+    @Test
+    fun `moveBatchToFolder calls repository and exits batch mode`() = runTest {
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        viewModel.enterBatchSelection(locationId = 1)
+        viewModel.toggleBatchSelection(locationId = 2)
+
+        viewModel.moveBatchToFolder(folderId = 5)
+        advanceUntilIdle()
+
+        assertEquals(listOf(listOf(1, 2) to 5), repository.movedLocations.map { it.first.sorted() to it.second })
+        assertFalse(viewModel.batchSelection.value.active)
+    }
 }
 
 private class FakeSavedLocationsRepository : LocationRepository {

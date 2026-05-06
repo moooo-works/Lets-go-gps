@@ -51,8 +51,6 @@ class SavedLocationsViewModel @Inject constructor(
 
     val isProActive: StateFlow<Boolean> = proRepository.isProActive
 
-    val canAddMoreLocations: StateFlow<Boolean> = MutableStateFlow(true).asStateFlow()
-
     private val _showProUpgrade = MutableStateFlow(false)
     val showProUpgrade: StateFlow<Boolean> = _showProUpgrade.asStateFlow()
 
@@ -197,9 +195,10 @@ class SavedLocationsViewModel @Inject constructor(
     fun deleteFolder(id: Int) {
         viewModelScope.launch {
             repository.deleteFolder(id)
-            val currentFilter = _uiState.value.filter
-            if (currentFilter is LocationFilter.Folder && currentFilter.folderId == id) {
-                _uiState.update { it.copy(filter = LocationFilter.All) }
+            _uiState.update { current ->
+                if (current.filter is LocationFilter.Folder && current.filter.folderId == id) {
+                    current.copy(filter = LocationFilter.All)
+                } else current
             }
         }
     }
