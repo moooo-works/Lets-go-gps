@@ -267,4 +267,12 @@
     <string name="folder_uncategorized">未分類</string>
     <string name="batch_move_to_folder">移到資料夾 (%1$d)</string>
     <string name="map_action_confirm">確認</string>
+    <!-- Folder Management -->
+    <string name="folder_management_title">管理資料夾</string>
+    <string name="folder_new">＋ 新增資料夾</string>
+    <string name="folder_name_hint">資料夾名稱</string>
+    <string name="folder_rename_title">重新命名資料夾</string>
+    <string name="folder_delete_title">刪除資料夾</string>
+    <string name="folder_delete_msg">資料夾內的位置將移至未分類，位置本身不受影響。</string>
+    <string name="folder_location_count">%1$d 個位置</string>
 </resources>

@@ -49,6 +49,7 @@ import com.moooo_works.letsgogps.ui.map.MapViewModel
 import com.moooo_works.letsgogps.ui.map.SearchViewModel
 import com.moooo_works.letsgogps.ui.routes.RoutesScreen
 import com.moooo_works.letsgogps.ui.routes.RoutesViewModel
+import com.moooo_works.letsgogps.ui.savedlocations.FolderManagementScreen
 import com.moooo_works.letsgogps.ui.savedlocations.SavedLocationsScreen
 import com.moooo_works.letsgogps.ui.savedlocations.SavedLocationsViewModel
 import com.moooo_works.letsgogps.ui.settings.SettingsScreen
@@ -125,77 +126,79 @@ fun AppNavigation(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            val navItemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor   = MaterialTheme.colorScheme.primary,
-                selectedTextColor   = MaterialTheme.colorScheme.primary,
-                indicatorColor      = MaterialTheme.colorScheme.primaryContainer,
-                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background,
-                tonalElevation = 0.dp
-            ) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Place, contentDescription = stringResource(R.string.nav_map)) },
-                    label = { Text(stringResource(R.string.nav_map)) },
-                    selected = currentRoute == "map",
-                    colors = navItemColors,
-                    onClick = {
-                        navController.navigate("map") {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+            if (currentRoute != "folder_management") {
+                val navItemColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor   = MaterialTheme.colorScheme.primary,
+                    selectedTextColor   = MaterialTheme.colorScheme.primary,
+                    indicatorColor      = MaterialTheme.colorScheme.primaryContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.List, contentDescription = stringResource(R.string.nav_saved_locations)) },
-                    label = { Text(stringResource(R.string.nav_saved_locations)) },
-                    selected = currentRoute == "saved_locations",
-                    colors = navItemColors,
-                    onClick = {
-                        navController.navigate("saved_locations") {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    tonalElevation = 0.dp
+                ) {
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Place, contentDescription = stringResource(R.string.nav_map)) },
+                        label = { Text(stringResource(R.string.nav_map)) },
+                        selected = currentRoute == "map",
+                        colors = navItemColors,
+                        onClick = {
+                            navController.navigate("map") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.nav_routes)) },
-                    label = { Text(stringResource(R.string.nav_routes)) },
-                    selected = currentRoute == "routes",
-                    colors = navItemColors,
-                    onClick = {
-                        navController.navigate("routes") {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.List, contentDescription = stringResource(R.string.nav_saved_locations)) },
+                        label = { Text(stringResource(R.string.nav_saved_locations)) },
+                        selected = currentRoute == "saved_locations",
+                        colors = navItemColors,
+                        onClick = {
+                            navController.navigate("saved_locations") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings)) },
-                    label = { Text(stringResource(R.string.nav_settings)) },
-                    selected = currentRoute == "settings",
-                    colors = navItemColors,
-                    onClick = {
-                        navController.navigate("settings") {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.nav_routes)) },
+                        label = { Text(stringResource(R.string.nav_routes)) },
+                        selected = currentRoute == "routes",
+                        colors = navItemColors,
+                        onClick = {
+                            navController.navigate("routes") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                )
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings)) },
+                        label = { Text(stringResource(R.string.nav_settings)) },
+                        selected = currentRoute == "settings",
+                        colors = navItemColors,
+                        onClick = {
+                            navController.navigate("settings") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
             }
         }
     ) { paddingValues ->
@@ -253,6 +256,7 @@ fun AppNavigation(
                 SavedLocationsScreen(
                     viewModel = viewModel,
                     onNavigateBack = { },
+                    onNavigateToFolderManagement = { navController.navigate("folder_management") },
                     onLocationSelected = { lat, lng ->
                         navController.getBackStackEntry("map").savedStateHandle.set("selectedLat", lat)
                         navController.getBackStackEntry("map").savedStateHandle.set("selectedLng", lng)
@@ -291,6 +295,16 @@ fun AppNavigation(
                     onNavigateBack = { },
                     themePreference = themePreference,
                     onThemeChange = onThemeChange
+                )
+            }
+
+            composable("folder_management") {
+                val viewModel: SavedLocationsViewModel = hiltViewModel(
+                    navController.getBackStackEntry("saved_locations")
+                )
+                FolderManagementScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    viewModel = viewModel
                 )
             }
         }
