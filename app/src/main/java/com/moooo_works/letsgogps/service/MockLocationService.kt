@@ -372,6 +372,12 @@ class MockLocationService : Service() {
         val stopIntent = PendingIntent.getService(this, 1,
             Intent(this, MockLocationService::class.java).apply { action = ACTION_STOP },
             PendingIntent.FLAG_IMMUTABLE)
+        val pauseIntent = PendingIntent.getService(this, 2,
+            Intent(this, MockLocationService::class.java).apply { action = ACTION_PAUSE_ROUTE },
+            PendingIntent.FLAG_IMMUTABLE)
+        val resumeIntent = PendingIntent.getService(this, 3,
+            Intent(this, MockLocationService::class.java).apply { action = ACTION_RESUME_ROUTE },
+            PendingIntent.FLAG_IMMUTABLE)
 
         val contentText = when (status) {
             MockStatus.ROUTE_PLAYING -> {
@@ -394,9 +400,28 @@ class MockLocationService : Service() {
             .setSmallIcon(R.drawable.ic_stat_mockgps)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setOnlyAlertOnce(true)
+
+        // Status-aware action buttons:
+        //   - PLAYING: pause + stop (mid-route, user might want to walk away)
+        //   - PAUSED:  resume + stop
+        //   - MOCKING (single point): stop only — pause makes no sense
+        //   - IDLE:    stop only (rare; shown briefly during setup)
+        // Order matters — first action gets the "compact" priority on lock screen.
+        when (status) {
+            MockStatus.ROUTE_PLAYING -> {
+                builder.addAction(android.R.drawable.ic_media_pause, getString(R.string.map_route_pause), pauseIntent)
+                builder.addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
+            }
+            MockStatus.ROUTE_PAUSED -> {
+                builder.addAction(android.R.drawable.ic_media_play, getString(R.string.action_resume), resumeIntent)
+                builder.addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
+            }
+            MockStatus.MOCKING, MockStatus.IDLE -> {
+                builder.addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
+            }
+        }
 
         val p = currentRouteProgress
         if ((status == MockStatus.ROUTE_PLAYING || status == MockStatus.ROUTE_PAUSED) && p != null) {

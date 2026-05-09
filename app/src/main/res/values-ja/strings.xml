@@ -14,6 +14,7 @@
     <string name="status_idle">準備中…</string>
     <string name="status_service_running">Fake GPS 実行中</string>
     <string name="action_stop">停止</string>
+    <string name="action_resume">再開</string>
 
     <!-- Map Screen -->
     <string name="map_search_hint">場所を検索...</string>
