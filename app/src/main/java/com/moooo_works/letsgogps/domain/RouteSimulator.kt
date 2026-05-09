@@ -13,8 +13,10 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -75,6 +77,14 @@ class RouteSimulator @Inject constructor(
     private var isReturning: Boolean = false
 
     private var loopMode: LoopMode = LoopMode.NONE
+
+    /**
+     * Per-tick speed multiplier in 0.85..1.15. Drifts ±0.05 each tick so the
+     * effective ground speed wobbles like a real driver/walker rather than
+     * being mechanically constant. Persists across pause/resume and pass
+     * boundaries; only [resetProgress] resets it.
+     */
+    private var jitterMultiplier: Double = 1.0
 
     // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -150,7 +160,25 @@ class RouteSimulator @Inject constructor(
 
                     delay(TICK_DELAY_MS)
 
-                    distanceCoveredInSegment += speedMps * TICK_DELAY_MS / 1000.0
+                    // Curvature-aware deceleration + jitter.
+                    // angleDiff is between the *current* segment bearing and
+                    // the *next* segment bearing (peek ahead). On the final
+                    // segment of a pass there is no next, so no braking.
+                    val nextBearing = if (currentSegmentIndex + 2 < effectiveWaypoints.size) {
+                        calculateBearing(
+                            effectiveWaypoints[currentSegmentIndex + 1],
+                            effectiveWaypoints[currentSegmentIndex + 2]
+                        )
+                    } else {
+                        null
+                    }
+                    val angleDiff = if (nextBearing != null) calculateAngleDiff(bearing, nextBearing) else 0f
+                    val baseKmh = (speedMps * 3.6).toFloat()
+                    val brakedKmh = calculateBrakingSpeed(baseKmh, angleDiff)
+                    jitterMultiplier = calculateNextJitter(jitterMultiplier, Random.nextDouble(-0.05, 0.05))
+                    val effectiveMps = (brakedKmh / 3.6) * jitterMultiplier
+
+                    distanceCoveredInSegment += effectiveMps * TICK_DELAY_MS / 1000.0
                     while (
                         currentSegmentIndex < effectiveWaypoints.size - 1 &&
                         distanceCoveredInSegment >= segDistances.getOrElse(currentSegmentIndex) { Double.MAX_VALUE }
@@ -224,6 +252,7 @@ class RouteSimulator @Inject constructor(
         currentSegmentIndex = 0
         distanceCoveredInSegment = 0.0
         isReturning = false
+        jitterMultiplier = 1.0
     }
 
     private fun calculateDistance(start: LatLng, end: LatLng): Double {
@@ -255,9 +284,38 @@ class RouteSimulator @Inject constructor(
         return ((bearing + 360) % 360).toFloat()
     }
 
-    private companion object {
+    companion object {
         const val TICK_DELAY_MS = 250L
         const val DEFAULT_SPEED_MPS = 1.3888889 // ~5 km/h
         const val MIN_SPEED_MPS = 0.1
+
+        /** Smallest absolute angular difference between two bearings (deg, 0..180). */
+        fun calculateAngleDiff(a: Float, b: Float): Float {
+            val diff = abs(a - b)
+            return if (diff > 180f) 360f - diff else diff
+        }
+
+        /**
+         * Slow down for upcoming corners. cos²(angleDiff/2) gives a smooth
+         * roll-off that mirrors how a real driver eases off through bends.
+         * Hard-caps for sharp/U-turn cases, floor of 3 km/h so we never
+         * stall completely. Below 15° the corner is too gentle to bother.
+         */
+        fun calculateBrakingSpeed(baseKmh: Float, angleDiff: Float): Float {
+            if (angleDiff <= 15f) return baseKmh
+            val clampedAngle = angleDiff.coerceIn(0f, 180f)
+            val rad = (clampedAngle * Math.PI / 180.0) / 2.0
+            var speed = baseKmh * cos(rad).pow(2.0).toFloat()
+            if (angleDiff > 130f) speed = speed.coerceAtMost(5f)
+            else if (angleDiff > 70f) speed = speed.coerceAtMost(18f)
+            return speed.coerceAtLeast(3f)
+        }
+
+        /**
+         * Drifts the multiplier by [randomDelta] (typically ±0.05) and
+         * clamps it to a believable speedometer wobble band.
+         */
+        fun calculateNextJitter(current: Double, randomDelta: Double): Double =
+            (current + randomDelta).coerceIn(0.85, 1.15)
     }
 }

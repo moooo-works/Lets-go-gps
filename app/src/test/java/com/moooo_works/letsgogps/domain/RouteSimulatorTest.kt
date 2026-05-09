@@ -248,4 +248,70 @@ class RouteSimulatorTest {
         assertEquals(SimulationState.IDLE, simulator.simulationState.value)
         assertNull(simulator.routeProgress.value)
     }
+
+    // ─── Curvature-aware deceleration & jitter helpers ───────────────────────
+
+    @Test
+    fun `calculateAngleDiff handles wraparound`() {
+        assertEquals(0f, RouteSimulator.calculateAngleDiff(0f, 0f), 0.001f)
+        assertEquals(90f, RouteSimulator.calculateAngleDiff(0f, 90f), 0.001f)
+        assertEquals(180f, RouteSimulator.calculateAngleDiff(0f, 180f), 0.001f)
+        // 350° vs 10° is 20° apart, not 340°.
+        assertEquals(20f, RouteSimulator.calculateAngleDiff(350f, 10f), 0.001f)
+        assertEquals(20f, RouteSimulator.calculateAngleDiff(10f, 350f), 0.001f)
+    }
+
+    @Test
+    fun `brakingSpeed leaves gentle bends untouched`() {
+        // Below the 15° threshold there's no slowdown.
+        assertEquals(60f, RouteSimulator.calculateBrakingSpeed(60f, 0f), 0.001f)
+        assertEquals(60f, RouteSimulator.calculateBrakingSpeed(60f, 15f), 0.001f)
+    }
+
+    @Test
+    fun `brakingSpeed caps mid corners at 18 kmh`() {
+        // angleDiff > 70° caps at 18.
+        assertTrue(RouteSimulator.calculateBrakingSpeed(60f, 80f) <= 18f)
+        assertTrue(RouteSimulator.calculateBrakingSpeed(100f, 80f) <= 18f)
+    }
+
+    @Test
+    fun `brakingSpeed caps sharp turns at 5 kmh`() {
+        assertTrue(RouteSimulator.calculateBrakingSpeed(60f, 140f) <= 5f)
+        assertTrue(RouteSimulator.calculateBrakingSpeed(100f, 180f) <= 5f)
+    }
+
+    @Test
+    fun `brakingSpeed never falls below 3 kmh floor`() {
+        // Even a U-turn at very low base speed should leave 3 km/h.
+        assertEquals(3f, RouteSimulator.calculateBrakingSpeed(10f, 180f), 0.001f)
+        assertEquals(3f, RouteSimulator.calculateBrakingSpeed(2f, 80f), 0.001f)
+    }
+
+    @Test
+    fun `brakingSpeed cosine rolloff is monotonically decreasing in angle`() {
+        val baseKmh = 100f
+        val a = RouteSimulator.calculateBrakingSpeed(baseKmh, 20f)
+        val b = RouteSimulator.calculateBrakingSpeed(baseKmh, 40f)
+        val c = RouteSimulator.calculateBrakingSpeed(baseKmh, 60f)
+        assertTrue("$a should be > $b at sharper angle", a > b)
+        assertTrue("$b should be > $c at sharper angle", b > c)
+    }
+
+    @Test
+    fun `jitterMultiplier stays in band`() {
+        // Drift beyond the band must be clamped.
+        assertEquals(1.15, RouteSimulator.calculateNextJitter(1.0, 0.5), 0.001)
+        assertEquals(0.85, RouteSimulator.calculateNextJitter(1.0, -0.5), 0.001)
+        // Already at the floor — pushing further down must stay at 0.85.
+        assertEquals(0.85, RouteSimulator.calculateNextJitter(0.85, -0.1), 0.001)
+        // Already at the ceiling — pushing further up must stay at 1.15.
+        assertEquals(1.15, RouteSimulator.calculateNextJitter(1.15, 0.1), 0.001)
+    }
+
+    @Test
+    fun `jitterMultiplier walks within step`() {
+        val next = RouteSimulator.calculateNextJitter(1.0, 0.03)
+        assertEquals(1.03, next, 0.001)
+    }
 }
