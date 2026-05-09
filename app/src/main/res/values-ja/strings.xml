@@ -123,6 +123,11 @@
     <string name="routes_delete_title">ルートを削除</string>
     <string name="routes_delete_desc">このルートを削除してもよろしいですか？この操作は元に戻せません。</string>
     <string name="routes_action_load">読み込む</string>
+    <string name="routes_action_merge">結合</string>
+    <string name="routes_merge_title">ルートを結合</string>
+    <string name="routes_merge_name_label">新しいルート名</string>
+    <string name="routes_selection_count">%1$d 件選択中</string>
+    <string name="routes_merge_min_hint">結合には 2 件以上の選択が必要です</string>
     <string name="routes_point_count">%1$d 地点</string>
 
     <string name="map_route_active">ルートが実行中です</string>

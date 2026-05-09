@@ -123,6 +123,11 @@
     <string name="routes_delete_title">Delete Route</string>
     <string name="routes_delete_desc">Are you sure you want to delete this route? This action cannot be undone.</string>
     <string name="routes_action_load">Load</string>
+    <string name="routes_action_merge">Merge</string>
+    <string name="routes_merge_title">Merge Routes</string>
+    <string name="routes_merge_name_label">New route name</string>
+    <string name="routes_selection_count">%1$d selected</string>
+    <string name="routes_merge_min_hint">Select at least 2 routes to merge</string>
     <string name="routes_point_count">%1$d points</string>
 
     <string name="map_route_active">A route is currently active</string>
