@@ -208,6 +208,13 @@ class SettingsViewModel @Inject constructor(
     val clipboardHintEnabled = settingsRepository.observeClipboardHintEnabled()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val enableTimezoneCheck = settingsRepository.observeEnableTimezoneCheck()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    fun setEnableTimezoneCheck(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setEnableTimezoneCheck(enabled) }
+    }
+
     fun setAltitude(value: Double) {
         viewModelScope.launch {
             settingsRepository.setAltitude(value)

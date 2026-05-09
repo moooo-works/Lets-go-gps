@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.Card
@@ -304,6 +305,71 @@ fun ClipboardHintBanner(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Warning 提示：mock 位置時區與系統時區不一致時顯示，幫助使用者察覺反作弊風險。 */
+@Composable
+fun TimezoneMismatchBanner(
+    mockTimezone: String,
+    systemTimezone: String,
+    onDismiss: () -> Unit,
+    onDisableCheck: () -> Unit,
+    onOpenSettings: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = androidx.compose.ui.graphics.Color(0xFFFFF8E1), // soft amber
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = 4.dp,
+    ) {
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.WarningAmber,
+                    contentDescription = null,
+                    tint = androidx.compose.ui.graphics.Color(0xFFB07A00),
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    stringResource(R.string.timezone_mismatch_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = androidx.compose.ui.graphics.Color(0xFF5C4400),
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+            Text(
+                stringResource(R.string.timezone_mismatch_body, mockTimezone, systemTimezone),
+                style = MaterialTheme.typography.bodySmall,
+                color = androidx.compose.ui.graphics.Color(0xFF5C4400),
+            )
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                androidx.compose.material3.TextButton(onClick = onDisableCheck) {
+                    Text(
+                        stringResource(R.string.timezone_mismatch_disable),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                androidx.compose.material3.TextButton(onClick = onOpenSettings) {
+                    Text(
+                        stringResource(R.string.timezone_mismatch_open_settings),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    Text(
+                        stringResource(R.string.timezone_mismatch_ignore),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }

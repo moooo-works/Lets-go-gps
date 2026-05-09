@@ -385,6 +385,24 @@ fun MapScreen(
                             .padding(top = 64.dp, start = 12.dp, end = 12.dp)
                     )
                 }
+
+                uiState.timezoneMismatch?.let { mismatch ->
+                    TimezoneMismatchBanner(
+                        mockTimezone = mismatch.mockTimezone,
+                        systemTimezone = mismatch.systemTimezone,
+                        onDismiss = { viewModel.dismissTimezoneMismatch() },
+                        onDisableCheck = { viewModel.disableTimezoneCheck() },
+                        onOpenSettings = {
+                            runCatching {
+                                context.startActivity(android.content.Intent(android.provider.Settings.ACTION_DATE_SETTINGS))
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .statusBarsPadding()
+                            .padding(top = 64.dp, start = 12.dp, end = 12.dp)
+                    )
+                }
             }
 
             if (!uiState.isProActive) {

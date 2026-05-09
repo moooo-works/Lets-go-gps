@@ -132,6 +132,13 @@
     <string name="map_advanced_modes">進階模擬模式</string>
     <string name="map_action_spiral_exploration">螺旋探察當前位置</string>
     <string name="map_action_teleport_exploration">瞬移探察路線</string>
+    <string name="timezone_mismatch_title">時區不符</string>
+    <string name="timezone_mismatch_body">模擬位置時區為 %1$s，但裝置系統時區為 %2$s。某些 App 可能會偵測到不一致並判定為異常。</string>
+    <string name="timezone_mismatch_ignore">忽略</string>
+    <string name="timezone_mismatch_open_settings">開啟系統時區</string>
+    <string name="timezone_mismatch_disable">不再提醒</string>
+    <string name="settings_timezone_check_title">時區不符提醒</string>
+    <string name="settings_timezone_check_desc">模擬位置時區與系統不一致時跳出警示</string>
     <string name="routes_point_count">%1$d 個路點</string>
 
     <string name="map_route_active">目前有路線正在進行</string>

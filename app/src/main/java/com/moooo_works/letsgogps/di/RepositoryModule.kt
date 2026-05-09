@@ -7,6 +7,7 @@ import com.moooo_works.letsgogps.data.repository.MockStateRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.ProRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.SearchRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.SettingsRepositoryImpl
+import com.moooo_works.letsgogps.data.repository.TimezoneRepositoryImpl
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
@@ -14,6 +15,7 @@ import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SearchRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
+import com.moooo_works.letsgogps.domain.repository.TimezoneRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -65,4 +67,10 @@ abstract class RepositoryModule {
     abstract fun bindSystemHealthCheck(
         systemHealthCheckImpl: SystemHealthCheckImpl
     ): SystemHealthCheck
+
+    @Binds
+    @Singleton
+    abstract fun bindTimezoneRepository(
+        timezoneRepositoryImpl: TimezoneRepositoryImpl
+    ): TimezoneRepository
 }

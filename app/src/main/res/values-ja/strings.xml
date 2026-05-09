@@ -131,6 +131,13 @@
     <string name="map_advanced_modes">詳細シミュレーションモード</string>
     <string name="map_action_spiral_exploration">現在地でスパイラル探察</string>
     <string name="map_action_teleport_exploration">ルートをテレポート探察</string>
+    <string name="timezone_mismatch_title">タイムゾーン不一致</string>
+    <string name="timezone_mismatch_body">模擬位置は %1$s ですが、端末のシステムタイムゾーンは %2$s です。一部のアプリでは不一致を検知される可能性があります。</string>
+    <string name="timezone_mismatch_ignore">閉じる</string>
+    <string name="timezone_mismatch_open_settings">タイムゾーン設定</string>
+    <string name="timezone_mismatch_disable">今後通知しない</string>
+    <string name="settings_timezone_check_title">タイムゾーン不一致を通知</string>
+    <string name="settings_timezone_check_desc">模擬位置とシステムのタイムゾーンが異なる場合に警告を表示</string>
     <string name="routes_point_count">%1$d 地点</string>
 
     <string name="map_route_active">ルートが実行中です</string>

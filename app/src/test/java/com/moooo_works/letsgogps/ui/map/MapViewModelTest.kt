@@ -17,6 +17,7 @@ import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import com.moooo_works.letsgogps.domain.repository.MockStatus
+import com.moooo_works.letsgogps.domain.repository.TimezoneRepository
 import com.moooo_works.letsgogps.service.MockLocationService
 import io.mockk.coEvery
 import io.mockk.every
@@ -59,6 +60,7 @@ class MapViewModelTest {
     private val joystickOverlayManager = mockk<JoystickOverlayManager>(relaxed = true)
     private val proRepository = mockk<ProRepository>(relaxed = true)
     private val systemHealthCheck = mockk<SystemHealthCheck>(relaxed = true)
+    private val timezoneRepository = mockk<TimezoneRepository>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
     private val dispatcher = StandardTestDispatcher()
 
@@ -79,6 +81,10 @@ class MapViewModelTest {
         every { mockStateRepository.currentMockLocation } returns currentMockLocationFlow
         every { mockStateRepository.mockError } returns mockErrorFlow
         every { settingsRepository.observeLastCenter() } returns lastCenterFlow
+        // Default: timezone check disabled to keep startMocking tests focused
+        // on the mock pipeline rather than network behaviour. Override per-test
+        // if the timezone path needs exercising.
+        every { settingsRepository.observeEnableTimezoneCheck() } returns kotlinx.coroutines.flow.flowOf(false)
 
         // Default: every health-check item passes — individual tests override
         // when they want to exercise the blocking-failure path.
@@ -94,7 +100,8 @@ class MapViewModelTest {
 
     private fun createViewModel() = MapViewModel(
         mockEngine, repository, mockStateRepository, settingsRepository,
-        routeSimulator, joystickOverlayManager, proRepository, systemHealthCheck, context
+        routeSimulator, joystickOverlayManager, proRepository, systemHealthCheck,
+        timezoneRepository, context
     )
 
     @Test

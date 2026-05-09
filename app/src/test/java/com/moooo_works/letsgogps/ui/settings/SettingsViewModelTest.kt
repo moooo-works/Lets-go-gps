@@ -91,6 +91,7 @@ class SettingsViewModelTest {
         every { systemHealthCheck.refresh() } returns HealthCheckState(
             HealthCheckItem.values().associateWith { ItemStatus.Passed }
         )
+        every { settingsRepository.observeEnableTimezoneCheck() } returns MutableStateFlow(true)
 
         viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, proRepository, systemHealthCheck, context)
     }

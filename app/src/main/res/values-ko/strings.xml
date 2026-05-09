@@ -131,6 +131,13 @@
     <string name="map_advanced_modes">고급 시뮬레이션 모드</string>
     <string name="map_action_spiral_exploration">현재 위치에서 나선형 탐색</string>
     <string name="map_action_teleport_exploration">경로 순간이동 탐색</string>
+    <string name="timezone_mismatch_title">시간대 불일치</string>
+    <string name="timezone_mismatch_body">모의 위치 시간대는 %1$s이지만 기기 시스템 시간대는 %2$s입니다. 일부 앱이 불일치를 감지할 수 있습니다.</string>
+    <string name="timezone_mismatch_ignore">무시</string>
+    <string name="timezone_mismatch_open_settings">시간대 설정</string>
+    <string name="timezone_mismatch_disable">다시 알리지 않음</string>
+    <string name="settings_timezone_check_title">시간대 불일치 경고</string>
+    <string name="settings_timezone_check_desc">모의 위치 시간대가 기기와 다를 때 경고 표시</string>
     <string name="routes_point_count">%1$d 개 지점</string>
 
     <string name="map_route_active">경로가 실행 중입니다</string>

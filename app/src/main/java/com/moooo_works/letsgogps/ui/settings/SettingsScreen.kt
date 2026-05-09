@@ -552,6 +552,26 @@ fun SettingsScreen(
                             onCheckedChange = { viewModel.setClipboardHintEnabled(it) }
                         )
                     }
+
+                    val enableTimezoneCheck by viewModel.enableTimezoneCheck.collectAsState()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.settings_timezone_check_title), style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                stringResource(R.string.settings_timezone_check_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = enableTimezoneCheck,
+                            onCheckedChange = { viewModel.setEnableTimezoneCheck(it) }
+                        )
+                    }
                 }
             }
 

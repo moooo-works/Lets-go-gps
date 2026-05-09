@@ -58,4 +58,11 @@ data class MapUiState(
     val showHealthCheck: Boolean = false,
     /** Latest health-check snapshot; null until first refresh. */
     val healthCheckState: HealthCheckState? = null,
+    /** Non-null when mock-location time-zone differs from device system time-zone. */
+    val timezoneMismatch: TimezoneMismatch? = null,
+)
+
+data class TimezoneMismatch(
+    val mockTimezone: String,
+    val systemTimezone: String,
 )

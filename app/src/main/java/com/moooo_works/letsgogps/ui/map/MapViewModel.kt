@@ -22,6 +22,10 @@ import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
+import com.moooo_works.letsgogps.domain.repository.TimezoneRepository
+import com.moooo_works.letsgogps.utils.GeoDistanceMeters
+import java.util.TimeZone
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import com.moooo_works.letsgogps.domain.repository.MockStatus
@@ -56,8 +60,12 @@ class MapViewModel @Inject constructor(
     private val joystickOverlayManager: JoystickOverlayManager,
     private val proRepository: ProRepository,
     private val systemHealthCheck: SystemHealthCheck,
+    private val timezoneRepository: TimezoneRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    private var timezoneCheckJob: Job? = null
+    private var lastTimezoneCheckLatLng: LatLng? = null
 
     private var saveCenterJob: Job? = null
     private var joystickTickerJob: Job? = null
@@ -291,8 +299,46 @@ class MapViewModel @Inject constructor(
         }
         ContextCompat.startForegroundService(context, intent)
 
+        maybeCheckTimezoneMismatch(target)
         saveLocationIfNeeded(target)
         checkAndTriggerReview()
+    }
+
+    /**
+     * Async timezone check on mock start. Throttled to "moved more than 1km
+     * since last check" so the API isn't hammered on rapid restarts. Uses
+     * timeapi.io — failure (network, parse) silently skips the warning.
+     */
+    private fun maybeCheckTimezoneMismatch(target: LatLng) {
+        val last = lastTimezoneCheckLatLng
+        if (last != null &&
+            GeoDistanceMeters.haversineMeters(last.latitude, last.longitude, target.latitude, target.longitude) < 1000.0
+        ) return
+        lastTimezoneCheckLatLng = target
+
+        timezoneCheckJob?.cancel()
+        timezoneCheckJob = viewModelScope.launch {
+            if (!settingsRepository.observeEnableTimezoneCheck().first()) return@launch
+            val mockTz = timezoneRepository.resolveTimezone(target.latitude, target.longitude)
+                ?: return@launch
+            val systemTz = TimeZone.getDefault().id
+            if (mockTz != systemTz) {
+                _uiState.update {
+                    it.copy(timezoneMismatch = TimezoneMismatch(mockTz, systemTz))
+                }
+            } else {
+                _uiState.update { it.copy(timezoneMismatch = null) }
+            }
+        }
+    }
+
+    fun dismissTimezoneMismatch() {
+        _uiState.update { it.copy(timezoneMismatch = null) }
+    }
+
+    fun disableTimezoneCheck() {
+        viewModelScope.launch { settingsRepository.setEnableTimezoneCheck(false) }
+        _uiState.update { it.copy(timezoneMismatch = null) }
     }
 
     /** Re-evaluate health check; called when user taps Re-check or returns from Settings. */
