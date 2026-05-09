@@ -221,6 +221,11 @@ fun SettingsScreen(
                     stringResource(R.string.mock_app_required_title),
                     stringResource(R.string.mock_app_authorized)
                 )
+                is MockPermissionStatus.DeveloperModeDisabled -> Triple(
+                    Color(0xFFF59E0B),
+                    stringResource(R.string.mock_app_required_title),
+                    stringResource(R.string.mock_app_dev_mode_disabled)
+                )
                 is MockPermissionStatus.NotAllowed -> Triple(
                     Color(0xFFF97316),
                     stringResource(R.string.mock_app_required_title),
@@ -266,14 +271,28 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    if (mockPermissionStatus is MockPermissionStatus.NotAllowed) {
-                        TextButton(onClick = {
-                            context.startActivity(
-                                Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                            )
-                        }) {
-                            Text(stringResource(R.string.about_developer_options), style = MaterialTheme.typography.labelMedium)
+                    when (mockPermissionStatus) {
+                        is MockPermissionStatus.NotAllowed -> {
+                            TextButton(onClick = {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                                )
+                            }) {
+                                Text(stringResource(R.string.about_developer_options), style = MaterialTheme.typography.labelMedium)
+                            }
                         }
+                        is MockPermissionStatus.DeveloperModeDisabled -> {
+                            TextButton(onClick = {
+                                runCatching {
+                                    context.startActivity(Intent(Settings.ACTION_DEVICE_INFO_SETTINGS))
+                                }.onFailure {
+                                    runCatching { context.startActivity(Intent(Settings.ACTION_SETTINGS)) }
+                                }
+                            }) {
+                                Text(stringResource(R.string.action_open_about_phone), style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                        else -> Unit
                     }
                 }
             }

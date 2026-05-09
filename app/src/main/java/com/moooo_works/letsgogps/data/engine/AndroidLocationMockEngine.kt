@@ -8,6 +8,7 @@ import android.location.provider.ProviderProperties
 import android.os.Build
 import android.os.Process
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import com.moooo_works.letsgogps.domain.LocationMockEngine
@@ -148,6 +149,9 @@ class AndroidLocationMockEngine : LocationMockEngine {
 
     override fun getMockPermissionStatus(): MockPermissionStatus {
         return try {
+            if (!isDeveloperModeEnabled()) {
+                return MockPermissionStatus.DeveloperModeDisabled
+            }
             val mode = if (sdkInt >= Build.VERSION_CODES.Q) {
                 appOpsManager.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_MOCK_LOCATION,
@@ -165,6 +169,20 @@ class AndroidLocationMockEngine : LocationMockEngine {
         } catch (e: Exception) {
             reportError(MockEngineError.PermissionCheck(e), "isMockingAllowed check failed")
             MockPermissionStatus.CheckFailed(e)
+        }
+    }
+
+    private fun isDeveloperModeEnabled(): Boolean {
+        return try {
+            Settings.Global.getInt(
+                context.contentResolver,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                0
+            ) == 1
+        } catch (e: Exception) {
+            // SettingNotFoundException on rare ROMs — fail open so the AppOps
+            // check still runs; the user will see NotAllowed instead.
+            true
         }
     }
 

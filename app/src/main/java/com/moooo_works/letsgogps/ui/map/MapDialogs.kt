@@ -134,6 +134,7 @@ fun MockErrorDialog(
         title = {
             Text(
                 if (error is MockError.NotMockAppSelected ||
+                    error is MockError.DeveloperModeDisabled ||
                     error is MockError.LocationPermissionMissing ||
                     error is MockError.NotificationPermissionMissing ||
                     error is MockError.FloatingWindowPermissionMissing
@@ -146,6 +147,7 @@ fun MockErrorDialog(
                 Text(
                     text = when (error) {
                         is MockError.NotMockAppSelected -> stringResource(R.string.error_mock_app_not_selected)
+                        is MockError.DeveloperModeDisabled -> stringResource(R.string.error_dev_mode_disabled)
                         is MockError.LocationPermissionMissing -> stringResource(R.string.error_location_permission)
                         is MockError.NotificationPermissionMissing -> stringResource(R.string.error_notification_permission)
                         is MockError.FloatingWindowPermissionMissing -> stringResource(R.string.error_floating_window)
@@ -161,6 +163,26 @@ fun MockErrorDialog(
         },
         confirmButton = {
             when {
+                error is MockError.DeveloperModeDisabled -> {
+                    Button(
+                        onClick = {
+                            onClearError()
+                            try {
+                                context.startActivity(Intent(Settings.ACTION_DEVICE_INFO_SETTINGS))
+                            } catch (_: Exception) {
+                                try {
+                                    context.startActivity(Intent(Settings.ACTION_SETTINGS))
+                                } catch (_: Exception) {}
+                            }
+                        },
+                        enabled = isButtonEnabled
+                    ) {
+                        Text(
+                            if (isButtonEnabled) stringResource(R.string.action_open_about_phone)
+                            else stringResource(R.string.action_please_wait)
+                        )
+                    }
+                }
                 error is MockError.NotMockAppSelected -> {
                     Button(
                         onClick = {

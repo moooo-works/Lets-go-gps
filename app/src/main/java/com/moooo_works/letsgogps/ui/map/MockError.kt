@@ -2,6 +2,7 @@ package com.moooo_works.letsgogps.ui.map
 
 sealed class MockError {
     object NotMockAppSelected : MockError()
+    object DeveloperModeDisabled : MockError()
     object LocationPermissionMissing : MockError()
     object NotificationPermissionMissing : MockError()
     object FloatingWindowPermissionMissing : MockError()

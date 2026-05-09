@@ -3,6 +3,7 @@ package com.moooo_works.letsgogps.domain
 sealed class MockPermissionStatus {
     object Allowed : MockPermissionStatus()
     object NotAllowed : MockPermissionStatus()
+    object DeveloperModeDisabled : MockPermissionStatus()
     data class CheckFailed(val cause: Throwable) : MockPermissionStatus()
 }
 

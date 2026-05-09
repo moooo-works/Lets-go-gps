@@ -53,6 +53,8 @@
     <string name="error_title">오류</string>
     <string name="error_permission_required">권한이 필요합니다</string>
     <string name="error_mock_app_not_selected">개발자 옵션에서 Fake GPS를 모의 위치 앱으로 선택해 주세요.</string>
+    <string name="error_dev_mode_disabled">개발자 옵션이 활성화되지 않았습니다. \"설정 → 휴대전화 정보\"에서 \"빌드 번호\"를 7회 탭하여 개발자 옵션을 활성화한 후 이 앱으로 돌아와 모의 위치 앱으로 선택해 주세요.</string>
+    <string name="action_open_about_phone">휴대전화 정보 열기</string>
     <string name="error_location_permission">이 기능을 사용하려면 위치 권한이 필요합니다.</string>
     <string name="error_notification_permission">백그라운드 제어를 위해 알림 권한이 필요합니다.</string>
     <string name="error_floating_window">조이스틱 기능을 사용하려면 다른 앱 위에 표시 권한이 필요합니다. 설정에서 활성화해 주세요.</string>
@@ -161,6 +163,7 @@
     <string name="mock_app_authorized">인증됨 — 모의 기능을 사용할 수 있습니다</string>
     <string name="mock_app_unauthorized">미인증 — 개발자 옵션에서 이 앱을 선택해 주세요</string>
     <string name="mock_app_check_failed">권한 확인 실패</string>
+    <string name="mock_app_dev_mode_disabled">비활성화됨 — \"설정 → 휴대전화 정보\"에서 개발자 옵션 활성화</string>
 
     <string name="settings_sim_title">시뮬레이션 설정</string>
     <string name="settings_sim_altitude">기본 고도 (미터)</string>

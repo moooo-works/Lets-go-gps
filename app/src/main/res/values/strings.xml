@@ -53,6 +53,8 @@
     <string name="error_title">錯誤</string>
     <string name="error_permission_required">需要權限</string>
     <string name="error_mock_app_not_selected">請至 開發者選項 -\u003E 選擇模擬位置應用程式 -\u003E 選擇此 App。</string>
+    <string name="error_dev_mode_disabled">開發者選項尚未開啟。請至「設定 → 關於手機」連點 7 次「版本號碼」開啟，然後再回到此 App 將其指定為模擬位置 App。</string>
+    <string name="action_open_about_phone">開啟「關於手機」</string>
     <string name="error_location_permission">此功能需要定位權限才能運作。</string>
     <string name="error_notification_permission">此功能需要通知權限以顯示背景控制項。</string>
     <string name="error_floating_window">搖桿功能需要「顯示在其他應用程式上層」權限。請在設定中開啟。</string>
@@ -162,6 +164,7 @@
     <string name="mock_app_authorized">已授權 — 可正常使用模擬功能</string>
     <string name="mock_app_unauthorized">未授權 — 請到開發者選項選擇此 App</string>
     <string name="mock_app_check_failed">權限檢查失敗</string>
+    <string name="mock_app_dev_mode_disabled">未開啟 — 請先到「設定 → 關於手機」啟用開發者選項</string>
 
     <string name="settings_sim_title">模擬設定</string>
     <string name="settings_sim_altitude">預設高度 (公尺)</string>

@@ -53,6 +53,8 @@
     <string name="error_title">エラー</string>
     <string name="error_permission_required">権限が必要です</string>
     <string name="error_mock_app_not_selected">開発者オプションで Fake GPS を模擬位置情報アプリとして選択してください。</string>
+    <string name="error_dev_mode_disabled">開発者向けオプションが有効になっていません。「設定 → 端末情報」で「ビルド番号」を 7 回タップして開発者向けオプションを有効にし、本アプリに戻って模擬位置情報アプリとして選択してください。</string>
+    <string name="action_open_about_phone">「端末情報」を開く</string>
     <string name="error_location_permission">この機能には位置情報の権限が必要です。</string>
     <string name="error_notification_permission">バックグラウンド操作には通知の権限が必要です。</string>
     <string name="error_floating_window">ジョイスティック機能には「他のアプリの上に重ねて表示」の権限が必要です。設定で有効にしてください。</string>
@@ -161,6 +163,7 @@
     <string name="mock_app_authorized">認証済み — 模擬機能が使用可能です</string>
     <string name="mock_app_unauthorized">未認証 — 開発者オプションでこのアプリを選択してください</string>
     <string name="mock_app_check_failed">権限チェック失敗</string>
+    <string name="mock_app_dev_mode_disabled">無効 —「設定 → 端末情報」で開発者向けオプションを有効にしてください</string>
 
     <string name="settings_sim_title">シミュレーション設定</string>
     <string name="settings_sim_altitude">デフォルト高度（メートル）</string>

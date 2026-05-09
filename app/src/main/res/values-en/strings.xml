@@ -53,6 +53,8 @@
     <string name="error_title">Error</string>
     <string name="error_permission_required">Permission Required</string>
     <string name="error_mock_app_not_selected">Please set Fake GPS as the mock location app in Developer Options.</string>
+    <string name="error_dev_mode_disabled">Developer Options is not enabled. Go to \"Settings → About phone\" and tap \"Build number\" 7 times to enable Developer Options, then return to this app and select it as the mock location app.</string>
+    <string name="action_open_about_phone">Open About phone</string>
     <string name="error_location_permission">Location permission is required for this feature.</string>
     <string name="error_notification_permission">Notification permission is required for background controls.</string>
     <string name="error_floating_window">Floating window permission is required for the joystick. Please enable it in Settings.</string>
@@ -161,6 +163,7 @@
     <string name="mock_app_authorized">Authorized — Mock features are ready</string>
     <string name="mock_app_unauthorized">Unauthorized — Please select this app in Developer Options</string>
     <string name="mock_app_check_failed">Permission check failed</string>
+    <string name="mock_app_dev_mode_disabled">Disabled — Enable Developer Options in \"Settings → About phone\"</string>
 
     <string name="settings_sim_title">Simulation Settings</string>
     <string name="settings_sim_altitude">Default Altitude (Meters)</string>

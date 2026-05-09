@@ -623,6 +623,10 @@ class MapViewModel @Inject constructor(
 
         return when (val permissionStatus = checkMockPermission()) {
             MockPermissionStatus.Allowed -> true
+            MockPermissionStatus.DeveloperModeDisabled -> {
+                setMockError(MockError.DeveloperModeDisabled)
+                false
+            }
             MockPermissionStatus.NotAllowed -> {
                 setMockError(MockError.NotMockAppSelected)
                 false
