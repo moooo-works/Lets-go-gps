@@ -128,6 +128,9 @@
     <string name="routes_merge_name_label">New route name</string>
     <string name="routes_selection_count">%1$d selected</string>
     <string name="routes_merge_min_hint">Select at least 2 routes to merge</string>
+    <string name="map_advanced_modes">Advanced simulation modes</string>
+    <string name="map_action_spiral_exploration">Spiral around current location</string>
+    <string name="map_action_teleport_exploration">Teleport-explore route</string>
     <string name="routes_point_count">%1$d points</string>
 
     <string name="map_route_active">A route is currently active</string>

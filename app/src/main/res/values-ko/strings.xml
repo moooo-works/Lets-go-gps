@@ -128,6 +128,9 @@
     <string name="routes_merge_name_label">새 경로 이름</string>
     <string name="routes_selection_count">%1$d개 선택됨</string>
     <string name="routes_merge_min_hint">병합하려면 2개 이상 선택해야 합니다</string>
+    <string name="map_advanced_modes">고급 시뮬레이션 모드</string>
+    <string name="map_action_spiral_exploration">현재 위치에서 나선형 탐색</string>
+    <string name="map_action_teleport_exploration">경로 순간이동 탐색</string>
     <string name="routes_point_count">%1$d 개 지점</string>
 
     <string name="map_route_active">경로가 실행 중입니다</string>

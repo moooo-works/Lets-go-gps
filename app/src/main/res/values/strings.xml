@@ -129,6 +129,9 @@
     <string name="routes_merge_name_label">新路線名稱</string>
     <string name="routes_selection_count">已選 %1$d 條</string>
     <string name="routes_merge_min_hint">至少需選 2 條才能合併</string>
+    <string name="map_advanced_modes">進階模擬模式</string>
+    <string name="map_action_spiral_exploration">螺旋探察當前位置</string>
+    <string name="map_action_teleport_exploration">瞬移探察路線</string>
     <string name="routes_point_count">%1$d 個路點</string>
 
     <string name="map_route_active">目前有路線正在進行</string>

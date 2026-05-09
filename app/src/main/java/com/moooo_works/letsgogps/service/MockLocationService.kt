@@ -164,7 +164,9 @@ class MockLocationService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
 
-        if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE) {
+        if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE ||
+            action == ACTION_START_EXPLORATION || action == ACTION_START_TELEPORT_EXPLORATION
+        ) {
             try {
                 startForeground(NOTIFICATION_ID, buildNotification(MockStatus.IDLE))
             } catch (e: SecurityException) {
@@ -177,6 +179,8 @@ class MockLocationService : Service() {
         when (action) {
             ACTION_START_SINGLE -> handleStartSingle(intent)
             ACTION_START_ROUTE -> handleStartRoute()
+            ACTION_START_EXPLORATION -> handleStartExploration(intent)
+            ACTION_START_TELEPORT_EXPLORATION -> handleStartTeleportExploration(intent)
             ACTION_PAUSE_ROUTE -> handlePauseRoute()
             ACTION_RESUME_ROUTE -> handleResumeRoute()
             ACTION_STOP -> handleStop()
@@ -259,6 +263,71 @@ class MockLocationService : Service() {
             }
         }
         routeSimulator.play(serviceScope)
+    }
+
+    /**
+     * Spiral around a single anchor point. Reuses the route-mode injection
+     * pipeline (collect simulator.currentLocation → push to provider) so the
+     * service-side wiring is identical to a normal route.
+     */
+    private fun handleStartExploration(intent: Intent) {
+        ensureProviderSetup()
+        if (!isProviderSetup) return
+        stopLocationPushJob()
+
+        val lat = intent.getDoubleExtra(EXTRA_LAT, 0.0)
+        val lng = intent.getDoubleExtra(EXTRA_LNG, 0.0)
+        val radius = intent.getDoubleExtra(EXTRA_RADIUS_M, RouteSimulator.DEFAULT_EXPLORATION_RADIUS_M)
+        val center = LatLng(lat, lng)
+
+        startSimulatorCollector()
+        routeSimulator.playExploration(serviceScope, center, radius)
+    }
+
+    /**
+     * Hop between [targets], spiral-explore each. Targets arrive as parallel
+     * DoubleArrays (lats[i], lngs[i]) since List<LatLng> isn't trivially
+     * Parcelable through Intent extras.
+     */
+    private fun handleStartTeleportExploration(intent: Intent) {
+        ensureProviderSetup()
+        if (!isProviderSetup) return
+        stopLocationPushJob()
+
+        val lats = intent.getDoubleArrayExtra(EXTRA_LATS) ?: return
+        val lngs = intent.getDoubleArrayExtra(EXTRA_LNGS) ?: return
+        if (lats.size != lngs.size || lats.isEmpty()) return
+        val targets = lats.indices.map { LatLng(lats[it], lngs[it]) }
+        val dwell = intent.getIntExtra(EXTRA_DWELL_SEC, RouteSimulator.DEFAULT_TELEPORT_DWELL_SEC)
+        val cooldown = intent.getIntExtra(EXTRA_COOLDOWN_SEC, RouteSimulator.DEFAULT_TELEPORT_COOLDOWN_SEC)
+        val radius = intent.getDoubleExtra(EXTRA_RADIUS_M, RouteSimulator.DEFAULT_EXPLORATION_RADIUS_M)
+
+        startSimulatorCollector()
+        routeSimulator.playTeleportExploration(serviceScope, targets, dwell, cooldown, radius)
+    }
+
+    /**
+     * Shared collector + keep-alive used by route, exploration, and teleport
+     * exploration modes. Mirrors handleStartRoute's pipeline.
+     */
+    private fun startSimulatorCollector() {
+        locationPushJob = serviceScope.launch {
+            launch {
+                routeSimulator.currentLocation.collect { point ->
+                    if (point != null) {
+                        mockStateRepository.setCurrentMockLocation(point.latLng)
+                        performInjection(point.latLng, point.bearing, point.speed, applyJitter = false)
+                    }
+                }
+            }
+            while (isActive) {
+                if (routeSimulator.simulationState.value != SimulationState.PLAYING) {
+                    val current = mockStateRepository.currentMockLocation.value
+                    if (current != null) performInjection(current)
+                }
+                delay(1000)
+            }
+        }
     }
 
     private fun handlePauseRoute() {
@@ -362,10 +431,17 @@ class MockLocationService : Service() {
         const val NOTIFICATION_ID = 1
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"
         const val ACTION_START_ROUTE = "ACTION_START_ROUTE"
+        const val ACTION_START_EXPLORATION = "ACTION_START_EXPLORATION"
+        const val ACTION_START_TELEPORT_EXPLORATION = "ACTION_START_TELEPORT_EXPLORATION"
         const val ACTION_PAUSE_ROUTE = "ACTION_PAUSE_ROUTE"
         const val ACTION_RESUME_ROUTE = "ACTION_RESUME_ROUTE"
         const val ACTION_STOP = "ACTION_STOP"
         const val EXTRA_LAT = "EXTRA_LAT"
         const val EXTRA_LNG = "EXTRA_LNG"
+        const val EXTRA_RADIUS_M = "EXTRA_RADIUS_M"
+        const val EXTRA_LATS = "EXTRA_LATS"
+        const val EXTRA_LNGS = "EXTRA_LNGS"
+        const val EXTRA_DWELL_SEC = "EXTRA_DWELL_SEC"
+        const val EXTRA_COOLDOWN_SEC = "EXTRA_COOLDOWN_SEC"
     }
 }

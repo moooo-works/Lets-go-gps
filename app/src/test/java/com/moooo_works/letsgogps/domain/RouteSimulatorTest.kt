@@ -314,4 +314,44 @@ class RouteSimulatorTest {
         val next = RouteSimulator.calculateNextJitter(1.0, 0.03)
         assertEquals(1.03, next, 0.001)
     }
+
+    // ─── Spiral position math (exploration / teleport-exploration) ───────────
+
+    @Test
+    fun `spiralPosition at zero radius is the centre`() {
+        val out = RouteSimulator.calculateSpiralPosition(25.0, 121.0, 0.0, 0.0)
+        assertEquals(25.0, out.latitude, 1e-9)
+        assertEquals(121.0, out.longitude, 1e-9)
+    }
+
+    @Test
+    fun `spiralPosition at angle 0 advances north by ~radius_meters_111320`() {
+        // 100m offset due north should be 100/111320 ≈ 0.0008983° in latitude.
+        val out = RouteSimulator.calculateSpiralPosition(0.0, 0.0, 100.0, 0.0)
+        assertEquals(100.0 / 111_320.0, out.latitude, 1e-9)
+        // East offset at angle 0 is zero — sin(0) = 0.
+        assertEquals(0.0, out.longitude, 1e-12)
+    }
+
+    @Test
+    fun `spiralPosition longitude scales with cos of latitude`() {
+        // 100m east at the equator vs at lat=60°: longitude offset at 60°
+        // should be exactly 2× the equator offset (1/cos(60°) = 2).
+        val equator = RouteSimulator.calculateSpiralPosition(0.0, 0.0, 100.0, Math.PI / 2)
+        val sixtyN = RouteSimulator.calculateSpiralPosition(60.0, 0.0, 100.0, Math.PI / 2)
+        // Sanity: latitude offset is ~zero at angle = π/2.
+        assertEquals(0.0, equator.latitude, 1e-12)
+        // The longitude shift at 60°N is twice the shift at the equator.
+        assertEquals(2.0, sixtyN.longitude / equator.longitude, 1e-6)
+    }
+
+    @Test
+    fun `spiralPosition full revolution returns to ~origin offset`() {
+        // Going round 360° at the same radius should land back where we started
+        // (offset wise) — sin/cos return to start.
+        val a = RouteSimulator.calculateSpiralPosition(25.0, 121.0, 50.0, 0.0)
+        val b = RouteSimulator.calculateSpiralPosition(25.0, 121.0, 50.0, 2.0 * Math.PI)
+        assertEquals(a.latitude, b.latitude, 1e-12)
+        assertEquals(a.longitude, b.longitude, 1e-12)
+    }
 }

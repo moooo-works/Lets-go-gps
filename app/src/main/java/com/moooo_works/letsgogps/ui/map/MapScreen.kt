@@ -409,7 +409,9 @@ fun MapScreen(
                     showSaveRouteDialog = true
                 },
                 onClearRoute = { viewModel.clearRoute() },
-                onCycleLoopMode = { viewModel.cycleLoopMode() }
+                onCycleLoopMode = { viewModel.cycleLoopMode() },
+                onStartExploration = { viewModel.startExplorationAtCenter() },
+                onStartTeleportExploration = { viewModel.startTeleportExplorationOfRoute() },
             )
         }
     }

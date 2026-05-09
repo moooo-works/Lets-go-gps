@@ -626,6 +626,48 @@ class MapViewModel @Inject constructor(
         ContextCompat.startForegroundService(context, intent)
     }
 
+    /**
+     * Start spiral exploration around the current map center. Pro-gated like
+     * playRoute since it leans on the same continuous simulation pipeline.
+     */
+    fun startExplorationAtCenter() {
+        if (!_uiState.value.isProActive) {
+            _uiState.update { it.copy(showProUpgrade = true) }
+            return
+        }
+        if (!ensurePermission()) return
+
+        val target = _uiState.value.centerLocation
+        val intent = Intent(context, MockLocationService::class.java).apply {
+            action = MockLocationService.ACTION_START_EXPLORATION
+            putExtra(MockLocationService.EXTRA_LAT, target.latitude)
+            putExtra(MockLocationService.EXTRA_LNG, target.longitude)
+        }
+        ContextCompat.startForegroundService(context, intent)
+    }
+
+    /**
+     * Teleport-explore the currently loaded route's waypoints. No-op when no
+     * route is loaded — calling site should hide/disable the entry point in
+     * that case.
+     */
+    fun startTeleportExplorationOfRoute() {
+        if (!_uiState.value.isProActive) {
+            _uiState.update { it.copy(showProUpgrade = true) }
+            return
+        }
+        if (!ensurePermission()) return
+
+        val targets = _uiState.value.waypoints
+        if (targets.isEmpty()) return
+        val intent = Intent(context, MockLocationService::class.java).apply {
+            action = MockLocationService.ACTION_START_TELEPORT_EXPLORATION
+            putExtra(MockLocationService.EXTRA_LATS, targets.map { it.latitude }.toDoubleArray())
+            putExtra(MockLocationService.EXTRA_LNGS, targets.map { it.longitude }.toDoubleArray())
+        }
+        ContextCompat.startForegroundService(context, intent)
+    }
+
     fun pauseRoute() {
         val intent = Intent(context, MockLocationService::class.java).apply {
             action = MockLocationService.ACTION_PAUSE_ROUTE

@@ -101,6 +101,113 @@ class RouteSimulator @Inject constructor(
         loopMode = mode
     }
 
+    /**
+     * Walk an Archimedean spiral around [center] — radius grows from 0 toward
+     * [maxRadiusMeters] over time, restarting at the inner ring when it reaches
+     * the outer edge. Used by location-based games where the user wants to
+     * "stay around home" but still register movement (egg hatching etc.).
+     *
+     * Emits SimulationPoint into [currentLocation] like [play] so MockLocationService
+     * can pick them up via the same flow without any service-side change.
+     */
+    fun playExploration(
+        scope: CoroutineScope,
+        center: LatLng,
+        maxRadiusMeters: Double = DEFAULT_EXPLORATION_RADIUS_M,
+    ) {
+        if (_simulationState.value == SimulationState.PLAYING) return
+        _simulationState.value = SimulationState.PLAYING
+        simulationJob = scope.launch {
+            val baseAltitude = settingsRepository.observeAltitude().first()
+            val useRandomAltitude = settingsRepository.observeRandomAltitude().first()
+            fun getAltitude() = if (useRandomAltitude)
+                baseAltitude + Random.nextDouble(-0.5, 0.5) else baseAltitude
+
+            spiralLoop(center, maxRadiusMeters, durationMs = null) { pos, bearing ->
+                _currentLocation.emit(SimulationPoint(pos, bearing, speedMps.toFloat(), getAltitude()))
+            }
+            _simulationState.value = SimulationState.IDLE
+        }
+    }
+
+    /**
+     * Teleport between [targets] and spiral-explore each for [dwellSec] seconds,
+     * with a [cooldownSec] pause after each teleport (lets some anti-cheat heuristics
+     * settle on "user just landed here, GPS warming up"). Loops indefinitely.
+     */
+    fun playTeleportExploration(
+        scope: CoroutineScope,
+        targets: List<LatLng>,
+        dwellSec: Int = DEFAULT_TELEPORT_DWELL_SEC,
+        cooldownSec: Int = DEFAULT_TELEPORT_COOLDOWN_SEC,
+        radiusMeters: Double = DEFAULT_EXPLORATION_RADIUS_M,
+    ) {
+        if (targets.isEmpty()) return
+        if (_simulationState.value == SimulationState.PLAYING) return
+        _simulationState.value = SimulationState.PLAYING
+        simulationJob = scope.launch {
+            val baseAltitude = settingsRepository.observeAltitude().first()
+            val useRandomAltitude = settingsRepository.observeRandomAltitude().first()
+            fun getAltitude() = if (useRandomAltitude)
+                baseAltitude + Random.nextDouble(-0.5, 0.5) else baseAltitude
+
+            while (isActive && _simulationState.value == SimulationState.PLAYING) {
+                for (target in targets) {
+                    if (!isActive) break
+                    // Teleport — single point at the new location, speed 0 to
+                    // signal "we just arrived, no movement for the moment".
+                    _currentLocation.emit(SimulationPoint(target, 0f, 0f, getAltitude()))
+                    delay(cooldownSec * 1000L)
+
+                    // Dwell-spiral for dwellSec.
+                    spiralLoop(target, radiusMeters, durationMs = dwellSec * 1000L) { pos, bearing ->
+                        _currentLocation.emit(SimulationPoint(pos, bearing, speedMps.toFloat(), getAltitude()))
+                    }
+                }
+            }
+            _simulationState.value = SimulationState.IDLE
+        }
+    }
+
+    /**
+     * Inline helper — runs a spiral around [center] until [durationMs] elapses
+     * (or forever if null). Each tick computes the next position via
+     * [calculateSpiralPosition] and emits via [emit].
+     */
+    private suspend inline fun spiralLoop(
+        center: LatLng,
+        maxRadiusMeters: Double,
+        durationMs: Long?,
+        crossinline emit: suspend (LatLng, Float) -> Unit,
+    ) {
+        val deadline = durationMs?.let { System.currentTimeMillis() + it }
+        // Tunables: a full revolution every ~15s, radius reaches max in ~4 min.
+        val angularStep = 2.0 * Math.PI / 60.0
+        val radialStep = maxRadiusMeters / 240.0
+        var angleRadians = 0.0
+        var radius = 0.0
+        var lastPos: LatLng? = null
+        while (true) {
+            if (deadline != null && System.currentTimeMillis() >= deadline) break
+            val pos = calculateSpiralPosition(center.latitude, center.longitude, radius, angleRadians)
+            val bearing = lastPos?.let { calculateBearing(it, pos) } ?: 0f
+            emit(pos, bearing)
+            lastPos = pos
+            // delay() throws CancellationException when the parent Job is
+            // cancelled (e.g. user calls stop()) — that escapes the loop
+            // naturally without an isActive check on every iteration.
+            delay(TICK_DELAY_MS)
+            angleRadians += angularStep
+            radius += radialStep
+            if (radius > maxRadiusMeters) {
+                // Hit the outer edge — pop back to centre and start a new
+                // sweep so coverage repeats rather than running off forever.
+                radius = 0.0
+                angleRadians = 0.0
+            }
+        }
+    }
+
     fun play(scope: CoroutineScope) {
         if (waypoints.size < 2 || _simulationState.value == SimulationState.PLAYING) return
 
@@ -288,6 +395,29 @@ class RouteSimulator @Inject constructor(
         const val TICK_DELAY_MS = 250L
         const val DEFAULT_SPEED_MPS = 1.3888889 // ~5 km/h
         const val MIN_SPEED_MPS = 0.1
+
+        // Exploration / teleport-exploration defaults — kept here so they
+        // are easy to tweak from one place and to surface as future settings.
+        const val DEFAULT_EXPLORATION_RADIUS_M = 200.0
+        const val DEFAULT_TELEPORT_DWELL_SEC = 60
+        const val DEFAULT_TELEPORT_COOLDOWN_SEC = 5
+
+        /**
+         * Translates a polar offset (radius_meters, angle_radians) anchored at
+         * (centerLat, centerLng) to a LatLng. 111320m ≈ 1° latitude; longitude
+         * is scaled by cos(lat) since meridians converge at the poles.
+         */
+        fun calculateSpiralPosition(
+            centerLat: Double,
+            centerLng: Double,
+            radiusMeters: Double,
+            angleRadians: Double,
+        ): LatLng {
+            val dLat = (radiusMeters * cos(angleRadians)) / 111_320.0
+            val dLng = (radiusMeters * sin(angleRadians)) /
+                (cos(Math.toRadians(centerLat)) * 111_320.0)
+            return LatLng(centerLat + dLat, centerLng + dLng)
+        }
 
         /** Smallest absolute angular difference between two bearings (deg, 0..180). */
         fun calculateAngleDiff(a: Float, b: Float): Float {
