@@ -7,6 +7,10 @@ import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.SimulationPoint
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import com.moooo_works.letsgogps.domain.SimulationState
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
+import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
+import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
@@ -54,6 +58,7 @@ class MapViewModelTest {
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
     private val joystickOverlayManager = mockk<JoystickOverlayManager>(relaxed = true)
     private val proRepository = mockk<ProRepository>(relaxed = true)
+    private val systemHealthCheck = mockk<SystemHealthCheck>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
     private val dispatcher = StandardTestDispatcher()
 
@@ -74,6 +79,12 @@ class MapViewModelTest {
         every { mockStateRepository.currentMockLocation } returns currentMockLocationFlow
         every { mockStateRepository.mockError } returns mockErrorFlow
         every { settingsRepository.observeLastCenter() } returns lastCenterFlow
+
+        // Default: every health-check item passes — individual tests override
+        // when they want to exercise the blocking-failure path.
+        every { systemHealthCheck.refresh() } returns HealthCheckState(
+            HealthCheckItem.values().associateWith { ItemStatus.Passed }
+        )
     }
 
     @After
@@ -83,7 +94,7 @@ class MapViewModelTest {
 
     private fun createViewModel() = MapViewModel(
         mockEngine, repository, mockStateRepository, settingsRepository,
-        routeSimulator, joystickOverlayManager, proRepository, context
+        routeSimulator, joystickOverlayManager, proRepository, systemHealthCheck, context
     )
 
     @Test

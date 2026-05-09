@@ -54,8 +54,12 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.domain.SimulationState
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
 import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
 import com.moooo_works.letsgogps.ui.components.BannerAdView
+import com.moooo_works.letsgogps.ui.healthcheck.HealthCheckSheet
+import com.moooo_works.letsgogps.ui.healthcheck.handleHealthCheckFix
 import com.moooo_works.letsgogps.ui.onboarding.OnboardingSheet
 import com.moooo_works.letsgogps.ui.pro.ProUpgradeDialog
 import com.moooo_works.letsgogps.utils.LatLngBoundsUtil
@@ -467,6 +471,21 @@ fun MapScreen(
             error = uiState.mockError!!,
             onClearError = { viewModel.clearError() },
             onRequestPermissions = { permissions -> permissionLauncher.launch(permissions) }
+        )
+    }
+
+    if (uiState.showHealthCheck) {
+        HealthCheckSheet(
+            state = uiState.healthCheckState ?: HealthCheckState(emptyMap()),
+            onItemFix = { item ->
+                handleHealthCheckFix(
+                    item = item,
+                    context = context,
+                    permissionLauncher = permissionLauncher,
+                )
+            },
+            onRefresh = { viewModel.refreshHealthCheck() },
+            onDismiss = { viewModel.dismissHealthCheck() },
         )
     }
 

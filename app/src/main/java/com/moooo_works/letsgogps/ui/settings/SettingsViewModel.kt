@@ -106,6 +106,7 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val mockEngine: LocationMockEngine,
     private val proRepository: ProRepository,
+    private val systemHealthCheck: com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -127,6 +128,25 @@ class SettingsViewModel @Inject constructor(
 
     private val _mockPermissionStatus = MutableStateFlow<MockPermissionStatus>(MockPermissionStatus.NotAllowed)
     val mockPermissionStatus: StateFlow<MockPermissionStatus> = _mockPermissionStatus.asStateFlow()
+
+    private val _healthCheckState = MutableStateFlow<com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState?>(null)
+    val healthCheckState: StateFlow<com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState?> = _healthCheckState.asStateFlow()
+
+    private val _showHealthCheck = MutableStateFlow(false)
+    val showHealthCheck: StateFlow<Boolean> = _showHealthCheck.asStateFlow()
+
+    fun openHealthCheck() {
+        _healthCheckState.value = systemHealthCheck.refresh()
+        _showHealthCheck.value = true
+    }
+
+    fun refreshHealthCheck() {
+        _healthCheckState.value = systemHealthCheck.refresh()
+    }
+
+    fun dismissHealthCheck() {
+        _showHealthCheck.value = false
+    }
 
     val altitude = settingsRepository.observeAltitude()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15.0)

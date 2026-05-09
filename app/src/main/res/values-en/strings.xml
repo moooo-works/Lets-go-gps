@@ -165,6 +165,28 @@
     <string name="mock_app_check_failed">Permission check failed</string>
     <string name="mock_app_dev_mode_disabled">Disabled — Enable Developer Options in \"Settings → About phone\"</string>
 
+    <string name="healthcheck_title">System Health Check</string>
+    <string name="healthcheck_subtitle_all_passed">All checks passed — ready to mock</string>
+    <string name="healthcheck_subtitle_with_failures">%1$d issue(s) need attention</string>
+    <string name="healthcheck_item_notification">Notification permission</string>
+    <string name="healthcheck_item_notification_desc">Foreground service needs to display the mocking notification</string>
+    <string name="healthcheck_item_location">Location permission</string>
+    <string name="healthcheck_item_location_desc">Used to anchor the map and emit mock locations</string>
+    <string name="healthcheck_item_gps">GPS service enabled</string>
+    <string name="healthcheck_item_gps_desc">System location service must be on</string>
+    <string name="healthcheck_item_dev_mode">Developer Options enabled</string>
+    <string name="healthcheck_item_dev_mode_desc">Tap \"Build number\" 7 times in \"Settings → About phone\"</string>
+    <string name="healthcheck_item_mock_app">Selected as mock location app</string>
+    <string name="healthcheck_item_mock_app_desc">Pick this app in Developer Options</string>
+    <string name="healthcheck_item_battery">Battery optimization (recommended)</string>
+    <string name="healthcheck_item_battery_desc">Prevents the OS freezing long mock sessions (optional)</string>
+    <string name="healthcheck_action_fix">Fix</string>
+    <string name="healthcheck_action_refresh">Re-check</string>
+    <string name="healthcheck_battery_warning">Battery optimization not whitelisted — long sessions may be paused by the OS</string>
+    <string name="settings_healthcheck_title">System Health Check</string>
+    <string name="settings_healthcheck_summary_passed">All clear</string>
+    <string name="settings_healthcheck_summary_failed">%1$d issue(s) pending</string>
+
     <string name="settings_sim_title">Simulation Settings</string>
     <string name="settings_sim_altitude">Default Altitude (Meters)</string>
     <string name="settings_sim_random_alt">Randomize Altitude</string>

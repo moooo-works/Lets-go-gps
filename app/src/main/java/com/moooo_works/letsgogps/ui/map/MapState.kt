@@ -6,6 +6,7 @@ import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.RouteProgress
 import com.moooo_works.letsgogps.domain.SimulationState
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
 
 enum class TransportMode(val speedKmh: Double) {
     WALKING(5.0),
@@ -52,5 +53,9 @@ data class MapUiState(
     /** Show a "what's new" tip card about clipboard detection. */
     val showClipboardHintTip: Boolean = false,
     /** Show a "what's new" tip card about GPX import. */
-    val showGpxTip: Boolean = false
+    val showGpxTip: Boolean = false,
+    /** Show the system health-check ModalBottomSheet (driven by startMocking blocking failure or settings entry). */
+    val showHealthCheck: Boolean = false,
+    /** Latest health-check snapshot; null until first refresh. */
+    val healthCheckState: HealthCheckState? = null,
 )

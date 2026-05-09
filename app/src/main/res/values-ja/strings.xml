@@ -165,6 +165,28 @@
     <string name="mock_app_check_failed">権限チェック失敗</string>
     <string name="mock_app_dev_mode_disabled">無効 —「設定 → 端末情報」で開発者向けオプションを有効にしてください</string>
 
+    <string name="healthcheck_title">システムヘルスチェック</string>
+    <string name="healthcheck_subtitle_all_passed">すべて合格 — 模擬を開始できます</string>
+    <string name="healthcheck_subtitle_with_failures">%1$d 件の修正が必要です</string>
+    <string name="healthcheck_item_notification">通知権限</string>
+    <string name="healthcheck_item_notification_desc">フォアグラウンドサービスの通知表示に必要</string>
+    <string name="healthcheck_item_location">位置情報の権限</string>
+    <string name="healthcheck_item_location_desc">地図中心の取得と模擬位置の送信に使用</string>
+    <string name="healthcheck_item_gps">位置情報サービス (GPS) 有効</string>
+    <string name="healthcheck_item_gps_desc">システムの位置情報サービスがオンである必要があります</string>
+    <string name="healthcheck_item_dev_mode">開発者向けオプション有効</string>
+    <string name="healthcheck_item_dev_mode_desc">「設定 → 端末情報」で「ビルド番号」を 7 回タップ</string>
+    <string name="healthcheck_item_mock_app">模擬位置情報アプリに選択済み</string>
+    <string name="healthcheck_item_mock_app_desc">開発者向けオプションで本アプリを選択</string>
+    <string name="healthcheck_item_battery">バッテリー最適化（推奨）</string>
+    <string name="healthcheck_item_battery_desc">長時間の模擬がシステムで停止されるのを防止（任意）</string>
+    <string name="healthcheck_action_fix">修正</string>
+    <string name="healthcheck_action_refresh">再チェック</string>
+    <string name="healthcheck_battery_warning">バッテリー最適化が解除されていません — 長時間の模擬は OS により停止される可能性があります</string>
+    <string name="settings_healthcheck_title">システムヘルスチェック</string>
+    <string name="settings_healthcheck_summary_passed">すべて正常</string>
+    <string name="settings_healthcheck_summary_failed">%1$d 件保留中</string>
+
     <string name="settings_sim_title">シミュレーション設定</string>
     <string name="settings_sim_altitude">デフォルト高度（メートル）</string>
     <string name="settings_sim_random_alt">高度をランダム化</string>

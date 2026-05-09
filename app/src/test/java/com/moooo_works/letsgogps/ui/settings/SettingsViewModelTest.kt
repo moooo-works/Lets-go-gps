@@ -9,6 +9,10 @@ import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
+import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
+import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
@@ -48,6 +52,7 @@ class SettingsViewModelTest {
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
     private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
     private val proRepository = mockk<ProRepository>(relaxed = true)
+    private val systemHealthCheck = mockk<SystemHealthCheck>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
     private val contentResolver = mockk<ContentResolver>(relaxed = true)
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -74,8 +79,11 @@ class SettingsViewModelTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { proRepository.isProActive } returns MutableStateFlow(true)
         every { settingsRepository.observeClipboardHintEnabled() } returns MutableStateFlow(true)
+        every { systemHealthCheck.refresh() } returns HealthCheckState(
+            HealthCheckItem.values().associateWith { ItemStatus.Passed }
+        )
 
-        viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, proRepository, context)
+        viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, proRepository, systemHealthCheck, context)
     }
 
     @After

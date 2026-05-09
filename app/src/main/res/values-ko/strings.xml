@@ -165,6 +165,28 @@
     <string name="mock_app_check_failed">권한 확인 실패</string>
     <string name="mock_app_dev_mode_disabled">비활성화됨 — \"설정 → 휴대전화 정보\"에서 개발자 옵션 활성화</string>
 
+    <string name="healthcheck_title">시스템 상태 점검</string>
+    <string name="healthcheck_subtitle_all_passed">모두 통과 — 모의 실행 준비 완료</string>
+    <string name="healthcheck_subtitle_with_failures">%1$d개 항목 처리 필요</string>
+    <string name="healthcheck_item_notification">알림 권한</string>
+    <string name="healthcheck_item_notification_desc">포그라운드 서비스의 모의 실행 알림 표시에 필요</string>
+    <string name="healthcheck_item_location">위치 권한</string>
+    <string name="healthcheck_item_location_desc">지도 중심 읽기 및 모의 위치 전송에 사용</string>
+    <string name="healthcheck_item_gps">위치 서비스 (GPS) 활성화</string>
+    <string name="healthcheck_item_gps_desc">시스템 위치 서비스가 켜져 있어야 합니다</string>
+    <string name="healthcheck_item_dev_mode">개발자 옵션 활성화</string>
+    <string name="healthcheck_item_dev_mode_desc">\"설정 → 휴대전화 정보\"에서 \"빌드 번호\"를 7회 탭</string>
+    <string name="healthcheck_item_mock_app">모의 위치 앱으로 선택됨</string>
+    <string name="healthcheck_item_mock_app_desc">개발자 옵션에서 이 앱을 선택</string>
+    <string name="healthcheck_item_battery">배터리 최적화 예외 (권장)</string>
+    <string name="healthcheck_item_battery_desc">장시간 모의 실행이 OS에 의해 중단되는 것을 방지 (선택)</string>
+    <string name="healthcheck_action_fix">해결</string>
+    <string name="healthcheck_action_refresh">다시 확인</string>
+    <string name="healthcheck_battery_warning">배터리 최적화 예외 미설정 — 장시간 모의 실행이 OS에 의해 중지될 수 있습니다</string>
+    <string name="settings_healthcheck_title">시스템 상태 점검</string>
+    <string name="settings_healthcheck_summary_passed">모두 정상</string>
+    <string name="settings_healthcheck_summary_failed">%1$d개 항목 대기 중</string>
+
     <string name="settings_sim_title">시뮬레이션 설정</string>
     <string name="settings_sim_altitude">기본 고도 (미터)</string>
     <string name="settings_sim_random_alt">고도 무작위화</string>

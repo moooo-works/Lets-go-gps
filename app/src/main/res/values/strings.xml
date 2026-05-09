@@ -166,6 +166,28 @@
     <string name="mock_app_check_failed">權限檢查失敗</string>
     <string name="mock_app_dev_mode_disabled">未開啟 — 請先到「設定 → 關於手機」啟用開發者選項</string>
 
+    <string name="healthcheck_title">系統健康檢查</string>
+    <string name="healthcheck_subtitle_all_passed">全部通過 — 可開始模擬</string>
+    <string name="healthcheck_subtitle_with_failures">%1$d 項待修復</string>
+    <string name="healthcheck_item_notification">通知權限</string>
+    <string name="healthcheck_item_notification_desc">前景服務需要顯示模擬中通知</string>
+    <string name="healthcheck_item_location">定位權限</string>
+    <string name="healthcheck_item_location_desc">讀取裝置定位以建立模擬位置</string>
+    <string name="healthcheck_item_gps">定位服務 (GPS) 已開啟</string>
+    <string name="healthcheck_item_gps_desc">系統定位服務必須處於開啟狀態</string>
+    <string name="healthcheck_item_dev_mode">開發者選項已開啟</string>
+    <string name="healthcheck_item_dev_mode_desc">於「設定 → 關於手機」連點 7 次「版本號碼」</string>
+    <string name="healthcheck_item_mock_app">已選為模擬位置 App</string>
+    <string name="healthcheck_item_mock_app_desc">於開發者選項中選擇此 App</string>
+    <string name="healthcheck_item_battery">電池白名單（建議）</string>
+    <string name="healthcheck_item_battery_desc">避免長時間模擬被系統凍結（非必要）</string>
+    <string name="healthcheck_action_fix">修復</string>
+    <string name="healthcheck_action_refresh">重新檢查</string>
+    <string name="healthcheck_battery_warning">電池白名單未啟用 — 長時間模擬可能被系統暫停</string>
+    <string name="settings_healthcheck_title">系統健康檢查</string>
+    <string name="settings_healthcheck_summary_passed">全部正常</string>
+    <string name="settings_healthcheck_summary_failed">%1$d 項待處理</string>
+
     <string name="settings_sim_title">模擬設定</string>
     <string name="settings_sim_altitude">預設高度 (公尺)</string>
     <string name="settings_sim_random_alt">高度隨機化</string>

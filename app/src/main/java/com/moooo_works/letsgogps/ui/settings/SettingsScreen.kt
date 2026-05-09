@@ -29,6 +29,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
+import com.moooo_works.letsgogps.ui.healthcheck.HealthCheckSheet
+import com.moooo_works.letsgogps.ui.healthcheck.handleHealthCheckFix
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -52,6 +55,8 @@ fun SettingsScreen(
     val activity = context as? android.app.Activity
     val lifecycleOwner = LocalLifecycleOwner.current
     val mockPermissionStatus by viewModel.mockPermissionStatus.collectAsState()
+    val healthCheckState by viewModel.healthCheckState.collectAsState()
+    val showHealthCheck by viewModel.showHealthCheck.collectAsState()
     val isProActive by viewModel.isProActive.collectAsState()
     val showProUpgrade by viewModel.showProUpgrade.collectAsState()
     val altitude by viewModel.altitude.collectAsState()
@@ -63,11 +68,19 @@ fun SettingsScreen(
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshMockPermission()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshMockPermission()
+                viewModel.refreshHealthCheck()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+
+    val healthCheckPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { viewModel.refreshHealthCheck() }
+    )
 
     var showClearNonFavoritesDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
@@ -296,6 +309,12 @@ fun SettingsScreen(
                     }
                 }
             }
+
+            // 系統健康檢查入口
+            HealthCheckEntryCard(
+                state = healthCheckState,
+                onClick = { viewModel.openHealthCheck() }
+            )
 
             // 外觀主題
             Card(
@@ -635,6 +654,76 @@ fun SettingsScreen(
                 )
             }
 
+        }
+    }
+
+    if (showHealthCheck) {
+        HealthCheckSheet(
+            state = healthCheckState ?: HealthCheckState(emptyMap()),
+            onItemFix = { item ->
+                handleHealthCheckFix(item, context, healthCheckPermissionLauncher)
+            },
+            onRefresh = { viewModel.refreshHealthCheck() },
+            onDismiss = { viewModel.dismissHealthCheck() },
+        )
+    }
+}
+
+@Composable
+private fun HealthCheckEntryCard(
+    state: HealthCheckState?,
+    onClick: () -> Unit,
+) {
+    val failedCritical = state?.items?.count { (item, status) ->
+        item.isCritical && status is com.moooo_works.letsgogps.domain.healthcheck.ItemStatus.Failed
+    } ?: 0
+    val allClear = state != null && failedCritical == 0
+    val dotColor = if (allClear) Color(0xFF22C55E) else Color(0xFFF97316)
+    val summary = if (allClear) {
+        stringResource(R.string.settings_healthcheck_summary_passed)
+    } else {
+        stringResource(R.string.settings_healthcheck_summary_failed, failedCritical)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(0.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(dotColor)
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_healthcheck_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

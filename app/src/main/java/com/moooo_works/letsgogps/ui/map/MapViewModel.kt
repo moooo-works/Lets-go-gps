@@ -17,6 +17,7 @@ import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.SimulationState
+import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
@@ -54,6 +55,7 @@ class MapViewModel @Inject constructor(
     private val routeSimulator: RouteSimulator,
     private val joystickOverlayManager: JoystickOverlayManager,
     private val proRepository: ProRepository,
+    private val systemHealthCheck: SystemHealthCheck,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -269,6 +271,16 @@ class MapViewModel @Inject constructor(
     }
 
     fun startMocking() {
+        // Pre-flight health check: surface every blocking failure at once
+        // instead of the legacy fail-fast MockErrorDialog.
+        val healthState = systemHealthCheck.refresh()
+        if (healthState.hasBlockingFailure) {
+            _uiState.update {
+                it.copy(showHealthCheck = true, healthCheckState = healthState)
+            }
+            return
+        }
+
         if (!ensurePermission()) return
 
         val target = _uiState.value.centerLocation
@@ -281,6 +293,27 @@ class MapViewModel @Inject constructor(
 
         saveLocationIfNeeded(target)
         checkAndTriggerReview()
+    }
+
+    /** Re-evaluate health check; called when user taps Re-check or returns from Settings. */
+    fun refreshHealthCheck() {
+        _uiState.update {
+            it.copy(healthCheckState = systemHealthCheck.refresh())
+        }
+    }
+
+    /** Open the health-check sheet manually (e.g. from settings entry). */
+    fun openHealthCheck() {
+        _uiState.update {
+            it.copy(
+                showHealthCheck = true,
+                healthCheckState = systemHealthCheck.refresh(),
+            )
+        }
+    }
+
+    fun dismissHealthCheck() {
+        _uiState.update { it.copy(showHealthCheck = false) }
     }
 
     private fun checkAndTriggerReview() {
