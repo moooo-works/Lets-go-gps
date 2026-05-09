@@ -99,6 +99,30 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+
+    applicationVariants.all {
+        val variant = this
+        outputs.all {
+            this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            outputFileName = "letsgo-${variant.versionName}-${variant.buildType.name}.apk"
+        }
+    }
+}
+
+// AAB 輸出重新命名
+tasks.whenTaskAdded {
+    if (name.matches(Regex("bundle(Release|Debug)"))) {
+        val buildType = name.removePrefix("bundle").lowercase()
+        doLast {
+            val bundleDir = layout.buildDirectory.dir("outputs/bundle/$buildType").get().asFile
+            bundleDir.listFiles()
+                ?.filter { it.extension == "aab" && !it.nameWithoutExtension.startsWith("letsgo-") }
+                ?.forEach { file ->
+                    file.renameTo(File(bundleDir, "letsgo-$versionMajor.$versionMinor.$versionPatch-$buildType.aab"))
+                }
+        }
+    }
 }
 
 dependencies {
