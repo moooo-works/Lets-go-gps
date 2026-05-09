@@ -48,19 +48,25 @@ data class ImportPreview(
     val schemaVersion: Int,
     val savedLocationsCount: Int,
     val routesCount: Int,
-    val isGpx: Boolean = false
+    val isGpx: Boolean = false,
+    val foldersCount: Int = 0,
+    val hasSettings: Boolean = false,
 )
 
 @Keep
 data class ExportData(
     @SerializedName("schemaVersion")
-    val schemaVersion: Int = 2,
+    val schemaVersion: Int = 3,
     @SerializedName("exportedAt")
     val exportedAt: Long? = null,
     @SerializedName("savedLocations")
     val savedLocations: List<ExportSavedLocation> = emptyList(),
     @SerializedName("routes")
-    val routes: List<ExportRoute> = emptyList()
+    val routes: List<ExportRoute> = emptyList(),
+    @SerializedName("folders")
+    val folders: List<ExportFolder> = emptyList(),
+    @SerializedName("settings")
+    val settings: ExportSettings? = null,
 )
 
 @Keep
@@ -74,7 +80,49 @@ data class ExportSavedLocation(
     @SerializedName("lng")
     val lng: Double,
     @SerializedName("createdAt")
-    val createdAt: Long? = null
+    val createdAt: Long? = null,
+    // Booleans default-init to false via Java primitive reflection — safe.
+    @SerializedName("isFavorite")
+    val isFavorite: Boolean = false,
+    // String/List references must be nullable: Gson does not honor Kotlin
+    // `= ""` defaults; missing fields in legacy v1/v2 backups deserialize
+    // to null and would NPE downstream.
+    @SerializedName("description")
+    val description: String? = null,
+    @SerializedName("folderId")
+    val folderId: Int? = null,
+    @SerializedName("sortOrder")
+    val sortOrder: Long? = null,
+)
+
+@Keep
+data class ExportFolder(
+    @SerializedName("id")
+    val id: Int? = null,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("createdAt")
+    val createdAt: Long? = null,
+)
+
+@Keep
+data class ExportSettings(
+    @SerializedName("altitude")
+    val altitude: Double? = null,
+    @SerializedName("randomAltitude")
+    val randomAltitude: Boolean? = null,
+    @SerializedName("coordinateJitter")
+    val coordinateJitter: Boolean? = null,
+    @SerializedName("routeSpeed")
+    val routeSpeed: Double? = null,
+    @SerializedName("transportMode")
+    val transportMode: String? = null,
+    @SerializedName("mapMode")
+    val mapMode: String? = null,
+    @SerializedName("mapType")
+    val mapType: String? = null,
+    @SerializedName("clipboardHintEnabled")
+    val clipboardHintEnabled: Boolean? = null,
 )
 
 @Keep
@@ -228,15 +276,37 @@ class SettingsViewModel @Inject constructor(
                         name = it.name,
                         lat = it.latitude,
                         lng = it.longitude,
-                        createdAt = it.createdAt
+                        createdAt = it.createdAt,
+                        isFavorite = it.isFavorite,
+                        description = it.description,
+                        folderId = it.folderId,
+                        sortOrder = it.sortOrder,
                     )
                 }
 
+                val foldersExport = if (!includeSavedLocations) emptyList()
+                else locationRepository.observeFolders().first().map {
+                    ExportFolder(id = it.id, name = it.name, createdAt = it.createdAt)
+                }
+
+                val settingsExport = ExportSettings(
+                    altitude = settingsRepository.observeAltitude().first(),
+                    randomAltitude = settingsRepository.observeRandomAltitude().first(),
+                    coordinateJitter = settingsRepository.observeCoordinateJitter().first(),
+                    routeSpeed = settingsRepository.observeRouteSpeed().first(),
+                    transportMode = settingsRepository.observeTransportMode().first(),
+                    mapMode = settingsRepository.observeMapMode().first(),
+                    mapType = settingsRepository.observeMapType().first(),
+                    clipboardHintEnabled = settingsRepository.observeClipboardHintEnabled().first(),
+                )
+
                 val exportData = ExportData(
-                    schemaVersion = 2,
+                    schemaVersion = 3,
                     exportedAt = System.currentTimeMillis(),
                     savedLocations = exportLocations,
-                    routes = routes
+                    routes = routes,
+                    folders = foldersExport,
+                    settings = settingsExport,
                 )
 
                 val jsonString = gson.toJson(exportData)
@@ -314,7 +384,7 @@ class SettingsViewModel @Inject constructor(
                     withContext(Dispatchers.Main) { onResult(false, null, "Invalid data") }
                     return@launch
                 }
-                if (exportData.schemaVersion > 2) {
+                if (exportData.schemaVersion > 3) {
                     withContext(Dispatchers.Main) { onResult(false, null, "Unsupported schema version: ${exportData.schemaVersion}") }
                     return@launch
                 }
@@ -322,8 +392,10 @@ class SettingsViewModel @Inject constructor(
                 val preview = ImportPreview(
                     uri = uri,
                     schemaVersion = exportData.schemaVersion,
-                    savedLocationsCount = exportData.savedLocations.size,
-                    routesCount = exportData.routes.size
+                    savedLocationsCount = exportData.savedLocations?.size ?: 0,
+                    routesCount = exportData.routes?.size ?: 0,
+                    foldersCount = exportData.folders?.size ?: 0,
+                    hasSettings = exportData.settings != null,
                 )
 
                 withContext(Dispatchers.Main) {
@@ -361,21 +433,47 @@ class SettingsViewModel @Inject constructor(
                 var importedRoutes = 0
                 var skippedRoutes = 0
 
+                // Folders first — build a remap from exported id → newly-created/found id.
+                // Same-name folders are merged (case-sensitive trim) so re-importing
+                // the same backup doesn't proliferate duplicates.
+                //
+                // Gson ignores Kotlin's `= emptyList()` default; a missing
+                // "folders"/"savedLocations" key in legacy v1/v2 backups
+                // deserializes to null. Coalesce defensively here.
+                val foldersList = exportData.folders ?: emptyList()
+                val savedList = exportData.savedLocations ?: emptyList()
+                val routesList = exportData.routes ?: emptyList()
+
+                val existingFolders = locationRepository.observeFolders().first()
+                val folderIdRemap = mutableMapOf<Int, Int>()
+                foldersList.forEach { exported ->
+                    val existing = existingFolders.firstOrNull { it.name.trim() == exported.name.trim() }
+                    val newId = existing?.id ?: locationRepository.createFolder(exported.name.trim())
+                    if (exported.id != null) folderIdRemap[exported.id] = newId
+                }
+
                 val existingLocations = locationRepository.getAllLocations().first()
                 val distanceThresholdMeters = 20.0
 
-                exportData.savedLocations.forEach { exportedLoc ->
-                    val isDuplicate = existingLocations.any { existing ->
+                savedList.forEach { exportedLoc ->
+                    val isDupById = exportedLoc.id != null &&
+                        existingLocations.any { it.id == exportedLoc.id }
+                    val isDupByDistance = existingLocations.any { existing ->
                         GeoDistanceMeters.haversineMeters(existing.latitude, existing.longitude, exportedLoc.lat, exportedLoc.lng) < distanceThresholdMeters
                     }
 
-                    if (!isDuplicate) {
+                    if (!isDupById && !isDupByDistance) {
+                        val now = System.currentTimeMillis()
                         locationRepository.saveLocation(
                             SavedLocation(
                                 name = exportedLoc.name,
                                 latitude = exportedLoc.lat,
                                 longitude = exportedLoc.lng,
-                                createdAt = exportedLoc.createdAt ?: System.currentTimeMillis()
+                                isFavorite = exportedLoc.isFavorite,
+                                description = exportedLoc.description.orEmpty(),
+                                createdAt = exportedLoc.createdAt ?: now,
+                                sortOrder = exportedLoc.sortOrder ?: now,
+                                folderId = exportedLoc.folderId?.let { folderIdRemap[it] },
                             )
                         )
                         importedLocations++
@@ -389,7 +487,7 @@ class SettingsViewModel @Inject constructor(
                     locationRepository.getRouteWithPoints(it.id)
                 }
 
-                exportData.routes.forEach { exportedRoute ->
+                routesList.forEach { exportedRoute ->
                     val exportedName = exportedRoute.name
                     val exportedNameClean = exportedName.trim().lowercase()
                     val exportedPoints = exportedRoute.points
@@ -420,6 +518,8 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
 
+                exportData.settings?.let { applySettings(it) }
+
                 val summaryMsg = context.getString(R.string.import_result_locations, importedLocations, skippedLocations) + "\n" +
                     context.getString(R.string.import_result_routes, importedRoutes, skippedRoutes)
                 withContext(Dispatchers.Main) {
@@ -432,6 +532,22 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Writes a backup's settings block back into preferences. Each field is
+     * applied only when present so partial-schema backups don't wipe
+     * settings absent from the file.
+     */
+    private suspend fun applySettings(s: ExportSettings) {
+        s.altitude?.let { settingsRepository.setAltitude(it) }
+        s.randomAltitude?.let { settingsRepository.setRandomAltitude(it) }
+        s.coordinateJitter?.let { settingsRepository.setCoordinateJitter(it) }
+        s.routeSpeed?.let { settingsRepository.setRouteSpeed(it) }
+        s.transportMode?.let { settingsRepository.setTransportMode(it) }
+        s.mapMode?.let { settingsRepository.setMapMode(it) }
+        s.mapType?.let { settingsRepository.setMapType(it) }
+        s.clipboardHintEnabled?.let { settingsRepository.setClipboardHintEnabled(it) }
     }
 
     private fun parseGpxContent(content: String): ExportData {

@@ -208,6 +208,8 @@
     <string name="import_preview_format">형식: %1$s</string>
     <string name="import_preview_locations">저장된 위치: %1$d</string>
     <string name="import_preview_routes">경로: %1$d</string>
+    <string name="import_preview_folders">폴더: %1$d</string>
+    <string name="import_preview_settings">앱 설정 포함 (현재 설정을 덮어씁니다)</string>
     <string name="import_result_locations">위치: %1$d 가져옴, %2$d 건너뜀.</string>
     <string name="import_result_routes">경로: %1$d 가져옴, %2$d 건너뜀.</string>
     <string name="import_format_dialog_title">가져오기 형식 선택</string>

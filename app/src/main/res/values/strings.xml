@@ -209,6 +209,8 @@
     <string name="import_preview_format">格式：%1$s</string>
     <string name="import_preview_locations">儲存位置：%1$d</string>
     <string name="import_preview_routes">路線：%1$d</string>
+    <string name="import_preview_folders">資料夾：%1$d</string>
+    <string name="import_preview_settings">含應用程式設定（將覆蓋目前設定）</string>
     <string name="import_result_locations">位置：%1$d 已匯入，%2$d 已略過。</string>
     <string name="import_result_routes">路線：%1$d 已匯入，%2$d 已略過。</string>
     <string name="import_format_dialog_title">選擇匯入格式</string>

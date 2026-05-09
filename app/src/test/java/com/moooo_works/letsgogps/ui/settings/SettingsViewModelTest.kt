@@ -79,6 +79,15 @@ class SettingsViewModelTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { proRepository.isProActive } returns MutableStateFlow(true)
         every { settingsRepository.observeClipboardHintEnabled() } returns MutableStateFlow(true)
+        // Defaults required by exportDataToUri and applyImportData/applySettings.
+        every { settingsRepository.observeAltitude() } returns flowOf(15.0)
+        every { settingsRepository.observeRandomAltitude() } returns flowOf(false)
+        every { settingsRepository.observeCoordinateJitter() } returns flowOf(false)
+        every { settingsRepository.observeRouteSpeed() } returns flowOf(5.0)
+        every { settingsRepository.observeTransportMode() } returns flowOf("WALKING")
+        every { settingsRepository.observeMapMode() } returns flowOf("SINGLE")
+        every { settingsRepository.observeMapType() } returns flowOf("NORMAL")
+        every { locationRepository.observeFolders() } returns flowOf(emptyList())
         every { systemHealthCheck.refresh() } returns HealthCheckState(
             HealthCheckItem.values().associateWith { ItemStatus.Passed }
         )

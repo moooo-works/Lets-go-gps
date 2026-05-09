@@ -852,6 +852,12 @@ private fun ImportPreviewDialog(
                 Text(stringResource(R.string.import_preview_format, if (preview.isGpx) "GPX" else "JSON"))
                 Text(stringResource(R.string.import_preview_locations, preview.savedLocationsCount))
                 Text(stringResource(R.string.import_preview_routes, preview.routesCount))
+                if (preview.foldersCount > 0) {
+                    Text(stringResource(R.string.import_preview_folders, preview.foldersCount))
+                }
+                if (preview.hasSettings) {
+                    Text(stringResource(R.string.import_preview_settings))
+                }
             }
         },
         confirmButton = {

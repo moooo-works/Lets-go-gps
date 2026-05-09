@@ -208,6 +208,8 @@
     <string name="import_preview_format">形式：%1$s</string>
     <string name="import_preview_locations">保存した位置: %1$d</string>
     <string name="import_preview_routes">ルート: %1$d</string>
+    <string name="import_preview_folders">フォルダ: %1$d</string>
+    <string name="import_preview_settings">アプリ設定を含む（現在の設定を上書きします）</string>
     <string name="import_result_locations">位置：%1$d 件インポート、%2$d 件スキップ。</string>
     <string name="import_result_routes">ルート：%1$d 件インポート、%2$d 件スキップ。</string>
     <string name="import_format_dialog_title">インポート形式を選択</string>

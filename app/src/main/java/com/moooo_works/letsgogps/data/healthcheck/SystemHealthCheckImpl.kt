@@ -18,10 +18,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SystemHealthCheckImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val sdkInt: Int = Build.VERSION.SDK_INT
-) : SystemHealthCheck {
+class SystemHealthCheckImpl : SystemHealthCheck {
+
+    private val context: Context
+    private val sdkInt: Int
+
+    @Inject
+    constructor(@ApplicationContext context: Context) : this(context, Build.VERSION.SDK_INT)
+
+    constructor(context: Context, sdkInt: Int) {
+        this.context = context
+        this.sdkInt = sdkInt
+    }
 
     override fun refresh(): HealthCheckState {
         val items = HealthCheckItem.values().associateWith(::evaluate)
