@@ -1,10 +1,13 @@
 package com.moooo_works.letsgogps
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.content.Context
+import com.moooo_works.letsgogps.data.imports.GpxImportBus
+import javax.inject.Inject
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -72,6 +75,9 @@ fun applyLocale(base: Context): Context {
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var gpxImportBus: GpxImportBus
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(applyLocale(newBase))
     }
@@ -79,6 +85,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        handleIncomingIntent(intent)
         setContent {
             val prefs = remember { getSharedPreferences("mockgps_prefs", Context.MODE_PRIVATE) }
             val themePreference = remember {
@@ -104,10 +111,28 @@ class MainActivity : ComponentActivity() {
                         onThemeChange = { newPref ->
                             themePreference.value = newPref
                             prefs.edit().putString("theme_pref", newPref.name).apply()
-                        }
+                        },
+                        gpxImportBus = gpxImportBus,
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingIntent(intent)
+    }
+
+    private fun handleIncomingIntent(incoming: Intent?) {
+        if (incoming?.action != Intent.ACTION_VIEW) return
+        val uri = incoming.data ?: return
+        val pathLooksGpx = uri.toString().substringAfterLast('?').endsWith(".gpx", ignoreCase = true) ||
+            (uri.lastPathSegment ?: "").endsWith(".gpx", ignoreCase = true)
+        val mimeLooksGpx = incoming.type?.contains("gpx", ignoreCase = true) == true
+        if (pathLooksGpx || mimeLooksGpx) {
+            gpxImportBus.emit(uri)
         }
     }
 }
@@ -116,9 +141,22 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation(
     themePreference: ThemePreference = ThemePreference.SYSTEM,
-    onThemeChange: (ThemePreference) -> Unit = {}
+    onThemeChange: (ThemePreference) -> Unit = {},
+    gpxImportBus: GpxImportBus,
 ) {
     val navController = rememberNavController()
+
+    // External GPX file opened from a file manager: jump to Settings so the
+    // existing import-preview/import-apply flow can take over.
+    LaunchedEffect(gpxImportBus) {
+        gpxImportBus.pending.collect { uri ->
+            if (uri != null) {
+                navController.navigate("settings") {
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -294,7 +332,8 @@ fun AppNavigation(
                     viewModel = viewModel,
                     onNavigateBack = { },
                     themePreference = themePreference,
-                    onThemeChange = onThemeChange
+                    onThemeChange = onThemeChange,
+                    gpxImportBus = gpxImportBus,
                 )
             }
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.moooo_works.letsgogps.data.imports.GpxImportBus
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
 import com.moooo_works.letsgogps.ui.healthcheck.HealthCheckSheet
@@ -49,7 +50,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateBack: () -> Unit,
     themePreference: ThemePreference = ThemePreference.SYSTEM,
-    onThemeChange: (ThemePreference) -> Unit = {}
+    onThemeChange: (ThemePreference) -> Unit = {},
+    gpxImportBus: GpxImportBus? = null,
 ) {
     val context = LocalContext.current
     val activity = context as? android.app.Activity
@@ -91,20 +93,33 @@ fun SettingsScreen(
     var importPreview by remember { mutableStateOf<ImportPreview?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
 
+    // Shared import-preview handler — used by the in-app picker and the
+    // external GPX intent flow.
+    val processImportUri: (Uri) -> Unit = { uri ->
+        viewModel.parseImportData(uri) { success, preview, message ->
+            if (success) {
+                importPreview = preview
+                showImportDialog = true
+            } else if (message == "PRO_REQUIRED") {
+                viewModel.requestProUpgrade()
+            } else {
+                Toast.makeText(context, "Import failed: $message", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
-        uri?.let {
-            viewModel.parseImportData(it) { success, preview, message ->
-                if (success) {
-                    importPreview = preview
-                    showImportDialog = true
-                } else if (message == "PRO_REQUIRED") {
-                    viewModel.requestProUpgrade()
-                } else {
-                    Toast.makeText(context, "Import failed: $message", Toast.LENGTH_LONG).show()
-                }
-            }
+        uri?.let { processImportUri(it) }
+    }
+
+    if (gpxImportBus != null) {
+        val pendingGpx by gpxImportBus.pending.collectAsState()
+        LaunchedEffect(pendingGpx) {
+            val uri = pendingGpx ?: return@LaunchedEffect
+            processImportUri(uri)
+            gpxImportBus.consume()
         }
     }
 
