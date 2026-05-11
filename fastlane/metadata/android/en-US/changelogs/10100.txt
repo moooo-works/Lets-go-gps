@@ -1,0 +1,4 @@
+• New spiral and teleport-explore advanced simulation modes
+• Batch-select and merge multiple routes on the Routes screen
+• Warning when mock location time-zone differs from system time-zone
+• Status-aware action buttons in the foreground notification

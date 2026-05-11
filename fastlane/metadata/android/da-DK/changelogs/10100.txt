@@ -1,0 +1,4 @@
+• Nye spiral- og teleport-udforskningssimuleringer
+• Massevalg og sammenfletning af ruter på ruteskærmen
+• Advarsel når mock-placeringens tidszone afviger fra systemets tidszone
+• Statusbevidste handlingsknapper i forgrundsbeskeden
