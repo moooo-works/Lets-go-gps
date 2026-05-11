@@ -138,7 +138,7 @@
     <string name="timezone_mismatch_open_settings">System time-zone</string>
     <string name="timezone_mismatch_disable">Stop warning me</string>
     <string name="settings_timezone_check_title">Time-zone mismatch warning</string>
-    <string name="settings_timezone_check_desc">Show a warning when the mock location's time-zone differs from the device</string>
+    <string name="settings_timezone_check_desc">Show a warning when the mock location\'s time-zone differs from the device</string>
     <string name="routes_point_count">%1$d points</string>
 
     <string name="map_route_active">A route is currently active</string>
