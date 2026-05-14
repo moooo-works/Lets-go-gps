@@ -201,7 +201,7 @@ class AndroidLocationMockEngine : LocationMockEngine {
                     true,
                     true,
                     ProviderProperties.POWER_USAGE_LOW,
-                    5
+                    LEGACY_ACCURACY_FINE
                 )
             }
             Log.d(TAG, "addTestProvider success provider=$provider")
@@ -289,5 +289,6 @@ class AndroidLocationMockEngine : LocationMockEngine {
     private companion object {
         private const val TAG = "MockGPS/MockEngine"
         private const val ERROR_BUFFER_CAPACITY = 16
+        private const val LEGACY_ACCURACY_FINE = 1
     }
 }

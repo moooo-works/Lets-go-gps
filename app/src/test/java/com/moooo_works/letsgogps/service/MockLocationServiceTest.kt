@@ -99,4 +99,21 @@ class MockLocationServiceTest {
 
         verify { routeSimulator.pause() }
     }
+
+    @Test
+    fun `service applies observed route speed to simulator`() = runTest {
+        every { settingsRepository.observeRouteSpeed() } returns flowOf(40.0)
+
+        val controller = Robolectric.buildService(MockLocationService::class.java)
+        val service = controller.create().get()
+
+        service.mockStateRepository = mockStateRepository
+        service.mockEngine = mockEngine
+        service.routeSimulator = routeSimulator
+        service.settingsRepository = settingsRepository
+
+        advanceUntilIdle()
+
+        verify { routeSimulator.setSpeed(40.0 / 3.6) }
+    }
 }

@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -81,6 +82,7 @@ class MapViewModelTest {
         every { mockStateRepository.currentMockLocation } returns currentMockLocationFlow
         every { mockStateRepository.mockError } returns mockErrorFlow
         every { settingsRepository.observeLastCenter() } returns lastCenterFlow
+        every { settingsRepository.observeRouteSpeed() } returns flowOf(5.0)
         // Default: timezone check disabled to keep startMocking tests focused
         // on the mock pipeline rather than network behaviour. Override per-test
         // if the timezone path needs exercising.
@@ -140,7 +142,18 @@ class MapViewModelTest {
     fun `setSpeed rejects non positive speed`() = runTest {
         val viewModel = createViewModel()
         viewModel.setSpeed(0.0)
-        verify(exactly = 0) { routeSimulator.setSpeed(any()) }
+        verify(exactly = 0) { routeSimulator.setSpeed(0.0) }
         assertTrue(viewModel.uiState.value.mockError is MockError.InvalidInput)
+    }
+
+    @Test
+    fun `init applies persisted route speed to simulator`() = runTest {
+        every { settingsRepository.observeRouteSpeed() } returns flowOf(40.0)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertEquals(40.0, viewModel.uiState.value.speedKmh, 0.0)
+        verify { routeSimulator.setSpeed(40.0 / 3.6) }
     }
 }

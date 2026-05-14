@@ -129,6 +129,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.observeRouteSpeed().collect { speed ->
                 val mode = TransportMode.values().find { it.speedKmh == speed }
+                routeSimulator.setSpeed(speed / KMH_TO_MPS_DIVISOR)
                 _uiState.update { it.copy(
                     speedKmh = speed,
                     transportMode = mode ?: it.transportMode

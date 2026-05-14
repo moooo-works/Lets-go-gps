@@ -108,6 +108,7 @@ class MockLocationService : Service() {
         serviceScope.launch {
             settingsRepository.observeRouteSpeed().collect { speed ->
                 currentSpeedKmh = speed
+                routeSimulator.setSpeed(speed / KMH_TO_MPS_DIVISOR)
                 if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING) {
                     updateNotification(MockStatus.ROUTE_PLAYING)
                 }
@@ -452,6 +453,7 @@ class MockLocationService : Service() {
     companion object {
         private const val TAG = "MockLocationService"
         private const val MAX_INJECTION_FAILURES = 5  // 連續失敗 5 次（約 5 秒）後停止
+        private const val KMH_TO_MPS_DIVISOR = 3.6
         const val CHANNEL_ID = "MockLocationServiceChannelV5"
         const val NOTIFICATION_ID = 1
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"

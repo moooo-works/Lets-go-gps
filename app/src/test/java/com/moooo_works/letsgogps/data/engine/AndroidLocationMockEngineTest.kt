@@ -77,11 +77,11 @@ class AndroidLocationMockEngineTest {
         verify {
             locationManager.addTestProvider(
                 LocationManager.GPS_PROVIDER,
-                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
+                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, LEGACY_ACCURACY_FINE
             )
             locationManager.addTestProvider(
                 LocationManager.NETWORK_PROVIDER,
-                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, 5
+                false, false, false, false, true, true, true, ProviderProperties.POWER_USAGE_LOW, LEGACY_ACCURACY_FINE
             )
         }
     }
@@ -175,5 +175,9 @@ class AndroidLocationMockEngineTest {
 
         // Fail-open: rare ROMs that throw on the lookup should not block legit users.
         assertEquals(MockPermissionStatus.Allowed, status)
+    }
+
+    private companion object {
+        private const val LEGACY_ACCURACY_FINE = 1
     }
 }

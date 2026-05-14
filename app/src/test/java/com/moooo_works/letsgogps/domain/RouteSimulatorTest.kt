@@ -58,9 +58,9 @@ class RouteSimulatorTest {
     fun `bearing is calculated correctly for cardinal directions`() = runTest {
         val simulator = RouteSimulator(settingsRepository)
 
-        val routeNorth = listOf(LatLng(0.0, 0.0), LatLng(1.0, 0.0))
+        val routeNorth = listOf(LatLng(0.0, 0.0), LatLng(0.000001, 0.0))
         simulator.setRoute(routeNorth)
-        simulator.setSpeed(1.0)
+        simulator.setSpeed(1000.0)
 
         val emittedPoints = mutableListOf<SimulationPoint?>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -73,7 +73,7 @@ class RouteSimulatorTest {
         val point = emittedPoints.filterNotNull().first()
         assertEquals(0f, point.bearing, 0.1f)
 
-        val routeEast = listOf(LatLng(0.0, 0.0), LatLng(0.0, 1.0))
+        val routeEast = listOf(LatLng(0.0, 0.0), LatLng(0.0, 0.000001))
         simulator.setRoute(routeEast)
         simulator.play(this)
         advanceUntilIdle()
