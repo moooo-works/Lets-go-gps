@@ -32,6 +32,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val ALTITUDE = doublePreferencesKey("altitude")
         val RANDOM_ALTITUDE = booleanPreferencesKey("random_altitude")
         val COORDINATE_JITTER = booleanPreferencesKey("coordinate_jitter")
+        val ROUTE_CORNER_SLOWDOWN = booleanPreferencesKey("route_corner_slowdown")
         val ROUTE_SPEED = doublePreferencesKey("route_speed")
         val TRANSPORT_MODE = stringPreferencesKey("transport_mode")
         val MAP_MODE = stringPreferencesKey("map_mode")
@@ -90,6 +91,14 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setCoordinateJitter(enabled: Boolean) {
         dataStore.edit { it[COORDINATE_JITTER] = enabled }
+    }
+
+    override fun observeRouteCornerSlowdown(): Flow<Boolean> {
+        return dataStore.data.map { it[ROUTE_CORNER_SLOWDOWN] ?: false }
+    }
+
+    override suspend fun setRouteCornerSlowdown(enabled: Boolean) {
+        dataStore.edit { it[ROUTE_CORNER_SLOWDOWN] = enabled }
     }
 
     override fun observeRouteSpeed(): Flow<Double> {
