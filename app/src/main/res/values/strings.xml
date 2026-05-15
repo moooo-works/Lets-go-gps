@@ -210,6 +210,11 @@
     <string name="settings_sim_random_alt_desc">在基礎高度上加入 ±0.5m 的波動</string>
     <string name="settings_sim_jitter">座標隨機抖動</string>
     <string name="settings_sim_jitter_desc">在經緯度上加入微小偏移 (1-5m)</string>
+    <string name="settings_sim_corner_slowdown">路線轉彎減速</string>
+    <string name="settings_sim_corner_slowdown_desc">通過急彎時降低實際移動速度；關閉時速度更精準</string>
+    <string name="settings_sim_corner_slowdown_dialog_title">啟用路線轉彎減速？</string>
+    <string name="settings_sim_corner_slowdown_dialog_body">這個功能會在路線遇到較大的轉角時降低實際移動速度，讓移動看起來更像真實轉彎。它會讓平均速度低於你設定的 km/h，可能造成種花、孵蛋或距離累積所需時間變長。</string>
+    <string name="settings_sim_corner_slowdown_enable">仍要啟用</string>
     <string name="settings_export_data">匯出資料</string>
     <string name="settings_import_data">匯入資料</string>
     <string name="settings_copy_diag">複製診斷資訊</string>

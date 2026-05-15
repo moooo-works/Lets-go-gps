@@ -16,6 +16,9 @@ interface SettingsRepository {
     fun observeCoordinateJitter(): Flow<Boolean>
     suspend fun setCoordinateJitter(enabled: Boolean)
 
+    fun observeRouteCornerSlowdown(): Flow<Boolean>
+    suspend fun setRouteCornerSlowdown(enabled: Boolean)
+
     fun observeRouteSpeed(): Flow<Double>
     suspend fun setRouteSpeed(value: Double)
 

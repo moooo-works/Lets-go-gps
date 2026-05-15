@@ -209,6 +209,11 @@
     <string name="settings_sim_random_alt_desc">기본 고도에 ±0.5m 변동 추가</string>
     <string name="settings_sim_jitter">좌표 지터</string>
     <string name="settings_sim_jitter_desc">좌표에 미세한 오프셋 추가 (1~5m)</string>
+    <string name="settings_sim_corner_slowdown">경로 코너 감속</string>
+    <string name="settings_sim_corner_slowdown_desc">급커브에서 실제 이동 속도를 낮춥니다. 정확한 시간을 원하면 끄세요</string>
+    <string name="settings_sim_corner_slowdown_dialog_title">경로 코너 감속을 켤까요?</string>
+    <string name="settings_sim_corner_slowdown_dialog_body">이 기능은 큰 코너에서 실제 이동 속도를 낮춰 움직임을 더 자연스럽게 보이게 합니다. 평균 속도가 설정한 km/h보다 낮아질 수 있어 꽃 심기, 알 부화, 거리 누적 시간이 길어질 수 있습니다.</string>
+    <string name="settings_sim_corner_slowdown_enable">그래도 켜기</string>
     <string name="settings_export_data">데이터 내보내기</string>
     <string name="settings_import_data">데이터 가져오기</string>
     <string name="settings_copy_diag">진단 정보 복사</string>

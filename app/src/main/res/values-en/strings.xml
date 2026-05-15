@@ -209,6 +209,11 @@
     <string name="settings_sim_random_alt_desc">Add a ±0.5m variance to base altitude</string>
     <string name="settings_sim_jitter">Coordinate Jitter</string>
     <string name="settings_sim_jitter_desc">Add minor offset to coordinates (1-5m)</string>
+    <string name="settings_sim_corner_slowdown">Route Corner Slowdown</string>
+    <string name="settings_sim_corner_slowdown_desc">Reduce actual speed through sharp turns; leave off for more accurate timing</string>
+    <string name="settings_sim_corner_slowdown_dialog_title">Enable route corner slowdown?</string>
+    <string name="settings_sim_corner_slowdown_dialog_body">This lowers the actual movement speed around sharper route turns so motion looks more realistic. Your average speed can be lower than the selected km/h, which may make flower planting, egg hatching, or distance progress take longer.</string>
+    <string name="settings_sim_corner_slowdown_enable">Enable anyway</string>
     <string name="settings_export_data">Export Data</string>
     <string name="settings_import_data">Import Data</string>
     <string name="settings_copy_diag">Copy Diagnostics</string>

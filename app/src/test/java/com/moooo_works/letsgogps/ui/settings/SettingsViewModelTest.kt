@@ -83,6 +83,7 @@ class SettingsViewModelTest {
         every { settingsRepository.observeAltitude() } returns flowOf(15.0)
         every { settingsRepository.observeRandomAltitude() } returns flowOf(false)
         every { settingsRepository.observeCoordinateJitter() } returns flowOf(false)
+        every { settingsRepository.observeRouteCornerSlowdown() } returns flowOf(false)
         every { settingsRepository.observeRouteSpeed() } returns flowOf(5.0)
         every { settingsRepository.observeTransportMode() } returns flowOf("WALKING")
         every { settingsRepository.observeMapMode() } returns flowOf("SINGLE")
@@ -502,5 +503,12 @@ class SettingsViewModelTest {
         viewModel.setClipboardHintEnabled(false)
         advanceUntilIdle()
         coVerify { settingsRepository.setClipboardHintEnabled(false) }
+    }
+
+    @Test
+    fun `setRouteCornerSlowdown calls repository`() = runTest {
+        viewModel.setRouteCornerSlowdown(true)
+        advanceUntilIdle()
+        coVerify { settingsRepository.setRouteCornerSlowdown(true) }
     }
 }

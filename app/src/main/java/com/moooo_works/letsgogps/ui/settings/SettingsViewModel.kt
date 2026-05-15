@@ -113,6 +113,8 @@ data class ExportSettings(
     val randomAltitude: Boolean? = null,
     @SerializedName("coordinateJitter")
     val coordinateJitter: Boolean? = null,
+    @SerializedName("routeCornerSlowdown")
+    val routeCornerSlowdown: Boolean? = null,
     @SerializedName("routeSpeed")
     val routeSpeed: Double? = null,
     @SerializedName("transportMode")
@@ -205,6 +207,9 @@ class SettingsViewModel @Inject constructor(
     val coordinateJitter = settingsRepository.observeCoordinateJitter()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val routeCornerSlowdown = settingsRepository.observeRouteCornerSlowdown()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     val clipboardHintEnabled = settingsRepository.observeClipboardHintEnabled()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -230,6 +235,12 @@ class SettingsViewModel @Inject constructor(
     fun setCoordinateJitter(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setCoordinateJitter(enabled)
+        }
+    }
+
+    fun setRouteCornerSlowdown(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setRouteCornerSlowdown(enabled)
         }
     }
 
@@ -300,6 +311,7 @@ class SettingsViewModel @Inject constructor(
                     altitude = settingsRepository.observeAltitude().first(),
                     randomAltitude = settingsRepository.observeRandomAltitude().first(),
                     coordinateJitter = settingsRepository.observeCoordinateJitter().first(),
+                    routeCornerSlowdown = settingsRepository.observeRouteCornerSlowdown().first(),
                     routeSpeed = settingsRepository.observeRouteSpeed().first(),
                     transportMode = settingsRepository.observeTransportMode().first(),
                     mapMode = settingsRepository.observeMapMode().first(),
@@ -550,6 +562,7 @@ class SettingsViewModel @Inject constructor(
         s.altitude?.let { settingsRepository.setAltitude(it) }
         s.randomAltitude?.let { settingsRepository.setRandomAltitude(it) }
         s.coordinateJitter?.let { settingsRepository.setCoordinateJitter(it) }
+        s.routeCornerSlowdown?.let { settingsRepository.setRouteCornerSlowdown(it) }
         s.routeSpeed?.let { settingsRepository.setRouteSpeed(it) }
         s.transportMode?.let { settingsRepository.setTransportMode(it) }
         s.mapMode?.let { settingsRepository.setMapMode(it) }

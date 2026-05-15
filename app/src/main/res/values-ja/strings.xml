@@ -209,6 +209,11 @@
     <string name="settings_sim_random_alt_desc">基本高度に ±0.5m の変動を追加</string>
     <string name="settings_sim_jitter">座標ジッター</string>
     <string name="settings_sim_jitter_desc">座標に微小なオフセットを追加（1〜5m）</string>
+    <string name="settings_sim_corner_slowdown">ルートのカーブ減速</string>
+    <string name="settings_sim_corner_slowdown_desc">急カーブで実際の移動速度を下げます。正確な時間を優先する場合はオフにしてください</string>
+    <string name="settings_sim_corner_slowdown_dialog_title">ルートのカーブ減速を有効にしますか？</string>
+    <string name="settings_sim_corner_slowdown_dialog_body">この機能は大きなカーブで実際の移動速度を下げ、より自然な動きに見せます。平均速度は設定した km/h より低くなることがあり、花植え、タマゴ孵化、距離進行にかかる時間が長くなる場合があります。</string>
+    <string name="settings_sim_corner_slowdown_enable">有効にする</string>
     <string name="settings_export_data">データをエクスポート</string>
     <string name="settings_import_data">データをインポート</string>
     <string name="settings_copy_diag">診断情報をコピー</string>

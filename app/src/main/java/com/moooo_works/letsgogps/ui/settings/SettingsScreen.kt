@@ -64,6 +64,7 @@ fun SettingsScreen(
     val altitude by viewModel.altitude.collectAsState()
     val randomAltitude by viewModel.randomAltitude.collectAsState()
     val coordinateJitter by viewModel.coordinateJitter.collectAsState()
+    val routeCornerSlowdown by viewModel.routeCornerSlowdown.collectAsState()
     val clipboardHintEnabled by viewModel.clipboardHintEnabled.collectAsState()
 
     var altitudeInput by remember(altitude) { mutableStateOf(altitude.toString()) }
@@ -89,6 +90,7 @@ fun SettingsScreen(
     var showImportFormatDialog by remember { mutableStateOf(false) }
     var exportSavedLocations by remember { mutableStateOf(true) }
     var exportRoutes by remember { mutableStateOf(true) }
+    var showCornerSlowdownDialog by remember { mutableStateOf(false) }
 
     var importPreview by remember { mutableStateOf<ImportPreview?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
@@ -211,6 +213,29 @@ fun SettingsScreen(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { showImportFormatDialog = false }) {
+                    Text(stringResource(R.string.map_action_cancel))
+                }
+            }
+        )
+    }
+
+    if (showCornerSlowdownDialog) {
+        AlertDialog(
+            onDismissRequest = { showCornerSlowdownDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
+            title = { Text(stringResource(R.string.settings_sim_corner_slowdown_dialog_title)) },
+            text = { Text(stringResource(R.string.settings_sim_corner_slowdown_dialog_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setRouteCornerSlowdown(true)
+                    showCornerSlowdownDialog = false
+                }) {
+                    Text(stringResource(R.string.settings_sim_corner_slowdown_enable))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCornerSlowdownDialog = false }) {
                     Text(stringResource(R.string.map_action_cancel))
                 }
             }
@@ -531,6 +556,28 @@ fun SettingsScreen(
                         Switch(
                             checked = coordinateJitter,
                             onCheckedChange = { viewModel.setCoordinateJitter(it) }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.settings_sim_corner_slowdown), style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                stringResource(R.string.settings_sim_corner_slowdown_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = routeCornerSlowdown,
+                            onCheckedChange = { enabled ->
+                                if (enabled) showCornerSlowdownDialog = true
+                                else viewModel.setRouteCornerSlowdown(false)
+                            }
                         )
                     }
 
