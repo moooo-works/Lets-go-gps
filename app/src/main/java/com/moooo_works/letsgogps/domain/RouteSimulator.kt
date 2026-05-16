@@ -173,11 +173,16 @@ class RouteSimulator @Inject constructor(
         crossinline emit: suspend (LatLng, Float) -> Unit,
     ) {
         val deadline = durationMs?.let { System.currentTimeMillis() + it }
-        // Tunables: a full revolution every ~15s, radius reaches max in ~4 min.
+        // Tunables: a full revolution every ~15s; one expand-then-contract
+        // cycle takes ~2 min (4 min for full coverage repeat).
         val angularStep = 2.0 * Math.PI / 60.0
         val radialStep = maxRadiusMeters / 240.0
         var angleRadians = 0.0
         var radius = 0.0
+        // Triangle-wave radius: expand 0→max, then contract max→0, then repeat.
+        // Avoids the 200m teleport an instant reset would create — location-based
+        // games (Pikmin Bloom etc.) flag that jump as cheating and freeze the avatar.
+        var expanding = true
         var lastPos: LatLng? = null
         while (true) {
             if (deadline != null && System.currentTimeMillis() >= deadline) break
@@ -190,12 +195,18 @@ class RouteSimulator @Inject constructor(
             // naturally without an isActive check on every iteration.
             delay(TICK_DELAY_MS)
             angleRadians += angularStep
-            radius += radialStep
-            if (radius > maxRadiusMeters) {
-                // Hit the outer edge — pop back to centre and start a new
-                // sweep so coverage repeats rather than running off forever.
-                radius = 0.0
-                angleRadians = 0.0
+            if (expanding) {
+                radius += radialStep
+                if (radius >= maxRadiusMeters) {
+                    radius = maxRadiusMeters
+                    expanding = false
+                }
+            } else {
+                radius -= radialStep
+                if (radius <= 0.0) {
+                    radius = 0.0
+                    expanding = true
+                }
             }
         }
     }

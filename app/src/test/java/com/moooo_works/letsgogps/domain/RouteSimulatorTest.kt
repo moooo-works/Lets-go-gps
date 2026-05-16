@@ -16,6 +16,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RouteSimulatorTest {
@@ -343,5 +347,82 @@ class RouteSimulatorTest {
         val b = RouteSimulator.calculateSpiralPosition(25.0, 121.0, 50.0, 2.0 * Math.PI)
         assertEquals(a.latitude, b.latitude, 1e-12)
         assertEquals(a.longitude, b.longitude, 1e-12)
+    }
+
+    // ─── Spiral loop continuity (regression: no 200m wraparound jump) ─────────
+
+    @Test
+    fun `playExploration never jumps more than one tick of travel between emits`() = runTest {
+        val simulator = RouteSimulator(settingsRepository)
+
+        val emittedPositions = mutableListOf<LatLng>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            simulator.currentLocation.collect { it?.let { p -> emittedPositions.add(p.latLng) } }
+        }
+
+        val center = LatLng(25.0, 121.0)
+        simulator.playExploration(this, center, maxRadiusMeters = 200.0)
+
+        // Spiral reaches max radius around tick 240 (~60s). Pre-fix, the next
+        // tick resets radius to 0 — Pikmin Bloom flags the resulting 200m
+        // position jump as teleportation and freezes the character.
+        // Run for ~300 ticks to cover the wrap.
+        testScheduler.advanceTimeBy(75_000)
+
+        simulator.stop()
+        job.cancel()
+
+        val jumps = emittedPositions.zipWithNext { a, b -> haversineMeters(a, b) }
+        val maxJump = jumps.maxOrNull() ?: 0.0
+
+        // Normal max tick-to-tick chord at r=200m, angularStep=2π/60 is ~21m.
+        // The wraparound bug produces a single ~200m jump.
+        assertTrue(
+            "Max tick-to-tick jump was ${"%.1f".format(maxJump)}m (out of ${jumps.size} ticks); " +
+                "spiral radius reset causes a 200m teleport. Expected < 30m.",
+            maxJump < 30.0
+        )
+    }
+
+    @Test
+    fun `playExploration radius contracts smoothly without resetting to centre`() = runTest {
+        val simulator = RouteSimulator(settingsRepository)
+
+        val center = LatLng(25.0, 121.0)
+        val distancesFromCenter = mutableListOf<Double>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            simulator.currentLocation.collect {
+                it?.let { p -> distancesFromCenter.add(haversineMeters(center, p.latLng)) }
+            }
+        }
+
+        simulator.playExploration(this, center, maxRadiusMeters = 200.0)
+        testScheduler.advanceTimeBy(75_000)
+
+        simulator.stop()
+        job.cancel()
+
+        // Pre-fix: radius resets 200m → 0 in one tick. Post-fix: radius shrinks
+        // by ~radialStep (~0.83m) per tick during the contract phase.
+        val biggestDropPerTick = distancesFromCenter
+            .zipWithNext { a, b -> a - b }
+            .maxOrNull() ?: 0.0
+
+        assertTrue(
+            "Largest single-tick drop in distance-from-centre was " +
+                "${"%.1f".format(biggestDropPerTick)}m. The wraparound bug drops ~200m " +
+                "in one tick; smooth contract should drop < 5m.",
+            biggestDropPerTick < 5.0
+        )
+    }
+
+    private fun haversineMeters(a: LatLng, b: LatLng): Double {
+        val earthRadius = 6_371_000.0
+        val dLat = Math.toRadians(b.latitude - a.latitude)
+        val dLng = Math.toRadians(b.longitude - a.longitude)
+        val h = sin(dLat / 2) * sin(dLat / 2) +
+            cos(Math.toRadians(a.latitude)) * cos(Math.toRadians(b.latitude)) *
+            sin(dLng / 2) * sin(dLng / 2)
+        return earthRadius * 2 * atan2(sqrt(h), sqrt(1 - h))
     }
 }
