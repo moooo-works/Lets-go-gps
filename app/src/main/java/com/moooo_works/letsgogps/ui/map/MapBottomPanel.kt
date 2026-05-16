@@ -111,6 +111,9 @@ fun MapBottomPanel(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val isHoldingCompletedRoute = uiState.mapMode == MapMode.ROUTE &&
+                    uiState.isMocking &&
+                    uiState.simulationState == SimulationState.IDLE
                 if (uiState.mapMode == MapMode.ROUTE) {
                     OutlinedButton(
                         onClick = onAddWaypoint,
@@ -122,7 +125,8 @@ fun MapBottomPanel(
                 Button(
                     onClick = {
                         if (uiState.mapMode == MapMode.ROUTE) {
-                            if (uiState.simulationState == SimulationState.PLAYING) onPauseRoute()
+                            if (isHoldingCompletedRoute) onStopMocking()
+                            else if (uiState.simulationState == SimulationState.PLAYING) onPauseRoute()
                             else if (uiState.waypoints.isNotEmpty()) onPlayRoute()
                         } else {
                             if (uiState.isMocking) {
@@ -146,6 +150,8 @@ fun MapBottomPanel(
                         when {
                             uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING ->
                                 "⏸ ${stringResource(R.string.map_route_pause)}"
+                            isHoldingCompletedRoute ->
+                                "⏹ ${stringResource(R.string.map_mock_stop)}"
                             uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() ->
                                 "▶ ${stringResource(R.string.map_route_start)}"
                             uiState.mapMode == MapMode.SINGLE && uiState.isMocking ->

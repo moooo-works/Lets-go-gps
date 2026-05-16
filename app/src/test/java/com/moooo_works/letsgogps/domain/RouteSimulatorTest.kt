@@ -207,7 +207,8 @@ class RouteSimulatorTest {
     @Test
     fun `NONE mode simulator is IDLE and progress null after route completes`() = runTest {
         val simulator = RouteSimulator(settingsRepository)
-        simulator.setRoute(listOf(LatLng(0.0, 0.0), LatLng(0.0001, 0.0)))
+        val end = LatLng(0.0001, 0.0)
+        simulator.setRoute(listOf(LatLng(0.0, 0.0), end))
         simulator.setLoopMode(LoopMode.NONE)
         simulator.setSpeed(100.0)
         simulator.play(this)
@@ -215,6 +216,7 @@ class RouteSimulatorTest {
 
         assertEquals(SimulationState.IDLE, simulator.simulationState.value)
         assertNull(simulator.routeProgress.value)
+        assertEquals(end, simulator.currentLocation.value?.latLng)
     }
 
     // ─── New: LoopMode.LOOP tests ─────────────────────────────────────────────

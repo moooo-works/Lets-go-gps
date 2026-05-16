@@ -113,7 +113,9 @@ class MapViewModel @Inject constructor(
                     it.copy(
                         isMocking = status != MockStatus.IDLE,
                         mapMode = when (status) {
-                            MockStatus.ROUTE_PLAYING, MockStatus.ROUTE_PAUSED -> MapMode.ROUTE
+                            MockStatus.ROUTE_PLAYING,
+                            MockStatus.ROUTE_PAUSED,
+                            MockStatus.ROUTE_COMPLETED -> MapMode.ROUTE
                             else -> it.mapMode
                         },
                         simulationState = when (status) {

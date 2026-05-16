@@ -84,7 +84,7 @@ class MockLocationService : Service() {
                     SimulationState.IDLE -> {
                         if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING || 
                             mockStateRepository.mockStatus.value == MockStatus.ROUTE_PAUSED) {
-                            handleStop()
+                            handleRouteCompleted()
                         }
                     }
                 }
@@ -341,6 +341,18 @@ class MockLocationService : Service() {
         }
     }
 
+    private fun handleRouteCompleted() {
+        currentRouteProgress = null
+        val finalLocation = mockStateRepository.currentMockLocation.value
+        if (finalLocation == null) {
+            handleStop()
+            return
+        }
+        mockStateRepository.setMockStatus(MockStatus.ROUTE_COMPLETED)
+        updateNotification(MockStatus.ROUTE_COMPLETED)
+        performInjection(finalLocation, speed = 0f, applyJitter = false)
+    }
+
     private fun handleStop() {
         consecutiveInjectionFailures = 0
         stopLocationPushJob()
@@ -391,7 +403,7 @@ class MockLocationService : Service() {
                 val p = currentRouteProgress
                 if (p != null) "$base (${String.format(java.util.Locale.getDefault(), "%.1f / %.1f km", p.coveredKm, p.totalKm)})" else base
             }
-            MockStatus.MOCKING       -> getString(R.string.status_mocking)
+            MockStatus.MOCKING, MockStatus.ROUTE_COMPLETED -> getString(R.string.status_mocking)
             MockStatus.IDLE          -> getString(R.string.status_idle)
         }
 
@@ -419,7 +431,7 @@ class MockLocationService : Service() {
                 builder.addAction(android.R.drawable.ic_media_play, getString(R.string.action_resume), resumeIntent)
                 builder.addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
             }
-            MockStatus.MOCKING, MockStatus.IDLE -> {
+            MockStatus.MOCKING, MockStatus.ROUTE_COMPLETED, MockStatus.IDLE -> {
                 builder.addAction(android.R.drawable.ic_delete, getString(R.string.action_stop), stopIntent)
             }
         }

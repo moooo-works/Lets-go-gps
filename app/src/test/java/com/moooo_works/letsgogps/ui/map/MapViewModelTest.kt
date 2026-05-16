@@ -156,4 +156,16 @@ class MapViewModelTest {
         assertEquals(40.0, viewModel.uiState.value.speedKmh, 0.0)
         verify { routeSimulator.setSpeed(40.0 / 3.6) }
     }
+
+    @Test
+    fun `route completed status keeps route mode idle and mocking`() = runTest {
+        val viewModel = createViewModel()
+
+        mockStatusFlow.value = MockStatus.ROUTE_COMPLETED
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isMocking)
+        assertEquals(MapMode.ROUTE, viewModel.uiState.value.mapMode)
+        assertEquals(SimulationState.IDLE, viewModel.uiState.value.simulationState)
+    }
 }

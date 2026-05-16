@@ -9,7 +9,8 @@ enum class MockStatus {
     IDLE,
     MOCKING,
     ROUTE_PLAYING,
-    ROUTE_PAUSED
+    ROUTE_PAUSED,
+    ROUTE_COMPLETED
 }
 
 interface MockStateRepository {
