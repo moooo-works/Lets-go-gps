@@ -62,6 +62,7 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            buildConfigField("Boolean", "DEV_FORCE_PRO", "true")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
             buildConfigField("String", "INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
         }
@@ -70,6 +71,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            buildConfigField("Boolean", "DEV_FORCE_PRO", "false")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-8495982996587452/2988295108\"")
             buildConfigField("String", "INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-8495982996587452/7493536385\"")
         }
@@ -96,7 +98,6 @@ android {
     }
     testOptions {
         unitTests {
-            isIncludeAndroidResources = true
             all {
                 it.jvmArgs("-XX:+EnableDynamicAgentLoading")
             }

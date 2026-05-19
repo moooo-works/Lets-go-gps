@@ -160,4 +160,3 @@ Engine 錯誤（setup／setLocation／teardown）須以 engine error 呈現，�
 
 ### 待完成
 - [ ] 上架前：替換測試廣告 ID 為正式 ID，建立 Play Console 訂閱方案
-- [ ] 上架前：確認 `BillingManager.kt` 的 `DEV_FORCE_PRO = false`
