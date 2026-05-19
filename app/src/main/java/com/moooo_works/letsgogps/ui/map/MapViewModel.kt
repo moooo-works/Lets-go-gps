@@ -77,6 +77,8 @@ class MapViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
+    private val locationPinController = LocationPinController(_uiState, viewModelScope, repository)
+
     private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val triggerReview: SharedFlow<Unit> = _triggerReview.asSharedFlow()
 
@@ -303,7 +305,7 @@ class MapViewModel @Inject constructor(
         ContextCompat.startForegroundService(context, intent)
 
         maybeCheckTimezoneMismatch(target)
-        saveLocationIfNeeded(target)
+        locationPinController.saveIfNeeded(target)
         checkAndTriggerReview()
     }
 
@@ -500,47 +502,14 @@ class MapViewModel @Inject constructor(
         _uiState.update { it.copy(showProUpgrade = false) }
     }
 
-    fun selectLocation(location: SavedLocation) {
-        _uiState.update { it.copy(selectedLocation = location) }
-    }
-
-    fun dismissSelectedLocation() {
-        _uiState.update { it.copy(selectedLocation = null, showEditLocationDialog = false) }
-    }
-
-    fun showEditLocationDialog() {
-        _uiState.update { it.copy(showEditLocationDialog = true) }
-    }
-
-    fun dismissEditLocationDialog() {
-        _uiState.update { it.copy(showEditLocationDialog = false) }
-    }
-
-    fun deleteSelectedLocation() {
-        val location = _uiState.value.selectedLocation ?: return
-        viewModelScope.launch {
-            repository.deleteLocation(location)
-            dismissSelectedLocation()
-        }
-    }
-
-    fun toggleFavorite() {
-        val location = _uiState.value.selectedLocation ?: return
-        val updated = location.copy(isFavorite = !location.isFavorite)
-        viewModelScope.launch {
-            repository.updateLocation(updated)
-            _uiState.update { it.copy(selectedLocation = updated) }
-        }
-    }
-
-    fun updateLocationDetails(name: String, description: String) {
-        val location = _uiState.value.selectedLocation ?: return
-        val updated = location.copy(name = name.trim(), description = description.trim())
-        viewModelScope.launch {
-            repository.updateLocation(updated)
-            _uiState.update { it.copy(selectedLocation = updated, showEditLocationDialog = false) }
-        }
-    }
+    fun selectLocation(location: SavedLocation) = locationPinController.select(location)
+    fun dismissSelectedLocation() = locationPinController.dismiss()
+    fun showEditLocationDialog() = locationPinController.showEditDialog()
+    fun dismissEditLocationDialog() = locationPinController.dismissEditDialog()
+    fun deleteSelectedLocation() = locationPinController.delete()
+    fun toggleFavorite() = locationPinController.toggleFavorite()
+    fun updateLocationDetails(name: String, description: String) =
+        locationPinController.updateDetails(name, description)
 
     fun toggleMapType() {
         val newType = if (_uiState.value.mapType == MapType.NORMAL) MapType.HYBRID else MapType.NORMAL
@@ -553,25 +522,6 @@ class MapViewModel @Inject constructor(
     fun launchBillingFlow(activity: Activity) {
         proRepository.launchBillingFlow(activity)
         dismissProUpgrade()
-    }
-
-    private fun saveLocationIfNeeded(latLng: LatLng) {
-        viewModelScope.launch {
-            val epsilon = 0.0001
-            val exists = _uiState.value.savedLocations.any {
-                kotlin.math.abs(it.latitude - latLng.latitude) < epsilon &&
-                    kotlin.math.abs(it.longitude - latLng.longitude) < epsilon
-            }
-
-            if (!exists) {
-                val newLocation = SavedLocation(
-                    name = "Saved ${System.currentTimeMillis()}",
-                    latitude = latLng.latitude,
-                    longitude = latLng.longitude
-                )
-                repository.saveLocation(newLocation)
-            }
-        }
     }
 
     fun addWaypoint() {
