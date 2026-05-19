@@ -136,12 +136,26 @@ debug {
     buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
 }
 release {
+    buildConfigField("String", "BANNER_AD_UNIT_ID",   "\"ca-app-pub-7328056144057376/1824598031\"")
     // 移除：buildConfigField("String", "INTERSTITIAL_AD_UNIT_ID", ...)
-    buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-TODO_REPLACE_ME/REWARDED\"")
+    buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-7328056144057376/6473078035\"")
 }
 ```
 
-Release ID 先用 placeholder（`ca-app-pub-TODO_REPLACE_ME/REWARDED`），等使用者在 AdMob 後台建立「獎勵廣告」單元後替換。
+Debug 一律用 Google 公開測試 ID（Banner `6300978111`、Rewarded `5224354917`）。Release 使用新 AdMob 帳號（pub `7328056144057376`）下的真實單元。
+
+### AndroidManifest App ID 遷移
+
+舊帳號（`ca-app-pub-8495982996587452`）已失效，AdMob 應用程式 ID 必須一併替換：
+
+```xml
+<!-- app/src/main/AndroidManifest.xml -->
+<meta-data
+    android:name="com.google.android.gms.ads.APPLICATION_ID"
+    android:value="ca-app-pub-7328056144057376~2219581212" />
+```
+
+注意：App ID 用 `~`（tilde）、Ad Unit ID 用 `/`（slash），格式不同。
 
 ## 7. Settings 頁 UI
 
@@ -327,7 +341,8 @@ if (!uiState.isAdFreeActive) BannerAdView()
 | `ui/map/MapBottomPanel.kt` | 刪除 `interstitialAdManager` 參數與 line 135 呼叫 |
 | `ui/map/MapViewModel.kt` | `MapUiState.isAdFreeActive` 對應 |
 | `ui/map/MapState.kt` | 新增 `isAdFreeActive` 欄位 |
-| `app/build.gradle.kts` | 移除 `INTERSTITIAL_AD_UNIT_ID`，新增 `REWARDED_AD_UNIT_ID` |
+| `app/build.gradle.kts` | 移除 `INTERSTITIAL_AD_UNIT_ID`，新增 `REWARDED_AD_UNIT_ID`，release Banner ID 換成新帳號 |
+| `app/src/main/AndroidManifest.xml` | App ID `ca-app-pub-8495982996587452~8507235154` → `ca-app-pub-7328056144057376~2219581212` |
 | `app/src/test/.../SettingsViewModelTest.kt` | 補三狀態與 reward callback 測試 |
 | `app/src/test/.../MapViewModelTest.kt` | 補 `isAdFreeActive` 預設值 |
 | `CLAUDE.md` | 新增 ad-unlock 邏輯說明、變現策略段落 |
@@ -338,7 +353,7 @@ if (!uiState.isAdFreeActive) BannerAdView()
 |------|------|
 | `app/src/main/java/com/moooo_works/letsgogps/ui/ads/InterstitialAdManager.kt` | 整套 interstitial 機制移除 |
 
-合計：4 新建 + 13 修改 + 1 刪除 = 18 檔。
+合計：4 新建 + 14 修改 + 1 刪除 = 19 檔。
 
 ## 13. 不在範圍
 
