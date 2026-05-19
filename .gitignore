@@ -38,3 +38,12 @@ google-services.json
 
 # Claude Code local settings
 .claude/
+
+# Superpowers brainstorm cache
+.superpowers/
+
+# Local-only analysis / reverse-engineering scratch
+analysis/
+
+# macOS metadata
+**/.DS_Store
