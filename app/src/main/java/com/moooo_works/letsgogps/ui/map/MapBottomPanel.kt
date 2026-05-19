@@ -55,7 +55,6 @@ import com.moooo_works.letsgogps.R
 import kotlin.math.roundToInt
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.SimulationState
-import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
 import com.moooo_works.letsgogps.ui.theme.Accent500
 
 /**
@@ -67,8 +66,6 @@ import com.moooo_works.letsgogps.ui.theme.Accent500
 @Composable
 fun MapBottomPanel(
     uiState: MapUiState,
-    activity: android.app.Activity?,
-    interstitialAdManager: InterstitialAdManager,
     onSetMode: (MapMode) -> Unit,
     onShowProUpgrade: () -> Unit,
     onAddWaypoint: () -> Unit,
@@ -131,8 +128,6 @@ fun MapBottomPanel(
                         } else {
                             if (uiState.isMocking) {
                                 onStopMocking()
-                            } else if (!uiState.isProActive && activity != null) {
-                                interstitialAdManager.showAd(activity) { onStartMocking() }
                             } else {
                                 onStartMocking()
                             }

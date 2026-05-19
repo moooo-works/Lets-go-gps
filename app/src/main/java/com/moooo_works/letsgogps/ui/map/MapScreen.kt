@@ -56,7 +56,6 @@ import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
 import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
-import com.moooo_works.letsgogps.ui.ads.InterstitialAdManager
 import com.moooo_works.letsgogps.ui.components.BannerAdView
 import com.moooo_works.letsgogps.ui.healthcheck.HealthCheckSheet
 import com.moooo_works.letsgogps.ui.healthcheck.handleHealthCheckFix
@@ -84,8 +83,6 @@ fun MapScreen(
     val activity = context as? android.app.Activity
     val density = LocalDensity.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val interstitialAdManager = remember { InterstitialAdManager(context) }
-
     // ── UI-only dialog visibility state ──────────────────────────────────────
     var showSaveRouteDialog by remember { mutableStateOf(false) }
     var showSearchDialog by remember { mutableStateOf(false) }
@@ -411,8 +408,6 @@ fun MapScreen(
 
             MapBottomPanel(
                 uiState = uiState,
-                activity = activity,
-                interstitialAdManager = interstitialAdManager,
                 onSetMode = { viewModel.setMapMode(it) },
                 onShowProUpgrade = { viewModel.showProUpgradeDialog() },
                 onAddWaypoint = { viewModel.addWaypoint() },
