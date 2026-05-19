@@ -40,6 +40,7 @@ data class MapUiState(
     val isJoystickEnabled: Boolean = false,
     val isProActive: Boolean = false,
     val isAdFreeActive: Boolean = false,
+    val adUnlockRemainingMillis: Long = 0L,
     val showProUpgrade: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,

@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import com.moooo_works.letsgogps.data.engine.MockEngineError
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.repository.ProRepository
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import android.app.Activity
 
 // State definitions are in MapState.kt
@@ -55,6 +56,7 @@ class MapViewModel @Inject constructor(
     private val routeSimulator: RouteSimulator,
     private val joystickOverlayManager: JoystickOverlayManager,
     private val proRepository: ProRepository,
+    private val rewardedAdManager: RewardedAdManager,
     private val systemHealthCheck: SystemHealthCheck,
     private val timezoneRepository: TimezoneRepository,
     @ApplicationContext private val context: Context
@@ -198,6 +200,16 @@ class MapViewModel @Inject constructor(
                 _uiState.update { it.copy(isAdFreeActive = isAdFree) }
             }
         }
+
+        viewModelScope.launch {
+            proRepository.adUnlockExpiryMillis.collect { expiry ->
+                _uiState.update {
+                    it.copy(adUnlockRemainingMillis = (expiry - System.currentTimeMillis()).coerceAtLeast(0L))
+                }
+            }
+        }
+
+        rewardedAdManager.preload()
 
         viewModelScope.launch {
             settingsRepository.observeMapType().collect { typeName ->
@@ -438,6 +450,21 @@ class MapViewModel @Inject constructor(
     fun launchBillingFlow(activity: Activity) {
         proRepository.launchBillingFlow(activity)
         dismissProUpgrade()
+    }
+
+    fun watchRewardedAd(activity: Activity) {
+        rewardedAdManager.showAd(
+            activity = activity,
+            onReward = {
+                viewModelScope.launch {
+                    proRepository.grantAdUnlockHours(6)
+                    _uiState.update { it.copy(showProUpgrade = false) }
+                }
+            },
+            onUnavailable = {
+                _uiState.update { it.copy(mockError = MockError.RewardedAdUnavailable) }
+            }
+        )
     }
 
     fun addWaypoint() = routeController.addWaypoint()

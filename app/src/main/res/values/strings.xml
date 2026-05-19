@@ -248,7 +248,9 @@
     <string name="pro_dialog_feature_ads">移除全部廣告</string>
     <string name="pro_dialog_cancel_note">試用期結束前不收費，可隨時於 Google Play 取消訂閱。</string>
     <string name="pro_dialog_action_upgrade">免費試用 7 天</string>
-    
+    <string name="pro_dialog_action_watch_ad">看一支廣告解鎖 6 小時</string>
+    <string name="error_rewarded_unavailable">暫時沒有可用廣告，請稍後再試</string>
+
     <string name="export_import_title">資料匯出 / 匯入</string>
     <string name="export_data">匯出所有資料</string>
     <string name="import_data">匯入資料</string>

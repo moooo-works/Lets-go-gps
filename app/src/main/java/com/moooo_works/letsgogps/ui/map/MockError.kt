@@ -12,4 +12,5 @@ sealed class MockError {
     data class InvalidInput(val message: String) : MockError()
     data class PermissionCheckFailed(val message: String) : MockError()
     data class Unknown(val message: String) : MockError()
+    object RewardedAdUnavailable : MockError()
 }

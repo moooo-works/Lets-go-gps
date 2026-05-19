@@ -15,7 +15,9 @@ import com.moooo_works.letsgogps.R
 @Composable
 fun ProUpgradeDialog(
     onDismiss: () -> Unit,
-    onUpgrade: () -> Unit
+    onWatchAd: () -> Unit,
+    onSubscribe: () -> Unit,
+    watchAdEnabled: Boolean = true
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -61,8 +63,20 @@ fun ProUpgradeDialog(
             }
         },
         confirmButton = {
-            Button(onClick = onUpgrade) {
-                Text(stringResource(R.string.pro_dialog_action_upgrade))
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Button(
+                    onClick = onWatchAd,
+                    enabled = watchAdEnabled,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.pro_dialog_action_watch_ad))
+                }
+                Button(
+                    onClick = onSubscribe,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.pro_dialog_action_upgrade))
+                }
             }
         },
         dismissButton = {

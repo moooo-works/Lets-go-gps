@@ -13,6 +13,7 @@ import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
 import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
@@ -61,6 +62,7 @@ class MapViewModelTest {
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
     private val joystickOverlayManager = mockk<JoystickOverlayManager>(relaxed = true)
     private val proRepository = mockk<ProRepository>(relaxed = true)
+    private val rewardedAdManager = mockk<RewardedAdManager>(relaxed = true)
     private val systemHealthCheck = mockk<SystemHealthCheck>(relaxed = true)
     private val timezoneRepository = mockk<TimezoneRepository>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
@@ -118,7 +120,7 @@ class MapViewModelTest {
 
     private fun createViewModel() = MapViewModel(
         mockEngine, repository, mockStateRepository, settingsRepository,
-        routeSimulator, joystickOverlayManager, proRepository, systemHealthCheck,
+        routeSimulator, joystickOverlayManager, proRepository, rewardedAdManager, systemHealthCheck,
         timezoneRepository, context
     )
 

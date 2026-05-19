@@ -437,9 +437,11 @@ fun MapScreen(
     if (uiState.showProUpgrade) {
         ProUpgradeDialog(
             onDismiss = { viewModel.dismissProUpgrade() },
-            onUpgrade = {
+            onWatchAd = { activity?.let { viewModel.watchRewardedAd(it) } },
+            onSubscribe = {
                 activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade()
-            }
+            },
+            watchAdEnabled = uiState.adUnlockRemainingMillis < 18 * 3600_000L,
         )
     }
 

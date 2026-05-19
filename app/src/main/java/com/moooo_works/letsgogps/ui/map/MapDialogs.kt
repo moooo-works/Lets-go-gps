@@ -157,6 +157,7 @@ fun MockErrorDialog(
                         is MockError.InvalidInput -> stringResource(R.string.error_invalid_input, error.message)
                         is MockError.PermissionCheckFailed -> stringResource(R.string.error_permission_check_failed, error.message)
                         is MockError.Unknown -> stringResource(R.string.error_unknown, error.message)
+                        is MockError.RewardedAdUnavailable -> stringResource(R.string.error_rewarded_unavailable)
                     }
                 )
             }

@@ -144,7 +144,9 @@ fun SettingsScreen(
     if (showProUpgrade) {
         ProUpgradeDialog(
             onDismiss = { viewModel.dismissProUpgrade() },
-            onUpgrade = { activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade() }
+            onWatchAd = { viewModel.dismissProUpgrade() },
+            onSubscribe = { activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade() },
+            watchAdEnabled = false,
         )
     }
 
