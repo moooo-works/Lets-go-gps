@@ -38,24 +38,17 @@ class RewardedAdManager(
                 isLoading = false
             },
             onFailed = {
-                // Keep isLoading = true to prevent immediate retry spam;
-                // a new preload cycle begins when showAd() resets this flag.
                 loadedAd = null
+                isLoading = false
             }
         )
-    }
-
-    private fun resetAndPreload() {
-        isLoading = false
-        loadedAd = null
-        preload()
     }
 
     fun showAd(activity: Activity, onReward: () -> Unit, onUnavailable: () -> Unit) {
         val ad = loadedAd
         if (ad == null) {
             onUnavailable()
-            resetAndPreload()
+            preload()
             return
         }
         loadedAd = null

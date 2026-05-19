@@ -16,7 +16,7 @@ class RewardedAdManagerTest {
         var pendingReward: (() -> Unit)? = null
         var pendingDismiss: (() -> Unit)? = null
 
-        enum class Outcome { LoadFails, LoadOk }
+        enum class Outcome { LoadFails, LoadOk, InFlight }
 
         override fun load(unitId: String, onLoaded: (RewardedAdManager.LoadedAd) -> Unit, onFailed: () -> Unit) {
             loadCalls++
@@ -28,6 +28,7 @@ class RewardedAdManagerTest {
                         pendingDismiss = onDismiss
                     }
                 })
+                Outcome.InFlight -> { /* never resolves — models a real async load in progress */ }
             }
         }
     }
@@ -42,12 +43,21 @@ class RewardedAdManagerTest {
 
     @Test
     fun `preload while loading is idempotent`() {
-        val loader = FakeLoader()  // load never completes
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.InFlight }
         val mgr = RewardedAdManager(loader, unitId = "test/123")
         mgr.preload()
         mgr.preload()
         mgr.preload()
         assertEquals(1, loader.loadCalls)
+    }
+
+    @Test
+    fun `preload retries after a previous failure`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadFails }
+        val mgr = RewardedAdManager(loader, unitId = "test/123")
+        mgr.preload()  // synchronously fails — onFailed resets isLoading
+        mgr.preload()  // should retry
+        assertEquals(2, loader.loadCalls)
     }
 
     @Test
