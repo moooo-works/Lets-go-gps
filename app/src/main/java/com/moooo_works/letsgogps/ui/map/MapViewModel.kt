@@ -5,13 +5,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
@@ -68,11 +64,7 @@ class MapViewModel @Inject constructor(
     private var lastTimezoneCheckLatLng: LatLng? = null
 
     private var saveCenterJob: Job? = null
-    private var joystickTickerJob: Job? = null
     private var isFirstLoad = true
-
-    private var currentJoystickX = 0f
-    private var currentJoystickY = 0f
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
@@ -89,6 +81,17 @@ class MapViewModel @Inject constructor(
         context = context,
         onStopMocking = ::stopMocking,
         onEnsurePermission = ::ensurePermission
+    )
+
+    private val joystickController = JoystickController(
+        state = _uiState,
+        scope = viewModelScope,
+        overlayManager = joystickOverlayManager,
+        mockStateRepository = mockStateRepository,
+        context = context,
+        onStopMocking = ::stopMocking,
+        onCameraMove = ::onCameraMove,
+        onSetTransportMode = ::setTransportMode
     )
 
     private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -395,104 +398,7 @@ class MapViewModel @Inject constructor(
         mockStateRepository.clearError()
     }
 
-    fun toggleJoystick() {
-        if (!_uiState.value.isJoystickEnabled) {
-            if (!_uiState.value.isProActive) {
-                _uiState.update { it.copy(showProUpgrade = true) }
-                return
-            }
-            if (!ensureFloatingWindowPermission()) return
-            _uiState.update { it.copy(isJoystickEnabled = true) }
-            startJoystickTicker()
-            joystickOverlayManager.show {
-                val state by uiState.collectAsState()
-                JoystickOverlayView(
-                    transportMode = state.transportMode,
-                    onMove = { dx, dy -> 
-                        currentJoystickX = dx
-                        currentJoystickY = dy
-                    },
-                    onWindowDrag = { dx, dy ->
-                        joystickOverlayManager.updatePosition(dx, dy)
-                    },
-                    onWindowDragEnd = {
-                        joystickOverlayManager.snapToEdge()
-                    },
-                    onToggleSpeed = { cycleTransportMode() },
-                    onStop = { stopMockingFromJoystick() }
-                )
-            }
-        } else {
-            _uiState.update { it.copy(isJoystickEnabled = false) }
-            stopJoystickTicker()
-            joystickOverlayManager.hide()
-        }
-    }
-
-    private fun cycleTransportMode() {
-        val nextMode = when (_uiState.value.transportMode) {
-            TransportMode.WALKING -> TransportMode.CYCLING
-            TransportMode.CYCLING -> TransportMode.DRIVING
-            TransportMode.DRIVING -> TransportMode.WALKING
-        }
-        setTransportMode(nextMode)
-    }
-
-    private fun stopMockingFromJoystick() {
-        stopMocking()
-        if (_uiState.value.isJoystickEnabled) {
-            toggleJoystick()
-        }
-    }
-
-    private fun startJoystickTicker() {
-        joystickTickerJob?.cancel()
-        joystickTickerJob = viewModelScope.launch {
-            while (true) {
-                if (currentJoystickX != 0f || currentJoystickY != 0f) {
-                    applyJoystickMovement(currentJoystickX, currentJoystickY)
-                }
-                delay(100) 
-            }
-        }
-    }
-
-    private fun stopJoystickTicker() {
-        joystickTickerJob?.cancel()
-        joystickTickerJob = null
-        currentJoystickX = 0f
-        currentJoystickY = 0f
-    }
-
-    private fun applyJoystickMovement(dx: Float, dy: Float) {
-        val uiStateValue = _uiState.value
-        val currentCenter = uiStateValue.centerLocation
-        val speedKmh = uiStateValue.speedKmh
-        
-        val metersPerTick = (speedKmh * 1000.0 / 3600.0) * 0.1
-        val degreesPerTick = metersPerTick / 111000.0
-        
-        val latDelta = -dy * degreesPerTick
-        val cosLat = kotlin.math.cos(Math.toRadians(currentCenter.latitude)).coerceAtLeast(0.001)
-        val lngDelta = dx * degreesPerTick / cosLat
-        
-        val newCenter = LatLng(currentCenter.latitude + latDelta, currentCenter.longitude + lngDelta)
-        onCameraMove(newCenter)
-        
-        if (uiStateValue.isMocking && uiStateValue.mapMode == MapMode.SINGLE) {
-            mockStateRepository.setCurrentMockLocation(newCenter)
-        }
-    }
-
-    private fun ensureFloatingWindowPermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(context)) {
-                setMockError(MockError.FloatingWindowPermissionMissing)
-                return false
-            }
-        }
-        return true
-    }
+    fun toggleJoystick() = joystickController.toggle()
 
     fun selectSearchResult(location: GeocodedLocation) {
         _uiState.update { it.copy(centerLocation = location.latLng) }
@@ -619,8 +525,7 @@ class MapViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        stopJoystickTicker()
-        joystickOverlayManager.hide()
+        joystickController.onCleared()
         super.onCleared()
     }
 
