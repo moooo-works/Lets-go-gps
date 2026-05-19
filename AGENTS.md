@@ -189,7 +189,7 @@ Engine failure（setup/setLocation/teardown）→ 顯示 engine failure，不得
 
 準星以地圖可視容器置中（非整個螢幕置中）
 
-點擊儲存 marker 只顯示名稱（不顯示經緯度 snippet）
+點擊儲存 marker 顯示名稱＋說明泡泡（不顯示經緯度 snippet；說明欄位於 schema v3 起新增）
 
 從列表選取儲存點 → 地圖必須 animate 置中 + 更新中心座標顯示
 

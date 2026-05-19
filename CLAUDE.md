@@ -55,7 +55,7 @@ PR 合併前，`test`、`lintDebug`、`assembleDebug` 三項皆須通過。
 
 - **UI 層** (`ui/`)：Jetpack Compose 畫面 + ViewModels（Map、SavedLocations、Routes、Settings）
 - **Domain 層** (`domain/`)：`LocationMockEngine` 介面、`RouteSimulator` singleton、Repository 介面（含 `ProRepository`）
-- **Data 層** (`data/`)：Room 資料庫（v3）、`AndroidLocationMockEngine`、`BillingManager`、Repository 實作
+- **Data 層** (`data/`)：Room 資料庫（v5）、`AndroidLocationMockEngine`、`BillingManager`、Repository 實作
 
 **DI**：Hilt（`MainApplication` 標註 `@HiltAndroidApp`），模組位於 `di/`。
 
@@ -65,7 +65,7 @@ PR 合併前，`test`、`lintDebug`、`assembleDebug` 三項皆須通過。
 
 **變現**：AdMob（橫幅 + 插頁式廣告）+ Google Play Billing（月繳訂閱，ID：`mockgps_pro_monthly`）。
 
-**開發者 Pro 旗標**：`BillingManager.kt` 頂部有 `DEV_FORCE_PRO` 常數，設為 `true` 可在本機繞過訂閱檢查，上架前須確認設回 `false`。
+**開發者 Pro 旗標**：`DEV_FORCE_PRO` 為 `BuildConfig` 旗標，由 build type 控制（`debug=true`、`release=false`）；設定處在 `app/build.gradle.kts` 的 `buildTypes` 區塊，`BillingManager` 透過 `BuildConfig.DEV_FORCE_PRO` 讀取。
 
 ---
 
@@ -79,7 +79,7 @@ PR 合併前，`test`、`lintDebug`、`assembleDebug` 三項皆須通過。
 | Compose Compiler | 1.5.8 |
 | AGP | 8.3.2 |
 | Hilt | 2.48 |
-| Room | 2.6.0（schema v3） |
+| Room | 2.6.0（schema v5） |
 
 ---
 
@@ -155,8 +155,8 @@ Engine 錯誤（setup／setLocation／teardown）須以 engine error 呈現，�
 - [x] 設定頁：主題切換、高度設定、座標抖動、匯入／匯出（Pro）、開發者選項、隱私政策
 - [x] 設定頁：「清除非最愛位置」（資料管理區塊）
 - [x] 變現：AdMob 橫幅 + 插頁式廣告、Google Play Billing 月繳訂閱、ProUpgradeDialog
-- [x] Room 資料庫 schema v3（新增 `description` 欄位）
+- [x] Room 資料庫 schema v5（新增 `description` 欄位、folder、route 等）
 - [x] 字體升級：Sora（標題）、Inter（內文）——字型已轉換為 TrueType 格式
 
 ### 待完成
-- [ ] 上架前：替換測試廣告 ID 為正式 ID，建立 Play Console 訂閱方案
+- [ ] 上架前：於 Play Console 建立訂閱方案 `mockgps_pro_monthly`（廣告 ID 已透過 `BuildConfig` per buildType 自動切換，仍須在 Play Console 後台對照確認 release 廣告單元）
