@@ -63,9 +63,9 @@ PR 合併前，`test`、`lintDebug`、`assembleDebug` 三項皆須通過。
 
 **背景服務**：`MockLocationService` 為 Foreground Service，管理 Android mock location provider 的生命週期，並驅動 `RouteSimulator` 更新。
 
-**變現**：AdMob（橫幅 + 插頁式廣告）+ Google Play Billing（月繳訂閱，ID：`mockgps_pro_monthly`）。
+**變現**：AdMob 橫幅 + 獎勵廣告（看一支廣告解鎖 Pro 6 小時，可堆疊至 24h；舊的 mocking 觸發插頁式廣告已移除）+ Google Play Billing（月繳訂閱 `mockgps_pro_monthly`：解鎖 Pro 並完全移除橫幅）。AdMob 帳號 `ca-app-pub-7328056144057376`。
 
-**開發者 Pro 旗標**：`DEV_FORCE_PRO` 為 `BuildConfig` 旗標，由 build type 控制（`debug=true`、`release=false`）；設定處在 `app/build.gradle.kts` 的 `buildTypes` 區塊，`BillingManager` 透過 `BuildConfig.DEV_FORCE_PRO` 讀取。
+**開發者 Pro 旗標**：`DEV_FORCE_PRO` 為 `BuildConfig` 旗標，由 build type 控制（`debug=true`、`release=false`）；設定處在 `app/build.gradle.kts` 的 `buildTypes` 區塊，`BillingManager` 透過 `BuildConfig.DEV_FORCE_PRO` 讀取。此旗標只影響訂閱類 `isProActive`／`isAdFreeActive`，不會寫入 `AdUnlockStore` 的 expiry。實機驗證 ad-unlock 流程時需設 `DEV_FORCE_PRO=false`。
 
 ---
 
@@ -119,10 +119,19 @@ Engine 錯誤（setup／setLocation／teardown）須以 engine error 呈現，�
 - `DropdownMenu` 同樣加 `containerColor = MaterialTheme.colorScheme.surface` + `tonalElevation = 0.dp`（M3 1.3.0+ 支援）
 - `Card` 若不需陰影，設 `CardDefaults.cardElevation(defaultElevation = 0.dp)`
 
+### Pro 解鎖兩個維度（必須分辨）
+- `isProActive`：訂閱 OR ad-unlock 未過期 → 控制 Pro 功能（路線、搖桿、匯入匯出）
+- `isAdFreeActive`：僅訂閱 → 控制橫幅廣告（`MapScreen.kt` 對 `BannerAdView` 的 gate）
+- **新增需要 banner gate 的地方一律用 `isAdFreeActive`，新增 feature gate 的地方一律用 `isProActive`**
+- 看廣告解鎖每次 +6h，累積上限 24h（`ProRepositoryImpl.grantAdUnlockHours` 已 cap，UI 端剩餘 ≥18h 時 watch-ad 按鈕停用）
+- `RewardedAdManager` 是 Hilt `@Singleton`，由 `MapViewModel.init` 與 `SettingsViewModel.init` 各預載一次
+- `ProUpgradeDialog` 有兩顆按鈕：「看一支廣告」與「訂閱」；訂閱者完全看不到此對話框（功能直接可用）
+
 ### 測試規則
 - 新增 Repository 介面方法時，同步更新所有測試中的 Fake 實作類別
-- ViewModel 新增 constructor 參數（如 `ProRepository`）時，同步更新所有相關測試的建構呼叫
-- `SettingsViewModelTest` 中需 mock `proRepository.isProActive` 回傳 `MutableStateFlow(true)`，確保 export 功能不被 Pro 檢查擋住
+- ViewModel 新增 constructor 參數（如 `ProRepository`、`RewardedAdManager`）時，同步更新所有相關測試的建構呼叫
+- `SettingsViewModelTest` 中需 mock `proRepository.isProActive` 回傳 `MutableStateFlow(true)`，確保 export 功能不被 Pro 檢查擋住，並 mock `isAdFreeActive`／`adUnlockExpiryMillis`／`grantAdUnlockHours`
+- 涉及 `nowTick` 60s ticker 的 flow（如 `SettingsViewModel.proSection`）必須透過 `@VisibleForTesting nowFlowOverride` 注入單次 emit 的 flow，否則 `runTest` 會在 virtual time 下無限迴圈
 
 ---
 
