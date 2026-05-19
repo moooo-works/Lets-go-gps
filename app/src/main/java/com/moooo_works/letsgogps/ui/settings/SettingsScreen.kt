@@ -290,7 +290,6 @@ fun SettingsScreen(
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
                 },
-                modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp),
             )
 
             // 權限狀態卡片
