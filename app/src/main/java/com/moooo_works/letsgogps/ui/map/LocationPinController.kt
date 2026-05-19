@@ -55,7 +55,7 @@ class LocationPinController(
         }
     }
 
-    fun saveIfNeeded(latLng: LatLng) {
+    internal fun saveIfNeeded(latLng: LatLng) {
         scope.launch {
             val epsilon = 0.0001
             val exists = state.value.savedLocations.any {
