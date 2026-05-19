@@ -46,6 +46,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import com.moooo_works.letsgogps.data.engine.MockEngineError
+import com.moooo_works.letsgogps.domain.RouteProgress
 import com.google.android.gms.maps.model.LatLng
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,6 +72,9 @@ class MapViewModelTest {
     private val currentMockLocationFlow = MutableStateFlow<LatLng?>(null)
     private val mockErrorFlow = MutableStateFlow<MockEngineError?>(null)
     private val lastCenterFlow = MutableStateFlow<LatLng?>(null)
+    private val activeRouteWaypointsFlow = MutableStateFlow<List<LatLng>>(emptyList())
+    private val isProActiveFlow = MutableStateFlow(false)
+    private val routeProgressFlow = MutableStateFlow<RouteProgress?>(null)
 
     @Before
     fun setup() {
@@ -87,6 +91,15 @@ class MapViewModelTest {
         // on the mock pipeline rather than network behaviour. Override per-test
         // if the timezone path needs exercising.
         every { settingsRepository.observeEnableTimezoneCheck() } returns kotlinx.coroutines.flow.flowOf(false)
+
+        every { mockStateRepository.activeRouteWaypoints } returns activeRouteWaypointsFlow
+        every { proRepository.isProActive } returns isProActiveFlow
+        every { routeSimulator.routeProgress } returns routeProgressFlow
+        every { settingsRepository.observeMapType() } returns flowOf("NORMAL")
+        every { settingsRepository.hasSeenOnboarding() } returns flowOf(true)
+        every { settingsRepository.getLoopBounceTipSeenVersion() } returns flowOf(1)
+        every { settingsRepository.hasSeenClipboardHintTip() } returns flowOf(true)
+        every { settingsRepository.hasSeenGpxTip() } returns flowOf(true)
 
         // Default: every health-check item passes — individual tests override
         // when they want to exercise the blocking-failure path.

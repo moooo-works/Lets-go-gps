@@ -11,8 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -61,9 +63,13 @@ class SearchViewModelTest {
     @Test
     fun `searchLocations sets isSearching true while loading`() = runTest {
         val query = "Taipei 101"
-        coEvery { searchRepository.search(query) } returns Result.success(emptyList())
+        coEvery { searchRepository.search(query) } coAnswers {
+            delay(100)
+            Result.success(emptyList())
+        }
 
         viewModel.searchLocations(query)
+        runCurrent()
         assertTrue(viewModel.uiState.value.isSearching)
 
         advanceUntilIdle()

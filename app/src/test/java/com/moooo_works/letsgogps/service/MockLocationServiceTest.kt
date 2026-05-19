@@ -2,7 +2,10 @@ package com.moooo_works.letsgogps.service
 
 import android.content.Intent
 import com.moooo_works.letsgogps.domain.LocationMockEngine
+import com.moooo_works.letsgogps.domain.RouteProgress
 import com.moooo_works.letsgogps.domain.RouteSimulator
+import com.moooo_works.letsgogps.domain.SimulationPoint
+import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
@@ -41,12 +44,18 @@ class MockLocationServiceTest {
 
     private val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
     private val currentMockLocationFlow = MutableStateFlow<LatLng?>(null)
+    private val simulationStateFlow = MutableStateFlow(SimulationState.IDLE)
+    private val currentLocationFlow = MutableStateFlow<SimulationPoint?>(null)
+    private val routeProgressFlow = MutableStateFlow<RouteProgress?>(null)
 
     @Before
     fun setup() {
         Dispatchers.setMain(dispatcher)
         every { mockStateRepository.mockStatus } returns mockStatusFlow
         every { mockStateRepository.currentMockLocation } returns currentMockLocationFlow
+        every { routeSimulator.simulationState } returns simulationStateFlow
+        every { routeSimulator.currentLocation } returns currentLocationFlow
+        every { routeSimulator.routeProgress } returns routeProgressFlow
         every { settingsRepository.observeAltitude() } returns flowOf(15.0)
         every { settingsRepository.observeRandomAltitude() } returns flowOf(false)
         every { settingsRepository.observeCoordinateJitter() } returns flowOf(false)

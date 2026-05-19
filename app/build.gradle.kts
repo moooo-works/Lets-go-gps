@@ -15,7 +15,7 @@ val localProperties = Properties().apply {
 
 val versionMajor = 1
 val versionMinor = 1
-val versionPatch = 2
+val versionPatch = 3
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -93,6 +93,14 @@ android {
         disable += "UnusedResources"
         checkReleaseBuilds = false
         abortOnError = false
+    }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.jvmArgs("-XX:+EnableDynamicAgentLoading")
+            }
+        }
     }
     packaging {
         resources {
