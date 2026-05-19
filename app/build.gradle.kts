@@ -65,6 +65,7 @@ android {
             buildConfigField("Boolean", "DEV_FORCE_PRO", "true")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
             buildConfigField("String", "INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
+            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
         }
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -74,6 +75,7 @@ android {
             buildConfigField("Boolean", "DEV_FORCE_PRO", "false")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-8495982996587452/2988295108\"")
             buildConfigField("String", "INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-8495982996587452/7493536385\"")
+            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-7328056144057376/6473078035\"")
         }
     }
     compileOptions {
