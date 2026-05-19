@@ -142,7 +142,7 @@ class RouteControllerTest {
 
     @Test
     fun `playRoute sends ACTION_START_ROUTE when Pro and permission ok`() = runTest {
-        state.value = state.value.copy(isProActive = true)
+        state.value = state.value.copy(isProActive = true, waypoints = listOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))
         val ctrl = makeController(this)
         val intentSlot = slot<Intent>()
         ctrl.playRoute()
@@ -184,5 +184,41 @@ class RouteControllerTest {
         val ctrl = makeController(this)
         ctrl.onRouteFitConsumed()
         assertNull(state.value.routeFitRequestToken)
+    }
+
+    @Test
+    fun `playRoute does not start service when waypoints fewer than 2`() = runTest {
+        state.value = state.value.copy(isProActive = true, waypoints = listOf(LatLng(1.0, 2.0)))
+        val ctrl = makeController(this)
+        ctrl.playRoute()
+        assertTrue(state.value.mockError is MockError.InvalidInput)
+        verify(exactly = 0) { context.startForegroundService(any()) }
+    }
+
+    @Test
+    fun `playRoute does not start service when permission denied`() = runTest {
+        state.value = state.value.copy(isProActive = true, waypoints = listOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))
+        ensurePermissionResult = false
+        val ctrl = makeController(this)
+        ctrl.playRoute()
+        verify(exactly = 0) { context.startForegroundService(any()) }
+    }
+
+    @Test
+    fun `loadRoute calls clearRoute before loading new points`() = runTest {
+        val existing = LatLng(9.0, 9.0)
+        state.value = state.value.copy(waypoints = listOf(existing))
+        val route = RouteWithPoints(
+            route = Route(id = 2, name = "New"),
+            points = listOf(RoutePoint(routeId = 2, orderIndex = 0, latitude = 1.0, longitude = 2.0),
+                            RoutePoint(routeId = 2, orderIndex = 1, latitude = 3.0, longitude = 4.0))
+        )
+        coEvery { repository.getRouteWithPoints(2) } returns route
+        val ctrl = makeController(this)
+        ctrl.loadRoute(2)
+        advanceUntilIdle()
+        // The old waypoint must not appear in the new list
+        assertTrue(state.value.waypoints.none { it == existing })
+        assertEquals(2, state.value.waypoints.size)
     }
 }

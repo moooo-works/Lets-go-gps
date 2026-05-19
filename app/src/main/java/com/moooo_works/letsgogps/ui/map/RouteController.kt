@@ -28,7 +28,7 @@ class RouteController(
     private val onEnsurePermission: () -> Boolean
 ) {
     private companion object {
-        const val KMH_TO_MPS = 3.6
+        const val KMH_TO_MPS_DIVISOR = 3.6
     }
 
     fun addWaypoint() = addWaypointAt(state.value.centerLocation)
@@ -98,7 +98,7 @@ class RouteController(
 
     fun setTransportMode(mode: TransportMode) {
         state.update { it.copy(transportMode = mode, speedKmh = mode.speedKmh) }
-        routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS)
+        routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS_DIVISOR)
         scope.launch { settingsRepository.setRouteSpeed(mode.speedKmh) }
     }
 
@@ -108,7 +108,7 @@ class RouteController(
             return
         }
         state.update { it.copy(speedKmh = speedKmh) }
-        routeSimulator.setSpeed(speedKmh / KMH_TO_MPS)
+        routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
         scope.launch { settingsRepository.setRouteSpeed(speedKmh) }
     }
 
@@ -124,6 +124,10 @@ class RouteController(
 
     fun playRoute() {
         if (!state.value.isProActive) { state.update { it.copy(showProUpgrade = true) }; return }
+        if (state.value.waypoints.size < 2) {
+            state.update { it.copy(mockError = MockError.InvalidInput("Add at least 2 waypoints to play a route")) }
+            return
+        }
         if (!onEnsurePermission()) return
         ContextCompat.startForegroundService(
             context,
