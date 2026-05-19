@@ -94,6 +94,9 @@ class MapViewModelTest {
 
         every { mockStateRepository.activeRouteWaypoints } returns activeRouteWaypointsFlow
         every { proRepository.isProActive } returns isProActiveFlow
+        every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
+        every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        coEvery { proRepository.grantAdUnlockHours(any()) } returns Unit
         every { routeSimulator.routeProgress } returns routeProgressFlow
         every { settingsRepository.observeMapType() } returns flowOf("NORMAL")
         every { settingsRepository.hasSeenOnboarding() } returns flowOf(true)

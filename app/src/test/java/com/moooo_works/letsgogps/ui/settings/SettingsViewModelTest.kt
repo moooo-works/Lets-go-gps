@@ -78,6 +78,9 @@ class SettingsViewModelTest {
         every { mockStateRepository.mockStatus } returns mockStatusFlow
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { proRepository.isProActive } returns MutableStateFlow(true)
+        every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
+        every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        coEvery { proRepository.grantAdUnlockHours(any()) } returns Unit
         every { settingsRepository.observeClipboardHintEnabled() } returns MutableStateFlow(true)
         // Defaults required by exportDataToUri and applyImportData/applySettings.
         every { settingsRepository.observeAltitude() } returns flowOf(15.0)
