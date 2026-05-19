@@ -20,7 +20,7 @@ import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28], manifest = Config.NONE)
+@Config(sdk = [33])
 class AdUnlockStoreTest {
 
     private lateinit var context: Context
