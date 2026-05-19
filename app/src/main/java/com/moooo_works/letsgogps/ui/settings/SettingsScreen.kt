@@ -61,6 +61,7 @@ fun SettingsScreen(
     val showHealthCheck by viewModel.showHealthCheck.collectAsState()
     val isProActive by viewModel.isProActive.collectAsState()
     val showProUpgrade by viewModel.showProUpgrade.collectAsState()
+    val proSection by viewModel.proSection.collectAsState()
     val altitude by viewModel.altitude.collectAsState()
     val randomAltitude by viewModel.randomAltitude.collectAsState()
     val coordinateJitter by viewModel.coordinateJitter.collectAsState()
@@ -144,9 +145,14 @@ fun SettingsScreen(
     if (showProUpgrade) {
         ProUpgradeDialog(
             onDismiss = { viewModel.dismissProUpgrade() },
-            onWatchAd = { viewModel.dismissProUpgrade() },
-            onSubscribe = { activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade() },
-            watchAdEnabled = false,
+            onWatchAd = {
+                activity?.let { viewModel.watchRewardedAd(it) }
+                viewModel.dismissProUpgrade()
+            },
+            onSubscribe = {
+                activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade()
+            },
+            watchAdEnabled = (proSection as? ProSectionState.AdUnlocked)?.watchAdEnabled ?: true,
         )
     }
 
@@ -269,6 +275,24 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Pro 訂閱狀態區塊
+            ProSection(
+                state = proSection,
+                onWatchAd = {
+                    activity?.let { viewModel.watchRewardedAd(it) }
+                },
+                onSubscribe = {
+                    activity?.let { viewModel.launchBillingFlow(it) }
+                },
+                onManageSubscription = {
+                    val url = "https://play.google.com/store/account/subscriptions?sku=mockgps_pro_monthly&package=${context.packageName}"
+                    runCatching {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    }
+                },
+                modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp),
+            )
+
             // 權限狀態卡片
             val (dotColor, statusLabel, statusDesc) = when (mockPermissionStatus) {
                 is MockPermissionStatus.Allowed -> Triple(

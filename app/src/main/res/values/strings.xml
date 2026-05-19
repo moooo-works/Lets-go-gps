@@ -251,6 +251,25 @@
     <string name="pro_dialog_action_watch_ad">看一支廣告解鎖 6 小時</string>
     <string name="error_rewarded_unavailable">暫時沒有可用廣告，請稍後再試</string>
 
+    <!-- Settings Pro Section -->
+    <string name="settings_pro_section_title">Pro 訂閱</string>
+    <string name="settings_pro_free_card_title">看廣告解鎖 6 小時</string>
+    <string name="settings_pro_free_card_subtitle">一次廣告 = 6 小時 Pro 功能</string>
+    <string name="settings_pro_free_card_button">看廣告</string>
+    <string name="settings_pro_subscribe_card_title">訂閱無廣告版</string>
+    <string name="settings_pro_subscribe_card_subtitle">$3.99 / 月，永久 Pro 且無廣告</string>
+    <string name="settings_pro_subscribe_card_button">訂閱</string>
+    <string name="settings_pro_unlocked_title">Pro 解鎖中</string>
+    <string name="settings_pro_unlocked_remaining">剩 %1$s</string>
+    <string name="settings_pro_unlocked_watch_more">再看一支 +6h</string>
+    <string name="settings_pro_unlocked_cap_note">累積上限 24 小時</string>
+    <string name="settings_pro_unlocked_upgrade">升級訂閱（永久無廣告）</string>
+    <string name="settings_pro_subscribed_title">Pro 訂閱中</string>
+    <string name="settings_pro_subscribed_manage">管理訂閱</string>
+    <string name="settings_pro_remaining_minutes">%1$d 分鐘</string>
+    <string name="settings_pro_remaining_less_than_minute">不到 1 分鐘</string>
+    <string name="settings_pro_remaining_hours_minutes">%1$dh %2$dm</string>
+
     <string name="export_import_title">資料匯出 / 匯入</string>
     <string name="export_data">匯出所有資料</string>
     <string name="import_data">匯入資料</string>

@@ -250,6 +250,25 @@
     <string name="pro_dialog_action_watch_ad">Watch an ad to unlock 6 hours</string>
     <string name="error_rewarded_unavailable">No ad available right now, please try later</string>
 
+    <!-- Settings Pro Section -->
+    <string name="settings_pro_section_title">Pro Subscription</string>
+    <string name="settings_pro_free_card_title">Watch ad for 6h</string>
+    <string name="settings_pro_free_card_subtitle">One ad = 6 hours of Pro</string>
+    <string name="settings_pro_free_card_button">Watch Ad</string>
+    <string name="settings_pro_subscribe_card_title">Ad-Free Subscription</string>
+    <string name="settings_pro_subscribe_card_subtitle">$3.99 / month, full Pro + no ads</string>
+    <string name="settings_pro_subscribe_card_button">Subscribe</string>
+    <string name="settings_pro_unlocked_title">Pro Unlocked</string>
+    <string name="settings_pro_unlocked_remaining">%1$s remaining</string>
+    <string name="settings_pro_unlocked_watch_more">Watch more (+6h)</string>
+    <string name="settings_pro_unlocked_cap_note">Stacks up to 24 hours</string>
+    <string name="settings_pro_unlocked_upgrade">Upgrade (permanent, ad-free)</string>
+    <string name="settings_pro_subscribed_title">Pro Subscriber</string>
+    <string name="settings_pro_subscribed_manage">Manage</string>
+    <string name="settings_pro_remaining_minutes">%1$d min</string>
+    <string name="settings_pro_remaining_less_than_minute">less than 1 min</string>
+    <string name="settings_pro_remaining_hours_minutes">%1$dh %2$dm</string>
+
     <string name="export_import_title">데이터 내보내기 / 가져오기</string>
     <string name="export_data">모든 데이터 내보내기</string>
     <string name="import_data">데이터 가져오기</string>
