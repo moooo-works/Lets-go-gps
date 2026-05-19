@@ -41,9 +41,8 @@ class ProRepositoryImpl @Inject constructor(
         adUnlockStore.expiryFlow.stateIn(tickerScope, SharingStarted.Eagerly, 0L)
     }
 
-    override val isAdFreeActive: StateFlow<Boolean> by lazy {
-        billingManager.isProActive
-    }
+    override val isAdFreeActive: StateFlow<Boolean>
+        get() = billingManager.isProActive
 
     override val isProActive: StateFlow<Boolean> by lazy {
         combine(
@@ -61,12 +60,16 @@ class ProRepositoryImpl @Inject constructor(
     override suspend fun grantAdUnlockHours(hours: Long) {
         val nowMillis = clock()
         val current = adUnlockExpiryMillis.value
-        val newExpiry = maxOf(current, nowMillis) + hours * 3600_000L
-        val cap = nowMillis + 24 * 3600_000L
+        val newExpiry = maxOf(current, nowMillis) + hours * HOUR_MILLIS
+        val cap = nowMillis + 24 * HOUR_MILLIS
         adUnlockStore.setExpiry(minOf(newExpiry, cap))
     }
 
     override fun launchBillingFlow(activity: Activity) {
         billingManager.launchBillingFlow(activity)
+    }
+
+    companion object {
+        private const val HOUR_MILLIS = 3_600_000L
     }
 }
