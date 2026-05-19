@@ -19,9 +19,13 @@ import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
+import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +40,7 @@ import javax.inject.Inject
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.utils.GeoDistanceMeters
 import com.google.gson.annotations.SerializedName
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
@@ -149,6 +154,12 @@ data class ExportRoute(
     val createdAt: Long? = null
 )
 
+sealed interface ProSectionState {
+    object Free : ProSectionState
+    data class AdUnlocked(val remainingMillis: Long, val watchAdEnabled: Boolean) : ProSectionState
+    object Subscribed : ProSectionState
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
@@ -157,12 +168,62 @@ class SettingsViewModel @Inject constructor(
     private val mockEngine: LocationMockEngine,
     private val proRepository: ProRepository,
     private val systemHealthCheck: com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck,
+    private val rewardedAdManager: RewardedAdManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
     val isProActive: StateFlow<Boolean> = proRepository.isProActive
+
+    /**
+     * Injectable time source for tests. When non-null, replaces the default
+     * 60-second ticker. Set this BEFORE first access to [proSection] (which is
+     * lazy) so the override is picked up.
+     */
+    @VisibleForTesting
+    internal var nowFlowOverride: Flow<Long>? = null
+
+    private val nowTick: Flow<Long> by lazy {
+        nowFlowOverride ?: flow {
+            while (true) {
+                emit(System.currentTimeMillis())
+                kotlinx.coroutines.delay(60_000)
+            }
+        }
+    }
+
+    val proSection: StateFlow<ProSectionState> by lazy {
+        combine(
+            proRepository.isAdFreeActive,
+            proRepository.adUnlockExpiryMillis,
+            nowTick
+        ) { adFree, expiry, now ->
+            when {
+                adFree -> ProSectionState.Subscribed
+                expiry > now -> {
+                    val remaining = expiry - now
+                    ProSectionState.AdUnlocked(
+                        remainingMillis = remaining,
+                        watchAdEnabled = remaining < 18 * 3600_000L
+                    )
+                }
+                else -> ProSectionState.Free
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProSectionState.Free)
+    }
+
+    fun watchRewardedAd(activity: Activity, onUnavailable: () -> Unit = {}) {
+        rewardedAdManager.showAd(
+            activity = activity,
+            onReward = {
+                viewModelScope.launch {
+                    proRepository.grantAdUnlockHours(6)
+                }
+            },
+            onUnavailable = onUnavailable
+        )
+    }
 
     private val _showProUpgrade = MutableStateFlow(false)
     val showProUpgrade: StateFlow<Boolean> = _showProUpgrade.asStateFlow()
@@ -252,6 +313,7 @@ class SettingsViewModel @Inject constructor(
 
     init {
         refreshMockPermission()
+        rewardedAdManager.preload()
     }
 
     fun refreshMockPermission() {

@@ -16,15 +16,19 @@ import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.ui.settings.ImportPreview
+import com.moooo_works.letsgogps.ui.settings.ProSectionState
 import com.moooo_works.letsgogps.R
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -37,6 +41,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -97,7 +102,25 @@ class SettingsViewModelTest {
         )
         every { settingsRepository.observeEnableTimezoneCheck() } returns MutableStateFlow(true)
 
-        viewModel = SettingsViewModel(locationRepository, mockStateRepository, settingsRepository, mockEngine, proRepository, systemHealthCheck, context)
+        viewModel = buildViewModel()
+    }
+
+    private fun buildViewModel(
+        rewardedAdManager: RewardedAdManager = mockk(relaxed = true),
+        nowMillis: Long = System.currentTimeMillis()
+    ): SettingsViewModel {
+        val vm = SettingsViewModel(
+            locationRepository,
+            mockStateRepository,
+            settingsRepository,
+            mockEngine,
+            proRepository,
+            systemHealthCheck,
+            rewardedAdManager,
+            context
+        )
+        vm.nowFlowOverride = flowOf(nowMillis)
+        return vm
     }
 
     @After
@@ -513,5 +536,61 @@ class SettingsViewModelTest {
         viewModel.setRouteCornerSlowdown(true)
         advanceUntilIdle()
         coVerify { settingsRepository.setRouteCornerSlowdown(true) }
+    }
+
+    @Test
+    fun `proSection - Free when no subscription and no unlock`() = runTest {
+        every { proRepository.isProActive } returns MutableStateFlow(false)
+        every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
+        every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        val vm = buildViewModel(nowMillis = System.currentTimeMillis())
+        // proSection uses WhileSubscribed; an active collector is required for
+        // the combine flow to produce a value.
+        backgroundScope.launch { vm.proSection.collect {} }
+        advanceUntilIdle()
+        assertEquals(ProSectionState.Free, vm.proSection.value)
+    }
+
+    @Test
+    fun `proSection - Subscribed when isAdFreeActive`() = runTest {
+        every { proRepository.isProActive } returns MutableStateFlow(true)
+        every { proRepository.isAdFreeActive } returns MutableStateFlow(true)
+        every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        val vm = buildViewModel(nowMillis = System.currentTimeMillis())
+        backgroundScope.launch { vm.proSection.collect {} }
+        advanceUntilIdle()
+        assertEquals(ProSectionState.Subscribed, vm.proSection.value)
+    }
+
+    @Test
+    fun `proSection - AdUnlocked watchAdEnabled false when remaining over 18h`() = runTest {
+        val fixedNow = 1_000_000L
+        every { proRepository.isProActive } returns MutableStateFlow(true)
+        every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
+        every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(fixedNow + 20 * 3600_000L)
+        val vm = buildViewModel(nowMillis = fixedNow)
+        backgroundScope.launch { vm.proSection.collect {} }
+        advanceUntilIdle()
+        val state = vm.proSection.value as ProSectionState.AdUnlocked
+        assertFalse(state.watchAdEnabled)
+    }
+
+    @Test
+    fun `watchRewardedAd reward callback calls grantAdUnlockHours(6)`() = runTest {
+        val activity = mockk<android.app.Activity>(relaxed = true)
+        val rewardedAdManager = mockk<RewardedAdManager>(relaxed = true)
+        val rewardSlot = slot<() -> Unit>()
+        every { rewardedAdManager.showAd(any(), capture(rewardSlot), any()) } answers {}
+        every { proRepository.isProActive } returns MutableStateFlow(false)
+        every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
+        every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        coEvery { proRepository.grantAdUnlockHours(any()) } returns Unit
+
+        val vm = buildViewModel(rewardedAdManager = rewardedAdManager)
+        vm.watchRewardedAd(activity)
+        rewardSlot.captured.invoke()
+        advanceUntilIdle()
+
+        coVerify { proRepository.grantAdUnlockHours(6) }
     }
 }
