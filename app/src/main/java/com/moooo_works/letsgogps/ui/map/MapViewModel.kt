@@ -194,6 +194,12 @@ class MapViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            proRepository.isAdFreeActive.collect { isAdFree ->
+                _uiState.update { it.copy(isAdFreeActive = isAdFree) }
+            }
+        }
+
+        viewModelScope.launch {
             settingsRepository.observeMapType().collect { typeName ->
                 val type = if (typeName == "HYBRID") MapType.HYBRID else MapType.NORMAL
                 _uiState.update { it.copy(mapType = type) }

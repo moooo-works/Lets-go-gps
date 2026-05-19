@@ -39,6 +39,7 @@ data class MapUiState(
     val routeFitRequestToken: Long? = null,
     val isJoystickEnabled: Boolean = false,
     val isProActive: Boolean = false,
+    val isAdFreeActive: Boolean = false,
     val showProUpgrade: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,

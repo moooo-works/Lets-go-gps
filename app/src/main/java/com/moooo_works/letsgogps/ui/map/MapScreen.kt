@@ -402,7 +402,7 @@ fun MapScreen(
                 }
             }
 
-            if (!uiState.isProActive) {
+            if (!uiState.isAdFreeActive) {
                 BannerAdView()
             }
 
