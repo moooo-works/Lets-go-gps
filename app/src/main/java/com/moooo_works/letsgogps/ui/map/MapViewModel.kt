@@ -79,6 +79,18 @@ class MapViewModel @Inject constructor(
 
     private val locationPinController = LocationPinController(_uiState, viewModelScope, repository)
 
+    private val routeController = RouteController(
+        state = _uiState,
+        scope = viewModelScope,
+        repository = repository,
+        mockStateRepository = mockStateRepository,
+        routeSimulator = routeSimulator,
+        settingsRepository = settingsRepository,
+        context = context,
+        onStopMocking = ::stopMocking,
+        onEnsurePermission = ::ensurePermission
+    )
+
     private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val triggerReview: SharedFlow<Unit> = _triggerReview.asSharedFlow()
 
@@ -233,15 +245,7 @@ class MapViewModel @Inject constructor(
      * Cycles the loop mode through NONE → LOOP → BOUNCE → NONE.
      * Propagates the new mode to [RouteSimulator] immediately.
      */
-    fun cycleLoopMode() {
-        val next = when (_uiState.value.loopMode) {
-            LoopMode.NONE -> LoopMode.LOOP
-            LoopMode.LOOP -> LoopMode.BOUNCE
-            LoopMode.BOUNCE -> LoopMode.NONE
-        }
-        routeSimulator.setLoopMode(next)
-        _uiState.update { it.copy(loopMode = next) }
-    }
+    fun cycleLoopMode() = routeController.cycleLoopMode()
 
     /** Dismiss the "clipboard hint" new-feature tip and persist the ack. */
     fun dismissClipboardHintTip() {
@@ -524,159 +528,42 @@ class MapViewModel @Inject constructor(
         dismissProUpgrade()
     }
 
-    fun addWaypoint() {
-        addWaypointAt(_uiState.value.centerLocation)
-    }
+    fun addWaypoint() = routeController.addWaypoint()
 
-    fun addWaypointAt(latLng: LatLng) {
-        val newWaypoints = _uiState.value.waypoints + latLng
-        _uiState.update { it.copy(waypoints = newWaypoints) }
-        mockStateRepository.setActiveRouteWaypoints(newWaypoints)
-        routeSimulator.setRoute(newWaypoints)
-    }
+    fun addWaypointAt(latLng: LatLng) = routeController.addWaypointAt(latLng)
 
-    fun removeWaypointAt(index: Int) {
-        val newWaypoints = _uiState.value.waypoints.toMutableList().apply { removeAt(index) }
-        _uiState.update { it.copy(waypoints = newWaypoints) }
-        mockStateRepository.setActiveRouteWaypoints(newWaypoints)
-        routeSimulator.setRoute(newWaypoints)
-    }
+    fun removeWaypointAt(index: Int) = routeController.removeWaypointAt(index)
 
-    fun clearRoute() {
-        _uiState.update { it.copy(waypoints = emptyList(), currentMockLocation = null, currentLocation = null) }
-        mockStateRepository.setActiveRouteWaypoints(emptyList())
-        stopMocking()
-        routeSimulator.stop()
-    }
+    fun clearRoute() = routeController.clearRoute()
 
-    fun saveCurrentRoute(name: String) {
-        val normalizedName = name.trim()
-        val points = _uiState.value.waypoints
-        if (normalizedName.isBlank() || normalizedName.length > 40 || points.size < 2) {
-            return
-        }
+    fun saveCurrentRoute(name: String) = routeController.saveCurrentRoute(name)
 
-        viewModelScope.launch {
-            repository.insertRouteWithPoints(
-                normalizedName,
-                points.mapIndexed { index, point ->
-                    RoutePoint(
-                        routeId = 0,
-                        orderIndex = index,
-                        latitude = point.latitude,
-                        longitude = point.longitude
-                    )
-                }
-            )
-        }
-    }
+    fun loadRoute(routeId: Int) = routeController.loadRoute(routeId)
 
-    fun loadRoute(routeId: Int) {
-        viewModelScope.launch {
-            val route = repository.getRouteWithPoints(routeId) ?: return@launch
-            clearRoute()
+    fun onRouteFitConsumed() = routeController.onRouteFitConsumed()
 
-            val points = route.points
-                .sortedBy { it.orderIndex }
-                .map { LatLng(it.latitude, it.longitude) }
+    fun setTransportMode(mode: TransportMode) = routeController.setTransportMode(mode)
 
-            _uiState.update {
-                it.copy(
-                    waypoints = points,
-                    centerLocation = points.firstOrNull() ?: it.centerLocation,
-                    routeFitRequestToken = if (points.size >= 2) System.currentTimeMillis() else null
-                )
-            }
-            mockStateRepository.setActiveRouteWaypoints(points)
-            routeSimulator.setRoute(points)
-        }
-    }
+    fun setSpeed(speedKmh: Double) = routeController.setSpeed(speedKmh)
 
-    fun onRouteFitConsumed() {
-        _uiState.update { it.copy(routeFitRequestToken = null) }
-    }
-
-    fun setTransportMode(mode: TransportMode) {
-        _uiState.update { it.copy(transportMode = mode, speedKmh = mode.speedKmh) }
-        routeSimulator.setSpeed(mode.speedKmh / KMH_TO_MPS_DIVISOR)
-        viewModelScope.launch { settingsRepository.setRouteSpeed(mode.speedKmh) }
-    }
-
-    fun setSpeed(speedKmh: Double) {
-        if (speedKmh <= 0.0) {
-            setMockError(MockError.InvalidInput("Speed must be greater than 0 km/h"))
-            return
-        }
-        _uiState.update { it.copy(speedKmh = speedKmh) }
-        routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
-        viewModelScope.launch { settingsRepository.setRouteSpeed(speedKmh) }
-    }
-
-    fun playRoute() {
-        if (!_uiState.value.isProActive) {
-            _uiState.update { it.copy(showProUpgrade = true) }
-            return
-        }
-        if (!ensurePermission()) return
-
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            action = MockLocationService.ACTION_START_ROUTE
-        }
-        ContextCompat.startForegroundService(context, intent)
-    }
+    fun playRoute() = routeController.playRoute()
 
     /**
      * Start spiral exploration around the current map center. Pro-gated like
      * playRoute since it leans on the same continuous simulation pipeline.
      */
-    fun startExplorationAtCenter() {
-        if (!_uiState.value.isProActive) {
-            _uiState.update { it.copy(showProUpgrade = true) }
-            return
-        }
-        if (!ensurePermission()) return
-
-        val target = _uiState.value.centerLocation
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            action = MockLocationService.ACTION_START_EXPLORATION
-            putExtra(MockLocationService.EXTRA_LAT, target.latitude)
-            putExtra(MockLocationService.EXTRA_LNG, target.longitude)
-        }
-        ContextCompat.startForegroundService(context, intent)
-    }
+    fun startExplorationAtCenter() = routeController.startExplorationAtCenter()
 
     /**
      * Teleport-explore the currently loaded route's waypoints. No-op when no
      * route is loaded — calling site should hide/disable the entry point in
      * that case.
      */
-    fun startTeleportExplorationOfRoute() {
-        if (!_uiState.value.isProActive) {
-            _uiState.update { it.copy(showProUpgrade = true) }
-            return
-        }
-        if (!ensurePermission()) return
+    fun startTeleportExplorationOfRoute() = routeController.startTeleportExplorationOfRoute()
 
-        val targets = _uiState.value.waypoints
-        if (targets.isEmpty()) return
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            action = MockLocationService.ACTION_START_TELEPORT_EXPLORATION
-            putExtra(MockLocationService.EXTRA_LATS, targets.map { it.latitude }.toDoubleArray())
-            putExtra(MockLocationService.EXTRA_LNGS, targets.map { it.longitude }.toDoubleArray())
-        }
-        ContextCompat.startForegroundService(context, intent)
-    }
+    fun pauseRoute() = routeController.pauseRoute()
 
-    fun pauseRoute() {
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            action = MockLocationService.ACTION_PAUSE_ROUTE
-        }
-        context.startService(intent)
-    }
-
-    fun stopRoute() {
-        stopMocking()
-    }
+    fun stopRoute() = routeController.stopRoute()
 
     private fun ensurePermission(): Boolean {
         val hasFineLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
