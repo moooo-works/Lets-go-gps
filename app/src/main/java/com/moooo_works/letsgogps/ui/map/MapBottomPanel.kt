@@ -2,6 +2,7 @@ package com.moooo_works.letsgogps.ui.map
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -116,10 +117,15 @@ fun MapBottomPanel(
                 val isHoldingCompletedRoute = uiState.mapMode == MapMode.ROUTE &&
                     uiState.isMocking &&
                     uiState.simulationState == SimulationState.IDLE
-                if (uiState.mapMode == MapMode.ROUTE) {
+                AnimatedVisibility(
+                    visible = uiState.mapMode == MapMode.ROUTE,
+                    modifier = Modifier.weight(1f, fill = uiState.mapMode == MapMode.ROUTE),
+                    enter = expandHorizontally() + fadeIn(),
+                    exit = shrinkHorizontally() + fadeOut(),
+                ) {
                     OutlinedButton(
                         onClick = onAddWaypoint,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp)
                     ) { Text(stringResource(R.string.route_add_waypoint)) }
                 }
@@ -238,8 +244,14 @@ fun MapBottomPanel(
                 }
             }
 
-            // Route-only controls
-            if (uiState.mapMode == MapMode.ROUTE) {
+            // Route-only controls. Animated so the speed slider / transport
+            // chips / save+clear buttons fade and expand instead of popping
+            // in or out when toggling between SINGLE and ROUTE modes.
+            AnimatedVisibility(
+                visible = uiState.mapMode == MapMode.ROUTE,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
                 RouteControls(
                     uiState = uiState,
                     onSetSpeed = onSetSpeed,
@@ -312,6 +324,17 @@ private fun MapModeSelector(
             else "🔒 ${stringResource(R.string.map_mode_route)}"
         ).forEach { (mode, label) ->
             val selected = uiState.mapMode == mode
+            val animatedBg by animateColorAsState(
+                targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                animationSpec = tween(durationMillis = 200),
+                label = "modePillBg"
+            )
+            val animatedText by animateColorAsState(
+                targetValue = if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                animationSpec = tween(durationMillis = 200),
+                label = "modePillText"
+            )
             Surface(
                 modifier = Modifier
                     .weight(1f)
@@ -323,15 +346,14 @@ private fun MapModeSelector(
                             onSetMode(mode)
                         }
                     },
-                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                color = animatedBg,
             ) {
                 Text(
                     text = label,
                     modifier = Modifier.padding(vertical = 8.dp),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (selected) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = animatedText,
                     textAlign = TextAlign.Center
                 )
             }
