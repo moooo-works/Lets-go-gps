@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moooo_works.letsgogps.R
 
@@ -119,16 +120,28 @@ private fun ProUnlockedContent(
             progress = { (state.remainingMillis.toFloat() / (24f * 3_600_000f)).coerceIn(0f, 1f) },
             modifier = Modifier.fillMaxWidth(),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.height(IntrinsicSize.Min),
+        ) {
             Button(
                 onClick = onWatchAd,
                 enabled = state.watchAdEnabled,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
-                Text(stringResource(R.string.settings_pro_unlocked_watch_more))
+                Text(
+                    stringResource(R.string.settings_pro_unlocked_watch_more),
+                    textAlign = TextAlign.Center,
+                )
             }
-            OutlinedButton(onClick = onSubscribe, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.settings_pro_unlocked_upgrade))
+            OutlinedButton(
+                onClick = onSubscribe,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                Text(
+                    stringResource(R.string.settings_pro_unlocked_upgrade),
+                    textAlign = TextAlign.Center,
+                )
             }
         }
         if (!state.watchAdEnabled) {
