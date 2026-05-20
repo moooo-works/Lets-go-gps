@@ -382,45 +382,82 @@ fun SettingsScreen(
             )
 
             // 外觀主題
+            var showThemeDialog by remember { mutableStateOf(false) }
+            val themeOptions = listOf(
+                ThemePreference.SYSTEM to stringResource(R.string.settings_theme_system),
+                ThemePreference.LIGHT  to stringResource(R.string.settings_theme_light),
+                ThemePreference.DARK   to stringResource(R.string.settings_theme_dark)
+            )
+            val currentThemeLabel = themeOptions.firstOrNull { it.first == themePreference }?.second
+                ?: stringResource(R.string.settings_theme_system)
+
+            if (showThemeDialog) {
+                AlertDialog(
+                    onDismissRequest = { showThemeDialog = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp,
+                    title = { Text(stringResource(R.string.settings_theme_title)) },
+                    text = {
+                        Column {
+                            themeOptions.forEach { (pref, label) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onThemeChange(pref)
+                                            showThemeDialog = false
+                                        }
+                                        .padding(vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = themePreference == pref,
+                                        onClick = null
+                                    )
+                                    Text(label, style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {}
+                )
+            }
+
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showThemeDialog = true },
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         stringResource(R.string.settings_theme_title),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(
-                            ThemePreference.SYSTEM to stringResource(R.string.settings_theme_system),
-                            ThemePreference.LIGHT  to stringResource(R.string.settings_theme_light),
-                            ThemePreference.DARK   to stringResource(R.string.settings_theme_dark)
-                        ).forEach { (pref, label) ->
-                            val selected = themePreference == pref
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(
-                                        if (selected) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.surfaceVariant
-                                    )
-                                    .clickable { onThemeChange(pref) }
-                                    .padding(horizontal = 14.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    label,
-                                    fontSize = 13.sp,
-                                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (selected) MaterialTheme.colorScheme.onPrimary
-                                            else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            currentThemeLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Icon(
+                            Icons.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
