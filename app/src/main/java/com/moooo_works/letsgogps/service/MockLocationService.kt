@@ -42,7 +42,15 @@ class MockLocationService : Service() {
     @Inject
     lateinit var settingsRepository: SettingsRepository
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    // Default dispatcher (not Main) so the route simulator's tick loop and
+    // location-injection collectors keep running at full cadence when the user
+    // switches MockGPS to background. Android 11+ throttles a backgrounded
+    // app's Main thread under Doze / App Standby, which would otherwise stall
+    // delay() in the simulator and "freeze" the mock location for consumers
+    // like Pokemon GO / Pikmin Bloom. None of the work in this scope touches
+    // UI: startForeground/stopForeground are called from onStartCommand /
+    // handleStop which run on the system's binder thread, not in serviceScope.
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var locationPushJob: Job? = null
     private var isProviderSetup = false
     private var currentSpeedKmh: Double = 5.0
