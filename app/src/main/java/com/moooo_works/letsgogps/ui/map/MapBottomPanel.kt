@@ -176,8 +176,14 @@ fun MapBottomPanel(
                     }
                 }
 
-                // Loop/Bounce cycle button — only shown in ROUTE mode with ≥ 2 waypoints
-                if (uiState.mapMode == MapMode.ROUTE && uiState.waypoints.size >= 2) {
+                // Loop/Bounce cycle button — only shown in ROUTE mode with ≥ 2 waypoints.
+                // Animated so adding the 2nd waypoint (or clearing the route) doesn't
+                // snap the primary button's width in a single frame.
+                AnimatedVisibility(
+                    visible = uiState.mapMode == MapMode.ROUTE && uiState.waypoints.size >= 2,
+                    enter = expandHorizontally() + fadeIn(),
+                    exit = shrinkHorizontally() + fadeOut(),
+                ) {
                     LoopModeButton(
                         loopMode = uiState.loopMode,
                         onClick = onCycleLoopMode
