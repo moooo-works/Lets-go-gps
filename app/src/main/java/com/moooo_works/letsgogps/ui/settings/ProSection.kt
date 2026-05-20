@@ -2,8 +2,12 @@ package com.moooo_works.letsgogps.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -51,31 +55,49 @@ fun ProSection(
 
 @Composable
 private fun ProFreeContent(onWatchAd: () -> Unit, onSubscribe: () -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Card(
-            modifier = Modifier.weight(1f),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.height(IntrinsicSize.Min),
+    ) {
+        ProFreeCard(
+            title = stringResource(R.string.settings_pro_free_card_title),
+            subtitle = stringResource(R.string.settings_pro_free_card_subtitle),
+            buttonText = stringResource(R.string.settings_pro_free_card_button),
+            onClick = onWatchAd,
+            modifier = Modifier.weight(1f).fillMaxHeight(),
+        )
+        ProFreeCard(
+            title = stringResource(R.string.settings_pro_subscribe_card_title),
+            subtitle = stringResource(R.string.settings_pro_subscribe_card_subtitle),
+            buttonText = stringResource(R.string.settings_pro_subscribe_card_button),
+            onClick = onSubscribe,
+            modifier = Modifier.weight(1f).fillMaxHeight(),
+        )
+    }
+}
+
+@Composable
+private fun ProFreeCard(
+    title: String,
+    subtitle: String,
+    buttonText: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight().padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.settings_pro_free_card_title), fontWeight = FontWeight.SemiBold)
-                Text(stringResource(R.string.settings_pro_free_card_subtitle), style = MaterialTheme.typography.bodySmall)
-                Button(onClick = onWatchAd, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_pro_free_card_button))
-                }
-            }
-        }
-        Card(
-            modifier = Modifier.weight(1f),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        ) {
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.settings_pro_subscribe_card_title), fontWeight = FontWeight.SemiBold)
-                Text(stringResource(R.string.settings_pro_subscribe_card_subtitle), style = MaterialTheme.typography.bodySmall)
-                Button(onClick = onSubscribe, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_pro_subscribe_card_button))
-                }
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall)
+            Spacer(Modifier.weight(1f))
+            Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+                Text(buttonText)
             }
         }
     }
