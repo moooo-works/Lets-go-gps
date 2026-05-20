@@ -282,6 +282,7 @@
     <string name="map_route_start">ルート開始</string>
     <string name="map_mock_stop">停止</string>
     <string name="map_mock_start">偽装開始</string>
+    <string name="map_mock_starting">起動中…</string>
     <string name="map_transport_walking">徒歩</string>
     <string name="map_transport_cycling">自転車</string>
     <string name="map_transport_driving">車</string>

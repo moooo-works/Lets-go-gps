@@ -282,6 +282,7 @@
     <string name="map_route_start">Start Route</string>
     <string name="map_mock_stop">Stop</string>
     <string name="map_mock_start">Start Mock</string>
+    <string name="map_mock_starting">Starting…</string>
     <string name="map_transport_walking">Walk</string>
     <string name="map_transport_cycling">Bike</string>
     <string name="map_transport_driving">Drive</string>

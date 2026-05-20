@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -135,25 +136,40 @@ fun MapBottomPanel(
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
+                    enabled = !uiState.isStartingMocking,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (uiState.isMocking || uiState.simulationState == SimulationState.PLAYING)
                             MaterialTheme.colorScheme.error
                         else MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text(
-                        when {
-                            uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING ->
-                                "⏸ ${stringResource(R.string.map_route_pause)}"
-                            isHoldingCompletedRoute ->
-                                "⏹ ${stringResource(R.string.map_mock_stop)}"
-                            uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() ->
-                                "▶ ${stringResource(R.string.map_route_start)}"
-                            uiState.mapMode == MapMode.SINGLE && uiState.isMocking ->
-                                "⏹ ${stringResource(R.string.map_mock_stop)}"
-                            else -> "▶ ${stringResource(R.string.map_mock_start)}"
+                    if (uiState.isStartingMocking) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                            Text(stringResource(R.string.map_mock_starting))
                         }
-                    )
+                    } else {
+                        Text(
+                            when {
+                                uiState.mapMode == MapMode.ROUTE && uiState.simulationState == SimulationState.PLAYING ->
+                                    "⏸ ${stringResource(R.string.map_route_pause)}"
+                                isHoldingCompletedRoute ->
+                                    "⏹ ${stringResource(R.string.map_mock_stop)}"
+                                uiState.mapMode == MapMode.ROUTE && uiState.waypoints.isNotEmpty() ->
+                                    "▶ ${stringResource(R.string.map_route_start)}"
+                                uiState.mapMode == MapMode.SINGLE && uiState.isMocking ->
+                                    "⏹ ${stringResource(R.string.map_mock_stop)}"
+                                else -> "▶ ${stringResource(R.string.map_mock_start)}"
+                            }
+                        )
+                    }
                 }
 
                 // Loop/Bounce cycle button — only shown in ROUTE mode with ≥ 2 waypoints

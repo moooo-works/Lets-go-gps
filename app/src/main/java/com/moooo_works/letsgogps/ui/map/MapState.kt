@@ -26,6 +26,8 @@ enum class MapMode {
 data class MapUiState(
     val mapMode: MapMode = MapMode.SINGLE,
     val isMocking: Boolean = false,
+    /** Optimistic flag: tap → true → cleared when [isMocking] flips or after a 5s safety timeout. */
+    val isStartingMocking: Boolean = false,
     val centerLocation: LatLng = LatLng(25.0330, 121.5654),
     val mockError: MockError? = null,
     val hasMockPermission: Boolean = false,

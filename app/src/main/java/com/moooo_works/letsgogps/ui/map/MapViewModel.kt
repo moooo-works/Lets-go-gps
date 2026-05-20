@@ -23,7 +23,9 @@ import com.moooo_works.letsgogps.utils.GeoDistanceMeters
 import java.util.TimeZone
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.service.MockLocationService
 import com.google.android.gms.maps.model.LatLng
@@ -128,9 +130,15 @@ class MapViewModel @Inject constructor(
 
         viewModelScope.launch {
             mockStateRepository.mockStatus.collect { status ->
+                val mocking = status != MockStatus.IDLE
                 _uiState.update {
                     it.copy(
-                        isMocking = status != MockStatus.IDLE,
+                        isMocking = mocking,
+                        // Clear the optimistic loading flag as soon as the service
+                        // publishes the real mocking status — that's the moment
+                        // the button can stop showing "啟動中…" and reveal the
+                        // real stop button.
+                        isStartingMocking = if (mocking) false else it.isStartingMocking,
                         mapMode = when (status) {
                             MockStatus.ROUTE_PLAYING,
                             MockStatus.ROUTE_PAUSED,
@@ -309,29 +317,60 @@ class MapViewModel @Inject constructor(
     }
 
     fun startMocking() {
-        // Pre-flight health check: surface every blocking failure at once
-        // instead of the legacy fail-fast MockErrorDialog.
-        val healthState = systemHealthCheck.refresh()
-        if (healthState.hasBlockingFailure) {
-            _uiState.update {
-                it.copy(showHealthCheck = true, healthCheckState = healthState)
+        // Debounce + idempotent: ignore taps while a start is already in flight
+        // or mocking is already active. Without this guard a rapid double-tap
+        // could fire two `startForegroundService` calls.
+        val current = _uiState.value
+        if (current.isStartingMocking || current.isMocking) return
+
+        // Optimistic UI: flip the loading flag before doing anything else so
+        // the button can show a spinner immediately. The `mockStatus` collector
+        // clears the flag when the real status arrives; failure paths below
+        // also clear it.
+        _uiState.update { it.copy(isStartingMocking = true) }
+
+        viewModelScope.launch {
+            // Health check is 6 system IPC queries (AppOps/PackageManager/Settings/
+            // PowerManager/LocationManager). Cheap individually but adds up on
+            // Android 16 Beta where IPC overhead is higher — pull off the main
+            // thread so the button's spinner animates smoothly.
+            val healthState = withContext(Dispatchers.IO) { systemHealthCheck.refresh() }
+            if (healthState.hasBlockingFailure) {
+                _uiState.update {
+                    it.copy(
+                        showHealthCheck = true,
+                        healthCheckState = healthState,
+                        isStartingMocking = false,
+                    )
+                }
+                return@launch
             }
-            return
+
+            if (!ensurePermission()) {
+                _uiState.update { it.copy(isStartingMocking = false) }
+                return@launch
+            }
+
+            val target = _uiState.value.centerLocation
+            val intent = Intent(context, MockLocationService::class.java).apply {
+                action = MockLocationService.ACTION_START_SINGLE
+                putExtra(MockLocationService.EXTRA_LAT, target.latitude)
+                putExtra(MockLocationService.EXTRA_LNG, target.longitude)
+            }
+            ContextCompat.startForegroundService(context, intent)
+
+            maybeCheckTimezoneMismatch(target)
+            locationPinController.saveIfNeeded(target)
+            checkAndTriggerReview()
+
+            // Safety: if the service never publishes MOCKING within 5s (engine
+            // setup crashed, FGS rejected, etc.), un-stick the button so the
+            // user can retry instead of staring at a frozen spinner forever.
+            delay(5_000)
+            _uiState.update { state ->
+                if (state.isStartingMocking) state.copy(isStartingMocking = false) else state
+            }
         }
-
-        if (!ensurePermission()) return
-
-        val target = _uiState.value.centerLocation
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            action = MockLocationService.ACTION_START_SINGLE
-            putExtra(MockLocationService.EXTRA_LAT, target.latitude)
-            putExtra(MockLocationService.EXTRA_LNG, target.longitude)
-        }
-        ContextCompat.startForegroundService(context, intent)
-
-        maybeCheckTimezoneMismatch(target)
-        locationPinController.saveIfNeeded(target)
-        checkAndTriggerReview()
     }
 
     /**

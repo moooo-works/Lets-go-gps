@@ -282,6 +282,7 @@
     <string name="map_route_start">경로 시작</string>
     <string name="map_mock_stop">정지</string>
     <string name="map_mock_start">위장 시작</string>
+    <string name="map_mock_starting">시작 중…</string>
     <string name="map_transport_walking">도보</string>
     <string name="map_transport_cycling">자전거</string>
     <string name="map_transport_driving">자동차</string>
