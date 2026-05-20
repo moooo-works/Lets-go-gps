@@ -247,27 +247,27 @@
     <string name="pro_dialog_feature_ads">모든 광고 제거</string>
     <string name="pro_dialog_cancel_note">체험 기간 종료 전까지 요금이 청구되지 않습니다. Google Play에서 언제든지 취소할 수 있습니다.</string>
     <string name="pro_dialog_action_upgrade">7일 무료로 시작</string>
-    <string name="pro_dialog_action_watch_ad">Watch an ad to unlock 6 hours</string>
-    <string name="error_rewarded_unavailable">No ad available right now, please try later</string>
+    <string name="pro_dialog_action_watch_ad">광고 시청으로 6시간 잠금 해제</string>
+    <string name="error_rewarded_unavailable">현재 사용 가능한 광고가 없습니다. 잠시 후 다시 시도해 주세요</string>
 
     <!-- Settings Pro Section -->
-    <string name="settings_pro_section_title">Pro Subscription</string>
-    <string name="settings_pro_free_card_title">Watch ad for 6h</string>
-    <string name="settings_pro_free_card_subtitle">One ad = 6 hours of Pro</string>
-    <string name="settings_pro_free_card_button">Watch Ad</string>
-    <string name="settings_pro_subscribe_card_title">Ad-Free Subscription</string>
-    <string name="settings_pro_subscribe_card_subtitle">$3.99 / month, full Pro + no ads</string>
-    <string name="settings_pro_subscribe_card_button">Subscribe</string>
-    <string name="settings_pro_unlocked_title">Pro Unlocked</string>
-    <string name="settings_pro_unlocked_remaining">%1$s remaining</string>
-    <string name="settings_pro_unlocked_watch_more">Watch more (+6h)</string>
-    <string name="settings_pro_unlocked_cap_note">Stacks up to 24 hours</string>
-    <string name="settings_pro_unlocked_upgrade">Upgrade (permanent, ad-free)</string>
-    <string name="settings_pro_subscribed_title">Pro Subscriber</string>
-    <string name="settings_pro_subscribed_manage">Manage</string>
-    <string name="settings_pro_remaining_minutes">%1$d min</string>
-    <string name="settings_pro_remaining_less_than_minute">less than 1 min</string>
-    <string name="settings_pro_remaining_hours_minutes">%1$dh %2$dm</string>
+    <string name="settings_pro_section_title">Pro 구독</string>
+    <string name="settings_pro_free_card_title">광고 시청으로 6시간 잠금 해제</string>
+    <string name="settings_pro_free_card_subtitle">광고 1회 = Pro 기능 6시간</string>
+    <string name="settings_pro_free_card_button">광고 보기</string>
+    <string name="settings_pro_subscribe_card_title">광고 없는 구독</string>
+    <string name="settings_pro_subscribe_card_subtitle">월 $3.99, 평생 Pro + 광고 제거</string>
+    <string name="settings_pro_subscribe_card_button">구독</string>
+    <string name="settings_pro_unlocked_title">Pro 잠금 해제됨</string>
+    <string name="settings_pro_unlocked_remaining">%1$s 남음</string>
+    <string name="settings_pro_unlocked_watch_more">다시 보기 +6h</string>
+    <string name="settings_pro_unlocked_cap_note">최대 24시간까지 누적</string>
+    <string name="settings_pro_unlocked_upgrade">구독으로 업그레이드 (영구, 광고 없음)</string>
+    <string name="settings_pro_subscribed_title">Pro 구독 중</string>
+    <string name="settings_pro_subscribed_manage">관리</string>
+    <string name="settings_pro_remaining_minutes">%1$d분</string>
+    <string name="settings_pro_remaining_less_than_minute">1분 미만</string>
+    <string name="settings_pro_remaining_hours_minutes">%1$d시간 %2$d분</string>
 
     <string name="export_import_title">데이터 내보내기 / 가져오기</string>
     <string name="export_data">모든 데이터 내보내기</string>
