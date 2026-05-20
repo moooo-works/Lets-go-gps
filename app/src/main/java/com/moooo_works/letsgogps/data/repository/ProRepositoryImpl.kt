@@ -45,12 +45,22 @@ class ProRepositoryImpl @Inject constructor(
         get() = billingManager.isProActive
 
     override val isProActive: StateFlow<Boolean> by lazy {
+        // Initial value must reflect the current subscription state — not a
+        // hard-coded `false`. combine() only fires its first value once all
+        // three upstreams have emitted, which is gated on the DataStore
+        // expiryFlow's first disk read. During that gap, observers received
+        // `false` even for subscribed users, causing the first tap on the
+        // ROUTE pill to spuriously open the upgrade dialog. Seeding with the
+        // cached billing state (already loaded synchronously by BillingManager)
+        // closes the race for subscribers. Ad-unlocked-only users still see a
+        // brief `false → true` transition but the cap on the rare "user taps
+        // route within ~10ms of opening the app" case is acceptable.
         combine(
             billingManager.isProActive,
             adUnlockStore.expiryFlow,
             nowFlow
         ) { subscribed, expiry, now -> subscribed || expiry > now }
-            .stateIn(tickerScope, SharingStarted.Eagerly, false)
+            .stateIn(tickerScope, SharingStarted.Eagerly, billingManager.isProActive.value)
     }
 
     override suspend fun refreshProStatus() {
