@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,8 +44,20 @@ class BillingManager @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var retryCount = 0
 
-    private val _isProActive = MutableStateFlow(DEV_FORCE_PRO)
+    // Seed the StateFlow synchronously from the persisted cache so the first
+    // observer (e.g. MapViewModel collecting on construction) immediately gets
+    // the right value. The async launch pattern used before raced against the
+    // user's first tap on the ROUTE pill: cache load took longer than the user
+    // taking to reach the bottom panel, so isProActive was still `false` and
+    // the upgrade dialog spuriously fired. One-shot blocking DataStore read at
+    // app startup is acceptable (~10–50ms) and only happens once per process.
+    private val _isProActive = MutableStateFlow(loadCachedProState())
     val isProActive: StateFlow<Boolean> = _isProActive.asStateFlow()
+
+    private fun loadCachedProState(): Boolean {
+        if (DEV_FORCE_PRO) return true
+        return runBlocking { context.dataStore.data.first()[KEY_PRO_CACHE] ?: false }
+    }
 
     private val billingClient = BillingClient.newBuilder(context)
         .setListener(this)
@@ -52,11 +65,6 @@ class BillingManager @Inject constructor(
         .build()
 
     init {
-        // 從 DataStore 讀取上次已知的 Pro 狀態，在 Billing 連線前給初始值
-        scope.launch {
-            val cached = context.dataStore.data.first()[KEY_PRO_CACHE] ?: false
-            if (!DEV_FORCE_PRO) _isProActive.value = cached
-        }
         connect()
         registerForegroundObserver()
     }
