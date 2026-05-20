@@ -38,29 +38,33 @@ class ProRepositoryImpl @Inject constructor(
     }
 
     override val adUnlockExpiryMillis: StateFlow<Long> by lazy {
-        adUnlockStore.expiryFlow.stateIn(tickerScope, SharingStarted.Eagerly, 0L)
+        // Seed with the persisted expiry read synchronously so observers (e.g.
+        // SettingsViewModel.proSection) reflect the cached unlock window from
+        // the very first emission, not a brief 0L window while DataStore loads.
+        adUnlockStore.expiryFlow.stateIn(tickerScope, SharingStarted.Eagerly, adUnlockStore.currentExpiry())
     }
 
     override val isAdFreeActive: StateFlow<Boolean>
         get() = billingManager.isProActive
 
     override val isProActive: StateFlow<Boolean> by lazy {
-        // Initial value must reflect the current subscription state — not a
-        // hard-coded `false`. combine() only fires its first value once all
-        // three upstreams have emitted, which is gated on the DataStore
-        // expiryFlow's first disk read. During that gap, observers received
-        // `false` even for subscribed users, causing the first tap on the
-        // ROUTE pill to spuriously open the upgrade dialog. Seeding with the
-        // cached billing state (already loaded synchronously by BillingManager)
-        // closes the race for subscribers. Ad-unlocked-only users still see a
-        // brief `false → true` transition but the cap on the rare "user taps
-        // route within ~10ms of opening the app" case is acceptable.
+        // Initial value computed from both synchronous caches (billing + ad-
+        // unlock). combine() only fires its first value once all three
+        // upstreams have emitted, gated on DataStore disk reads. Until that
+        // moment observers receive whatever we pass as `initialValue` here.
+        // A hard-coded `false` previously caused the first ROUTE pill tap to
+        // spuriously open the upgrade dialog for both subscribers AND ad-
+        // unlocked users on cold launch. Both BillingManager and AdUnlockStore
+        // expose synchronous accessors so we can reconstruct the correct
+        // initial value here.
+        val nowMillis = clock()
+        val initial = billingManager.isProActive.value || adUnlockStore.currentExpiry() > nowMillis
         combine(
             billingManager.isProActive,
             adUnlockStore.expiryFlow,
             nowFlow
         ) { subscribed, expiry, now -> subscribed || expiry > now }
-            .stateIn(tickerScope, SharingStarted.Eagerly, billingManager.isProActive.value)
+            .stateIn(tickerScope, SharingStarted.Eagerly, initial)
     }
 
     override suspend fun refreshProStatus() {
