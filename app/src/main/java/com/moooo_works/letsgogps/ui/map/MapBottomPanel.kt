@@ -4,7 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -182,10 +186,18 @@ fun MapBottomPanel(
 
                 // Advanced modes: spiral exploration (SINGLE) and teleport-spiral
                 // (ROUTE with waypoints). Hidden when neither would activate.
+                //
+                // Wrapped in AnimatedVisibility so the start/stop transition
+                // doesn't snap the main Start button wider in a single frame
+                // when this IconButton disappears.
                 val showAdvancedButton = (uiState.mapMode == MapMode.SINGLE && !uiState.isMocking) ||
                     (uiState.mapMode == MapMode.ROUTE && uiState.waypoints.size >= 2 &&
                         uiState.simulationState != SimulationState.PLAYING)
-                if (showAdvancedButton) {
+                AnimatedVisibility(
+                    visible = showAdvancedButton,
+                    enter = expandHorizontally() + fadeIn(),
+                    exit = shrinkHorizontally() + fadeOut(),
+                ) {
                     Box {
                         IconButton(onClick = { showAdvancedMenu = true }) {
                             Icon(
