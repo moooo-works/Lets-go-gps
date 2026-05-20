@@ -238,8 +238,16 @@ fun MapBottomPanel(
                 }
             }
 
-            // Route-only controls
-            if (uiState.mapMode == MapMode.ROUTE) {
+            // Route-only controls. Wrapped in AnimatedVisibility so the
+            // big block (speed slider + transport chips + save/clear) fades
+            // and slides instead of popping when toggling SINGLE ↔ ROUTE.
+            // The parent Surface's animateContentSize coordinates the
+            // outer panel height transition.
+            AnimatedVisibility(
+                visible = uiState.mapMode == MapMode.ROUTE,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
                 RouteControls(
                     uiState = uiState,
                     onSetSpeed = onSetSpeed,
