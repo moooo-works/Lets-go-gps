@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.annotation.VisibleForTesting
 import com.moooo_works.letsgogps.data.billing.AdUnlockStore
 import com.moooo_works.letsgogps.data.billing.BillingManager
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,9 @@ class ProRepositoryImpl @Inject constructor(
 
     override val isAdFreeActive: StateFlow<Boolean>
         get() = billingManager.isProActive
+
+    override val subscriptionOffer: StateFlow<SubscriptionOffer?>
+        get() = billingManager.subscriptionOffer
 
     override val isProActive: StateFlow<Boolean> by lazy {
         // Initial value computed from both synchronous caches (billing + ad-

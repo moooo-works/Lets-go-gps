@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -175,6 +176,16 @@ class SettingsViewModel @Inject constructor(
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
     val isProActive: StateFlow<Boolean> = proRepository.isProActive
+
+    /** Localized recurring price (e.g. "₱269.00", "$3.99") from Play Billing,
+     *  or null until ProductDetails has loaded. */
+    val subscriptionPrice: StateFlow<String?> = proRepository.subscriptionOffer
+        .map { it?.formattedPrice }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            proRepository.subscriptionOffer.value?.formattedPrice,
+        )
 
     /**
      * Injectable time source for tests. When non-null, replaces the default

@@ -240,7 +240,8 @@
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">升級至 Pro</string>
-    <string name="pro_dialog_desc">免費試用 7 天，之後每月 $3.99。解鎖以下所有進階功能：</string>
+    <string name="pro_dialog_desc">免費試用 7 天，之後依 Google Play 顯示之每月訂閱費用收費。解鎖以下所有進階功能：</string>
+    <string name="pro_dialog_desc_with_price">免費試用 7 天，之後每月 %1$s。解鎖以下所有進階功能：</string>
     <string name="pro_dialog_feature_routes">建立與播放自訂路線</string>
     <string name="pro_dialog_feature_joystick">搖桿自由控制方向</string>
     <string name="pro_dialog_feature_storage">無限儲存位置</string>
@@ -257,7 +258,8 @@
     <string name="settings_pro_free_card_subtitle">一次廣告 = 6 小時 Pro 功能</string>
     <string name="settings_pro_free_card_button">看廣告</string>
     <string name="settings_pro_subscribe_card_title">訂閱無廣告版</string>
-    <string name="settings_pro_subscribe_card_subtitle">$3.99 / 月，永久 Pro 且無廣告</string>
+    <string name="settings_pro_subscribe_card_subtitle">月訂閱方案，永久 Pro 且無廣告</string>
+    <string name="settings_pro_subscribe_card_subtitle_with_price">%1$s / 月，永久 Pro 且無廣告</string>
     <string name="settings_pro_subscribe_card_button">訂閱</string>
     <string name="settings_pro_unlocked_title">Pro 解鎖中</string>
     <string name="settings_pro_unlocked_remaining">剩 %1$s</string>

@@ -217,6 +217,12 @@ class MapViewModel @Inject constructor(
             }
         }
 
+        viewModelScope.launch {
+            proRepository.subscriptionOffer.collect { offer ->
+                _uiState.update { it.copy(subscriptionPrice = offer?.formattedPrice) }
+            }
+        }
+
         rewardedAdManager.preload()
 
         viewModelScope.launch {

@@ -239,7 +239,8 @@
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Pro로 업그레이드</string>
-    <string name="pro_dialog_desc">7일 무료 체험 후 월 $3.99. 모든 Pro 기능 잠금 해제:</string>
+    <string name="pro_dialog_desc">7일 무료 체험 후 Google Play에 표시된 월 구독 요금으로 청구됩니다. 모든 Pro 기능 잠금 해제:</string>
+    <string name="pro_dialog_desc_with_price">7일 무료 체험 후 월 %1$s. 모든 Pro 기능 잠금 해제:</string>
     <string name="pro_dialog_feature_routes">커스텀 경로 생성 및 재생</string>
     <string name="pro_dialog_feature_joystick">조이스틱으로 방향 제어</string>
     <string name="pro_dialog_feature_storage">무제한 위치 저장</string>
@@ -256,7 +257,8 @@
     <string name="settings_pro_free_card_subtitle">광고 1회 = Pro 기능 6시간</string>
     <string name="settings_pro_free_card_button">광고 보기</string>
     <string name="settings_pro_subscribe_card_title">광고 없는 구독</string>
-    <string name="settings_pro_subscribe_card_subtitle">월 $3.99, 평생 Pro + 광고 제거</string>
+    <string name="settings_pro_subscribe_card_subtitle">월간 구독, 평생 Pro + 광고 제거</string>
+    <string name="settings_pro_subscribe_card_subtitle_with_price">월 %1$s, 평생 Pro + 광고 제거</string>
     <string name="settings_pro_subscribe_card_button">구독</string>
     <string name="settings_pro_unlocked_title">Pro 잠금 해제됨</string>
     <string name="settings_pro_unlocked_remaining">%1$s 남음</string>

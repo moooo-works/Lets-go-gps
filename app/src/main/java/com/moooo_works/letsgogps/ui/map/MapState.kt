@@ -44,6 +44,8 @@ data class MapUiState(
     val isAdFreeActive: Boolean = false,
     val adUnlockRemainingMillis: Long = 0L,
     val showProUpgrade: Boolean = false,
+    /** Localized recurring price from Play Billing; null until ProductDetails loads. */
+    val subscriptionPrice: String? = null,
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,
     val showEditLocationDialog: Boolean = false,

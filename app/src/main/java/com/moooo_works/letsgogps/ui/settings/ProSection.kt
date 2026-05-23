@@ -33,6 +33,7 @@ fun ProSection(
     onSubscribe: () -> Unit,
     onManageSubscription: () -> Unit,
     modifier: Modifier = Modifier,
+    formattedPrice: String? = null,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -46,7 +47,7 @@ fun ProSection(
                 fontWeight = FontWeight.Bold,
             )
             when (state) {
-                ProSectionState.Free -> ProFreeContent(onWatchAd, onSubscribe)
+                ProSectionState.Free -> ProFreeContent(onWatchAd, onSubscribe, formattedPrice)
                 is ProSectionState.AdUnlocked -> ProUnlockedContent(state, onWatchAd, onSubscribe)
                 ProSectionState.Subscribed -> ProSubscribedContent(onManageSubscription)
             }
@@ -55,7 +56,16 @@ fun ProSection(
 }
 
 @Composable
-private fun ProFreeContent(onWatchAd: () -> Unit, onSubscribe: () -> Unit) {
+private fun ProFreeContent(
+    onWatchAd: () -> Unit,
+    onSubscribe: () -> Unit,
+    formattedPrice: String?,
+) {
+    val subscribeSubtitle = if (formattedPrice != null) {
+        stringResource(R.string.settings_pro_subscribe_card_subtitle_with_price, formattedPrice)
+    } else {
+        stringResource(R.string.settings_pro_subscribe_card_subtitle)
+    }
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.height(IntrinsicSize.Min),
@@ -69,7 +79,7 @@ private fun ProFreeContent(onWatchAd: () -> Unit, onSubscribe: () -> Unit) {
         )
         ProFreeCard(
             title = stringResource(R.string.settings_pro_subscribe_card_title),
-            subtitle = stringResource(R.string.settings_pro_subscribe_card_subtitle),
+            subtitle = subscribeSubtitle,
             buttonText = stringResource(R.string.settings_pro_subscribe_card_button),
             onClick = onSubscribe,
             modifier = Modifier.weight(1f).fillMaxHeight(),

@@ -98,6 +98,7 @@ class MapViewModelTest {
         every { proRepository.isProActive } returns isProActiveFlow
         every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
         every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        every { proRepository.subscriptionOffer } returns MutableStateFlow(null)
         coEvery { proRepository.grantAdUnlockHours(any()) } returns Unit
         every { routeSimulator.routeProgress } returns routeProgressFlow
         every { settingsRepository.observeMapType() } returns flowOf("NORMAL")

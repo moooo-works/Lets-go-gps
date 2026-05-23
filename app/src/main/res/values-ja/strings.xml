@@ -239,7 +239,8 @@
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Pro にアップグレード</string>
-    <string name="pro_dialog_desc">7日間無料体験、その後月額 $3.99。すべての Pro 機能をアンロック：</string>
+    <string name="pro_dialog_desc">7日間無料体験、その後は Google Play に表示される月額料金。すべての Pro 機能をアンロック：</string>
+    <string name="pro_dialog_desc_with_price">7日間無料体験、その後月額 %1$s。すべての Pro 機能をアンロック：</string>
     <string name="pro_dialog_feature_routes">カスタムルートの作成と再生</string>
     <string name="pro_dialog_feature_joystick">ジョイスティックによる方向制御</string>
     <string name="pro_dialog_feature_storage">無制限の保存位置</string>
@@ -256,7 +257,8 @@
     <string name="settings_pro_free_card_subtitle">広告1本 = Pro機能6時間</string>
     <string name="settings_pro_free_card_button">広告を見る</string>
     <string name="settings_pro_subscribe_card_title">広告なしサブスク</string>
-    <string name="settings_pro_subscribe_card_subtitle">月額 $3.99、永久Pro + 広告非表示</string>
+    <string name="settings_pro_subscribe_card_subtitle">月額サブスク、永久Pro + 広告非表示</string>
+    <string name="settings_pro_subscribe_card_subtitle_with_price">月額 %1$s、永久Pro + 広告非表示</string>
     <string name="settings_pro_subscribe_card_button">登録する</string>
     <string name="settings_pro_unlocked_title">Pro 解除中</string>
     <string name="settings_pro_unlocked_remaining">残り %1$s</string>

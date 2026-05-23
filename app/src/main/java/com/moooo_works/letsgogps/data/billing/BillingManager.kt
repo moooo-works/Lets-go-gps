@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.android.billingclient.api.*
 import com.moooo_works.letsgogps.data.repository.dataStore
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,15 @@ class BillingManager @Inject constructor(
     private val _isProActive = MutableStateFlow(loadCachedProState())
     val isProActive: StateFlow<Boolean> = _isProActive.asStateFlow()
 
+    // Localized recurring price + trial flag, populated on each successful
+    // ProductDetails query. Null until the BillingClient has connected and
+    // Play has returned product info — UI must render a no-price fallback
+    // in that window instead of any hard-coded amount, otherwise the price
+    // shown in-app can disagree with the Play checkout sheet and trip Play's
+    // "consistent local currency" subscription policy.
+    private val _subscriptionOffer = MutableStateFlow<SubscriptionOffer?>(null)
+    val subscriptionOffer: StateFlow<SubscriptionOffer?> = _subscriptionOffer.asStateFlow()
+
     private fun loadCachedProState(): Boolean {
         if (DEV_FORCE_PRO) return true
         return runBlocking { context.dataStore.data.first()[KEY_PRO_CACHE] ?: false }
@@ -76,6 +86,7 @@ class BillingManager @Inject constructor(
                     Log.d(TAG, "Billing connected")
                     retryCount = 0
                     queryActiveSubscriptions()
+                    queryProductOffer()
                 } else {
                     Log.w(TAG, "Billing setup failed: ${result.debugMessage}")
                 }
@@ -101,6 +112,7 @@ class BillingManager @Inject constructor(
                     // App 回到前景時重新驗證訂閱狀態
                     if (billingClient.isReady) {
                         queryActiveSubscriptions()
+                        queryProductOffer()
                     } else {
                         retryCount = 0
                         connect()
@@ -128,6 +140,47 @@ class BillingManager @Inject constructor(
                 }
                 purchases.filter { !it.isAcknowledged }.forEach { acknowledgePurchase(it) }
             }
+        }
+    }
+
+    /**
+     * Query ProductDetails for the subscription and publish the localized
+     * recurring price into [_subscriptionOffer]. Runs separately from
+     * [launchBillingFlow]'s in-line query — the launch path needs an
+     * offerToken at click time, while UI needs the price as soon as billing
+     * is ready so the upgrade dialog/settings card don't display a hard-coded
+     * USD value.
+     */
+    private fun queryProductOffer() {
+        if (!billingClient.isReady) return
+        val productList = listOf(
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(SUBSCRIPTION_ID)
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
+        )
+        val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
+        billingClient.queryProductDetailsAsync(params) { result, productDetailsList ->
+            if (result.responseCode != BillingClient.BillingResponseCode.OK || productDetailsList.isEmpty()) {
+                Log.w(TAG, "ProductDetails query failed: ${result.debugMessage}")
+                return@queryProductDetailsAsync
+            }
+            val phases = productDetailsList.first().subscriptionOfferDetails
+                ?.firstOrNull()
+                ?.pricingPhases
+                ?.pricingPhaseList
+                ?: return@queryProductDetailsAsync
+            // Last phase with a non-zero price = the recurring price the user
+            // will actually be billed. Earlier zero-price phases (free trial)
+            // and lead-in discount phases are skipped — the user-facing "after
+            // trial, $X/month" line should always quote the steady-state price.
+            val recurring = phases.lastOrNull { it.priceAmountMicros > 0L } ?: return@queryProductDetailsAsync
+            val hasFreeTrial = phases.any { it.priceAmountMicros == 0L }
+            _subscriptionOffer.value = SubscriptionOffer(
+                formattedPrice = recurring.formattedPrice,
+                hasFreeTrial = hasFreeTrial,
+            )
+            Log.d(TAG, "Offer loaded: ${recurring.formattedPrice} (trial=$hasFreeTrial)")
         }
     }
 

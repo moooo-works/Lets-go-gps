@@ -17,7 +17,8 @@ fun ProUpgradeDialog(
     onDismiss: () -> Unit,
     onWatchAd: () -> Unit,
     onSubscribe: () -> Unit,
-    watchAdEnabled: Boolean = true
+    watchAdEnabled: Boolean = true,
+    formattedPrice: String? = null,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -37,7 +38,11 @@ fun ProUpgradeDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    stringResource(R.string.pro_dialog_desc),
+                    text = if (formattedPrice != null) {
+                        stringResource(R.string.pro_dialog_desc_with_price, formattedPrice)
+                    } else {
+                        stringResource(R.string.pro_dialog_desc)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

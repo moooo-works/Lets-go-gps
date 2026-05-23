@@ -1,6 +1,7 @@
 package com.moooo_works.letsgogps.domain.repository
 
 import android.app.Activity
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import kotlinx.coroutines.flow.StateFlow
 
 interface ProRepository {
@@ -12,6 +13,14 @@ interface ProRepository {
 
     /** Current ad-unlock expiry epoch millis; 0 means not unlocked. */
     val adUnlockExpiryMillis: StateFlow<Long>
+
+    /**
+     * Localized Play Billing offer (formattedPrice in the user's billing
+     * country currency). `null` until BillingClient has connected and queried
+     * ProductDetails — UI must fall back to a no-price string in that case
+     * rather than show any hard-coded amount.
+     */
+    val subscriptionOffer: StateFlow<SubscriptionOffer?>
 
     suspend fun refreshProStatus()
 

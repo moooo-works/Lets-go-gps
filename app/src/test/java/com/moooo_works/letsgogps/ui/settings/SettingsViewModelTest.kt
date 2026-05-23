@@ -85,6 +85,7 @@ class SettingsViewModelTest {
         every { proRepository.isProActive } returns MutableStateFlow(true)
         every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
         every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        every { proRepository.subscriptionOffer } returns MutableStateFlow(null)
         coEvery { proRepository.grantAdUnlockHours(any()) } returns Unit
         every { settingsRepository.observeClipboardHintEnabled() } returns MutableStateFlow(true)
         // Defaults required by exportDataToUri and applyImportData/applySettings.
@@ -543,6 +544,7 @@ class SettingsViewModelTest {
         every { proRepository.isProActive } returns MutableStateFlow(false)
         every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
         every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        every { proRepository.subscriptionOffer } returns MutableStateFlow(null)
         val vm = buildViewModel(nowMillis = System.currentTimeMillis())
         // proSection uses WhileSubscribed; an active collector is required for
         // the combine flow to produce a value.
@@ -556,6 +558,7 @@ class SettingsViewModelTest {
         every { proRepository.isProActive } returns MutableStateFlow(true)
         every { proRepository.isAdFreeActive } returns MutableStateFlow(true)
         every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        every { proRepository.subscriptionOffer } returns MutableStateFlow(null)
         val vm = buildViewModel(nowMillis = System.currentTimeMillis())
         backgroundScope.launch { vm.proSection.collect {} }
         advanceUntilIdle()
@@ -568,6 +571,7 @@ class SettingsViewModelTest {
         every { proRepository.isProActive } returns MutableStateFlow(true)
         every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
         every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(fixedNow + 20 * 3600_000L)
+        every { proRepository.subscriptionOffer } returns MutableStateFlow(null)
         val vm = buildViewModel(nowMillis = fixedNow)
         backgroundScope.launch { vm.proSection.collect {} }
         advanceUntilIdle()
@@ -584,6 +588,7 @@ class SettingsViewModelTest {
         every { proRepository.isProActive } returns MutableStateFlow(false)
         every { proRepository.isAdFreeActive } returns MutableStateFlow(false)
         every { proRepository.adUnlockExpiryMillis } returns MutableStateFlow(0L)
+        every { proRepository.subscriptionOffer } returns MutableStateFlow(null)
         coEvery { proRepository.grantAdUnlockHours(any()) } returns Unit
 
         val vm = buildViewModel(rewardedAdManager = rewardedAdManager)
