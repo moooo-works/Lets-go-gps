@@ -47,3 +47,11 @@ analysis/
 
 # macOS metadata
 **/.DS_Store
+
+# AI agent tool working dirs
+.agent/
+.agents/
+.codex/
+.gemini/
+.serena/
+.trellis/
