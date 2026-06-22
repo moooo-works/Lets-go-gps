@@ -241,13 +241,17 @@
     <string name="pro_dialog_title">Upgrade to Pro</string>
     <string name="pro_dialog_desc">Try free for 7 days, then the monthly price shown by Google Play. Unlock all pro features:</string>
     <string name="pro_dialog_desc_with_price">Try free for 7 days, then %1$s/month. Unlock all pro features:</string>
+    <string name="pro_dialog_desc_no_trial">Billed at the monthly price shown by Google Play. Unlock all pro features:</string>
+    <string name="pro_dialog_desc_no_trial_with_price">%1$s/month. Unlock all pro features:</string>
     <string name="pro_dialog_feature_routes">Create &amp; Play Custom Routes</string>
     <string name="pro_dialog_feature_joystick">Direction Control via Joystick</string>
     <string name="pro_dialog_feature_storage">Unlimited Saved Locations</string>
     <string name="pro_dialog_feature_export">Import &amp; Export Data</string>
     <string name="pro_dialog_feature_ads">Remove All Ads</string>
     <string name="pro_dialog_cancel_note">No charge until trial ends. Cancel anytime in Google Play.</string>
+    <string name="pro_dialog_cancel_note_no_trial">Cancel anytime in Google Play.</string>
     <string name="pro_dialog_action_upgrade">Try Free for 7 Days</string>
+    <string name="pro_dialog_action_subscribe">Subscribe</string>
     <string name="pro_dialog_action_watch_ad">Watch an ad to unlock 6 hours</string>
     <string name="error_rewarded_unavailable">No ad available right now, please try later</string>
 
@@ -259,7 +263,12 @@
     <string name="settings_pro_subscribe_card_title">Ad-Free Subscription</string>
     <string name="settings_pro_subscribe_card_subtitle">Monthly subscription, full Pro + no ads</string>
     <string name="settings_pro_subscribe_card_subtitle_with_price">%1$s / month, full Pro + no ads</string>
+    <string name="settings_pro_subscribe_card_subtitle_trial">7-day free trial, then billed at the monthly price shown by Google Play</string>
+    <string name="settings_pro_subscribe_card_subtitle_trial_with_price">7-day free trial, then %1$s / month</string>
+    <string name="settings_pro_subscribe_card_cancel_note">Cancel anytime in Google Play</string>
+    <string name="settings_pro_subscribe_card_cancel_note_trial">No charge until trial ends. Cancel anytime in Google Play</string>
     <string name="settings_pro_subscribe_card_button">Subscribe</string>
+    <string name="settings_pro_subscribe_card_button_trial">Start 7-Day Free Trial</string>
     <string name="settings_pro_unlocked_title">Pro Unlocked</string>
     <string name="settings_pro_unlocked_remaining">%1$s remaining</string>
     <string name="settings_pro_unlocked_watch_more">Watch more (+6h)</string>

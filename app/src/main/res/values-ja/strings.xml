@@ -241,13 +241,17 @@
     <string name="pro_dialog_title">Pro にアップグレード</string>
     <string name="pro_dialog_desc">7日間無料体験、その後は Google Play に表示される月額料金。すべての Pro 機能をアンロック：</string>
     <string name="pro_dialog_desc_with_price">7日間無料体験、その後月額 %1$s。すべての Pro 機能をアンロック：</string>
+    <string name="pro_dialog_desc_no_trial">Google Play に表示される月額料金で課金されます。すべての Pro 機能をアンロック：</string>
+    <string name="pro_dialog_desc_no_trial_with_price">月額 %1$s。すべての Pro 機能をアンロック：</string>
     <string name="pro_dialog_feature_routes">カスタムルートの作成と再生</string>
     <string name="pro_dialog_feature_joystick">ジョイスティックによる方向制御</string>
     <string name="pro_dialog_feature_storage">無制限の保存位置</string>
     <string name="pro_dialog_feature_export">データのインポート／エクスポート</string>
     <string name="pro_dialog_feature_ads">すべての広告を削除</string>
     <string name="pro_dialog_cancel_note">試用期間終了まで料金は発生しません。Google Play でいつでもキャンセルできます。</string>
+    <string name="pro_dialog_cancel_note_no_trial">Google Play でいつでもキャンセルできます。</string>
     <string name="pro_dialog_action_upgrade">7日間無料で試す</string>
+    <string name="pro_dialog_action_subscribe">登録する</string>
     <string name="pro_dialog_action_watch_ad">広告を1本見て6時間解除</string>
     <string name="error_rewarded_unavailable">利用可能な広告がありません。しばらくしてから再度お試しください</string>
 
@@ -259,7 +263,12 @@
     <string name="settings_pro_subscribe_card_title">広告なしサブスク</string>
     <string name="settings_pro_subscribe_card_subtitle">月額サブスク、永久Pro + 広告非表示</string>
     <string name="settings_pro_subscribe_card_subtitle_with_price">月額 %1$s、永久Pro + 広告非表示</string>
+    <string name="settings_pro_subscribe_card_subtitle_trial">7日間無料体験、その後は Google Play に表示される月額料金で課金</string>
+    <string name="settings_pro_subscribe_card_subtitle_trial_with_price">7日間無料体験、その後月額 %1$s</string>
+    <string name="settings_pro_subscribe_card_cancel_note">Google Play でいつでもキャンセルできます</string>
+    <string name="settings_pro_subscribe_card_cancel_note_trial">試用期間終了まで料金は発生しません。Google Play でいつでもキャンセル可能</string>
     <string name="settings_pro_subscribe_card_button">登録する</string>
+    <string name="settings_pro_subscribe_card_button_trial">7日間無料で試す</string>
     <string name="settings_pro_unlocked_title">Pro 解除中</string>
     <string name="settings_pro_unlocked_remaining">残り %1$s</string>
     <string name="settings_pro_unlocked_watch_more">もう1本見る +6h</string>

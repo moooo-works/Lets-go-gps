@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.moooo_works.letsgogps.R
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 
 @Composable
 fun ProUpgradeDialog(
@@ -18,8 +19,30 @@ fun ProUpgradeDialog(
     onWatchAd: () -> Unit,
     onSubscribe: () -> Unit,
     watchAdEnabled: Boolean = true,
-    formattedPrice: String? = null,
+    subscriptionOffer: SubscriptionOffer? = null,
 ) {
+    val price = subscriptionOffer?.formattedPrice
+    // Default to the trial wording while `subscriptionOffer == null` (Billing
+    // hasn't connected yet) — Play reviewers may trigger the dialog before
+    // ProductDetails loads, and the trial terms must be visible at every
+    // subscription entry point per Play policy. Only switch to the no-trial
+    // variant when Play explicitly reports the current user has exhausted
+    // trial eligibility.
+    val isTrial = subscriptionOffer?.hasFreeTrial != false
+    val descText = when {
+        isTrial && price != null -> stringResource(R.string.pro_dialog_desc_with_price, price)
+        isTrial -> stringResource(R.string.pro_dialog_desc)
+        price != null -> stringResource(R.string.pro_dialog_desc_no_trial_with_price, price)
+        else -> stringResource(R.string.pro_dialog_desc_no_trial)
+    }
+    val cancelNote = stringResource(
+        if (isTrial) R.string.pro_dialog_cancel_note
+        else R.string.pro_dialog_cancel_note_no_trial
+    )
+    val subscribeButton = stringResource(
+        if (isTrial) R.string.pro_dialog_action_upgrade
+        else R.string.pro_dialog_action_subscribe
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -38,11 +61,7 @@ fun ProUpgradeDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = if (formattedPrice != null) {
-                        stringResource(R.string.pro_dialog_desc_with_price, formattedPrice)
-                    } else {
-                        stringResource(R.string.pro_dialog_desc)
-                    },
+                    text = descText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -61,7 +80,7 @@ fun ProUpgradeDialog(
                     }
                 }
                 Text(
-                    stringResource(R.string.pro_dialog_cancel_note),
+                    cancelNote,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -80,7 +99,7 @@ fun ProUpgradeDialog(
                     onClick = onSubscribe,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.pro_dialog_action_upgrade))
+                    Text(subscribeButton)
                 }
             }
         },
