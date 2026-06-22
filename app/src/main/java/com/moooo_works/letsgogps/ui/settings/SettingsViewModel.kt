@@ -18,6 +18,7 @@ import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +27,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -177,15 +177,10 @@ class SettingsViewModel @Inject constructor(
 
     val isProActive: StateFlow<Boolean> = proRepository.isProActive
 
-    /** Localized recurring price (e.g. "₱269.00", "$3.99") from Play Billing,
-     *  or null until ProductDetails has loaded. */
-    val subscriptionPrice: StateFlow<String?> = proRepository.subscriptionOffer
-        .map { it?.formattedPrice }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            proRepository.subscriptionOffer.value?.formattedPrice,
-        )
+    /** Play Billing subscription offer: localized recurring price + trial
+     *  eligibility. Null until ProductDetails has loaded; UI falls back to a
+     *  no-price, no-trial render in that window. */
+    val subscriptionOffer: StateFlow<SubscriptionOffer?> = proRepository.subscriptionOffer
 
     /**
      * Injectable time source for tests. When non-null, replaces the default

@@ -7,6 +7,7 @@ import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.RouteProgress
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 
 enum class TransportMode(val speedKmh: Double) {
     WALKING(5.0),
@@ -44,8 +45,8 @@ data class MapUiState(
     val isAdFreeActive: Boolean = false,
     val adUnlockRemainingMillis: Long = 0L,
     val showProUpgrade: Boolean = false,
-    /** Localized recurring price from Play Billing; null until ProductDetails loads. */
-    val subscriptionPrice: String? = null,
+    /** Play Billing offer (localized price + trial eligibility); null until ProductDetails loads. */
+    val subscriptionOffer: SubscriptionOffer? = null,
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,
     val showEditLocationDialog: Boolean = false,

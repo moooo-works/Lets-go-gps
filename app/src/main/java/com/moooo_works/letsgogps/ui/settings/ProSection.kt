@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moooo_works.letsgogps.R
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 
 @Composable
 fun ProSection(
@@ -33,7 +34,7 @@ fun ProSection(
     onSubscribe: () -> Unit,
     onManageSubscription: () -> Unit,
     modifier: Modifier = Modifier,
-    formattedPrice: String? = null,
+    subscriptionOffer: SubscriptionOffer? = null,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -47,7 +48,7 @@ fun ProSection(
                 fontWeight = FontWeight.Bold,
             )
             when (state) {
-                ProSectionState.Free -> ProFreeContent(onWatchAd, onSubscribe, formattedPrice)
+                ProSectionState.Free -> ProFreeContent(onWatchAd, onSubscribe, subscriptionOffer)
                 is ProSectionState.AdUnlocked -> ProUnlockedContent(state, onWatchAd, onSubscribe)
                 ProSectionState.Subscribed -> ProSubscribedContent(onManageSubscription)
             }
@@ -59,13 +60,36 @@ fun ProSection(
 private fun ProFreeContent(
     onWatchAd: () -> Unit,
     onSubscribe: () -> Unit,
-    formattedPrice: String?,
+    offer: SubscriptionOffer?,
 ) {
-    val subscribeSubtitle = if (formattedPrice != null) {
-        stringResource(R.string.settings_pro_subscribe_card_subtitle_with_price, formattedPrice)
-    } else {
-        stringResource(R.string.settings_pro_subscribe_card_subtitle)
+    val price = offer?.formattedPrice
+    // Trial disclosure must be visible at the subscription entry point even
+    // before BillingClient has connected — Play reviewers open the app fresh
+    // and frequently land on Settings before ProductDetails finishes loading.
+    // Default to the trial wording while `offer == null` and only switch to
+    // the no-trial variant when Play explicitly reports the current user has
+    // exhausted trial eligibility (`hasFreeTrial == false`). Required by
+    // Play's "Trial or new user offer terms" policy — the entry point must
+    // spell out trial length, post-trial price, and how to cancel.
+    val isTrial = offer?.hasFreeTrial != false
+    val subscribeSubtitle = when {
+        isTrial && price != null ->
+            stringResource(R.string.settings_pro_subscribe_card_subtitle_trial_with_price, price)
+        isTrial ->
+            stringResource(R.string.settings_pro_subscribe_card_subtitle_trial)
+        price != null ->
+            stringResource(R.string.settings_pro_subscribe_card_subtitle_with_price, price)
+        else ->
+            stringResource(R.string.settings_pro_subscribe_card_subtitle)
     }
+    val subscribeNote = stringResource(
+        if (isTrial) R.string.settings_pro_subscribe_card_cancel_note_trial
+        else R.string.settings_pro_subscribe_card_cancel_note
+    )
+    val subscribeButton = stringResource(
+        if (isTrial) R.string.settings_pro_subscribe_card_button_trial
+        else R.string.settings_pro_subscribe_card_button
+    )
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.height(IntrinsicSize.Min),
@@ -80,7 +104,8 @@ private fun ProFreeContent(
         ProFreeCard(
             title = stringResource(R.string.settings_pro_subscribe_card_title),
             subtitle = subscribeSubtitle,
-            buttonText = stringResource(R.string.settings_pro_subscribe_card_button),
+            note = subscribeNote,
+            buttonText = subscribeButton,
             onClick = onSubscribe,
             modifier = Modifier.weight(1f).fillMaxHeight(),
         )
@@ -94,6 +119,7 @@ private fun ProFreeCard(
     buttonText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    note: String? = null,
 ) {
     Card(
         modifier = modifier,
@@ -106,6 +132,13 @@ private fun ProFreeCard(
         ) {
             Text(title, fontWeight = FontWeight.SemiBold)
             Text(subtitle, style = MaterialTheme.typography.bodySmall)
+            if (note != null) {
+                Text(
+                    note,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.weight(1f))
             Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
                 Text(buttonText)

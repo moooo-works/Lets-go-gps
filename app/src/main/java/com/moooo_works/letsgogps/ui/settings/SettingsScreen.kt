@@ -62,7 +62,7 @@ fun SettingsScreen(
     val isProActive by viewModel.isProActive.collectAsState()
     val showProUpgrade by viewModel.showProUpgrade.collectAsState()
     val proSection by viewModel.proSection.collectAsState()
-    val subscriptionPrice by viewModel.subscriptionPrice.collectAsState()
+    val subscriptionOffer by viewModel.subscriptionOffer.collectAsState()
     val altitude by viewModel.altitude.collectAsState()
     val randomAltitude by viewModel.randomAltitude.collectAsState()
     val coordinateJitter by viewModel.coordinateJitter.collectAsState()
@@ -154,7 +154,7 @@ fun SettingsScreen(
                 activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade()
             },
             watchAdEnabled = (proSection as? ProSectionState.AdUnlocked)?.watchAdEnabled ?: true,
-            formattedPrice = subscriptionPrice,
+            subscriptionOffer = subscriptionOffer,
         )
     }
 
@@ -292,7 +292,7 @@ fun SettingsScreen(
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
                 },
-                formattedPrice = subscriptionPrice,
+                subscriptionOffer = subscriptionOffer,
             )
 
             // 權限狀態卡片

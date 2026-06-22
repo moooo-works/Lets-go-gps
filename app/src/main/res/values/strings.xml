@@ -242,13 +242,17 @@
     <string name="pro_dialog_title">升級至 Pro</string>
     <string name="pro_dialog_desc">免費試用 7 天，之後依 Google Play 顯示之每月訂閱費用收費。解鎖以下所有進階功能：</string>
     <string name="pro_dialog_desc_with_price">免費試用 7 天，之後每月 %1$s。解鎖以下所有進階功能：</string>
+    <string name="pro_dialog_desc_no_trial">依 Google Play 顯示之每月訂閱費用收費。解鎖以下所有進階功能：</string>
+    <string name="pro_dialog_desc_no_trial_with_price">每月 %1$s。解鎖以下所有進階功能：</string>
     <string name="pro_dialog_feature_routes">建立與播放自訂路線</string>
     <string name="pro_dialog_feature_joystick">搖桿自由控制方向</string>
     <string name="pro_dialog_feature_storage">無限儲存位置</string>
     <string name="pro_dialog_feature_export">匯入／匯出資料</string>
     <string name="pro_dialog_feature_ads">移除全部廣告</string>
     <string name="pro_dialog_cancel_note">試用期結束前不收費，可隨時於 Google Play 取消訂閱。</string>
+    <string name="pro_dialog_cancel_note_no_trial">可隨時於 Google Play 取消訂閱。</string>
     <string name="pro_dialog_action_upgrade">免費試用 7 天</string>
+    <string name="pro_dialog_action_subscribe">訂閱</string>
     <string name="pro_dialog_action_watch_ad">看一支廣告解鎖 6 小時</string>
     <string name="error_rewarded_unavailable">暫時沒有可用廣告，請稍後再試</string>
 
@@ -260,7 +264,12 @@
     <string name="settings_pro_subscribe_card_title">訂閱無廣告版</string>
     <string name="settings_pro_subscribe_card_subtitle">月訂閱方案，永久 Pro 且無廣告</string>
     <string name="settings_pro_subscribe_card_subtitle_with_price">%1$s / 月，永久 Pro 且無廣告</string>
+    <string name="settings_pro_subscribe_card_subtitle_trial">7 天免費試用，之後依 Google Play 顯示之每月訂閱費用收費</string>
+    <string name="settings_pro_subscribe_card_subtitle_trial_with_price">7 天免費試用，之後每月 %1$s</string>
+    <string name="settings_pro_subscribe_card_cancel_note">可隨時於 Google Play 取消訂閱</string>
+    <string name="settings_pro_subscribe_card_cancel_note_trial">試用結束前不收費，可隨時於 Google Play 取消</string>
     <string name="settings_pro_subscribe_card_button">訂閱</string>
+    <string name="settings_pro_subscribe_card_button_trial">免費試用 7 天</string>
     <string name="settings_pro_unlocked_title">Pro 解鎖中</string>
     <string name="settings_pro_unlocked_remaining">剩 %1$s</string>
     <string name="settings_pro_unlocked_watch_more">再看一支 +6h</string>

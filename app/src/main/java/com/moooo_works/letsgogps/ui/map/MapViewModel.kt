@@ -219,7 +219,7 @@ class MapViewModel @Inject constructor(
 
         viewModelScope.launch {
             proRepository.subscriptionOffer.collect { offer ->
-                _uiState.update { it.copy(subscriptionPrice = offer?.formattedPrice) }
+                _uiState.update { it.copy(subscriptionOffer = offer) }
             }
         }
 

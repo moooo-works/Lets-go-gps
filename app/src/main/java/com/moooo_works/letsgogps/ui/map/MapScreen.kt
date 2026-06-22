@@ -442,7 +442,7 @@ fun MapScreen(
                 activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade()
             },
             watchAdEnabled = uiState.adUnlockRemainingMillis < 18 * 3600_000L,
-            formattedPrice = uiState.subscriptionPrice,
+            subscriptionOffer = uiState.subscriptionOffer,
         )
     }
 
