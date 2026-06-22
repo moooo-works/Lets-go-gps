@@ -3,6 +3,7 @@ package com.moooo_works.letsgogps.di
 import com.moooo_works.letsgogps.data.engine.AndroidLocationMockEngine
 import com.moooo_works.letsgogps.data.healthcheck.SystemHealthCheckImpl
 import com.moooo_works.letsgogps.data.repository.LocationRepositoryImpl
+import com.moooo_works.letsgogps.data.repository.MockSessionRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.MockStateRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.ProRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.SearchRepositoryImpl
@@ -11,6 +12,7 @@ import com.moooo_works.letsgogps.data.repository.TimezoneRepositoryImpl
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
+import com.moooo_works.letsgogps.domain.repository.MockSessionRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SearchRepository
@@ -43,6 +45,12 @@ abstract class RepositoryModule {
     abstract fun bindMockStateRepository(
         mockStateRepositoryImpl: MockStateRepositoryImpl
     ): MockStateRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMockSessionRepository(
+        mockSessionRepositoryImpl: MockSessionRepositoryImpl
+    ): MockSessionRepository
 
     @Binds
     @Singleton

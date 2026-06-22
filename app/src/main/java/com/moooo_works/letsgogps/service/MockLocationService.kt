@@ -17,9 +17,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.moooo_works.letsgogps.domain.LocationMockEngine
+import com.moooo_works.letsgogps.domain.isRouteCompletionOnIdle
+import com.moooo_works.letsgogps.domain.MockSessionMode
+import com.moooo_works.letsgogps.domain.PersistedMockSession
 import com.moooo_works.letsgogps.domain.RouteSimulator
+import com.moooo_works.letsgogps.domain.SerLatLng
 import com.moooo_works.letsgogps.domain.SimulationPoint
 import com.moooo_works.letsgogps.domain.SimulationState
+import com.moooo_works.letsgogps.domain.repository.MockSessionRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
@@ -41,6 +46,22 @@ class MockLocationService : Service() {
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var mockSessionRepository: MockSessionRepository
+
+    // The session we are currently persisting for crash-recovery, kept in memory
+    // so progress ticks only have to rewrite the changed fields. Null = nothing
+    // to recover. Cleared only on explicit stop / route completion, NOT on
+    // onDestroy — a killed process must leave its session on disk to restore.
+    @Volatile
+    private var activeSession: PersistedMockSession? = null
+
+    // True while handleStop() is tearing down. Stop drives the simulator to IDLE
+    // before mockStatus flips to IDLE; without this flag the IDLE collector would
+    // misread that transient as "route completed" and clear the recovery session.
+    @Volatile
+    private var isStopping = false
 
     // Default dispatcher (not Main) so the route simulator's tick loop and
     // location-injection collectors keep running at full cadence when the user
@@ -90,8 +111,7 @@ class MockLocationService : Service() {
                         updateNotification(MockStatus.ROUTE_PAUSED)
                     }
                     SimulationState.IDLE -> {
-                        if (mockStateRepository.mockStatus.value == MockStatus.ROUTE_PLAYING || 
-                            mockStateRepository.mockStatus.value == MockStatus.ROUTE_PAUSED) {
+                        if (isRouteCompletionOnIdle(isStopping, mockStateRepository.mockStatus.value)) {
                             handleRouteCompleted()
                         }
                     }
@@ -134,6 +154,44 @@ class MockLocationService : Service() {
                 }
             }
         }
+
+        // 6. Persist route progress so a killed process can resume mid-route.
+        // ponytail: 3s throttle — a kill loses at most ~3s of progress, which is fine.
+        @OptIn(FlowPreview::class)
+        serviceScope.launch {
+            routeSimulator.routeProgress.sample(3000).collect {
+                val base = activeSession ?: return@collect
+                if (base.mode == MockSessionMode.ROUTE &&
+                    routeSimulator.simulationState.value == SimulationState.PLAYING
+                ) {
+                    val snap = routeSimulator.snapshotProgress()
+                    persistSession(
+                        base.copy(
+                            savedAtMillis = System.currentTimeMillis(),
+                            wasInjecting = true,
+                            segmentIndex = snap.segmentIndex,
+                            distanceCoveredInSegment = snap.distanceCoveredInSegment,
+                            isReturning = snap.isReturning,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun bootTimeMillis(): Long =
+        System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime()
+
+    /** Save + remember the session. Suspend DataStore write is fire-and-forget. */
+    private fun persistSession(session: PersistedMockSession) {
+        activeSession = session
+        serviceScope.launch { mockSessionRepository.save(session) }
+    }
+
+    /** Clear the recovery session — only on explicit stop / completion. */
+    private fun clearPersistedSession() {
+        activeSession = null
+        serviceScope.launch { mockSessionRepository.clear() }
     }
 
     private fun performInjection(location: LatLng, bearing: Float = 0f, speed: Float = 0f, applyJitter: Boolean = true) {
@@ -176,6 +234,7 @@ class MockLocationService : Service() {
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE ||
             action == ACTION_START_EXPLORATION || action == ACTION_START_TELEPORT_EXPLORATION
         ) {
+            isStopping = false // starting fresh — IDLE-as-completion detection re-armed
             try {
                 startForeground(NOTIFICATION_ID, buildNotification(MockStatus.IDLE))
             } catch (e: SecurityException) {
@@ -192,7 +251,10 @@ class MockLocationService : Service() {
             ACTION_START_TELEPORT_EXPLORATION -> handleStartTeleportExploration(intent)
             ACTION_PAUSE_ROUTE -> handlePauseRoute()
             ACTION_RESUME_ROUTE -> handleResumeRoute()
-            ACTION_STOP -> handleStop()
+            ACTION_STOP -> {
+                clearPersistedSession() // explicit user stop — discard recovery
+                handleStop()
+            }
         }
 
         return START_NOT_STICKY
@@ -225,6 +287,17 @@ class MockLocationService : Service() {
             mockStateRepository.setCurrentMockLocation(target)
             mockStateRepository.setMockStatus(MockStatus.MOCKING)
             updateNotification(MockStatus.MOCKING)
+
+            persistSession(
+                PersistedMockSession(
+                    mode = MockSessionMode.SINGLE,
+                    savedAtMillis = System.currentTimeMillis(),
+                    bootTimeMillis = bootTimeMillis(),
+                    wasInjecting = true,
+                    singleLat = lat,
+                    singleLng = lng,
+                )
+            )
 
             // Keep-alive loop: ensure the system receives updates at least once per 500ms
             // even if the user isn't moving the joystick. 500ms (2Hz) is enough.
@@ -259,7 +332,7 @@ class MockLocationService : Service() {
                 }
             }
 
-            // 2. KEEP-ALIVE: If the simulator is idle/paused, re-inject last point every 1s 
+            // 2. KEEP-ALIVE: If the simulator is idle/paused, re-inject last point every 1s
             // to prevent system from reclaiming the location, but don't do it rapidly.
             while (isActive) {
                 if (routeSimulator.simulationState.value != SimulationState.PLAYING) {
@@ -271,6 +344,30 @@ class MockLocationService : Service() {
                 delay(1000) // Lower frequency for keep-alive to avoid interference
             }
         }
+
+        // Persist the route session for crash-recovery. waypoints come from the
+        // repository (already populated by the UI before playRoute); progress is
+        // whatever the simulator currently holds (0 on a fresh play, mid-route on
+        // a restore-driven resume). The 3s progress ticker keeps it fresh.
+        val waypoints = mockStateRepository.activeRouteWaypoints.value
+        if (waypoints.size >= 2) {
+            val snap = routeSimulator.snapshotProgress()
+            persistSession(
+                PersistedMockSession(
+                    mode = MockSessionMode.ROUTE,
+                    savedAtMillis = System.currentTimeMillis(),
+                    bootTimeMillis = bootTimeMillis(),
+                    wasInjecting = true,
+                    waypoints = waypoints.map { SerLatLng(it.latitude, it.longitude) },
+                    speedMps = routeSimulator.currentSpeedMps(),
+                    loopMode = routeSimulator.currentLoopMode().name,
+                    segmentIndex = snap.segmentIndex,
+                    distanceCoveredInSegment = snap.distanceCoveredInSegment,
+                    isReturning = snap.isReturning,
+                )
+            )
+        }
+
         routeSimulator.play(serviceScope)
     }
 
@@ -341,16 +438,24 @@ class MockLocationService : Service() {
 
     private fun handlePauseRoute() {
         routeSimulator.pause()
+        // Paused-then-killed must NOT auto-inject on return — only restore display.
+        activeSession?.let {
+            persistSession(it.copy(wasInjecting = false, savedAtMillis = System.currentTimeMillis()))
+        }
     }
 
     private fun handleResumeRoute() {
         if (routeSimulator.simulationState.value == SimulationState.PAUSED) {
             routeSimulator.play(serviceScope)
+            activeSession?.let {
+                persistSession(it.copy(wasInjecting = true, savedAtMillis = System.currentTimeMillis()))
+            }
         }
     }
 
     private fun handleRouteCompleted() {
         currentRouteProgress = null
+        clearPersistedSession() // route finished — nothing to recover
         val finalLocation = mockStateRepository.currentMockLocation.value
         if (finalLocation == null) {
             handleStop()
@@ -362,6 +467,7 @@ class MockLocationService : Service() {
     }
 
     private fun handleStop() {
+        isStopping = true
         consecutiveInjectionFailures = 0
         stopLocationPushJob()
         routeSimulator.stop()

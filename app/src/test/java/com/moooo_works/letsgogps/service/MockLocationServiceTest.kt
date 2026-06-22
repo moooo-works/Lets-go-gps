@@ -6,6 +6,7 @@ import com.moooo_works.letsgogps.domain.RouteProgress
 import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.SimulationPoint
 import com.moooo_works.letsgogps.domain.SimulationState
+import com.moooo_works.letsgogps.domain.repository.MockSessionRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
@@ -40,6 +41,7 @@ class MockLocationServiceTest {
     private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
+    private val mockSessionRepository = mockk<MockSessionRepository>(relaxed = true)
     private val dispatcher = StandardTestDispatcher()
 
     private val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
@@ -75,6 +77,7 @@ class MockLocationServiceTest {
         service.mockStateRepository = mockStateRepository
         service.mockEngine = mockEngine
         service.routeSimulator = routeSimulator
+        service.mockSessionRepository = mockSessionRepository
         service.settingsRepository = settingsRepository
 
         // Set status to MOCKING
@@ -101,6 +104,7 @@ class MockLocationServiceTest {
         service.mockStateRepository = mockStateRepository
         service.mockEngine = mockEngine
         service.routeSimulator = routeSimulator
+        service.mockSessionRepository = mockSessionRepository
         service.settingsRepository = settingsRepository
 
         val intent = Intent().apply { action = MockLocationService.ACTION_PAUSE_ROUTE }
@@ -119,6 +123,7 @@ class MockLocationServiceTest {
         service.mockStateRepository = mockStateRepository
         service.mockEngine = mockEngine
         service.routeSimulator = routeSimulator
+        service.mockSessionRepository = mockSessionRepository
         service.settingsRepository = settingsRepository
 
         advanceUntilIdle()
