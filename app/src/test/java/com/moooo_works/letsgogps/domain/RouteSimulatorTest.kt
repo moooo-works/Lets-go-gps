@@ -299,6 +299,91 @@ class RouteSimulatorTest {
         assertNull(simulator.routeProgress.value)
     }
 
+    // ─── Progress snapshot / restore (process-death resume) ───────────────────
+
+    @Test
+    fun `restoreProgress makes play resume from the given segment`() = runTest {
+        val simulator = RouteSimulator(settingsRepository)
+        val a = LatLng(0.0, 0.0)
+        val b = LatLng(0.01, 0.0)
+        val c = LatLng(0.01, 0.01)
+        simulator.setRoute(listOf(a, b, c))
+        simulator.setSpeed(5.0)
+
+        // Resume from the start of segment 1 (waypoint b), not from a.
+        simulator.restoreProgress(RouteProgressSnapshot(segmentIndex = 1, distanceCoveredInSegment = 0.0, isReturning = false))
+
+        val emitted = mutableListOf<SimulationPoint?>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            simulator.currentLocation.collect { emitted.add(it) }
+        }
+
+        simulator.play(this)
+        testScheduler.advanceTimeBy(100)
+
+        val firstPoint = emitted.filterNotNull().first()
+        assertEquals("should resume at waypoint b latitude", b.latitude, firstPoint.latLng.latitude, 1e-6)
+        assertEquals("should resume at waypoint b longitude", b.longitude, firstPoint.latLng.longitude, 1e-6)
+
+        simulator.stop()
+        job.cancel()
+    }
+
+    @Test
+    fun `snapshotProgress reflects advancing playback`() = runTest {
+        val simulator = RouteSimulator(settingsRepository)
+        simulator.setRoute(listOf(LatLng(0.0, 0.0), LatLng(0.01, 0.0), LatLng(0.02, 0.0)))
+        simulator.setSpeed(50.0)
+
+        simulator.play(this)
+        testScheduler.advanceTimeBy(5_000)
+
+        val snap = simulator.snapshotProgress()
+        simulator.stop()
+
+        assertTrue(
+            "snapshot should have advanced past the start (seg=${snap.segmentIndex}, dist=${snap.distanceCoveredInSegment})",
+            snap.segmentIndex > 0 || snap.distanceCoveredInSegment > 0.0
+        )
+    }
+
+    @Test
+    fun `snapshot then restore on a fresh simulator resumes mid-route`() = runTest {
+        // Simulates process death: snapshot progress, throw the simulator away,
+        // rebuild a fresh one, restore, and confirm it does NOT restart at the origin.
+        val route = listOf(LatLng(0.0, 0.0), LatLng(0.01, 0.0), LatLng(0.01, 0.01))
+
+        val first = RouteSimulator(settingsRepository)
+        first.setRoute(route)
+        first.setSpeed(50.0)
+        first.play(this)
+        testScheduler.advanceTimeBy(3_000)
+        val snap = first.snapshotProgress()
+        first.stop()
+        assertTrue("precondition: progress advanced", snap.segmentIndex > 0 || snap.distanceCoveredInSegment > 0.0)
+
+        val fresh = RouteSimulator(settingsRepository)
+        fresh.setRoute(route)
+        fresh.setSpeed(50.0)
+        fresh.restoreProgress(snap)
+
+        val emitted = mutableListOf<SimulationPoint?>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            fresh.currentLocation.collect { emitted.add(it) }
+        }
+        fresh.play(this)
+        testScheduler.advanceTimeBy(50)
+
+        val firstPoint = emitted.filterNotNull().first()
+        assertTrue(
+            "fresh simulator must resume past origin, got ${firstPoint.latLng}",
+            firstPoint.latLng.latitude > 0.0
+        )
+
+        fresh.stop()
+        job.cancel()
+    }
+
     // ─── Spiral position math (exploration / teleport-exploration) ───────────
 
     @Test

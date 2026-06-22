@@ -52,6 +52,17 @@ data class RouteProgress(
     val totalKm: Double
 )
 
+/**
+ * Minimal playback progress needed to resume a route after process death.
+ * Mirrors the private [RouteSimulator] fields that [RouteSimulator.play] reads
+ * to continue from a mid-route position.
+ */
+data class RouteProgressSnapshot(
+    val segmentIndex: Int,
+    val distanceCoveredInSegment: Double,
+    val isReturning: Boolean
+)
+
 @Singleton
 class RouteSimulator @Inject constructor(
     private val settingsRepository: SettingsRepository
@@ -91,6 +102,30 @@ class RouteSimulator @Inject constructor(
 
     fun setLoopMode(mode: LoopMode) {
         loopMode = mode
+    }
+
+    /** Current loop mode — exposed so the service can persist it for resume. */
+    fun currentLoopMode(): LoopMode = loopMode
+
+    /** Current speed (m/s) — exposed so the service can persist it for resume. */
+    fun currentSpeedMps(): Double = speedMps
+
+    /**
+     * Snapshot the mid-route playback position so it can be persisted and later
+     * fed back via [restoreProgress] after the process is killed.
+     */
+    fun snapshotProgress(): RouteProgressSnapshot =
+        RouteProgressSnapshot(currentSegmentIndex, distanceCoveredInSegment, isReturning)
+
+    /**
+     * Restore a previously captured playback position. MUST be called AFTER
+     * [setRoute] (which resets progress) and BEFORE [play] — [play] reads these
+     * fields to continue from the mid-route position instead of the origin.
+     */
+    fun restoreProgress(snapshot: RouteProgressSnapshot) {
+        currentSegmentIndex = snapshot.segmentIndex
+        distanceCoveredInSegment = snapshot.distanceCoveredInSegment
+        isReturning = snapshot.isReturning
     }
 
     /**
