@@ -1,0 +1,3 @@
+• Rettet et nedbrud, hvor appen ikke kunne åbnes igen, efter at systemet havde lukket den på visse enheder
+• Du bliver nu mindet om at slå batterioptimering fra før rutesimulering, så lange forløb ikke afbrydes
+• Forbedret stabilitet og nedbrudsdiagnostik

@@ -1,0 +1,3 @@
+• Fixed a crash where the app could fail to reopen after being closed by the system on some devices
+• You're now reminded to turn off battery optimization before route simulation, so long runs aren't interrupted
+• Improved overall stability and crash diagnostics
