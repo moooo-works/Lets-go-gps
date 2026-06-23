@@ -1,0 +1,3 @@
+• Rettet en krasj der appen ikke kunne åpnes igjen etter at systemet hadde lukket den på enkelte enheter
+• Du blir nå minnet om å slå av batterioptimalisering før rutesimulering, slik at lange økter ikke avbrytes
+• Forbedret stabilitet og krasjdiagnostikk
