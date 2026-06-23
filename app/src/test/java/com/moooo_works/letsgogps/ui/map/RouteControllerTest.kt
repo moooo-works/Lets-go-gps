@@ -8,11 +8,16 @@ import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.RouteSimulator
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
+import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
+import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.service.MockLocationService
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
@@ -39,6 +44,10 @@ class RouteControllerTest {
     private val routeSimulator = mockk<RouteSimulator>(relaxed = true)
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
+    private val systemHealthCheck = mockk<SystemHealthCheck> {
+        // Battery item absent → NotApplicable → no nudge; playRoute proceeds as before.
+        every { refresh() } returns HealthCheckState(emptyMap())
+    }
     private val state = MutableStateFlow(MapUiState())
     private var stopMockingCalled = false
     private var ensurePermissionResult = true
@@ -51,6 +60,7 @@ class RouteControllerTest {
         routeSimulator = routeSimulator,
         settingsRepository = settingsRepository,
         context = context,
+        systemHealthCheck = systemHealthCheck,
         onStopMocking = { stopMockingCalled = true },
         onEnsurePermission = { ensurePermissionResult }
     )
@@ -148,6 +158,23 @@ class RouteControllerTest {
         ctrl.playRoute()
         verify { context.startForegroundService(capture(intentSlot)) }
         assertEquals(MockLocationService.ACTION_START_ROUTE, intentSlot.captured.action)
+    }
+
+    @Test
+    fun `playRoute nudges battery whitelist once then plays`() = runTest {
+        state.value = state.value.copy(isProActive = true, waypoints = listOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))
+        every { systemHealthCheck.refresh() } returns
+            HealthCheckState(mapOf(HealthCheckItem.BatteryOptimizationExempt to ItemStatus.Failed))
+        val ctrl = makeController(this)
+
+        // First tap: surface the health sheet, do NOT start the service yet.
+        ctrl.playRoute()
+        assertTrue(state.value.showHealthCheck)
+        verify(exactly = 0) { context.startForegroundService(any()) }
+
+        // Second tap: nudge already shown this session, playback proceeds.
+        ctrl.playRoute()
+        verify { context.startForegroundService(any()) }
     }
 
     @Test

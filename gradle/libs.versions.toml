@@ -23,6 +23,9 @@ datastore = "1.0.0"
 openlocationcode = "1.0.4"
 admob = "23.1.0"
 billing = "7.1.0"
+google-services = "4.4.2"
+firebase-crashlytics-plugin = "3.0.2"
+firebase-bom = "33.1.2"
 play-review = "2.0.2"
 appcompat = "1.6.1"
 reorderable = "0.9.6"
@@ -65,12 +68,16 @@ billing = { group = "com.android.billingclient", name = "billing-ktx", version.r
 play-review = { group = "com.google.android.play", name = "review-ktx", version.ref = "play-review" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 reorderable = { group = "org.burnoutcrew.composereorderable", name = "reorderable", version.ref = "reorderable" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-plugin" }
 
 [bundles]
 compose = ["ui", "ui-graphics", "ui-tooling-preview", "material3"]

@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 val localProperties = Properties().apply {
@@ -15,7 +17,7 @@ val localProperties = Properties().apply {
 
 val versionMajor = 1
 val versionMinor = 2
-val versionPatch = 2
+val versionPatch = 4
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -153,6 +155,10 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.material.icons.extended)
     implementation(libs.reorderable)
+
+    // Firebase Crashlytics (crash reporting; works without GMS via its own upload)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     // Gson
     implementation(libs.gson)
