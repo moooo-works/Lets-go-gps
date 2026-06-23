@@ -1,9 +1,6 @@
 package com.moooo_works.letsgogps.service
 
-import android.content.Context
-import android.content.Intent
 import android.os.SystemClock
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -17,7 +14,6 @@ import com.moooo_works.letsgogps.domain.decideRestore
 import com.moooo_works.letsgogps.domain.repository.MockSessionRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,10 +26,16 @@ import javax.inject.Singleton
  * its process was killed (e.g. aggressive OEM background management). Registered
  * once from [com.moooo_works.letsgogps.MainApplication]; the first ON_START after
  * a cold start drives recovery. See [decideRestore] for the policy.
+ *
+ * Restore only ever re-populates the *display* state (route shown as paused, single
+ * point shown). It never starts the foreground service: starting a FGS from this
+ * background lifecycle callback throws ForegroundServiceStartNotAllowedException on
+ * Android 12+ (and is especially strict on some OEMs), which previously crash-looped
+ * the app on every launch. The user resumes by pressing play from a real foreground
+ * interaction, continuing from the restored progress.
  */
 @Singleton
 class MockSessionRestorer @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val sessionRepository: MockSessionRepository,
     private val mockStateRepository: MockStateRepository,
     private val routeSimulator: RouteSimulator,
@@ -49,27 +51,39 @@ class MockSessionRestorer @Inject constructor(
     }
 
     private suspend fun maybeRestore() {
-        val memoryHasActiveSession =
-            mockStateRepository.mockStatus.value != MockStatus.IDLE ||
-                mockStateRepository.activeRouteWaypoints.value.isNotEmpty()
+        // Defense in depth: restore runs in a background coroutine right after a
+        // cold start. Any uncaught throw here reaches the default handler and
+        // crashes the app ON LAUNCH — and since the session stays on disk, it
+        // crash-loops every reopen ("app killed → can't open it again"). So we
+        // never let restore brick startup: on ANY failure, drop the session and
+        // give up quietly. The user just won't see the route restored.
+        try {
+            val memoryHasActiveSession =
+                mockStateRepository.mockStatus.value != MockStatus.IDLE ||
+                    mockStateRepository.activeRouteWaypoints.value.isNotEmpty()
 
-        val persisted = sessionRepository.load()
-        val decision = decideRestore(
-            persisted = persisted,
-            memoryHasActiveSession = memoryHasActiveSession,
-            currentBootTimeMillis = System.currentTimeMillis() - SystemClock.elapsedRealtime(),
-            nowMillis = System.currentTimeMillis(),
-        )
+            val persisted = sessionRepository.load()
+            val decision = decideRestore(
+                persisted = persisted,
+                memoryHasActiveSession = memoryHasActiveSession,
+                currentBootTimeMillis = System.currentTimeMillis() - SystemClock.elapsedRealtime(),
+                nowMillis = System.currentTimeMillis(),
+            )
 
-        when (decision) {
-            RestoreDecision.NO_OP -> Unit
-            RestoreDecision.DISCARD -> sessionRepository.clear()
-            RestoreDecision.RESTORE_AND_RESUME -> persisted?.let { restore(it, resume = true) }
-            RestoreDecision.RESTORE_PAUSED -> persisted?.let { restore(it, resume = false) }
+            when (decision) {
+                RestoreDecision.NO_OP -> Unit
+                RestoreDecision.DISCARD -> sessionRepository.clear()
+                // Both RESUME and PAUSED restore display only — never auto-start the
+                // service. Resuming injection is a foreground user action (press play).
+                RestoreDecision.RESTORE_AND_RESUME,
+                RestoreDecision.RESTORE_PAUSED -> persisted?.let { restoreDisplay(it) }
+            }
+        } catch (e: Exception) {
+            runCatching { sessionRepository.clear() }
         }
     }
 
-    private fun restore(session: com.moooo_works.letsgogps.domain.PersistedMockSession, resume: Boolean) {
+    private fun restoreDisplay(session: com.moooo_works.letsgogps.domain.PersistedMockSession) {
         when (session.mode) {
             MockSessionMode.ROUTE -> {
                 val waypoints = session.waypoints.map { LatLng(it.lat, it.lng) }
@@ -81,34 +95,16 @@ class MockSessionRestorer @Inject constructor(
                 routeSimulator.restoreProgress(
                     RouteProgressSnapshot(session.segmentIndex, session.distanceCoveredInSegment, session.isReturning)
                 )
-                if (resume) {
-                    // handleStartRoute calls play(), which continues from the restored progress.
-                    startService(MockLocationService.ACTION_START_ROUTE)
-                } else {
-                    // Device rebooted: show route + progress, wait for the user to press play.
-                    mockStateRepository.setMockStatus(MockStatus.ROUTE_PAUSED)
-                }
+                // Show route + progress, paused; the user presses play to resume
+                // from here (the normal foreground start path drives the service).
+                mockStateRepository.setMockStatus(MockStatus.ROUTE_PAUSED)
             }
             MockSessionMode.SINGLE -> {
                 val lat = session.singleLat ?: return
                 val lng = session.singleLng ?: return
+                // Show the point; the user re-starts injection from the foreground.
                 mockStateRepository.setCurrentMockLocation(LatLng(lat, lng))
-                if (resume) {
-                    startService(MockLocationService.ACTION_START_SINGLE) {
-                        putExtra(MockLocationService.EXTRA_LAT, lat)
-                        putExtra(MockLocationService.EXTRA_LNG, lng)
-                    }
-                }
-                // RESTORE_PAUSED for a single point: location is shown, no injection.
             }
         }
-    }
-
-    private fun startService(action: String, configure: Intent.() -> Unit = {}) {
-        val intent = Intent(context, MockLocationService::class.java).apply {
-            this.action = action
-            configure()
-        }
-        ContextCompat.startForegroundService(context, intent)
     }
 }

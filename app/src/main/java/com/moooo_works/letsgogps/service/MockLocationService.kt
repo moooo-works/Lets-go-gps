@@ -237,7 +237,14 @@ class MockLocationService : Service() {
             isStopping = false // starting fresh — IDLE-as-completion detection re-armed
             try {
                 startForeground(NOTIFICATION_ID, buildNotification(MockStatus.IDLE))
-            } catch (e: SecurityException) {
+            } catch (e: RuntimeException) {
+                // Android 12+ throws ForegroundServiceStartNotAllowedException (an
+                // IllegalStateException, NOT SecurityException) when a FGS starts
+                // outside an allowed window; SecurityException covers a missing FGS
+                // type permission. Catch both so a failed start degrades instead of
+                // crashing, and clear any recovery session so we never crash-loop on
+                // every launch. See task fix-fgs-restore-crash.
+                clearPersistedSession()
                 mockStateRepository.setMockError(MockEngineError.Setup(e))
                 stopSelf()
                 return START_NOT_STICKY

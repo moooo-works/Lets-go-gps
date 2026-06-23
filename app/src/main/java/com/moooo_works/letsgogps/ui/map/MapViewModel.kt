@@ -83,6 +83,7 @@ class MapViewModel @Inject constructor(
         routeSimulator = routeSimulator,
         settingsRepository = settingsRepository,
         context = context,
+        systemHealthCheck = systemHealthCheck,
         onStopMocking = ::stopMocking,
         onEnsurePermission = ::ensurePermission
     )

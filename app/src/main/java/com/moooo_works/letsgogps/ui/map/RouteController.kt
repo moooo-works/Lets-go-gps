@@ -7,6 +7,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.RouteSimulator
+import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
+import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
+import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
@@ -24,12 +27,19 @@ class RouteController(
     private val routeSimulator: RouteSimulator,
     private val settingsRepository: SettingsRepository,
     private val context: Context,
+    private val systemHealthCheck: SystemHealthCheck,
     private val onStopMocking: () -> Unit,
     private val onEnsurePermission: () -> Boolean
 ) {
     private companion object {
         const val KMH_TO_MPS_DIVISOR = 3.6
     }
+
+    // Route playback is the long-running case where Doze / OEM battery management
+    // kills the foreground service mid-route (the vivo "5 min then GPS resets"
+    // report). If the user hasn't whitelisted us, nudge once per session via the
+    // existing health-check sheet — non-blocking, they can dismiss and play.
+    private var batteryNudgeShown = false
 
     fun addWaypoint() = addWaypointAt(state.value.centerLocation)
 
@@ -129,6 +139,17 @@ class RouteController(
             return
         }
         if (!onEnsurePermission()) return
+        // One-time battery-whitelist nudge before a long route, so Doze/OEM
+        // management is less likely to kill the service mid-route. Reuses the
+        // health-check sheet (battery is its sole soft item); does not block play.
+        if (!batteryNudgeShown) {
+            val health = systemHealthCheck.refresh()
+            if (health.statusOf(HealthCheckItem.BatteryOptimizationExempt) is ItemStatus.Failed) {
+                batteryNudgeShown = true
+                state.update { it.copy(showHealthCheck = true, healthCheckState = health) }
+                return
+            }
+        }
         ContextCompat.startForegroundService(
             context,
             Intent(context, MockLocationService::class.java).apply {
