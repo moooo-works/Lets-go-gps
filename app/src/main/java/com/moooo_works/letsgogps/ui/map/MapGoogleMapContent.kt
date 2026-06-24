@@ -79,20 +79,29 @@ fun MapGoogleMapContent(
             }
         }
     ) {
+        // ponytail: BitmapDescriptors must be stable across recompositions — a fresh
+        // descriptor each frame makes Compose fire Marker.setIcon (a main-thread Binder
+        // call) every recompose, flooding the UI thread until the watchdog ANRs.
+        val favoriteIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED) }
+        val normalIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE) }
+        val mockIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) }
+
         // Saved location markers
         uiState.savedLocations.forEach { location ->
+            // ponytail: MarkerState must be remembered, never created inline in composition —
+            // a fresh MarkerState each recompose leaks snapshot read-scopes until OOM.
+            val markerState = remember(location.latitude, location.longitude) {
+                MarkerState(position = LatLng(location.latitude, location.longitude))
+            }
             Marker(
-                state = MarkerState(position = LatLng(location.latitude, location.longitude)),
+                state = markerState,
                 title = location.name,
                 snippet = location.description.takeIf { it.isNotBlank() },
                 onClick = {
                     onSavedLocationClick(location)
                     false
                 },
-                icon = BitmapDescriptorFactory.defaultMarker(
-                    if (location.isFavorite) BitmapDescriptorFactory.HUE_RED
-                    else BitmapDescriptorFactory.HUE_ORANGE
-                )
+                icon = if (location.isFavorite) favoriteIcon else normalIcon
             )
         }
 
@@ -100,8 +109,9 @@ fun MapGoogleMapContent(
         uiState.waypoints.forEachIndexed { index, point ->
             val isSimulating = uiState.simulationState == SimulationState.PLAYING
                     || uiState.simulationState == SimulationState.PAUSED
+            val markerState = remember(point) { MarkerState(position = point) }
             Marker(
-                state = MarkerState(position = point),
+                state = markerState,
                 title = "路點 ${index + 1}",
                 icon = waypointIcons.getOrNull(index) ?: BitmapDescriptorFactory.defaultMarker(),
                 onClick = {
@@ -116,7 +126,7 @@ fun MapGoogleMapContent(
             Marker(
                 state = mockMarkerState,
                 title = "Current Mock Location",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                icon = mockIcon
             )
         }
 

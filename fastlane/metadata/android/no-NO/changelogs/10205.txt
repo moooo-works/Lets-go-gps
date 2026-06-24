@@ -1,0 +1,2 @@
+• Fikset en krasj og frysing der kartet kunne gå tom for minne etter lengre tids bruk når markører hopet seg opp
+• Justerte bakgrunnsfargen på «Tillatelse for falsk posisjon»-kortet i Innstillinger slik at det samsvarer med de andre elementene
