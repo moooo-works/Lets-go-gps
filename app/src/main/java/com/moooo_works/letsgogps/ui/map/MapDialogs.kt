@@ -49,7 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -273,7 +273,10 @@ fun SearchDialog(
     onSelectResult: (GeocodedLocation) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    val focusManager = LocalFocusManager.current
+    // ponytail: 收 IME 用 keyboardController.hide()，不要用 focusManager.clearFocus()——
+    // 後者會走訪嵌入式 GoogleMap(AndroidView) 的焦點群組，在 Dialog 獨立 window 下跨 window
+    // 計算焦點矩形而崩潰 (IllegalArgumentException: parameter must be a descendant of this view)。
+    val keyboardController = LocalSoftwareKeyboardController.current
     val searchLatLngLocationTitle = stringResource(R.string.search_latlng_location)
 
     val performAction = { query: String ->
@@ -364,7 +367,7 @@ fun SearchDialog(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = {
                         performAction(searchQuery)
-                        focusManager.clearFocus()
+                        keyboardController?.hide()
                     }),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(

@@ -1,0 +1,1 @@
+• Fikset en krasj ved søk fra kartets søkefelt
