@@ -1,0 +1,2 @@
+• Fixed a crash and freezing where the map could run out of memory after extended use as markers accumulated
+• Adjusted the "Mock location permission" card background in Settings to match the other items

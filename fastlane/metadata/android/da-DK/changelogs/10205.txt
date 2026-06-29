@@ -1,0 +1,2 @@
+• Rettede et nedbrud, hvor kortet kunne løbe tør for hukommelse og fryse eller lukke ned efter længere tids brug
+• Justerede baggrundsfarven på kortet "Tilladelse til mock-placering" i Indstillinger, så det matcher de øvrige punkter
