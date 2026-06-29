@@ -279,10 +279,21 @@ fun SearchDialog(
     val keyboardController = LocalSoftwareKeyboardController.current
     val searchLatLngLocationTitle = stringResource(R.string.search_latlng_location)
 
+    // ponytail: dialog 拆除前先收 IME，避免框架在 draw 時捲動到即將被移除的焦點輸入框而崩潰
+    // (scrollToRectOrFocus → IllegalArgumentException: parameter must be a descendant of this view)。
+    val dismissWithKeyboard = {
+        keyboardController?.hide()
+        onDismiss()
+    }
+    val selectWithKeyboard = { result: GeocodedLocation ->
+        keyboardController?.hide()
+        onSelectResult(result)
+    }
+
     val performAction = { query: String ->
         val parseResult = LocationQueryParser.parse(query, centerLocation)
         if (parseResult is ParseResult.Success) {
-            onSelectResult(
+            selectWithKeyboard(
                 GeocodedLocation(
                     name = searchLatLngLocationTitle,
                     address = query,
@@ -295,7 +306,7 @@ fun SearchDialog(
     }
 
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = dismissWithKeyboard,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
@@ -326,7 +337,7 @@ fun SearchDialog(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    IconButton(onClick = dismissWithKeyboard, modifier = Modifier.size(32.dp)) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = stringResource(R.string.action_close),
@@ -366,8 +377,8 @@ fun SearchDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = {
-                        performAction(searchQuery)
                         keyboardController?.hide()
+                        performAction(searchQuery)
                     }),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -428,7 +439,7 @@ fun SearchDialog(
                                 contentPadding = PaddingValues(bottom = 16.dp)
                             ) {
                                 items(searchState.searchResults) { result ->
-                                    SearchResultItem(result = result, onClick = { onSelectResult(result) })
+                                    SearchResultItem(result = result, onClick = { selectWithKeyboard(result) })
                                 }
                             }
                         }
