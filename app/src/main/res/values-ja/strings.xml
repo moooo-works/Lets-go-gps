@@ -247,6 +247,7 @@
     <string name="import_default_gpx_waypoint_name">ウェイポイント %1$d</string>
     <string name="import_default_gpx_track_name">トラック %1$d</string>
     <string name="import_default_gpx_route_name">ルート %1$d</string>
+    <string name="import_export_menu">インポート／エクスポート</string>
     <string name="import_default_route_name">インポートしたルート</string>
 
     <!-- Pro Upgrade -->

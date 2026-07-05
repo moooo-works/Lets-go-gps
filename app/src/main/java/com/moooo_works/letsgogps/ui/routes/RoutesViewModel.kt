@@ -1,10 +1,17 @@
 package com.moooo_works.letsgogps.ui.routes
 
+import android.app.Activity
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.moooo_works.letsgogps.data.backup.BackupManager
+import com.moooo_works.letsgogps.data.backup.ImportPreview
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.RouteSummary
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
+import com.moooo_works.letsgogps.domain.repository.ProRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,11 +38,84 @@ sealed class RoutesEvent {
 
 @HiltViewModel
 class RoutesViewModel @Inject constructor(
-    private val repository: LocationRepository
+    private val repository: LocationRepository,
+    private val proRepository: ProRepository,
+    private val rewardedAdManager: RewardedAdManager,
+    private val backupManager: BackupManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RoutesUiState())
     val uiState: StateFlow<RoutesUiState> = _uiState.asStateFlow()
+
+    val isProActive: StateFlow<Boolean> = proRepository.isProActive
+    val subscriptionOffer: StateFlow<SubscriptionOffer?> = proRepository.subscriptionOffer
+
+    private val _showProUpgrade = MutableStateFlow(false)
+    val showProUpgrade: StateFlow<Boolean> = _showProUpgrade.asStateFlow()
+
+    fun dismissProUpgrade() { _showProUpgrade.value = false }
+    fun requestProUpgrade() { _showProUpgrade.value = true }
+
+    fun launchBillingFlow(activity: Activity) {
+        proRepository.launchBillingFlow(activity)
+        dismissProUpgrade()
+    }
+
+    fun watchRewardedAd(activity: Activity, onUnavailable: () -> Unit = {}) {
+        rewardedAdManager.showAd(
+            activity = activity,
+            onReward = {
+                viewModelScope.launch {
+                    proRepository.grantAdUnlockHours(6)
+                }
+            },
+            onUnavailable = onUnavailable
+        )
+    }
+
+    // Snapshot check at dialog-open time; no ticking flow needed here (the
+    // dialog is short-lived, unlike the settings page's live countdown).
+    fun watchAdEnabled(): Boolean =
+        proRepository.adUnlockExpiryMillis.value - System.currentTimeMillis() < 18 * 3600_000L
+
+    fun exportData(uri: Uri, onResult: (Boolean, String?) -> Unit) {
+        if (!proRepository.isProActive.value) {
+            onResult(false, "PRO_REQUIRED")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                backupManager.exportToUri(uri, includeSavedLocations = false, includeRoutes = true)
+                onResult(true, null)
+            } catch (e: Exception) {
+                onResult(false, e.message)
+            }
+        }
+    }
+
+    fun parseImportData(uri: Uri, onResult: (Boolean, ImportPreview?, String?) -> Unit) {
+        if (!proRepository.isProActive.value) {
+            onResult(false, null, "PRO_REQUIRED")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                onResult(true, backupManager.parseImport(uri), null)
+            } catch (e: Exception) {
+                onResult(false, null, e.message)
+            }
+        }
+    }
+
+    fun applyImportData(preview: ImportPreview, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                onResult(true, backupManager.applyImport(preview))
+            } catch (e: Exception) {
+                onResult(false, e.message)
+            }
+        }
+    }
 
     private val _events = MutableSharedFlow<RoutesEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<RoutesEvent> = _events.asSharedFlow()

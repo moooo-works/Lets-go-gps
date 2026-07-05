@@ -19,7 +19,8 @@ import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
-import com.moooo_works.letsgogps.ui.settings.ImportPreview
+import com.moooo_works.letsgogps.data.backup.BackupManager
+import com.moooo_works.letsgogps.data.backup.ImportPreview
 import com.moooo_works.letsgogps.ui.settings.ProSectionState
 import com.moooo_works.letsgogps.R
 import io.mockk.coEvery
@@ -124,6 +125,7 @@ class SettingsViewModelTest {
             proRepository,
             systemHealthCheck,
             rewardedAdManager,
+            BackupManager(context, locationRepository, settingsRepository),
             context
         )
         vm.nowFlowOverride = flowOf(nowMillis)

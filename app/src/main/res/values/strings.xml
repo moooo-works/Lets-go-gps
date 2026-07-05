@@ -248,6 +248,7 @@
     <string name="import_default_gpx_waypoint_name">航點 %1$d</string>
     <string name="import_default_gpx_track_name">軌跡 %1$d</string>
     <string name="import_default_gpx_route_name">路線 %1$d</string>
+    <string name="import_export_menu">匯入 / 匯出</string>
     <string name="import_default_route_name">匯入的路線</string>
 
     <!-- Pro Upgrade -->

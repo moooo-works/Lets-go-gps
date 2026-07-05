@@ -7,7 +7,13 @@ import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.RouteSummary
 import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import com.moooo_works.letsgogps.data.backup.BackupManager
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
+import com.moooo_works.letsgogps.domain.repository.ProRepository
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -29,6 +35,9 @@ import org.junit.Test
 class RoutesViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private lateinit var repository: FakeLocationRepository
+    private val proRepository = mockk<ProRepository>(relaxed = true)
+    private val rewardedAdManager = mockk<RewardedAdManager>(relaxed = true)
+    private val backupManager = mockk<BackupManager>(relaxed = true)
 
     @Before
     fun setup() {
@@ -66,7 +75,7 @@ class RoutesViewModelTest {
                 RoutePoint(routeId = 0, orderIndex = 1, latitude = 2.0, longitude = 2.0)
             )
         )
-        val viewModel = RoutesViewModel(repository)
+        val viewModel = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
 
         viewModel.renameRoute(1, "New Name")
         advanceUntilIdle()
@@ -83,7 +92,7 @@ class RoutesViewModelTest {
                 RoutePoint(routeId = 0, orderIndex = 1, latitude = 2.0, longitude = 2.0)
             )
         )
-        val viewModel = RoutesViewModel(repository)
+        val viewModel = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
 
         viewModel.deleteRoute(1)
         advanceUntilIdle()
@@ -104,7 +113,7 @@ class RoutesViewModelTest {
     fun `enterSelectionMode preselects the long-pressed route`() = runTest {
         seedRoute("A", 1.0 to 1.0)
         seedRoute("B", 2.0 to 2.0)
-        val vm = RoutesViewModel(repository)
+        val vm = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
         advanceUntilIdle()
 
         vm.enterSelectionMode(2)
@@ -118,7 +127,7 @@ class RoutesViewModelTest {
         seedRoute("A", 1.0 to 1.0)
         seedRoute("B", 2.0 to 2.0)
         seedRoute("C", 3.0 to 3.0)
-        val vm = RoutesViewModel(repository)
+        val vm = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
         advanceUntilIdle()
 
         vm.enterSelectionMode(1)
@@ -135,7 +144,7 @@ class RoutesViewModelTest {
         seedRoute("A", 1.0 to 1.0, 1.5 to 1.5)
         seedRoute("B", 2.0 to 2.0)
         seedRoute("C", 3.0 to 3.0, 3.5 to 3.5, 3.9 to 3.9)
-        val vm = RoutesViewModel(repository)
+        val vm = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
         advanceUntilIdle()
 
         // Selection order C → A → B; merged route should follow that order.
@@ -163,7 +172,7 @@ class RoutesViewModelTest {
     @Test
     fun `mergeSelected is a no-op when fewer than two routes selected`() = runTest {
         seedRoute("A", 1.0 to 1.0)
-        val vm = RoutesViewModel(repository)
+        val vm = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
         advanceUntilIdle()
 
         vm.enterSelectionMode(1)
@@ -177,7 +186,7 @@ class RoutesViewModelTest {
     @Test
     fun `exitSelectionMode clears state`() = runTest {
         seedRoute("A", 1.0 to 1.0)
-        val vm = RoutesViewModel(repository)
+        val vm = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
         advanceUntilIdle()
 
         vm.enterSelectionMode(1)
@@ -192,7 +201,7 @@ class RoutesViewModelTest {
         seedRoute("Morning", 1.0 to 1.0)
         seedRoute("Noon", 2.0 to 2.0)
         seedRoute("Night", 3.0 to 3.0)
-        val vm = RoutesViewModel(repository)
+        val vm = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
         advanceUntilIdle()
 
         vm.enterSelectionMode(1)
@@ -201,6 +210,30 @@ class RoutesViewModelTest {
 
         vm.toggleSelection(3)
         assertEquals("Morning + Noon (+1 more)", vm.buildDefaultMergedName())
+    }
+
+    @Test
+    fun `export without pro returns PRO_REQUIRED`() = runTest {
+        every { proRepository.isProActive } returns MutableStateFlow(false)
+        val viewModel = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
+
+        var error: String? = null
+        viewModel.exportData(mockk()) { _, e -> error = e }
+
+        assertEquals("PRO_REQUIRED", error)
+    }
+
+    @Test
+    fun `export with pro exports routes only`() = runTest {
+        every { proRepository.isProActive } returns MutableStateFlow(true)
+        val viewModel = RoutesViewModel(repository, proRepository, rewardedAdManager, backupManager)
+
+        var success: Boolean? = null
+        viewModel.exportData(mockk()) { s, _ -> success = s }
+        advanceUntilIdle()
+
+        assertEquals(true, success)
+        coVerify(exactly = 1) { backupManager.exportToUri(any(), includeSavedLocations = false, includeRoutes = true) }
     }
 }
 

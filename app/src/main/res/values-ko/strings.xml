@@ -247,6 +247,7 @@
     <string name="import_default_gpx_waypoint_name">웨이포인트 %1$d</string>
     <string name="import_default_gpx_track_name">트랙 %1$d</string>
     <string name="import_default_gpx_route_name">경로 %1$d</string>
+    <string name="import_export_menu">가져오기 / 내보내기</string>
     <string name="import_default_route_name">가져온 경로</string>
 
     <!-- Pro Upgrade -->

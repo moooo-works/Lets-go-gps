@@ -146,6 +146,7 @@ Engine 錯誤（setup／setLocation／teardown）須以 engine error 呈現，�
 | `app/src/main/java/com/moooo_works/letsgogps/data/billing/BillingManager.kt` | Google Play Billing 訂閱管理 |
 | `app/src/main/java/com/moooo_works/letsgogps/domain/repository/ProRepository.kt` | Pro 訂閱狀態介面 |
 | `app/src/main/java/com/moooo_works/letsgogps/ui/pro/ProUpgradeDialog.kt` | 付費升級提示 Dialog |
+| `app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt` | 匯入匯出引擎（JSON／GPX／純文字 lat,lng）；設定頁、位置頁、路線頁共用,Pro 閘門留在各 ViewModel |
 | `gradle/libs.versions.toml` | 集中管理依賴版本 |
 | `AGENTS.md` | 多 Agent 協作規範（分支策略、合併門檻） |
 

@@ -6,9 +6,12 @@ import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.data.model.RouteSummary
 import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import com.moooo_works.letsgogps.data.backup.BackupManager
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +39,8 @@ class SavedLocationsViewModelTest {
     private lateinit var repository: FakeSavedLocationsRepository
     private val proRepository = mockk<ProRepository>(relaxed = true)
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
+    private val rewardedAdManager = mockk<RewardedAdManager>(relaxed = true)
+    private val backupManager = mockk<BackupManager>(relaxed = true)
 
     @Before
     fun setup() {
@@ -58,7 +63,7 @@ class SavedLocationsViewModelTest {
             SavedLocation(id = 2, name = "B", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
 
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         advanceTimeBy(350)
         advanceUntilIdle()
@@ -74,7 +79,7 @@ class SavedLocationsViewModelTest {
             SavedLocation(id = 2, name = "Fav", latitude = 0.0, longitude = 0.0, isFavorite = true)
         )
 
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         viewModel.onFilterChanged(LocationFilter.Favorites)
         advanceTimeBy(350)
@@ -91,7 +96,7 @@ class SavedLocationsViewModelTest {
             SavedLocation(id = 2, name = "No Folder", latitude = 0.0, longitude = 0.0, folderId = null)
         )
 
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val collectJob = backgroundScope.launch { viewModel.filteredLocations.collect { } }
         viewModel.onFilterChanged(LocationFilter.Folder(folderId = 10, folderName = "Test"))
         advanceTimeBy(350)
@@ -103,7 +108,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `deleteLocation calls repository delete`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val location = SavedLocation(id = 1, name = "Test", latitude = 0.0, longitude = 0.0)
 
         viewModel.deleteLocation(location)
@@ -114,7 +119,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `renameLocation calls repository update with valid name`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
 
         viewModel.renameLocation(location, "New Name")
@@ -125,7 +130,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `renameLocation ignores empty name`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
 
         viewModel.renameLocation(location, "   ")
@@ -136,7 +141,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `renameLocation ignores too long name`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         val location = SavedLocation(id = 1, name = "Old", latitude = 0.0, longitude = 0.0)
 
         viewModel.renameLocation(location, "A".repeat(41))
@@ -147,7 +152,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `enterBatchSelection activates batch mode with one id selected`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
 
         viewModel.enterBatchSelection(locationId = 5)
         advanceUntilIdle()
@@ -158,7 +163,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `toggleBatchSelection adds and removes ids`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         viewModel.enterBatchSelection(locationId = 1)
         viewModel.toggleBatchSelection(locationId = 2)
         viewModel.toggleBatchSelection(locationId = 1)
@@ -169,7 +174,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `exitBatchSelection clears batch mode`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         viewModel.enterBatchSelection(locationId = 1)
         viewModel.exitBatchSelection()
         advanceUntilIdle()
@@ -180,7 +185,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `deleteFolder resets filter to All when current folder is deleted`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         viewModel.onFilterChanged(LocationFilter.Folder(folderId = 99, folderName = "Old"))
         viewModel.deleteFolder(id = 99)
         advanceUntilIdle()
@@ -190,7 +195,7 @@ class SavedLocationsViewModelTest {
 
     @Test
     fun `moveBatchToFolder calls repository and exits batch mode`() = runTest {
-        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
         viewModel.enterBatchSelection(locationId = 1)
         viewModel.toggleBatchSelection(locationId = 2)
 
@@ -199,6 +204,30 @@ class SavedLocationsViewModelTest {
 
         assertEquals(listOf(listOf(1, 2) to 5), repository.movedLocations.map { it.first.sorted() to it.second })
         assertFalse(viewModel.batchSelection.value.active)
+    }
+
+    @Test
+    fun `export without pro returns PRO_REQUIRED`() = runTest {
+        every { proRepository.isProActive } returns MutableStateFlow(false)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
+
+        var error: String? = null
+        viewModel.exportData(mockk()) { _, e -> error = e }
+
+        assertEquals("PRO_REQUIRED", error)
+    }
+
+    @Test
+    fun `export with pro exports locations only`() = runTest {
+        every { proRepository.isProActive } returns MutableStateFlow(true)
+        val viewModel = SavedLocationsViewModel(repository, proRepository, settingsRepository, rewardedAdManager, backupManager)
+
+        var success: Boolean? = null
+        viewModel.exportData(mockk()) { s, _ -> success = s }
+        advanceUntilIdle()
+
+        assertEquals(true, success)
+        coVerify(exactly = 1) { backupManager.exportToUri(any(), includeSavedLocations = true, includeRoutes = false) }
     }
 }
 

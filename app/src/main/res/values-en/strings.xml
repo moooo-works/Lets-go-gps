@@ -247,6 +247,7 @@
     <string name="import_default_gpx_waypoint_name">Waypoint %1$d</string>
     <string name="import_default_gpx_track_name">Track %1$d</string>
     <string name="import_default_gpx_route_name">Route %1$d</string>
+    <string name="import_export_menu">Import / Export</string>
     <string name="import_default_route_name">Imported route</string>
 
     <!-- Pro Upgrade -->
