@@ -244,6 +244,9 @@
     <string name="import_error_unsupported_format">지원하지 않는 파일 형식: 본 앱의 JSON 백업, GPX 또는 줄마다 \"위도,경도\"가 있는 텍스트 파일만 지원합니다</string>
     <string name="import_error_schema_version">지원하지 않는 데이터 버전: %1$d</string>
     <string name="import_default_point_name">가져온 지점</string>
+    <string name="import_default_gpx_waypoint_name">웨이포인트 %1$d</string>
+    <string name="import_default_gpx_track_name">트랙 %1$d</string>
+    <string name="import_default_gpx_route_name">경로 %1$d</string>
     <string name="import_default_route_name">가져온 경로</string>
 
     <!-- Pro Upgrade -->

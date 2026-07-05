@@ -750,7 +750,9 @@ class SettingsViewModel @Inject constructor(
             if (lat != null && lon != null) {
                 waypoints.add(
                     ExportSavedLocation(
-                        name = waypoint.directChildText("name").ifBlank { "Waypoint ${waypoints.size + 1}" },
+                        name = waypoint.directChildText("name").ifBlank {
+                            context.getString(R.string.import_default_gpx_waypoint_name, waypoints.size + 1)
+                        },
                         lat = lat,
                         lng = lon
                     )
@@ -770,7 +772,9 @@ class SettingsViewModel @Inject constructor(
             if (points.isNotEmpty()) {
                 routes.add(
                     ExportRoute(
-                        name = track.directChildText("name").ifBlank { "Track ${routes.size + 1}" },
+                        name = track.directChildText("name").ifBlank {
+                            context.getString(R.string.import_default_gpx_track_name, routes.size + 1)
+                        },
                         points = points
                     )
                 )
@@ -789,7 +793,9 @@ class SettingsViewModel @Inject constructor(
             if (points.isNotEmpty()) {
                 routes.add(
                     ExportRoute(
-                        name = route.directChildText("name").ifBlank { "Route ${routes.size + 1}" },
+                        name = route.directChildText("name").ifBlank {
+                            context.getString(R.string.import_default_gpx_route_name, routes.size + 1)
+                        },
                         points = points
                     )
                 )

@@ -244,6 +244,9 @@
     <string name="import_error_unsupported_format">未対応のファイル形式：本アプリのJSONバックアップ、GPX、または各行「緯度,経度」のテキストファイルのみ対応しています</string>
     <string name="import_error_schema_version">未対応のデータバージョン：%1$d</string>
     <string name="import_default_point_name">インポートした地点</string>
+    <string name="import_default_gpx_waypoint_name">ウェイポイント %1$d</string>
+    <string name="import_default_gpx_track_name">トラック %1$d</string>
+    <string name="import_default_gpx_route_name">ルート %1$d</string>
     <string name="import_default_route_name">インポートしたルート</string>
 
     <!-- Pro Upgrade -->

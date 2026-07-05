@@ -245,6 +245,9 @@
     <string name="import_error_unsupported_format">不支援的檔案格式：僅支援本應用程式的 JSON 備份、GPX，或每行「緯度,經度」的純文字檔</string>
     <string name="import_error_schema_version">不支援的資料版本：%1$d</string>
     <string name="import_default_point_name">匯入的位置</string>
+    <string name="import_default_gpx_waypoint_name">航點 %1$d</string>
+    <string name="import_default_gpx_track_name">軌跡 %1$d</string>
+    <string name="import_default_gpx_route_name">路線 %1$d</string>
     <string name="import_default_route_name">匯入的路線</string>
 
     <!-- Pro Upgrade -->

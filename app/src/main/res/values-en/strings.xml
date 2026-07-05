@@ -244,6 +244,9 @@
     <string name="import_error_unsupported_format">Unsupported file format: expected a JSON backup from this app, a GPX file, or plain \"lat,lng\" lines</string>
     <string name="import_error_schema_version">Unsupported schema version: %1$d</string>
     <string name="import_default_point_name">Imported point</string>
+    <string name="import_default_gpx_waypoint_name">Waypoint %1$d</string>
+    <string name="import_default_gpx_track_name">Track %1$d</string>
+    <string name="import_default_gpx_route_name">Route %1$d</string>
     <string name="import_default_route_name">Imported route</string>
 
     <!-- Pro Upgrade -->
