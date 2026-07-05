@@ -78,6 +78,12 @@ class SettingsViewModelTest {
             val formatArgs = args[1] as Array<*>
             "Routes: ${formatArgs[0]} imported, ${formatArgs[1]} skipped."
         }
+        every { context.getString(R.string.import_error_foreign_backup) } returns
+            "Unrecognized backup: this JSON file was not exported by this app"
+        every { context.getString(R.string.import_error_unsupported_format) } returns
+            "Unsupported file format"
+        every { context.getString(R.string.import_default_point_name) } returns "Imported point"
+        every { context.getString(R.string.import_default_route_name) } returns "Imported route"
 
         val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
         every { mockStateRepository.mockStatus } returns mockStatusFlow

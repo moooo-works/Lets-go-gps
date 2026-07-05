@@ -437,7 +437,7 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 if (fileContent.isBlank()) {
-                    withContext(Dispatchers.Main) { onResult(false, null, "File is empty") }
+                    withContext(Dispatchers.Main) { onResult(false, null, context.getString(R.string.import_error_empty)) }
                     return@launch
                 }
 
@@ -448,7 +448,7 @@ class SettingsViewModel @Inject constructor(
                     val exportData = try {
                         parseGpxContent(fileContent)
                     } catch (e: Exception) {
-                        withContext(Dispatchers.Main) { onResult(false, null, "Invalid GPX: ${e.message}") }
+                        withContext(Dispatchers.Main) { onResult(false, null, context.getString(R.string.import_error_invalid_gpx, e.message.orEmpty())) }
                         return@launch
                     }
                     val preview = ImportPreview(
@@ -469,7 +469,7 @@ class SettingsViewModel @Inject constructor(
                     val plainData = parsePlainCoordinatesContent(fileContent)
                     if (plainData == null) {
                         withContext(Dispatchers.Main) {
-                            onResult(false, null, "Unsupported file format: expected a MockGPS JSON backup, a GPX file, or plain \"lat,lng\" lines")
+                            onResult(false, null, context.getString(R.string.import_error_unsupported_format))
                         }
                         return@launch
                     }
@@ -487,12 +487,12 @@ class SettingsViewModel @Inject constructor(
                 val exportData = try {
                     gson.fromJson(fileContent, ExportData::class.java)
                 } catch (e: Exception) {
-                    withContext(Dispatchers.Main) { onResult(false, null, "Invalid JSON format: ${e.message}") }
+                    withContext(Dispatchers.Main) { onResult(false, null, context.getString(R.string.import_error_invalid_json, e.message.orEmpty())) }
                     return@launch
                 }
 
                 if (exportData == null) {
-                    withContext(Dispatchers.Main) { onResult(false, null, "Invalid data") }
+                    withContext(Dispatchers.Main) { onResult(false, null, context.getString(R.string.import_error_invalid_data)) }
                     return@launch
                 }
                 // A foreign JSON schema (e.g. another app's backup) deserializes into
@@ -506,12 +506,12 @@ class SettingsViewModel @Inject constructor(
                 }
                 if (listOf("schemaVersion", "savedLocations", "routes", "folders").none { it in rootKeys }) {
                     withContext(Dispatchers.Main) {
-                        onResult(false, null, "Unrecognized backup: this JSON file was not exported by this app")
+                        onResult(false, null, context.getString(R.string.import_error_foreign_backup))
                     }
                     return@launch
                 }
                 if (exportData.schemaVersion > 3) {
-                    withContext(Dispatchers.Main) { onResult(false, null, "Unsupported schema version: ${exportData.schemaVersion}") }
+                    withContext(Dispatchers.Main) { onResult(false, null, context.getString(R.string.import_error_schema_version, exportData.schemaVersion)) }
                     return@launch
                 }
 
@@ -554,7 +554,7 @@ class SettingsViewModel @Inject constructor(
                     trimmedContent.startsWith("{") || trimmedContent.startsWith("[") ->
                         gson.fromJson(fileContent, ExportData::class.java)
                     else -> parsePlainCoordinatesContent(fileContent)
-                        ?: throw IllegalArgumentException("Unsupported file format")
+                        ?: throw IllegalArgumentException(context.getString(R.string.import_error_unsupported_format))
                 }
 
                 var importedLocations = 0
@@ -702,7 +702,11 @@ class SettingsViewModel @Inject constructor(
             ExportData(
                 schemaVersion = 0,
                 savedLocations = listOf(
-                    ExportSavedLocation(name = "Imported point", lat = points[0].lat, lng = points[0].lng)
+                    ExportSavedLocation(
+                        name = context.getString(R.string.import_default_point_name),
+                        lat = points[0].lat,
+                        lng = points[0].lng
+                    )
                 ),
                 routes = emptyList()
             )
@@ -710,7 +714,7 @@ class SettingsViewModel @Inject constructor(
             ExportData(
                 schemaVersion = 0,
                 savedLocations = emptyList(),
-                routes = listOf(ExportRoute(name = "Imported route", points = points))
+                routes = listOf(ExportRoute(name = context.getString(R.string.import_default_route_name), points = points))
             )
         }
     }

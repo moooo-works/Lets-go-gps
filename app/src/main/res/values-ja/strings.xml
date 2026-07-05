@@ -236,6 +236,15 @@
     <string name="import_format_dialog_title">インポート形式を選択</string>
     <string name="import_format_json">バックアップからインポート（.json）</string>
     <string name="import_format_gpx">GPXからインポート（.gpx）</string>
+    <string name="import_error_empty">ファイルが空です</string>
+    <string name="import_error_invalid_gpx">GPX形式が正しくありません：%1$s</string>
+    <string name="import_error_invalid_json">JSON形式が正しくありません：%1$s</string>
+    <string name="import_error_invalid_data">ファイルの内容が無効です</string>
+    <string name="import_error_foreign_backup">認識できないバックアップ：このJSONファイルは本アプリからエクスポートされたものではありません</string>
+    <string name="import_error_unsupported_format">未対応のファイル形式：本アプリのJSONバックアップ、GPX、または各行「緯度,経度」のテキストファイルのみ対応しています</string>
+    <string name="import_error_schema_version">未対応のデータバージョン：%1$d</string>
+    <string name="import_default_point_name">インポートした地点</string>
+    <string name="import_default_route_name">インポートしたルート</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Pro にアップグレード</string>

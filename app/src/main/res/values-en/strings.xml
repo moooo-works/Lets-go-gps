@@ -236,6 +236,15 @@
     <string name="import_format_dialog_title">Select Import Format</string>
     <string name="import_format_json">Import from backup (.json)</string>
     <string name="import_format_gpx">Import from GPX (.gpx)</string>
+    <string name="import_error_empty">File is empty</string>
+    <string name="import_error_invalid_gpx">Invalid GPX: %1$s</string>
+    <string name="import_error_invalid_json">Invalid JSON format: %1$s</string>
+    <string name="import_error_invalid_data">Invalid file content</string>
+    <string name="import_error_foreign_backup">Unrecognized backup: this JSON file was not exported by this app</string>
+    <string name="import_error_unsupported_format">Unsupported file format: expected a JSON backup from this app, a GPX file, or plain \"lat,lng\" lines</string>
+    <string name="import_error_schema_version">Unsupported schema version: %1$d</string>
+    <string name="import_default_point_name">Imported point</string>
+    <string name="import_default_route_name">Imported route</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Upgrade to Pro</string>
