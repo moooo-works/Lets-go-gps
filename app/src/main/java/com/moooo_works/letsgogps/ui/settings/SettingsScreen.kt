@@ -979,7 +979,7 @@ private fun ImportPreviewDialog(
         title = { Text(stringResource(R.string.import_preview_title)) },
         text = {
             Column {
-                Text(stringResource(R.string.import_preview_format, if (preview.isGpx) "GPX" else "JSON"))
+                Text(stringResource(R.string.import_preview_format, preview.format))
                 Text(stringResource(R.string.import_preview_locations, preview.savedLocationsCount))
                 Text(stringResource(R.string.import_preview_routes, preview.routesCount))
                 if (preview.foldersCount > 0) {

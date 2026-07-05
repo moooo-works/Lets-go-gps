@@ -57,6 +57,7 @@ data class ImportPreview(
     val isGpx: Boolean = false,
     val foldersCount: Int = 0,
     val hasSettings: Boolean = false,
+    val format: String = "JSON",
 )
 
 @Keep
@@ -440,7 +441,8 @@ class SettingsViewModel @Inject constructor(
                     return@launch
                 }
 
-                val isGpx = fileContent.trimStart().startsWith("<")
+                val trimmedContent = fileContent.trimStart()
+                val isGpx = trimmedContent.startsWith("<")
 
                 if (isGpx) {
                     val exportData = try {
@@ -454,7 +456,29 @@ class SettingsViewModel @Inject constructor(
                         schemaVersion = 0,
                         savedLocationsCount = exportData.savedLocations.size,
                         routesCount = exportData.routes.size,
-                        isGpx = true
+                        isGpx = true,
+                        format = "GPX"
+                    )
+                    withContext(Dispatchers.Main) { onResult(true, preview, null) }
+                    return@launch
+                }
+
+                if (!trimmedContent.startsWith("{") && !trimmedContent.startsWith("[")) {
+                    // Not XML, not JSON — some apps export plain "lat,lng" lines
+                    // under a .gpx/.txt extension.
+                    val plainData = parsePlainCoordinatesContent(fileContent)
+                    if (plainData == null) {
+                        withContext(Dispatchers.Main) {
+                            onResult(false, null, "Unsupported file format: expected a MockGPS JSON backup, a GPX file, or plain \"lat,lng\" lines")
+                        }
+                        return@launch
+                    }
+                    val preview = ImportPreview(
+                        uri = uri,
+                        schemaVersion = 0,
+                        savedLocationsCount = plainData.savedLocations.size,
+                        routesCount = plainData.routes.size,
+                        format = "TXT"
                     )
                     withContext(Dispatchers.Main) { onResult(true, preview, null) }
                     return@launch
@@ -469,6 +493,21 @@ class SettingsViewModel @Inject constructor(
 
                 if (exportData == null) {
                     withContext(Dispatchers.Main) { onResult(false, null, "Invalid data") }
+                    return@launch
+                }
+                // A foreign JSON schema (e.g. another app's backup) deserializes into
+                // ExportData's defaults without error, yielding a useless 0/0 preview.
+                // Reject unless at least one of our top-level keys is actually present
+                // ("settings" excluded: foreign backups can have a same-named object).
+                val rootKeys = try {
+                    gson.fromJson(fileContent, com.google.gson.JsonObject::class.java)?.keySet().orEmpty()
+                } catch (e: Exception) {
+                    emptySet()
+                }
+                if (listOf("schemaVersion", "savedLocations", "routes", "folders").none { it in rootKeys }) {
+                    withContext(Dispatchers.Main) {
+                        onResult(false, null, "Unrecognized backup: this JSON file was not exported by this app")
+                    }
                     return@launch
                 }
                 if (exportData.schemaVersion > 3) {
@@ -509,10 +548,13 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
 
-                val exportData = if (preview.isGpx) {
-                    parseGpxContent(fileContent)
-                } else {
-                    gson.fromJson(fileContent, ExportData::class.java)
+                val trimmedContent = fileContent.trimStart()
+                val exportData = when {
+                    trimmedContent.startsWith("<") -> parseGpxContent(fileContent)
+                    trimmedContent.startsWith("{") || trimmedContent.startsWith("[") ->
+                        gson.fromJson(fileContent, ExportData::class.java)
+                    else -> parsePlainCoordinatesContent(fileContent)
+                        ?: throw IllegalArgumentException("Unsupported file format")
                 }
 
                 var importedLocations = 0
@@ -636,6 +678,41 @@ class SettingsViewModel @Inject constructor(
         s.mapMode?.let { settingsRepository.setMapMode(it) }
         s.mapType?.let { settingsRepository.setMapType(it) }
         s.clipboardHintEnabled?.let { settingsRepository.setClipboardHintEnabled(it) }
+    }
+
+    /**
+     * Parses plain-text coordinate files: one "lat,lng" pair per line
+     * (the export format of some other mock-GPS apps, often with a .gpx
+     * extension despite not being XML). Returns null unless every
+     * non-blank line is a valid coordinate pair. A single point becomes a
+     * saved location; two or more become one route.
+     */
+    private fun parsePlainCoordinatesContent(content: String): ExportData? {
+        val lines = content.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (lines.isEmpty()) return null
+        val points = lines.map { line ->
+            val parts = line.split(',')
+            if (parts.size != 2) return null
+            val lat = parts[0].trim().toDoubleOrNull() ?: return null
+            val lng = parts[1].trim().toDoubleOrNull() ?: return null
+            if (lat !in -90.0..90.0 || lng !in -180.0..180.0) return null
+            ExportRoutePoint(lat = lat, lng = lng)
+        }
+        return if (points.size == 1) {
+            ExportData(
+                schemaVersion = 0,
+                savedLocations = listOf(
+                    ExportSavedLocation(name = "Imported point", lat = points[0].lat, lng = points[0].lng)
+                ),
+                routes = emptyList()
+            )
+        } else {
+            ExportData(
+                schemaVersion = 0,
+                savedLocations = emptyList(),
+                routes = listOf(ExportRoute(name = "Imported route", points = points))
+            )
+        }
     }
 
     private fun parseGpxContent(content: String): ExportData {

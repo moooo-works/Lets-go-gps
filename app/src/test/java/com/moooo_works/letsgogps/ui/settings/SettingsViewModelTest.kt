@@ -365,6 +365,108 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun testParseAndApplyImportData_PlainTextLatLngLines_ImportsAsRoute() = runTest {
+        // Some apps export plain "lat,lng" lines under a .gpx extension.
+        val plainInput = "48.198274,11.463173\n48.199274,11.463173"
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(plainInput.toByteArray())
+        }
+
+        coEvery { locationRepository.getAllLocations() } returns flowOf(emptyList())
+        coEvery { locationRepository.observeRoutes() } returns flowOf(emptyList())
+
+        var previewResult: ImportPreview? = null
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, preview, error ->
+            parseSuccess = success
+            previewResult = preview
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertTrue("Plain-text parse failed: $parseError", parseSuccess == true)
+        assertEquals("TXT", previewResult!!.format)
+        assertEquals(0, previewResult!!.savedLocationsCount)
+        assertEquals(1, previewResult!!.routesCount)
+
+        var applySuccess: Boolean? = null
+        var applyMessage: String? = null
+        val applyLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.applyImportData(previewResult!!) { success, message ->
+            applySuccess = success
+            applyMessage = message
+            applyLatch.countDown()
+        }
+        applyLatch.await()
+
+        assertEquals(true, applySuccess)
+        assertTrue(applyMessage!!.contains("Routes: 1 imported, 0 skipped"))
+        coVerify(exactly = 1) { locationRepository.insertRouteWithPoints("Imported route", any()) }
+    }
+
+    @Test
+    fun testParseImportData_ForeignJsonSchema_FailsWithClearError() = runTest {
+        // Backup from another app (EasyGPSMock): parses as JSON but matches
+        // none of our fields — must be rejected, not shown as a 0/0 preview.
+        val foreignJson = """
+            {
+              "bookmarks": [
+                {"id": "1", "isStarred": false, "lat": 0.0, "lng": 0.0, "name": "08:46:38", "type": "FOOTPRINT"}
+              ],
+              "settings": {"default_speed": 19.0, "map_type": 1},
+              "timestamp": 1783212402563,
+              "version": 1
+            }
+        """.trimIndent()
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(foreignJson.toByteArray())
+        }
+
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, _, error ->
+            parseSuccess = success
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertEquals(false, parseSuccess)
+        assertTrue("Expected unrecognized-backup error, got: $parseError", parseError!!.contains("Unrecognized backup"))
+    }
+
+    @Test
+    fun testParseImportData_UnparseablePlainText_FailsWithClearError() = runTest {
+        val garbage = "hello world\nnot,coordinates"
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(garbage.toByteArray())
+        }
+
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, _, error ->
+            parseSuccess = success
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertEquals(false, parseSuccess)
+        assertTrue("Expected unsupported-format error, got: $parseError", parseError!!.contains("Unsupported file format"))
+    }
+
+    @Test
     fun testApplyImportData_SavedLocationsDeduplication_19m_21m() = runTest {
         val jsonInput = """
             {
