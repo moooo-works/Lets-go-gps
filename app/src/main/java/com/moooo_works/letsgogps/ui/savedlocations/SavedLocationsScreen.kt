@@ -209,6 +209,9 @@ fun SavedLocationsScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    TextButton(onClick = onNavigateToFolderManagement) {
+                        Text(stringResource(R.string.folder_manage_button), color = MaterialTheme.colorScheme.primary)
+                    }
                     Box {
                         IconButton(onClick = { importExportMenuExpanded = true }) {
                             Icon(Icons.Default.ImportExport, contentDescription = stringResource(R.string.import_export_menu))
@@ -249,9 +252,6 @@ fun SavedLocationsScreen(
                                 }
                             )
                         }
-                    }
-                    TextButton(onClick = onNavigateToFolderManagement) {
-                        Text(stringResource(R.string.folder_manage_button), color = MaterialTheme.colorScheme.primary)
                     }
                     Box {
                         IconButton(onClick = { overflowMenuExpanded = true }) {
