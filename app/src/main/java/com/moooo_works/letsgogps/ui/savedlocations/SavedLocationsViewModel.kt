@@ -6,6 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.moooo_works.letsgogps.data.model.FolderWithCount
 import com.moooo_works.letsgogps.data.model.LocationFolder
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import android.net.Uri
+import com.moooo_works.letsgogps.data.backup.BackupManager
+import com.moooo_works.letsgogps.data.backup.ImportPreview
+import com.moooo_works.letsgogps.data.billing.RewardedAdManager
+import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +48,9 @@ data class BatchSelectionState(
 class SavedLocationsViewModel @Inject constructor(
     private val repository: LocationRepository,
     private val proRepository: ProRepository,
-    private val settingsRepository: com.moooo_works.letsgogps.domain.repository.SettingsRepository
+    private val settingsRepository: com.moooo_works.letsgogps.domain.repository.SettingsRepository,
+    private val rewardedAdManager: RewardedAdManager,
+    private val backupManager: BackupManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SavedLocationsUiState())
@@ -117,6 +124,64 @@ class SavedLocationsViewModel @Inject constructor(
     fun launchBillingFlow(activity: Activity) {
         proRepository.launchBillingFlow(activity)
         dismissProUpgrade()
+    }
+
+    val subscriptionOffer: StateFlow<SubscriptionOffer?> = proRepository.subscriptionOffer
+
+    fun watchRewardedAd(activity: Activity, onUnavailable: () -> Unit = {}) {
+        rewardedAdManager.showAd(
+            activity = activity,
+            onReward = {
+                viewModelScope.launch {
+                    proRepository.grantAdUnlockHours(6)
+                }
+            },
+            onUnavailable = onUnavailable
+        )
+    }
+
+    // Snapshot check at dialog-open time; no ticking flow needed here (the
+    // dialog is short-lived, unlike the settings page's live countdown).
+    fun watchAdEnabled(): Boolean =
+        proRepository.adUnlockExpiryMillis.value - System.currentTimeMillis() < 18 * 3600_000L
+
+    fun exportData(uri: Uri, onResult: (Boolean, String?) -> Unit) {
+        if (!proRepository.isProActive.value) {
+            onResult(false, "PRO_REQUIRED")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                backupManager.exportToUri(uri, includeSavedLocations = true, includeRoutes = false)
+                onResult(true, null)
+            } catch (e: Exception) {
+                onResult(false, e.message)
+            }
+        }
+    }
+
+    fun parseImportData(uri: Uri, onResult: (Boolean, ImportPreview?, String?) -> Unit) {
+        if (!proRepository.isProActive.value) {
+            onResult(false, null, "PRO_REQUIRED")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                onResult(true, backupManager.parseImport(uri), null)
+            } catch (e: Exception) {
+                onResult(false, null, e.message)
+            }
+        }
+    }
+
+    fun applyImportData(preview: ImportPreview, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                onResult(true, backupManager.applyImport(preview))
+            } catch (e: Exception) {
+                onResult(false, e.message)
+            }
+        }
     }
 
     fun onQueryChanged(query: String) {

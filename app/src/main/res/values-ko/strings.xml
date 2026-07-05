@@ -236,6 +236,19 @@
     <string name="import_format_dialog_title">가져오기 형식 선택</string>
     <string name="import_format_json">백업 파일 가져오기（.json）</string>
     <string name="import_format_gpx">GPX 파일 가져오기（.gpx）</string>
+    <string name="import_error_empty">파일이 비어 있습니다</string>
+    <string name="import_error_invalid_gpx">잘못된 GPX 형식: %1$s</string>
+    <string name="import_error_invalid_json">잘못된 JSON 형식: %1$s</string>
+    <string name="import_error_invalid_data">파일 내용이 유효하지 않습니다</string>
+    <string name="import_error_foreign_backup">인식할 수 없는 백업: 이 JSON 파일은 본 앱에서 내보낸 파일이 아닙니다</string>
+    <string name="import_error_unsupported_format">지원하지 않는 파일 형식: 본 앱의 JSON 백업, GPX 또는 줄마다 \"위도,경도\"가 있는 텍스트 파일만 지원합니다</string>
+    <string name="import_error_schema_version">지원하지 않는 데이터 버전: %1$d</string>
+    <string name="import_default_point_name">가져온 지점</string>
+    <string name="import_default_gpx_waypoint_name">웨이포인트 %1$d</string>
+    <string name="import_default_gpx_track_name">트랙 %1$d</string>
+    <string name="import_default_gpx_route_name">경로 %1$d</string>
+    <string name="import_export_menu">가져오기 / 내보내기</string>
+    <string name="import_default_route_name">가져온 경로</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">Pro로 업그레이드</string>

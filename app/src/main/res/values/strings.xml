@@ -237,6 +237,19 @@
     <string name="import_format_dialog_title">選擇匯入格式</string>
     <string name="import_format_json">從備份檔匯入（.json）</string>
     <string name="import_format_gpx">從 GPX 匯入（.gpx）</string>
+    <string name="import_error_empty">檔案是空的</string>
+    <string name="import_error_invalid_gpx">GPX 格式錯誤：%1$s</string>
+    <string name="import_error_invalid_json">JSON 格式錯誤：%1$s</string>
+    <string name="import_error_invalid_data">檔案內容無效</string>
+    <string name="import_error_foreign_backup">無法辨識的備份：此 JSON 檔並非由本應用程式匯出</string>
+    <string name="import_error_unsupported_format">不支援的檔案格式：僅支援本應用程式的 JSON 備份、GPX，或每行「緯度,經度」的純文字檔</string>
+    <string name="import_error_schema_version">不支援的資料版本：%1$d</string>
+    <string name="import_default_point_name">匯入的位置</string>
+    <string name="import_default_gpx_waypoint_name">航點 %1$d</string>
+    <string name="import_default_gpx_track_name">軌跡 %1$d</string>
+    <string name="import_default_gpx_route_name">路線 %1$d</string>
+    <string name="import_export_menu">匯入 / 匯出</string>
+    <string name="import_default_route_name">匯入的路線</string>
 
     <!-- Pro Upgrade -->
     <string name="pro_dialog_title">升級至 Pro</string>

@@ -19,7 +19,8 @@ import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.data.billing.RewardedAdManager
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
-import com.moooo_works.letsgogps.ui.settings.ImportPreview
+import com.moooo_works.letsgogps.data.backup.BackupManager
+import com.moooo_works.letsgogps.data.backup.ImportPreview
 import com.moooo_works.letsgogps.ui.settings.ProSectionState
 import com.moooo_works.letsgogps.R
 import io.mockk.coEvery
@@ -78,6 +79,12 @@ class SettingsViewModelTest {
             val formatArgs = args[1] as Array<*>
             "Routes: ${formatArgs[0]} imported, ${formatArgs[1]} skipped."
         }
+        every { context.getString(R.string.import_error_foreign_backup) } returns
+            "Unrecognized backup: this JSON file was not exported by this app"
+        every { context.getString(R.string.import_error_unsupported_format) } returns
+            "Unsupported file format"
+        every { context.getString(R.string.import_default_point_name) } returns "Imported point"
+        every { context.getString(R.string.import_default_route_name) } returns "Imported route"
 
         val mockStatusFlow = MutableStateFlow(MockStatus.IDLE)
         every { mockStateRepository.mockStatus } returns mockStatusFlow
@@ -118,6 +125,7 @@ class SettingsViewModelTest {
             proRepository,
             systemHealthCheck,
             rewardedAdManager,
+            BackupManager(context, locationRepository, settingsRepository),
             context
         )
         vm.nowFlowOverride = flowOf(nowMillis)
@@ -362,6 +370,108 @@ class SettingsViewModelTest {
         assertTrue(applyMessage!!.contains("Routes: 1 imported, 0 skipped"))
         coVerify(exactly = 1) { locationRepository.saveLocation(match { it.name == "Taipei 101" }) }
         coVerify(exactly = 1) { locationRepository.insertRouteWithPoints("Morning Walk", any()) }
+    }
+
+    @Test
+    fun testParseAndApplyImportData_PlainTextLatLngLines_ImportsAsRoute() = runTest {
+        // Some apps export plain "lat,lng" lines under a .gpx extension.
+        val plainInput = "48.198274,11.463173\n48.199274,11.463173"
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(plainInput.toByteArray())
+        }
+
+        coEvery { locationRepository.getAllLocations() } returns flowOf(emptyList())
+        coEvery { locationRepository.observeRoutes() } returns flowOf(emptyList())
+
+        var previewResult: ImportPreview? = null
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, preview, error ->
+            parseSuccess = success
+            previewResult = preview
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertTrue("Plain-text parse failed: $parseError", parseSuccess == true)
+        assertEquals("TXT", previewResult!!.format)
+        assertEquals(0, previewResult!!.savedLocationsCount)
+        assertEquals(1, previewResult!!.routesCount)
+
+        var applySuccess: Boolean? = null
+        var applyMessage: String? = null
+        val applyLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.applyImportData(previewResult!!) { success, message ->
+            applySuccess = success
+            applyMessage = message
+            applyLatch.countDown()
+        }
+        applyLatch.await()
+
+        assertEquals(true, applySuccess)
+        assertTrue(applyMessage!!.contains("Routes: 1 imported, 0 skipped"))
+        coVerify(exactly = 1) { locationRepository.insertRouteWithPoints("Imported route", any()) }
+    }
+
+    @Test
+    fun testParseImportData_ForeignJsonSchema_FailsWithClearError() = runTest {
+        // Backup from another app (EasyGPSMock): parses as JSON but matches
+        // none of our fields — must be rejected, not shown as a 0/0 preview.
+        val foreignJson = """
+            {
+              "bookmarks": [
+                {"id": "1", "isStarred": false, "lat": 0.0, "lng": 0.0, "name": "08:46:38", "type": "FOOTPRINT"}
+              ],
+              "settings": {"default_speed": 19.0, "map_type": 1},
+              "timestamp": 1783212402563,
+              "version": 1
+            }
+        """.trimIndent()
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(foreignJson.toByteArray())
+        }
+
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, _, error ->
+            parseSuccess = success
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertEquals(false, parseSuccess)
+        assertTrue("Expected unrecognized-backup error, got: $parseError", parseError!!.contains("Unrecognized backup"))
+    }
+
+    @Test
+    fun testParseImportData_UnparseablePlainText_FailsWithClearError() = runTest {
+        val garbage = "hello world\nnot,coordinates"
+
+        val uri = mockk<Uri>()
+        every { contentResolver.openInputStream(uri) } answers {
+            ByteArrayInputStream(garbage.toByteArray())
+        }
+
+        var parseSuccess: Boolean? = null
+        var parseError: String? = null
+        val parseLatch = java.util.concurrent.CountDownLatch(1)
+        viewModel.parseImportData(uri) { success, _, error ->
+            parseSuccess = success
+            parseError = error
+            parseLatch.countDown()
+        }
+        parseLatch.await()
+
+        assertEquals(false, parseSuccess)
+        assertTrue("Expected unsupported-format error, got: $parseError", parseError!!.contains("Unsupported file format"))
     }
 
     @Test

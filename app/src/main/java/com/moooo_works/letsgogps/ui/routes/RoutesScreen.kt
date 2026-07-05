@@ -1,6 +1,10 @@
 package com.moooo_works.letsgogps.ui.routes
 
+import android.app.Activity
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,7 +23,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ImportExport
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,12 +54,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moooo_works.letsgogps.R
+import com.moooo_works.letsgogps.data.backup.ImportPreview
 import com.moooo_works.letsgogps.data.model.RouteSummary
+import com.moooo_works.letsgogps.ui.common.ImportPreviewDialog
+import com.moooo_works.letsgogps.ui.pro.ProUpgradeDialog
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -77,6 +89,76 @@ fun RoutesScreen(
                 showMergeDialog = false
             }
         }
+    }
+
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val isProActive by viewModel.isProActive.collectAsStateWithLifecycle()
+    val showProUpgrade by viewModel.showProUpgrade.collectAsStateWithLifecycle()
+    val subscriptionOffer by viewModel.subscriptionOffer.collectAsStateWithLifecycle()
+    var importExportMenuExpanded by remember { mutableStateOf(false) }
+    var importPreview by remember { mutableStateOf<ImportPreview?>(null) }
+    var showImportDialog by remember { mutableStateOf(false) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            viewModel.parseImportData(it) { success, preview, message ->
+                if (success) {
+                    importPreview = preview
+                    showImportDialog = true
+                } else if (message == "PRO_REQUIRED") {
+                    viewModel.requestProUpgrade()
+                } else {
+                    Toast.makeText(context, context.getString(R.string.import_failed, message), Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let {
+            viewModel.exportData(it) { success, error ->
+                if (success) {
+                    Toast.makeText(context, context.getString(R.string.export_success), Toast.LENGTH_SHORT).show()
+                } else if (error == "PRO_REQUIRED") {
+                    viewModel.requestProUpgrade()
+                } else {
+                    Toast.makeText(context, context.getString(R.string.export_failed, error), Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    if (showProUpgrade) {
+        ProUpgradeDialog(
+            onDismiss = { viewModel.dismissProUpgrade() },
+            onWatchAd = {
+                activity?.let { viewModel.watchRewardedAd(it) }
+                viewModel.dismissProUpgrade()
+            },
+            onSubscribe = {
+                activity?.let { viewModel.launchBillingFlow(it) } ?: viewModel.dismissProUpgrade()
+            },
+            watchAdEnabled = viewModel.watchAdEnabled(),
+            subscriptionOffer = subscriptionOffer,
+        )
+    }
+
+    if (showImportDialog && importPreview != null) {
+        ImportPreviewDialog(
+            preview = importPreview!!,
+            onDismiss = { showImportDialog = false },
+            onConfirm = {
+                showImportDialog = false
+                viewModel.applyImportData(importPreview!!) { _, message ->
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -115,6 +197,49 @@ fun RoutesScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
+                    },
+                    actions = {
+                        Box {
+                            IconButton(onClick = { importExportMenuExpanded = true }) {
+                                Icon(Icons.Default.ImportExport, contentDescription = stringResource(R.string.import_export_menu))
+                            }
+                            DropdownMenu(
+                                expanded = importExportMenuExpanded,
+                                onDismissRequest = { importExportMenuExpanded = false },
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                tonalElevation = 0.dp
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.settings_import_data)) },
+                                    trailingIcon = if (!isProActive) {
+                                        { Icon(Icons.Default.Lock, contentDescription = null) }
+                                    } else null,
+                                    onClick = {
+                                        importExportMenuExpanded = false
+                                        if (isProActive) {
+                                            importLauncher.launch(arrayOf("*/*"))
+                                        } else {
+                                            viewModel.requestProUpgrade()
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.settings_export_data)) },
+                                    trailingIcon = if (!isProActive) {
+                                        { Icon(Icons.Default.Lock, contentDescription = null) }
+                                    } else null,
+                                    onClick = {
+                                        importExportMenuExpanded = false
+                                        if (isProActive) {
+                                            val dateStr = java.text.SimpleDateFormat("yyyyMMdd_HHmm", java.util.Locale.US).format(java.util.Date())
+                                            exportLauncher.launch("mockgps_routes_${dateStr}.json")
+                                        } else {
+                                            viewModel.requestProUpgrade()
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
