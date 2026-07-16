@@ -374,4 +374,6 @@
     <!-- GPX Import Tip Card -->
     <string name="tip_gpx_title">GPXインポートに対応！</string>
     <string name="tip_gpx_body">設定 → データ管理 → インポートから「GPXからインポート」を選ぶと、.gpxファイルからルートと場所をインポートできます。</string>
+    <string name="tip_jump_mode_title">「ジャンプ」再生モード登場！</string>
+    <string name="tip_jump_mode_body">ルートモードの速度スライダー横に「⚡ ジャンプ」スイッチを追加しました。オンにすると歩く代わりに数秒ごとに次のポイントへ瞬間移動します。GPXルートを素早く進みたいときに便利です。間隔はスライダーで調整できます。</string>
 </resources>

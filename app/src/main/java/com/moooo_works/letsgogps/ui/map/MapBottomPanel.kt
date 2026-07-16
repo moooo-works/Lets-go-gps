@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -374,7 +375,13 @@ private fun RouteControls(
                     "⚡ ${stringResource(R.string.route_jump_mode)}",
                     style = MaterialTheme.typography.labelMedium
                 )
-            }
+            },
+            // Primary when active — the default secondaryContainer reads as
+            // grey/white and users can't tell whether the mode is on.
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+            )
         )
         Text(
             if (isJump) stringResource(R.string.route_jump_interval, uiState.jumpIntervalSec)

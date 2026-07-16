@@ -106,6 +106,7 @@ class MapViewModelTest {
         every { settingsRepository.getLoopBounceTipSeenVersion() } returns flowOf(1)
         every { settingsRepository.hasSeenClipboardHintTip() } returns flowOf(true)
         every { settingsRepository.hasSeenGpxTip() } returns flowOf(true)
+        every { settingsRepository.hasSeenJumpModeTip() } returns flowOf(true)
 
         // Default: every health-check item passes — individual tests override
         // when they want to exercise the blocking-failure path.

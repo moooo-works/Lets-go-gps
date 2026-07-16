@@ -270,6 +270,14 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.hasSeenJumpModeTip().collect { seen ->
+                if (!seen) {
+                    _uiState.update { it.copy(showJumpModeTip = true) }
+                }
+            }
+        }
     }
 
     fun dismissOnboarding() {
@@ -295,6 +303,12 @@ class MapViewModel @Inject constructor(
     fun dismissGpxTip() {
         _uiState.update { it.copy(showGpxTip = false) }
         viewModelScope.launch { settingsRepository.setGpxTipSeen() }
+    }
+
+    /** Dismiss the "jump playback mode" new-feature tip and persist the ack. */
+    fun dismissJumpModeTip() {
+        _uiState.update { it.copy(showJumpModeTip = false) }
+        viewModelScope.launch { settingsRepository.setJumpModeTipSeen() }
     }
 
     /** Dismiss the "loop/bounce is available" new-feature tip and persist the ack. */

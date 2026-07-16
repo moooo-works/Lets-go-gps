@@ -374,4 +374,6 @@
     <!-- GPX Import Tip Card -->
     <string name="tip_gpx_title">GPX Import is here!</string>
     <string name="tip_gpx_body">Go to Settings → Data Management → Import, then choose \"Import from GPX\" to import routes and locations from a .gpx file.</string>
+    <string name="tip_jump_mode_title">Jump playback is here!</string>
+    <string name="tip_jump_mode_body">In Route mode, turn on the \"⚡ Jump\" chip next to the speed slider to teleport to the next waypoint every few seconds instead of walking — great for finishing GPX tracks fast. Adjust the interval with the slider.</string>
 </resources>

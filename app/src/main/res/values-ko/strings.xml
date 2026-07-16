@@ -374,4 +374,6 @@
     <!-- GPX Import Tip Card -->
     <string name="tip_gpx_title">GPX 가져오기 지원!</string>
     <string name="tip_gpx_body">설정 → 데이터 관리 → 가져오기에서 \"GPX에서 가져오기\"를 선택하면 .gpx 파일에서 경로와 위치를 가져올 수 있어요.</string>
+    <string name="tip_jump_mode_title">\'점프\' 재생 모드 추가!</string>
+    <string name="tip_jump_mode_body">경로 모드의 속도 슬라이더 옆에 \"⚡ 점프\" 스위치가 생겼어요. 켜면 걷는 대신 몇 초마다 다음 지점으로 순간이동합니다. GPX 경로를 빠르게 진행할 때 유용해요. 간격은 슬라이더로 조절할 수 있어요.</string>
 </resources>
