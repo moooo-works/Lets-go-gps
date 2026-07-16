@@ -26,6 +26,8 @@ data class PersistedMockSession(
     val waypoints: List<SerLatLng> = emptyList(),
     val speedMps: Double = 0.0,
     val loopMode: String = "NONE",
+    val playbackMode: String = "WALK",
+    val jumpIntervalSec: Int = RouteSimulator.DEFAULT_JUMP_INTERVAL_SEC,
     val segmentIndex: Int = 0,
     val distanceCoveredInSegment: Double = 0.0,
     val isReturning: Boolean = false,

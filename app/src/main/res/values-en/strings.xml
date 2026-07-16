@@ -338,6 +338,8 @@
     <string name="route_loop_cd">Cycle playback mode</string>
     <string name="route_loop_active_loop">🔁 Looping</string>
     <string name="route_loop_active_bounce">↔ Bouncing</string>
+    <string name="route_jump_mode">Jump</string>
+    <string name="route_jump_interval">%1$d s/pt</string>
     <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
     <!-- Loop/Bounce new-feature tip -->
     <string name="tip_loop_bounce_title">🆕 New: Route Playback Modes</string>

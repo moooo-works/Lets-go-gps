@@ -4,7 +4,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.MapType
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.domain.LoopMode
+import com.moooo_works.letsgogps.domain.RoutePlaybackMode
 import com.moooo_works.letsgogps.domain.RouteProgress
+import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckState
 import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
@@ -53,6 +55,10 @@ data class MapUiState(
     val showOnboarding: Boolean = false,
     /** Current loop/bounce playback mode for route simulation. */
     val loopMode: LoopMode = LoopMode.NONE,
+    /** WALK = interpolate at speed; JUMP = teleport waypoint-to-waypoint. */
+    val playbackMode: RoutePlaybackMode = RoutePlaybackMode.WALK,
+    /** Seconds between jumps when [playbackMode] is JUMP. */
+    val jumpIntervalSec: Int = RouteSimulator.DEFAULT_JUMP_INTERVAL_SEC,
     /** Non-null while the route simulation is PLAYING or PAUSED; null when IDLE. */
     val routeProgress: RouteProgress? = null,
     /** Show a "what's new" tip card about loop/bounce modes. */

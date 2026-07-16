@@ -368,6 +368,8 @@ class MockLocationService : Service() {
                     waypoints = waypoints.map { SerLatLng(it.latitude, it.longitude) },
                     speedMps = routeSimulator.currentSpeedMps(),
                     loopMode = routeSimulator.currentLoopMode().name,
+                    playbackMode = routeSimulator.currentPlaybackMode().name,
+                    jumpIntervalSec = routeSimulator.currentJumpIntervalSec(),
                     segmentIndex = snap.segmentIndex,
                     distanceCoveredInSegment = snap.distanceCoveredInSegment,
                     isReturning = snap.isReturning,

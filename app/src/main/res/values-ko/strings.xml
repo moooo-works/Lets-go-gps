@@ -338,6 +338,8 @@
     <string name="route_loop_cd">재생 모드 전환</string>
     <string name="route_loop_active_loop">🔁 루프 중</string>
     <string name="route_loop_active_bounce">↔ 왕복 중</string>
+    <string name="route_jump_mode">점프</string>
+    <string name="route_jump_interval">%1$d초/지점</string>
     <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
     <!-- Loop/Bounce new-feature tip -->
     <string name="tip_loop_bounce_title">🆕 신규: 경로 재생 모드</string>

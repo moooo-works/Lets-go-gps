@@ -284,6 +284,72 @@ class RouteSimulatorTest {
         assertEquals(SimulationState.IDLE, simulator.simulationState.value)
     }
 
+    // ─── RoutePlaybackMode.JUMP ───────────────────────────────────────────────
+
+    @Test
+    fun `JUMP mode teleports waypoint-to-waypoint at the set interval`() = runTest {
+        val simulator = RouteSimulator(settingsRepository)
+        val a = LatLng(0.0, 0.0)
+        val b = LatLng(0.01, 0.0)
+        val c = LatLng(0.01, 0.01)
+        simulator.setRoute(listOf(a, b, c))
+        simulator.setPlaybackMode(RoutePlaybackMode.JUMP)
+        simulator.setJumpIntervalSec(2)
+
+        val emitted = mutableListOf<SimulationPoint?>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            simulator.currentLocation.collect { emitted.add(it) }
+        }
+
+        simulator.play(this)
+        testScheduler.advanceTimeBy(1_000)
+        // Before the first interval elapses only the start point exists — no interpolation.
+        assertEquals(listOf(a), emitted.filterNotNull().map { it.latLng })
+
+        testScheduler.advanceTimeBy(1_100) // t≈2.1s → first jump landed on b
+        assertEquals(b, emitted.filterNotNull().last().latLng)
+
+        advanceUntilIdle()
+        assertEquals(listOf(a, b, c), emitted.filterNotNull().map { it.latLng })
+        assertEquals(SimulationState.IDLE, simulator.simulationState.value)
+        job.cancel()
+    }
+
+    @Test
+    fun `JUMP mode with LOOP restarts from the first waypoint and stays PLAYING`() = runTest {
+        val simulator = RouteSimulator(settingsRepository)
+        val a = LatLng(0.0, 0.0)
+        val b = LatLng(0.01, 0.0)
+        simulator.setRoute(listOf(a, b))
+        simulator.setPlaybackMode(RoutePlaybackMode.JUMP)
+        simulator.setJumpIntervalSec(1)
+        simulator.setLoopMode(LoopMode.LOOP)
+
+        val positions = mutableListOf<LatLng>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            simulator.currentLocation.collect { it?.let { p -> positions.add(p.latLng) } }
+        }
+
+        simulator.play(this)
+        testScheduler.advanceTimeBy(3_500)
+
+        assertEquals(SimulationState.PLAYING, simulator.simulationState.value)
+        assertTrue("expected a second pass, got $positions", positions.size >= 3)
+        assertEquals(listOf(a, b, a), positions.take(3))
+
+        simulator.stop()
+        job.cancel()
+    }
+
+    @Test
+    fun `jump interval is clamped to its bounds`() {
+        val simulator = RouteSimulator(settingsRepository)
+        simulator.setJumpIntervalSec(99)
+        assertEquals(RouteSimulator.MAX_JUMP_INTERVAL_SEC, simulator.currentJumpIntervalSec())
+        simulator.setJumpIntervalSec(0)
+        assertEquals(RouteSimulator.MIN_JUMP_INTERVAL_SEC, simulator.currentJumpIntervalSec())
+    }
+
     // ─── setRoute resets ──────────────────────────────────────────────────────
 
     @Test

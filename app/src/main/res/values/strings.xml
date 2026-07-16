@@ -339,6 +339,8 @@
     <string name="route_loop_cd">切換播放模式</string>
     <string name="route_loop_active_loop">🔁 循環中</string>
     <string name="route_loop_active_bounce">↔ 折返中</string>
+    <string name="route_jump_mode">跳點</string>
+    <string name="route_jump_interval">%1$d 秒/點</string>
     <string name="route_progress_distance">%1$.1f / %2$.1f 公里</string>
     <!-- Loop/Bounce new-feature tip -->
     <string name="tip_loop_bounce_title">🆕 路線播放新功能</string>

@@ -338,6 +338,8 @@
     <string name="route_loop_cd">再生モード切替</string>
     <string name="route_loop_active_loop">🔁 ループ中</string>
     <string name="route_loop_active_bounce">↔ 往復中</string>
+    <string name="route_jump_mode">ジャンプ</string>
+    <string name="route_jump_interval">%1$d 秒/点</string>
     <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
     <!-- Loop/Bounce new-feature tip -->
     <string name="tip_loop_bounce_title">🆕 新機能：ルート再生モード</string>

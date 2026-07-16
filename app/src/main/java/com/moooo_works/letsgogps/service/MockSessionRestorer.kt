@@ -8,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.moooo_works.letsgogps.domain.LoopMode
 import com.moooo_works.letsgogps.domain.MockSessionMode
 import com.moooo_works.letsgogps.domain.RestoreDecision
+import com.moooo_works.letsgogps.domain.RoutePlaybackMode
 import com.moooo_works.letsgogps.domain.RouteProgressSnapshot
 import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.decideRestore
@@ -92,6 +93,11 @@ class MockSessionRestorer @Inject constructor(
                 routeSimulator.setRoute(waypoints)
                 routeSimulator.setSpeed(session.speedMps)
                 routeSimulator.setLoopMode(runCatching { LoopMode.valueOf(session.loopMode) }.getOrDefault(LoopMode.NONE))
+                // Gson skips Kotlin defaults on old JSON — parse defensively like loopMode.
+                routeSimulator.setPlaybackMode(
+                    runCatching { RoutePlaybackMode.valueOf(session.playbackMode) }.getOrDefault(RoutePlaybackMode.WALK)
+                )
+                routeSimulator.setJumpIntervalSec(session.jumpIntervalSec)
                 routeSimulator.restoreProgress(
                     RouteProgressSnapshot(session.segmentIndex, session.distanceCoveredInSegment, session.isReturning)
                 )

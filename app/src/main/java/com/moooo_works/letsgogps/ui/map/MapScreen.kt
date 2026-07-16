@@ -417,6 +417,8 @@ fun MapScreen(
                 onPauseRoute = { viewModel.pauseRoute() },
                 onSetSpeed = { viewModel.setSpeed(it) },
                 onSetTransportMode = { viewModel.setTransportMode(it) },
+                onTogglePlaybackMode = { viewModel.togglePlaybackMode() },
+                onSetJumpInterval = { viewModel.setJumpInterval(it) },
                 onShowSaveRoute = {
                     routeNameInput = ""
                     showSaveRouteDialog = true

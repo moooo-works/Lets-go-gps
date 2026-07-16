@@ -282,6 +282,8 @@ class MapViewModel @Inject constructor(
      * Propagates the new mode to [RouteSimulator] immediately.
      */
     fun cycleLoopMode() = routeController.cycleLoopMode()
+    fun togglePlaybackMode() = routeController.togglePlaybackMode()
+    fun setJumpInterval(sec: Int) = routeController.setJumpInterval(sec)
 
     /** Dismiss the "clipboard hint" new-feature tip and persist the ack. */
     fun dismissClipboardHintTip() {
