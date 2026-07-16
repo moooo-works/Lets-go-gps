@@ -49,16 +49,6 @@ fun MapGoogleMapContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val primaryColorArgb = MaterialTheme.colorScheme.primary.toArgb()
-    val waypointIcons = remember(uiState.waypoints.size, primaryColorArgb) {
-        uiState.waypoints.mapIndexed { index, _ ->
-            val label = when (index) {
-                0 -> "S"
-                uiState.waypoints.size - 1 -> "E"
-                else -> "${index + 1}"
-            }
-            createNumberedMarkerBitmap(label, primaryColorArgb)
-        }
-    }
 
     GoogleMap(
         modifier = modifier.fillMaxSize(),
@@ -85,6 +75,20 @@ fun MapGoogleMapContent(
         val favoriteIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED) }
         val normalIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE) }
         val mockIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) }
+        // Must live INSIDE the GoogleMap content lambda: BitmapDescriptorFactory
+        // throws "IBitmapDescriptorFactory is not initialized" until the map renderer
+        // is up. Outside, a first composition that already has waypoints (restored
+        // session after process death) crashes on launch.
+        val waypointIcons = remember(uiState.waypoints.size, primaryColorArgb) {
+            uiState.waypoints.mapIndexed { index, _ ->
+                val label = when (index) {
+                    0 -> "S"
+                    uiState.waypoints.size - 1 -> "E"
+                    else -> "${index + 1}"
+                }
+                createNumberedMarkerBitmap(label, primaryColorArgb)
+            }
+        }
 
         // Saved location markers
         uiState.savedLocations.forEach { location ->
