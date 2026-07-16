@@ -342,6 +342,30 @@ class RouteSimulatorTest {
     }
 
     @Test
+    fun `JUMP mode with LOOP dwells on the final waypoint before restarting`() = runTest {
+        // Regression: the LOOP reset used to re-emit the first waypoint in the
+        // same tick as the final jump, so the StateFlow conflated the final
+        // point away — with 2 waypoints playback appeared stuck on the first.
+        val simulator = RouteSimulator(settingsRepository)
+        val a = LatLng(0.0, 0.0)
+        val b = LatLng(0.01, 0.0)
+        simulator.setRoute(listOf(a, b))
+        simulator.setPlaybackMode(RoutePlaybackMode.JUMP)
+        simulator.setJumpIntervalSec(2)
+        simulator.setLoopMode(LoopMode.LOOP)
+
+        simulator.play(this)
+
+        testScheduler.advanceTimeBy(2_100) // just past the first jump
+        assertEquals(b, simulator.currentLocation.value?.latLng)
+
+        testScheduler.advanceTimeBy(2_000) // dwell elapsed → looped back to start
+        assertEquals(a, simulator.currentLocation.value?.latLng)
+
+        simulator.stop()
+    }
+
+    @Test
     fun `jump interval is clamped to its bounds`() {
         val simulator = RouteSimulator(settingsRepository)
         simulator.setJumpIntervalSec(99)

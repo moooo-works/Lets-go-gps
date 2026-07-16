@@ -326,6 +326,11 @@ class RouteSimulator @Inject constructor(
                             )
                         }
                     }
+                    // Dwell on the final point for one interval before a LOOP/BOUNCE
+                    // pass resets — without this the reset re-emits the first waypoint
+                    // in the same tick and the StateFlow conflates the final point
+                    // away entirely (2-waypoint routes looked stuck on the start).
+                    if (loopMode != LoopMode.NONE) delay(jumpIntervalSec * 1000L)
                 } else while (isActive && currentSegmentIndex < effectiveWaypoints.size - 1) {
                     val start = effectiveWaypoints[currentSegmentIndex]
                     val end = effectiveWaypoints[currentSegmentIndex + 1]
