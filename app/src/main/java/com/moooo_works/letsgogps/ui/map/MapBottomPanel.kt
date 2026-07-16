@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -59,6 +60,8 @@ import androidx.compose.ui.unit.dp
 import com.moooo_works.letsgogps.R
 import kotlin.math.roundToInt
 import com.moooo_works.letsgogps.domain.LoopMode
+import com.moooo_works.letsgogps.domain.RoutePlaybackMode
+import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.SimulationState
 import com.moooo_works.letsgogps.ui.theme.Accent500
 
@@ -80,6 +83,8 @@ fun MapBottomPanel(
     onPauseRoute: () -> Unit,
     onSetSpeed: (Double) -> Unit,
     onSetTransportMode: (TransportMode) -> Unit,
+    onTogglePlaybackMode: () -> Unit,
+    onSetJumpInterval: (Int) -> Unit,
     onShowSaveRoute: () -> Unit,
     onClearRoute: () -> Unit,
     onCycleLoopMode: () -> Unit,
@@ -244,6 +249,8 @@ fun MapBottomPanel(
                     uiState = uiState,
                     onSetSpeed = onSetSpeed,
                     onSetTransportMode = onSetTransportMode,
+                    onTogglePlaybackMode = onTogglePlaybackMode,
+                    onSetJumpInterval = onSetJumpInterval,
                     onShowSaveRoute = onShowSaveRoute,
                     onClearRoute = onClearRoute
                 )
@@ -346,10 +353,13 @@ private fun RouteControls(
     uiState: MapUiState,
     onSetSpeed: (Double) -> Unit,
     onSetTransportMode: (TransportMode) -> Unit,
+    onTogglePlaybackMode: () -> Unit,
+    onSetJumpInterval: (Int) -> Unit,
     onShowSaveRoute: () -> Unit,
     onClearRoute: () -> Unit
 ) {
-    // Speed slider row
+    val isJump = uiState.playbackMode == RoutePlaybackMode.JUMP
+    // Walk: speed slider. Jump: interval slider. The leading chip toggles the mode.
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -357,19 +367,46 @@ private fun RouteControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        FilterChip(
+            selected = isJump,
+            onClick = onTogglePlaybackMode,
+            label = {
+                Text(
+                    "⚡ ${stringResource(R.string.route_jump_mode)}",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            },
+            // Primary when active — the default secondaryContainer reads as
+            // grey/white and users can't tell whether the mode is on.
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+            )
+        )
         Text(
-            "${"%.0f".format(uiState.speedKmh)} km/h",
+            if (isJump) stringResource(R.string.route_jump_interval, uiState.jumpIntervalSec)
+            else "${"%.0f".format(uiState.speedKmh)} km/h",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(60.dp)
         )
-        Slider(
-            value = uiState.speedKmh.toFloat(),
-            onValueChange = { onSetSpeed(it.roundToInt().toDouble()) },
-            valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH,
-            steps = ROUTE_SPEED_STEPS,
-            modifier = Modifier.weight(1f)
-        )
+        if (isJump) {
+            Slider(
+                value = uiState.jumpIntervalSec.toFloat(),
+                onValueChange = { onSetJumpInterval(it.roundToInt()) },
+                valueRange = RouteSimulator.MIN_JUMP_INTERVAL_SEC.toFloat()..RouteSimulator.MAX_JUMP_INTERVAL_SEC.toFloat(),
+                steps = RouteSimulator.MAX_JUMP_INTERVAL_SEC - RouteSimulator.MIN_JUMP_INTERVAL_SEC - 1,
+                modifier = Modifier.weight(1f)
+            )
+        } else {
+            Slider(
+                value = uiState.speedKmh.toFloat(),
+                onValueChange = { onSetSpeed(it.roundToInt().toDouble()) },
+                valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH,
+                steps = ROUTE_SPEED_STEPS,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 
     // Transport mode chips + save / clear buttons row
@@ -379,22 +416,25 @@ private fun RouteControls(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            val transportModeLabels = mapOf(
-                TransportMode.WALKING to "🚶 ${stringResource(R.string.map_transport_walking)}",
-                TransportMode.CYCLING to "🚲 ${stringResource(R.string.map_transport_cycling)}",
-                TransportMode.DRIVING to "🚗 ${stringResource(R.string.map_transport_driving)}"
-            )
-            TransportMode.values().forEach { mode ->
-                FilterChip(
-                    selected = uiState.transportMode == mode,
-                    onClick = { onSetTransportMode(mode) },
-                    label = {
-                        Text(
-                            transportModeLabels[mode] ?: mode.name,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
+            // Transport presets only set speed — meaningless while jumping.
+            if (!isJump) {
+                val transportModeLabels = mapOf(
+                    TransportMode.WALKING to "🚶 ${stringResource(R.string.map_transport_walking)}",
+                    TransportMode.CYCLING to "🚲 ${stringResource(R.string.map_transport_cycling)}",
+                    TransportMode.DRIVING to "🚗 ${stringResource(R.string.map_transport_driving)}"
                 )
+                TransportMode.values().forEach { mode ->
+                    FilterChip(
+                        selected = uiState.transportMode == mode,
+                        onClick = { onSetTransportMode(mode) },
+                        label = {
+                            Text(
+                                transportModeLabels[mode] ?: mode.name,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    )
+                }
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {

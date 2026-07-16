@@ -417,6 +417,8 @@ fun MapScreen(
                 onPauseRoute = { viewModel.pauseRoute() },
                 onSetSpeed = { viewModel.setSpeed(it) },
                 onSetTransportMode = { viewModel.setTransportMode(it) },
+                onTogglePlaybackMode = { viewModel.togglePlaybackMode() },
+                onSetJumpInterval = { viewModel.setJumpInterval(it) },
                 onShowSaveRoute = {
                     routeNameInput = ""
                     showSaveRouteDialog = true
@@ -520,6 +522,60 @@ fun MapScreen(
     // GPX import new-feature tip card
     if (uiState.showGpxTip && !uiState.showOnboarding && !uiState.showLoopBounceTip && !uiState.showClipboardHintTip) {
         GpxTipCard(onDismiss = { viewModel.dismissGpxTip() })
+    }
+
+    // Jump playback mode new-feature tip card
+    if (uiState.showJumpModeTip && !uiState.showOnboarding && !uiState.showLoopBounceTip &&
+        !uiState.showClipboardHintTip && !uiState.showGpxTip
+    ) {
+        JumpModeTipCard(onDismiss = { viewModel.dismissJumpModeTip() })
+    }
+}
+
+@Composable
+private fun JumpModeTipCard(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.3f))
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.tip_jump_mode_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.tip_jump_mode_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                androidx.compose.material3.Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.tip_dismiss),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
     }
 }
 

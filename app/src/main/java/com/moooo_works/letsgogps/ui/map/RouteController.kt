@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.LatLng
 import com.moooo_works.letsgogps.data.model.RoutePoint
 import com.moooo_works.letsgogps.domain.LoopMode
+import com.moooo_works.letsgogps.domain.RoutePlaybackMode
 import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.healthcheck.HealthCheckItem
 import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
@@ -120,6 +121,19 @@ class RouteController(
         state.update { it.copy(speedKmh = speedKmh) }
         routeSimulator.setSpeed(speedKmh / KMH_TO_MPS_DIVISOR)
         scope.launch { settingsRepository.setRouteSpeed(speedKmh) }
+    }
+
+    fun togglePlaybackMode() {
+        val next = if (state.value.playbackMode == RoutePlaybackMode.WALK)
+            RoutePlaybackMode.JUMP else RoutePlaybackMode.WALK
+        routeSimulator.setPlaybackMode(next)
+        state.update { it.copy(playbackMode = next) }
+    }
+
+    fun setJumpInterval(sec: Int) {
+        val clamped = sec.coerceIn(RouteSimulator.MIN_JUMP_INTERVAL_SEC, RouteSimulator.MAX_JUMP_INTERVAL_SEC)
+        routeSimulator.setJumpIntervalSec(clamped)
+        state.update { it.copy(jumpIntervalSec = clamped) }
     }
 
     fun cycleLoopMode() {

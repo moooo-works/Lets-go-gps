@@ -35,6 +35,15 @@ enum class SimulationState {
  */
 enum class LoopMode { NONE, LOOP, BOUNCE }
 
+/**
+ * How a route is traversed.
+ *
+ * WALK – interpolate along segments at the selected speed (default)
+ * JUMP – teleport waypoint-to-waypoint every [RouteSimulator.currentJumpIntervalSec] seconds
+ *        (for GPX tracks where the user wants to hop through points, not walk them)
+ */
+enum class RoutePlaybackMode { WALK, JUMP }
+
 data class SimulationPoint(
     val latLng: LatLng,
     val bearing: Float,
@@ -89,6 +98,9 @@ class RouteSimulator @Inject constructor(
 
     private var loopMode: LoopMode = LoopMode.NONE
 
+    private var playbackMode: RoutePlaybackMode = RoutePlaybackMode.WALK
+    private var jumpIntervalSec: Int = DEFAULT_JUMP_INTERVAL_SEC
+
     // ─── Public API ───────────────────────────────────────────────────────────
 
     fun setRoute(points: List<LatLng>) {
@@ -106,6 +118,20 @@ class RouteSimulator @Inject constructor(
 
     /** Current loop mode — exposed so the service can persist it for resume. */
     fun currentLoopMode(): LoopMode = loopMode
+
+    fun setPlaybackMode(mode: RoutePlaybackMode) {
+        playbackMode = mode
+    }
+
+    fun setJumpIntervalSec(sec: Int) {
+        jumpIntervalSec = sec.coerceIn(MIN_JUMP_INTERVAL_SEC, MAX_JUMP_INTERVAL_SEC)
+    }
+
+    /** Current playback mode — exposed so the service can persist it for resume. */
+    fun currentPlaybackMode(): RoutePlaybackMode = playbackMode
+
+    /** Current jump interval (s) — exposed so the service can persist it for resume. */
+    fun currentJumpIntervalSec(): Int = jumpIntervalSec
 
     /** Current speed (m/s) — exposed so the service can persist it for resume. */
     fun currentSpeedMps(): Double = speedMps
@@ -277,7 +303,35 @@ class RouteSimulator @Inject constructor(
                 }
 
                 // ── Main tick loop ────────────────────────────────────────────
-                while (isActive && currentSegmentIndex < effectiveWaypoints.size - 1) {
+                if (playbackMode == RoutePlaybackMode.JUMP) {
+                    // Teleport waypoint-to-waypoint every jumpIntervalSec.
+                    // ponytail: no keep-alive re-emit inside the interval — capped at
+                    // MAX_JUMP_INTERVAL_SEC (10s), a fix every ≤10s is fine downstream.
+                    while (isActive && currentSegmentIndex < effectiveWaypoints.size - 1) {
+                        delay(jumpIntervalSec * 1000L)
+                        val from = effectiveWaypoints[currentSegmentIndex]
+                        currentSegmentIndex++
+                        distanceCoveredInSegment = 0.0
+                        val point = effectiveWaypoints[currentSegmentIndex]
+                        // speed 0 — we just teleported (mirrors playTeleportExploration)
+                        _currentLocation.emit(
+                            SimulationPoint(point, calculateBearing(from, point), 0f, getAltitude())
+                        )
+                        if (totalDistance > 0.0) {
+                            val covered = segDistances.take(currentSegmentIndex).sum()
+                            _routeProgress.value = RouteProgress(
+                                fraction = (covered / totalDistance).coerceIn(0.0, 1.0).toFloat(),
+                                coveredKm = covered / 1000.0,
+                                totalKm = totalDistance / 1000.0
+                            )
+                        }
+                    }
+                    // Dwell on the final point for one interval before a LOOP/BOUNCE
+                    // pass resets — without this the reset re-emits the first waypoint
+                    // in the same tick and the StateFlow conflates the final point
+                    // away entirely (2-waypoint routes looked stuck on the start).
+                    if (loopMode != LoopMode.NONE) delay(jumpIntervalSec * 1000L)
+                } else while (isActive && currentSegmentIndex < effectiveWaypoints.size - 1) {
                     val start = effectiveWaypoints[currentSegmentIndex]
                     val end = effectiveWaypoints[currentSegmentIndex + 1]
                     val segDist = segDistances.getOrElse(currentSegmentIndex) { 0.0 }
@@ -433,6 +487,10 @@ class RouteSimulator @Inject constructor(
 
         // Exploration / teleport-exploration defaults — kept here so they
         // are easy to tweak from one place and to surface as future settings.
+        const val DEFAULT_JUMP_INTERVAL_SEC = 3
+        const val MIN_JUMP_INTERVAL_SEC = 1
+        const val MAX_JUMP_INTERVAL_SEC = 10
+
         const val DEFAULT_EXPLORATION_RADIUS_M = 200.0
         const val DEFAULT_TELEPORT_DWELL_SEC = 60
         const val DEFAULT_TELEPORT_COOLDOWN_SEC = 5

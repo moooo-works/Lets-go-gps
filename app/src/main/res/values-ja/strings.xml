@@ -338,6 +338,8 @@
     <string name="route_loop_cd">再生モード切替</string>
     <string name="route_loop_active_loop">🔁 ループ中</string>
     <string name="route_loop_active_bounce">↔ 往復中</string>
+    <string name="route_jump_mode">ジャンプ</string>
+    <string name="route_jump_interval">%1$d 秒/点</string>
     <string name="route_progress_distance">%1$.1f / %2$.1f km</string>
     <!-- Loop/Bounce new-feature tip -->
     <string name="tip_loop_bounce_title">🆕 新機能：ルート再生モード</string>
@@ -372,4 +374,6 @@
     <!-- GPX Import Tip Card -->
     <string name="tip_gpx_title">GPXインポートに対応！</string>
     <string name="tip_gpx_body">設定 → データ管理 → インポートから「GPXからインポート」を選ぶと、.gpxファイルからルートと場所をインポートできます。</string>
+    <string name="tip_jump_mode_title">「ジャンプ」再生モード登場！</string>
+    <string name="tip_jump_mode_body">ルートモードの速度スライダー横に「⚡ ジャンプ」スイッチを追加しました。オンにすると歩く代わりに数秒ごとに次のポイントへ瞬間移動します。GPXルートを素早く進みたいときに便利です。間隔はスライダーで調整できます。</string>
 </resources>

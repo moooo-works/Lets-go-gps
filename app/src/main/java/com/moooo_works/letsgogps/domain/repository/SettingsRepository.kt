@@ -52,6 +52,8 @@ interface SettingsRepository {
 
     fun hasSeenGpxTip(): Flow<Boolean>
     suspend fun setGpxTipSeen()
+    fun hasSeenJumpModeTip(): Flow<Boolean>
+    suspend fun setJumpModeTipSeen()
 
     /** Whether to warn the user when mock-location time-zone differs from system. */
     fun observeEnableTimezoneCheck(): Flow<Boolean>
