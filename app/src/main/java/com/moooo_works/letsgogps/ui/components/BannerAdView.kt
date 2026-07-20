@@ -23,6 +23,10 @@ fun BannerAdView(modifier: Modifier = Modifier) {
                 adUnitId = BuildConfig.BANNER_AD_UNIT_ID
                 loadAd(AdRequest.Builder().build())
             }
-        }
+        },
+        // Every tab switch / ad-free toggle disposes this composable and creates a
+        // fresh AdView; without destroy() AdMob keeps the old WebView-backed view
+        // registered (refresh timers), leaking ~MBs per switch until OOM.
+        onRelease = { it.destroy() }
     )
 }

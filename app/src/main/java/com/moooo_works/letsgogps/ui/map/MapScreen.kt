@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.CancellationException
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -62,7 +63,7 @@ import com.moooo_works.letsgogps.ui.healthcheck.handleHealthCheckFix
 import com.moooo_works.letsgogps.ui.onboarding.OnboardingSheet
 import com.moooo_works.letsgogps.ui.pro.ProUpgradeDialog
 import com.moooo_works.letsgogps.utils.LatLngBoundsUtil
-import kotlin.math.min
+import com.moooo_works.letsgogps.utils.RouteFitPlan
 
 private const val DEFAULT_ROUTE_FALLBACK_ZOOM = 15f
 
@@ -91,6 +92,12 @@ fun MapScreen(
     // ── Map state ─────────────────────────────────────────────────────────────
     val mockMarkerState = remember { MarkerState(position = uiState.centerLocation) }
     var mapContainerSize by remember { mutableStateOf(IntSize.Zero) }
+    // Camera animations queued before the map attaches execute later inside
+    // composition apply, where the Maps SDK's padding assertion escapes every
+    // try/catch and kills the process ("Additional camera padding must be less
+    // than half..."). Gate all bounds-fits until the map has actually rendered,
+    // so animate() runs against a laid-out map whose size matches the container.
+    var mapLoaded by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(uiState.centerLocation, 15f)
     }
@@ -181,8 +188,10 @@ fun MapScreen(
     }
 
     // Fit camera to current route waypoints
-    LaunchedEffect(uiState.routeFitRequestToken, mapContainerSize) {
+    LaunchedEffect(uiState.routeFitRequestToken, mapContainerSize, mapLoaded) {
         if (uiState.routeFitRequestToken == null) return@LaunchedEffect
+        // Token deliberately NOT consumed — effect re-runs once mapLoaded flips.
+        if (!mapLoaded) return@LaunchedEffect
 
         val fitTarget = LatLngBoundsUtil.calculateFitTarget(uiState.waypoints)
 
@@ -192,80 +201,46 @@ fun MapScreen(
                     (fitTarget.bounds.minLat + fitTarget.bounds.maxLat) / 2.0,
                     (fitTarget.bounds.minLng + fitTarget.bounds.maxLng) / 2.0
                 )
-                val widthPx = mapContainerSize.width
-                val heightPx = mapContainerSize.height
-                if (widthPx <= 2 || heightPx <= 2) {
+
+                suspend fun fallbackToCenter() {
                     cameraPositionState.animate(
                         CameraUpdateFactory.newLatLngZoom(boundsCenter, DEFAULT_ROUTE_FALLBACK_ZOOM)
                     )
                     viewModel.onCameraMove(boundsCenter)
-                    viewModel.onRouteFitConsumed()
-                    return@LaunchedEffect
                 }
 
-                val mapPaddingPx = with(density) { 80.dp.roundToPx() }
-                val bottomPanelReservePx = with(density) { 140.dp.roundToPx() }
-                val desiredLeftPadPx = mapPaddingPx
-                val desiredRightPadPx = mapPaddingPx
-                val desiredTopPadPx = mapPaddingPx
-                val desiredBottomPadPx = mapPaddingPx + bottomPanelReservePx
-
-                val maxPadX = (widthPx / 2) - 1
-                val maxPadY = (heightPx / 2) - 1
-                if (maxPadX <= 0 || maxPadY <= 0) {
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newLatLngZoom(boundsCenter, DEFAULT_ROUTE_FALLBACK_ZOOM)
-                    )
-                    viewModel.onCameraMove(boundsCenter)
-                    viewModel.onRouteFitConsumed()
-                    return@LaunchedEffect
-                }
-
-                val safeLeftPadPx = min(desiredLeftPadPx, maxPadX)
-                val safeRightPadPx = min(desiredRightPadPx, maxPadX)
-                val safeTopPadPx = min(desiredTopPadPx, maxPadY)
-                val safeBottomPadPx = min(desiredBottomPadPx, maxPadY)
-
-                val safeViewportWidthPx = widthPx - safeLeftPadPx - safeRightPadPx
-                val safeViewportHeightPx = heightPx - safeTopPadPx - safeBottomPadPx
-                val safeUniformPaddingPx = min(
-                    min(safeLeftPadPx, safeRightPadPx),
-                    min(safeTopPadPx, safeBottomPadPx)
+                val plan = LatLngBoundsUtil.planRouteFit(
+                    widthPx = mapContainerSize.width,
+                    heightPx = mapContainerSize.height,
+                    mapPaddingPx = with(density) { 80.dp.roundToPx() },
+                    bottomPanelReservePx = with(density) { 140.dp.roundToPx() }
                 )
 
-                if (safeViewportWidthPx <= 2 || safeViewportHeightPx <= 2) {
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newLatLngZoom(boundsCenter, DEFAULT_ROUTE_FALLBACK_ZOOM)
-                    )
-                    viewModel.onCameraMove(boundsCenter)
-                    viewModel.onRouteFitConsumed()
-                    return@LaunchedEffect
-                }
-
-                val bounds = LatLngBounds(
-                    LatLng(fitTarget.bounds.minLat, fitTarget.bounds.minLng),
-                    LatLng(fitTarget.bounds.maxLat, fitTarget.bounds.maxLng)
-                )
-
+                // A camera fit is cosmetic — never let a Maps SDK padding/size
+                // rejection (which escapes normal control flow) crash the app.
                 try {
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newLatLngBounds(
-                            bounds,
-                            safeViewportWidthPx,
-                            safeViewportHeightPx,
-                            safeUniformPaddingPx
-                        )
-                    )
-                    viewModel.onCameraMove(cameraPositionState.position.target)
-                } catch (exception: Exception) {
-                    if (exception.message?.contains("Additional camera padding") == true) {
-                        cameraPositionState.animate(
-                            CameraUpdateFactory.newLatLngZoom(boundsCenter, DEFAULT_ROUTE_FALLBACK_ZOOM)
-                        )
-                        viewModel.onCameraMove(boundsCenter)
-                    } else {
-                        throw exception
+                    when (plan) {
+                        is RouteFitPlan.FitBounds -> {
+                            val bounds = LatLngBounds(
+                                LatLng(fitTarget.bounds.minLat, fitTarget.bounds.minLng),
+                                LatLng(fitTarget.bounds.maxLat, fitTarget.bounds.maxLng)
+                            )
+                            cameraPositionState.animate(
+                                CameraUpdateFactory.newLatLngBounds(
+                                    bounds,
+                                    plan.widthPx,
+                                    plan.heightPx,
+                                    plan.paddingPx
+                                )
+                            )
+                            viewModel.onCameraMove(cameraPositionState.position.target)
+                        }
+                        RouteFitPlan.FallbackZoom -> fallbackToCenter()
                     }
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (exception: Exception) {
+                    fallbackToCenter()
                 }
             }
 
@@ -324,7 +299,8 @@ fun MapScreen(
                     onSavedLocationClick = { loc ->
                         viewModel.onCameraMove(LatLng(loc.latitude, loc.longitude))
                         viewModel.selectLocation(loc)
-                    }
+                    },
+                    onMapLoaded = { mapLoaded = true }
                 )
 
                 MapCrosshair(modifier = Modifier.align(Alignment.Center))

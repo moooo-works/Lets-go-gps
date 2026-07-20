@@ -15,8 +15,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -45,7 +47,8 @@ fun MapGoogleMapContent(
     onRouteMapClick: (LatLng) -> Unit,
     onWaypointClick: (Int) -> Unit,
     onSavedLocationClick: (SavedLocation) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMapLoaded: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     val primaryColorArgb = MaterialTheme.colorScheme.primary.toArgb()
@@ -55,6 +58,7 @@ fun MapGoogleMapContent(
         cameraPositionState = cameraPositionState,
         uiSettings = MapUiSettings(zoomControlsEnabled = false, rotationGesturesEnabled = false),
         properties = MapProperties(isMyLocationEnabled = false, mapType = uiState.mapType),
+        onMapLoaded = onMapLoaded,
         onMapClick = { latLng ->
             when (uiState.mapMode) {
                 MapMode.SINGLE -> coroutineScope.launch {
@@ -69,16 +73,21 @@ fun MapGoogleMapContent(
             }
         }
     ) {
+        // BitmapDescriptorFactory throws "IBitmapDescriptorFactory is not initialized"
+        // until the Maps SDK is initialized. Living inside the content lambda is NOT
+        // enough: on cold start with a restored route this lambda composes (subcompose
+        // during measure) before the renderer initializes the factory, so it still
+        // crashes. MapsInitializer.initialize() is the SDK-documented prerequisite and
+        // makes the factory usable regardless of renderer timing; it is idempotent.
+        val context = LocalContext.current
+        remember { MapsInitializer.initialize(context) }
+
         // ponytail: BitmapDescriptors must be stable across recompositions — a fresh
         // descriptor each frame makes Compose fire Marker.setIcon (a main-thread Binder
         // call) every recompose, flooding the UI thread until the watchdog ANRs.
         val favoriteIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED) }
         val normalIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE) }
         val mockIcon = remember { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) }
-        // Must live INSIDE the GoogleMap content lambda: BitmapDescriptorFactory
-        // throws "IBitmapDescriptorFactory is not initialized" until the map renderer
-        // is up. Outside, a first composition that already has waypoints (restored
-        // session after process death) crashes on launch.
         val waypointIcons = remember(uiState.waypoints.size, primaryColorArgb) {
             uiState.waypoints.mapIndexed { index, _ ->
                 val label = when (index) {
