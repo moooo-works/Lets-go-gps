@@ -73,13 +73,16 @@ PR 合併前，`test`、`lintDebug`、`assembleDebug` 三項皆須通過。
 
 | 項目 | 版本 |
 |------|------|
-| Kotlin | 1.9.22 |
-| KSP | 1.9.22-1.0.17 |
+| Kotlin | 2.1.20 |
+| KSP | 2.1.20-1.0.32 |
 | compose-bom | 2024.09.00（Material3 1.3.0） |
-| Compose Compiler | 1.5.8 |
-| AGP | 8.3.2 |
-| Hilt | 2.48 |
+| Compose Compiler | Kotlin Compose plugin（`org.jetbrains.kotlin.plugin.compose`，版本跟 Kotlin） |
+| AGP | 8.9.2 |
+| Gradle | 8.11.1（以 JDK 17 建置） |
+| Hilt | 2.56.2 |
 | Room | 2.6.0（schema v5） |
+| Play Billing | 8.0.0 |
+| compile/targetSdk | 36（Android 16） |
 
 ---
 
