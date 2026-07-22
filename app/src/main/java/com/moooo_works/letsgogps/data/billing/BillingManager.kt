@@ -160,7 +160,8 @@ class BillingManager @Inject constructor(
                 .build()
         )
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
-        billingClient.queryProductDetailsAsync(params) { result, productDetailsList ->
+        billingClient.queryProductDetailsAsync(params) { result, productDetailsResult ->
+            val productDetailsList = productDetailsResult.productDetailsList
             if (result.responseCode != BillingClient.BillingResponseCode.OK || productDetailsList.isEmpty()) {
                 Log.w(TAG, "ProductDetails query failed: ${result.debugMessage}")
                 return@queryProductDetailsAsync
@@ -199,7 +200,8 @@ class BillingManager @Inject constructor(
                 .build()
         )
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
-        billingClient.queryProductDetailsAsync(params) { result, productDetailsList ->
+        billingClient.queryProductDetailsAsync(params) { result, productDetailsResult ->
+            val productDetailsList = productDetailsResult.productDetailsList
             if (result.responseCode != BillingClient.BillingResponseCode.OK || productDetailsList.isEmpty()) {
                 Log.w(TAG, "Product details not found: ${result.debugMessage}")
                 Handler(Looper.getMainLooper()).post {
