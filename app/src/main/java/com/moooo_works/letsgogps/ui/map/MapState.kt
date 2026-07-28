@@ -17,9 +17,26 @@ enum class TransportMode(val speedKmh: Double) {
     DRIVING(40.0)
 }
 
+/**
+ * 哪一種模擬啟動被步數同步的計次閘門擋下，等使用者看完廣告後要恢復執行。
+ *
+ * 用 enum 而非 lambda：UiState 必須可比較，塞 lambda 會讓 Compose 每次
+ * recomposition 都判定狀態改變。各啟動所需的參數本來就都在 state 裡。
+ */
+enum class PendingStart {
+    SINGLE,
+    ROUTE,
+    EXPLORATION,
+    TELEPORT_EXPLORATION,
+}
+
 const val ROUTE_SPEED_MIN_KMH = 1f
 const val ROUTE_SPEED_MAX_KMH = 100f
 const val ROUTE_SPEED_STEPS = 0
+
+/** 步數同步的計速上限（km/h）。UI 用；門檻定義在 [StepAccumulator.MAX_STEP_SPEED_KMH]。 */
+const val STEP_SYNC_MAX_SPEED_KMH =
+    com.moooo_works.letsgogps.domain.health.StepAccumulator.MAX_STEP_SPEED_KMH.toFloat()
 
 enum class MapMode {
     SINGLE,
@@ -49,6 +66,20 @@ data class MapUiState(
     val showProUpgrade: Boolean = false,
     /** Play Billing offer (localized price + trial eligibility); null until ProductDetails loads. */
     val subscriptionOffer: SubscriptionOffer? = null,
+
+    // ── 步數同步計次閘門 ──────────────────────────────────────────────────
+    /** Subscription only — ad-unlock must not satisfy the credit gate. */
+    val isSubscriptionActive: Boolean = false,
+    /** Whether the user turned step sync on in Settings. */
+    val stepSyncEnabled: Boolean = false,
+    /** Remaining per-use credits in the generic wallet. */
+    val featureCredits: Int = 0,
+    /** Shown when a non-subscriber with 0 credits tries to start with step sync on. */
+    val showStepSyncCreditDialog: Boolean = false,
+    /** Which start action to resume once the user earns a credit. */
+    val pendingStepSyncStart: PendingStart? = null,
+    /** Set when the rewarded ad could not be shown, so the dialog can explain. */
+    val stepSyncAdUnavailable: Boolean = false,
     val mapType: MapType = MapType.NORMAL,
     val selectedLocation: SavedLocation? = null,
     val showEditLocationDialog: Boolean = false,

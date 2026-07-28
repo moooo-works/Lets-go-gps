@@ -34,6 +34,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.data.billing.RewardedAdManager
+import com.moooo_works.letsgogps.data.health.HealthConnectAvailability
 import com.moooo_works.letsgogps.data.backup.BackupManager
 import com.moooo_works.letsgogps.data.backup.ImportPreview
 
@@ -53,6 +54,7 @@ class SettingsViewModel @Inject constructor(
     private val systemHealthCheck: com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck,
     private val rewardedAdManager: RewardedAdManager,
     private val backupManager: BackupManager,
+    private val healthConnectAvailability: HealthConnectAvailability,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -166,6 +168,79 @@ class SettingsViewModel @Inject constructor(
 
     fun setEnableTimezoneCheck(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setEnableTimezoneCheck(enabled) }
+    }
+
+    // ── Health Connect 步數同步 ───────────────────────────────────────────
+
+    val stepSyncEnabled = settingsRepository.observeStepSyncEnabled()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val stepLengthMeters = settingsRepository.observeStepLengthMeters()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.75)
+
+    val stepDailyQuota = settingsRepository.observeStepDailyQuota()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 20_000)
+
+    val stepQuotaUsedToday = settingsRepository.observeStepQuotaUsedToday()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    /** 僅訂閱。計次制不能用 isProActive 判斷——那個包含 ad-unlock。 */
+    val isSubscriptionActive: StateFlow<Boolean> = proRepository.isSubscriptionActive
+
+    val featureCredits: StateFlow<Int> = proRepository.featureCredits
+
+    /**
+     * Health Connect 在本裝置上的可用性。
+     *
+     * 每次呼叫都重新查詢，因為使用者可能在系統設定裡安裝／移除／撤銷權限後
+     * 才切回來——快取住會顯示過期狀態。
+     */
+    fun healthConnectStatus(): HealthConnectAvailability.Status = healthConnectAvailability.status()
+
+    val healthConnectWritePermissions: Set<String>
+        get() = healthConnectAvailability.writePermissions
+
+    fun requestHealthPermissionsContract() =
+        healthConnectAvailability.requestPermissionsContract()
+
+    private val _hasHealthPermission = MutableStateFlow(false)
+    val hasHealthPermission: StateFlow<Boolean> = _hasHealthPermission.asStateFlow()
+
+    /** 回到設定頁或授權流程結束後呼叫，重新對齊權限狀態。 */
+    fun refreshHealthPermission() {
+        viewModelScope.launch {
+            val granted = healthConnectAvailability.hasWritePermission()
+            _hasHealthPermission.value = granted
+            // 權限被撤銷時自動關掉同步，避免使用者以為還在寫。
+            if (!granted && stepSyncEnabled.value) {
+                settingsRepository.setStepSyncEnabled(false)
+            }
+        }
+    }
+
+    fun openHealthConnectPlayStore() = healthConnectAvailability.openPlayStoreForProvider()
+
+    /**
+     * Google Fit 是否已安裝。每次呼叫都重查——使用者可能剛從 Play 商店裝完回來。
+     */
+    fun isGoogleFitInstalled(): Boolean = healthConnectAvailability.isGoogleFitInstalled()
+
+    fun openGoogleFitPlayStore() = healthConnectAvailability.openPlayStoreForGoogleFit()
+
+    fun openGoogleFit() = healthConnectAvailability.openGoogleFit()
+
+    fun openHealthConnectSettings() = healthConnectAvailability.openHealthConnectSettings()
+
+    fun setStepSyncEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setStepSyncEnabled(enabled) }
+    }
+
+    fun setStepLengthMeters(meters: Double) {
+        viewModelScope.launch { settingsRepository.setStepLengthMeters(meters) }
+    }
+
+    fun setStepDailyQuota(quota: Int) {
+        viewModelScope.launch { settingsRepository.setStepDailyQuota(quota) }
     }
 
     fun setAltitude(value: Double) {

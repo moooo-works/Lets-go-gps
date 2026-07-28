@@ -14,7 +14,6 @@ import com.google.android.gms.maps.model.LatLng
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import io.mockk.coVerify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +61,10 @@ class MockLocationServiceTest {
         every { settingsRepository.observeRandomAltitude() } returns flowOf(false)
         every { settingsRepository.observeCoordinateJitter() } returns flowOf(false)
         every { settingsRepository.observeRouteSpeed() } returns flowOf(5.0)
+        every { settingsRepository.observeStepSyncEnabled() } returns flowOf(false)
+        every { settingsRepository.observeStepLengthMeters() } returns flowOf(0.75)
+        every { settingsRepository.observeStepDailyQuota() } returns flowOf(20_000)
+        every { settingsRepository.observeStepQuotaUsedToday() } returns flowOf(0)
     }
 
     @After

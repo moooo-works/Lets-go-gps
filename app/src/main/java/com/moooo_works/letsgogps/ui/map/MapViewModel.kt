@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import com.moooo_works.letsgogps.domain.FeatureCost
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import com.moooo_works.letsgogps.domain.RouteSimulator
@@ -85,7 +86,8 @@ class MapViewModel @Inject constructor(
         context = context,
         systemHealthCheck = systemHealthCheck,
         onStopMocking = ::stopMocking,
-        onEnsurePermission = ::ensurePermission
+        onEnsurePermission = ::ensurePermission,
+        onSimulationStarted = ::consumeStepSyncCreditIfNeeded
     )
 
     private val joystickController = JoystickController(
@@ -204,6 +206,21 @@ class MapViewModel @Inject constructor(
             }
         }
 
+        viewModelScope.launch {
+            proRepository.isSubscriptionActive.collect { subscribed ->
+                _uiState.update { it.copy(isSubscriptionActive = subscribed) }
+            }
+        }
+        viewModelScope.launch {
+            proRepository.featureCredits.collect { credits ->
+                _uiState.update { it.copy(featureCredits = credits) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.observeStepSyncEnabled().collect { enabled ->
+                _uiState.update { it.copy(stepSyncEnabled = enabled) }
+            }
+        }
         viewModelScope.launch {
             proRepository.isAdFreeActive.collect { isAdFree ->
                 _uiState.update { it.copy(isAdFreeActive = isAdFree) }
@@ -374,13 +391,22 @@ class MapViewModel @Inject constructor(
                 return@launch
             }
 
+            val stepSyncActive = StepSyncGate.resolve(_uiState, PendingStart.SINGLE)
+            if (stepSyncActive == null) {
+                // 次數不足，對話框已彈出——先解除按鈕的 loading 狀態。
+                _uiState.update { it.copy(isStartingMocking = false) }
+                return@launch
+            }
+
             val target = _uiState.value.centerLocation
             val intent = Intent(context, MockLocationService::class.java).apply {
                 action = MockLocationService.ACTION_START_SINGLE
                 putExtra(MockLocationService.EXTRA_LAT, target.latitude)
                 putExtra(MockLocationService.EXTRA_LNG, target.longitude)
+                putExtra(MockLocationService.EXTRA_STEP_SYNC_ALLOWED, stepSyncActive)
             }
             ContextCompat.startForegroundService(context, intent)
+            consumeStepSyncCreditIfNeeded(stepSyncActive)
 
             maybeCheckTimezoneMismatch(target)
             locationPinController.saveIfNeeded(target)
@@ -527,6 +553,87 @@ class MapViewModel @Inject constructor(
                 _uiState.update { it.copy(mockError = MockError.RewardedAdUnavailable) }
             }
         )
+    }
+
+    // ── 步數同步計次閘門 ──────────────────────────────────────────────────
+
+    /**
+     * 啟動成功後才扣次數。啟動失敗就等於沒扣過，不需要退款邏輯。
+     * 訂閱者不扣。
+     */
+    private fun consumeStepSyncCreditIfNeeded(stepSyncActive: Boolean) {
+        if (!StepSyncGate.shouldConsumeCredit(_uiState.value, stepSyncActive)) return
+        viewModelScope.launch {
+            proRepository.consumeFeatureCredits(FeatureCost.STEP_SYNC_SESSION)
+        }
+    }
+
+    /** 「這次不用步數同步」——照常啟動模擬，只是不寫步數，也不扣次數。 */
+    fun startWithoutStepSync() {
+        val pending = _uiState.value.pendingStepSyncStart ?: return
+        dismissStepSyncCreditDialog()
+        resumePendingStart(pending, stepSyncActive = false)
+    }
+
+    fun dismissStepSyncCreditDialog() {
+        _uiState.update {
+            it.copy(
+                showStepSyncCreditDialog = false,
+                pendingStepSyncStart = null,
+                stepSyncAdUnavailable = false,
+            )
+        }
+    }
+
+    /** 看一支獎勵廣告換一次步數同步。中途關閉或無庫存都不扣次數。 */
+    fun watchAdForStepSyncCredit(activity: Activity) {
+        val pending = _uiState.value.pendingStepSyncStart ?: return
+        // 刻意不設 loading 旗標：RewardedAdManager 在「使用者看到一半關掉」時
+        // onReward 與 onUnavailable 都不會觸發，旗標會永遠卡在 true 而鎖死
+        // 對話框。獎勵廣告是全螢幕的，播放期間看不到這個對話框，spinner 沒有價值。
+        _uiState.update { it.copy(stepSyncAdUnavailable = false) }
+        rewardedAdManager.showAd(
+            activity = activity,
+            onReward = {
+                viewModelScope.launch {
+                    proRepository.grantFeatureCredits(FeatureCost.CREDITS_PER_REWARDED_AD)
+                    dismissStepSyncCreditDialog()
+                    resumePendingStart(pending, stepSyncActive = true)
+                }
+            },
+            onUnavailable = {
+                // 不扣次數、不關對話框——使用者仍可改選「這次不用步數同步」。
+                _uiState.update { it.copy(stepSyncAdUnavailable = true) }
+            }
+        )
+    }
+
+    private fun resumePendingStart(pending: PendingStart, stepSyncActive: Boolean) {
+        when (pending) {
+            PendingStart.ROUTE -> routeController.startRouteService(stepSyncActive)
+            PendingStart.EXPLORATION -> routeController.startExplorationService(stepSyncActive)
+            PendingStart.TELEPORT_EXPLORATION ->
+                routeController.startTeleportExplorationService(stepSyncActive)
+            PendingStart.SINGLE -> startSingleMock(stepSyncActive)
+        }
+    }
+
+    private fun startSingleMock(stepSyncActive: Boolean) {
+        val target = _uiState.value.centerLocation
+        ContextCompat.startForegroundService(
+            context,
+            Intent(context, MockLocationService::class.java).apply {
+                action = MockLocationService.ACTION_START_SINGLE
+                putExtra(MockLocationService.EXTRA_LAT, target.latitude)
+                putExtra(MockLocationService.EXTRA_LNG, target.longitude)
+                putExtra(MockLocationService.EXTRA_STEP_SYNC_ALLOWED, stepSyncActive)
+            }
+        )
+        consumeStepSyncCreditIfNeeded(stepSyncActive)
+        viewModelScope.launch {
+            maybeCheckTimezoneMismatch(target)
+            locationPinController.saveIfNeeded(target)
+        }
     }
 
     fun addWaypoint() = routeController.addWaypoint()

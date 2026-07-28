@@ -62,6 +62,7 @@ import com.moooo_works.letsgogps.ui.healthcheck.HealthCheckSheet
 import com.moooo_works.letsgogps.ui.healthcheck.handleHealthCheckFix
 import com.moooo_works.letsgogps.ui.onboarding.OnboardingSheet
 import com.moooo_works.letsgogps.ui.pro.ProUpgradeDialog
+import com.moooo_works.letsgogps.ui.pro.StepSyncCreditDialog
 import com.moooo_works.letsgogps.utils.LatLngBoundsUtil
 import com.moooo_works.letsgogps.utils.RouteFitPlan
 
@@ -421,6 +422,19 @@ fun MapScreen(
             },
             watchAdEnabled = uiState.adUnlockRemainingMillis < 18 * 3600_000L,
             subscriptionOffer = uiState.subscriptionOffer,
+        )
+    }
+
+    if (uiState.showStepSyncCreditDialog) {
+        StepSyncCreditDialog(
+            onDismiss = { viewModel.dismissStepSyncCreditDialog() },
+            onWatchAd = { activity?.let { viewModel.watchAdForStepSyncCredit(it) } },
+            onStartWithoutStepSync = { viewModel.startWithoutStepSync() },
+            onSubscribe = {
+                activity?.let { viewModel.launchBillingFlow(it) }
+                    ?: viewModel.dismissStepSyncCreditDialog()
+            },
+            adUnavailable = uiState.stepSyncAdUnavailable,
         )
     }
 

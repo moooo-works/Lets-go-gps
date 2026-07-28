@@ -58,4 +58,27 @@ interface SettingsRepository {
     /** Whether to warn the user when mock-location time-zone differs from system. */
     fun observeEnableTimezoneCheck(): Flow<Boolean>
     suspend fun setEnableTimezoneCheck(enabled: Boolean)
+
+    // ── Health Connect 步數同步 ───────────────────────────────────────────
+
+    /** Whether simulated travel distance is written to Health Connect as steps. */
+    fun observeStepSyncEnabled(): Flow<Boolean>
+    suspend fun setStepSyncEnabled(enabled: Boolean)
+
+    /** Metres per step, used to convert distance into a step count. */
+    fun observeStepLengthMeters(): Flow<Double>
+    suspend fun setStepLengthMeters(meters: Double)
+
+    /** Maximum steps that may be written per day. */
+    fun observeStepDailyQuota(): Flow<Int>
+    suspend fun setStepDailyQuota(quota: Int)
+
+    /**
+     * Steps already written today. Buckets by date internally — reading on a new
+     * day yields 0 without any caller-side reset.
+     */
+    fun observeStepQuotaUsedToday(): Flow<Int>
+
+    /** Add to today's used quota, rolling the bucket over if the date changed. */
+    suspend fun addStepQuotaUsed(steps: Int)
 }

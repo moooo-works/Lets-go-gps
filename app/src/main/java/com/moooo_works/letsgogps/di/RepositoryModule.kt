@@ -1,6 +1,7 @@
 package com.moooo_works.letsgogps.di
 
 import com.moooo_works.letsgogps.data.engine.AndroidLocationMockEngine
+import com.moooo_works.letsgogps.data.health.HealthConnectStepSync
 import com.moooo_works.letsgogps.data.healthcheck.SystemHealthCheckImpl
 import com.moooo_works.letsgogps.data.repository.LocationRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.MockSessionRepositoryImpl
@@ -10,6 +11,7 @@ import com.moooo_works.letsgogps.data.repository.SearchRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.SettingsRepositoryImpl
 import com.moooo_works.letsgogps.data.repository.TimezoneRepositoryImpl
 import com.moooo_works.letsgogps.domain.LocationMockEngine
+import com.moooo_works.letsgogps.domain.health.StepSyncEngine
 import com.moooo_works.letsgogps.domain.healthcheck.SystemHealthCheck
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockSessionRepository
@@ -75,6 +77,12 @@ abstract class RepositoryModule {
     abstract fun bindSystemHealthCheck(
         systemHealthCheckImpl: SystemHealthCheckImpl
     ): SystemHealthCheck
+
+    @Binds
+    @Singleton
+    abstract fun bindStepSyncEngine(
+        healthConnectStepSync: HealthConnectStepSync
+    ): StepSyncEngine
 
     @Binds
     @Singleton

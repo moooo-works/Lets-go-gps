@@ -12,6 +12,18 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" tools:ignore="MockLocation,ProtectedPermissions" />
 
+    <!-- Health Connect：只寫入步數，不讀取任何健康資料，故不需要 ACTIVITY_RECOGNITION。 -->
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+
+    <!-- Android 13 以下的 Health Connect 是獨立 APK，需宣告 package visibility
+         才能查得到 SDK 狀態；Android 14+ 已內建於系統，此宣告無害。
+         Google Fit 則是步數同步鏈路的必要中繼（Health Connect → Fit → 目標 app），
+         沒有這個宣告在 Android 11+ 會偵測不到它是否已安裝。 -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+        <package android:name="com.google.android.apps.fitness" />
+    </queries>
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -77,6 +89,29 @@
             android:name=".service.MockLocationService"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+        <!-- Health Connect 權限用途說明頁。Play 審核要求：使用者在 Health Connect
+             設定中點「隱私權政策」時必須能看到說明。
+             Android 13 以下走 activity 的 intent-filter，14+ 走 activity-alias。 -->
+        <activity
+            android:name=".ui.health.HealthRationaleActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MockGPS">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".ui.health.HealthRationaleActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
 
     </application>
 

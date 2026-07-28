@@ -376,4 +376,69 @@
     <string name="tip_gpx_body">Go to Settings → Data Management → Import, then choose \"Import from GPX\" to import routes and locations from a .gpx file.</string>
     <string name="tip_jump_mode_title">Jump playback is here!</string>
     <string name="tip_jump_mode_body">In Route mode, turn on the \"⚡ Jump\" chip next to the speed slider to teleport to the next waypoint every few seconds instead of walking — great for finishing GPX tracks fast. Adjust the interval with the slider.</string>
+    <!-- Health Connect permissions rationale (required by Play review) -->
+    <string name="health_rationale_title">How we use health data</string>
+    <string name="health_rationale_what_title">What we write</string>
+    <string name="health_rationale_what_body">Steps only. This app never writes heart rate, weight, sleep, or any other health data.</string>
+    <string name="health_rationale_why_title">Why we need this permission</string>
+    <string name="health_rationale_why_body">This app is a testing tool for developers and QA engineers working on location-dependent features. During a route simulation it can convert the simulated travel distance into a step count and write it to Health Connect, so test scenarios that depend on step data can be verified end to end.</string>
+    <string name="health_rationale_read_title">We read nothing</string>
+    <string name="health_rationale_read_body">This app requests write access only. It never reads any of your health data from Health Connect.</string>
+    <string name="health_rationale_control_title">You stay in control</string>
+    <string name="health_rationale_control_body">This feature is off by default and must be turned on by you. You can revoke this app\'s permission at any time in Health Connect settings, and you can review or delete anything this app has written from within Health Connect.</string>
+    <string name="health_rationale_close">Close</string>
+    <!-- Step quota exhausted notification -->
+    <string name="step_quota_exhausted_title">Daily step quota reached</string>
+    <string name="step_quota_exhausted_body">Today\'s step limit has been reached, so no more steps will be written for this simulation. You can adjust the daily quota in Settings.</string>
+    <!-- Step sync per-use credit dialog -->
+    <string name="step_credit_dialog_title">Enable step sync for this run?</string>
+    <string name="step_credit_dialog_desc">Step sync is charged per use — one simulation costs one credit. You have none left. Watch an ad to earn one, or subscribe for unlimited use.</string>
+    <string name="step_credit_dialog_ad_unavailable">No ad is available right now. Please try again later.</string>
+    <string name="step_credit_dialog_action_watch_ad">Watch an ad for 1 credit</string>
+    <string name="step_credit_dialog_action_skip">Start without step sync</string>
+    <string name="step_credit_dialog_action_subscribe">Subscribe for unlimited</string>
+    <!-- Step sync settings -->
+    <string name="settings_step_sync_title">Step sync</string>
+    <string name="settings_step_sync_enable">Enable step sync</string>
+    <string name="settings_step_sync_enable_desc">Convert simulated travel distance into steps and write them to Health Connect.</string>
+    <string name="settings_step_sync_unsupported">Health Connect is not supported on this device.</string>
+    <string name="settings_step_sync_update_required">Health Connect needs to be installed or updated.</string>
+    <string name="settings_step_sync_needs_permission">Permission to write steps is required.</string>
+    <string name="settings_step_sync_connected">Connected to Health Connect.</string>
+    <string name="settings_step_sync_open_store">Open store</string>
+    <string name="settings_step_sync_grant">Grant</string>
+    <string name="settings_step_length">Step length (metres)</string>
+    <string name="settings_step_quota">Daily step limit</string>
+    <string name="settings_step_quota_used">Written today: %1$d / %2$d steps</string>
+    <string name="settings_step_credits_unlimited">Subscribed — unlimited use.</string>
+    <string name="settings_step_credits_remaining">Credits left: %1$d (one per simulation; earn more by watching an ad at start)</string>
+    <!-- Step sync setup guide -->
+    <string name="settings_step_sync_fit_missing">Google Fit is not installed. Steps will stop at Health Connect and never reach other apps.</string>
+    <string name="settings_step_sync_setup_hint">Step sync needs several apps working together, and each link takes time.</string>
+    <string name="settings_step_sync_setup_open">View setup guide</string>
+    <string name="step_setup_title">Step sync setup guide</string>
+    <string name="step_setup_intro">Steps do not go straight to the target app — they pass through a few relays. If any link is missing, the steps never arrive. Each step below is configured in a different place, so please work through them in order.</string>
+    <string name="step_setup_chain">This app → Health Connect → Google Fit → target app</string>
+    <string name="step_setup_1_title">1. Get Health Connect ready</string>
+    <string name="step_setup_1_body">Built into Android 14 and later — nothing to install. Older versions need Health Connect from the Play Store.</string>
+    <string name="step_setup_2_title">2. Allow this app to write steps</string>
+    <string name="step_setup_2_body">This grant lets the app convert simulated travel distance into steps and write them to Health Connect. Write access only — it never reads any of your health data.</string>
+    <string name="step_setup_3_title">3. Install Google Fit</string>
+    <string name="step_setup_3_body">Google Fit is a required relay. Most apps read from Google Fit rather than from Health Connect directly, so without it the steps stop at Health Connect.</string>
+    <string name="step_setup_4_title">4. Let Google Fit read Health Connect</string>
+    <string name="step_setup_4_body">Open Google Fit, find \"Keep Fit in sync with Health Connect\" on the home screen, tap Get started → Set up, then turn on Steps on the permission screen and allow it.
+
+Watch the direction: the card title reads as if Fit is only sharing its data out, but the same flow also lets Fit pull in data from other apps — which is exactly what is needed here. This step cannot be detected automatically, so please confirm it yourself.</string>
+    <string name="step_setup_5_title">5. Point the target app at Google Fit</string>
+    <string name="step_setup_5_body">In the app you want to use, set its step data source to Google Fit. The exact location varies by app, usually under its settings or account-linking screen.</string>
+    <string name="step_setup_troubleshoot">If steps do not show up: every link in this chain syncs on its own schedule, none of them instantly. Work through them in order to find which one has not caught up yet.\n\n1. This app → Health Connect: written in batches every 10–25 seconds. Just wait a moment after starting a simulation; check the \"written today\" figure above.\n\n2. Health Connect → Google Fit: opening Google Fit prompts it to pull the data in. Today\'s step count usually updates right after you open it.\n\n3. Google Fit → target app: the slowest link, sometimes several minutes. Opening the target app and staying in it usually speeds this up.\n\nWhat looks like a sync failure is usually just the next link not having run yet. Confirm step 1 has a number, then work down the chain.</string>
+    <string name="step_setup_action_install_fit">Install Google Fit</string>
+    <string name="step_setup_action_open_fit">Open Google Fit</string>
+    <string name="step_setup_action_open_hc_settings">Open Health Connect settings</string>
+    <string name="step_setup_duplicate_note">About the number shown in Health Connect: after Google Fit reads the data it writes the same steps back into Health Connect, so each time slot appears twice in the Health Connect list — once from this app and once from Fit — making the total look roughly doubled. That is Google Fit\'s behaviour, not duplicate writing. This app\'s "written today" figure and daily limit count only what it actually wrote, so they are unaffected.</string>
+    <!-- Too-fast-for-steps notice -->
+    <string name="step_too_fast_title">Too fast — steps not counted</string>
+    <string name="step_too_fast_body">The simulated speed is above 20 km/h, beyond any plausible walking or running pace, so this stretch is not converted into steps. Drop below 20 km/h to resume counting.</string>
+    <string name="route_speed_exceeds_step_limit">Above %1$d km/h — this movement will not count as steps</string>
+    <string name="step_setup_speed_limit_note">About simulated speed: only movement at or below %1$d km/h is converted into steps; anything faster is skipped because it is beyond any plausible walking or running pace. The Walk and Bike presets stay within range; Drive produces no steps. Jump-mode teleports are never counted either.</string>
 </resources>

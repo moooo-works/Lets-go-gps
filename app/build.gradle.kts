@@ -17,8 +17,8 @@ val localProperties = Properties().apply {
 }
 
 val versionMajor = 1
-val versionMinor = 2
-val versionPatch = 11
+val versionMinor = 3
+val versionPatch = 0
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -64,6 +64,9 @@ android {
 
     buildTypes {
         debug {
+            // 注意：不要加 applicationIdSuffix。google-services.json 只註冊了
+            // com.moooo_works.letsgogps，加了 suffix 會讓 Google Services plugin
+            // 以 "No matching client found" 直接 fail build。
             isDebuggable = true
             buildConfigField("Boolean", "DEV_FORCE_PRO", "true")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
@@ -98,6 +101,10 @@ android {
     }
     testOptions {
         unitTests {
+            // 注意：目前刻意 *不* 開 isIncludeAndroidResources。
+            // 開啟後 Robolectric 才找得到合併 manifest，但也會載入真正的
+            // @HiltAndroidApp，導致 Service 測試的手動 mock 被 Hilt 覆寫。
+            // 詳見 .trellis/tasks/07-28-robolectric-tests-silently-skipped。
             all {
                 it.jvmArgs("-XX:+EnableDynamicAgentLoading")
             }
@@ -172,6 +179,9 @@ dependencies {
     // Billing
     implementation(libs.billing)
     implementation(libs.play.review)
+
+    // Health Connect — 步數寫入（不得改用 play-services-fitness，Fit API 已停止服務）
+    implementation(libs.health.connect)
 
     // Hilt
     implementation(libs.hilt.android)

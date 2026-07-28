@@ -376,4 +376,69 @@
     <string name="tip_gpx_body">설정 → 데이터 관리 → 가져오기에서 \"GPX에서 가져오기\"를 선택하면 .gpx 파일에서 경로와 위치를 가져올 수 있어요.</string>
     <string name="tip_jump_mode_title">\'점프\' 재생 모드 추가!</string>
     <string name="tip_jump_mode_body">경로 모드의 속도 슬라이더 옆에 \"⚡ 점프\" 스위치가 생겼어요. 켜면 걷는 대신 몇 초마다 다음 지점으로 순간이동합니다. GPX 경로를 빠르게 진행할 때 유용해요. 간격은 슬라이더로 조절할 수 있어요.</string>
+    <!-- Health Connect 권한 사용 목적 (Play 심사 요건) -->
+    <string name="health_rationale_title">건강 데이터 사용 안내</string>
+    <string name="health_rationale_what_title">기록하는 항목</string>
+    <string name="health_rationale_what_body">걸음 수만 기록합니다. 심박수, 체중, 수면 등 다른 건강 데이터는 기록하지 않습니다.</string>
+    <string name="health_rationale_why_title">이 권한이 필요한 이유</string>
+    <string name="health_rationale_why_body">이 앱은 위치 기반 기능을 테스트하는 개발자와 QA 엔지니어를 위한 도구입니다. 경로 시뮬레이션 중 시뮬레이션된 이동 거리를 걸음 수로 환산해 Health Connect에 기록하므로, 걸음 수 데이터가 필요한 테스트 시나리오를 끝까지 검증할 수 있습니다.</string>
+    <string name="health_rationale_read_title">읽지 않습니다</string>
+    <string name="health_rationale_read_body">이 앱은 쓰기 권한만 요청하며, Health Connect에 있는 회원님의 건강 데이터를 읽지 않습니다.</string>
+    <string name="health_rationale_control_title">언제든 제어할 수 있습니다</string>
+    <string name="health_rationale_control_body">이 기능은 기본적으로 꺼져 있으며 직접 켜야 작동합니다. Health Connect 설정에서 언제든 이 앱의 권한을 취소할 수 있고, 이 앱이 기록한 데이터도 Health Connect에서 확인하거나 삭제할 수 있습니다.</string>
+    <string name="health_rationale_close">닫기</string>
+    <!-- 걸음 수 할당량 소진 알림 -->
+    <string name="step_quota_exhausted_title">오늘 걸음 수 한도에 도달했습니다</string>
+    <string name="step_quota_exhausted_body">오늘 설정한 걸음 수 한도에 도달하여 이번 시뮬레이션에서는 더 이상 걸음 수를 기록하지 않습니다. 한도는 설정에서 조정할 수 있습니다.</string>
+    <!-- 걸음 수 동기화 횟수제 대화상자 -->
+    <string name="step_credit_dialog_title">이번 시뮬레이션에 걸음 수 동기화를 사용할까요?</string>
+    <string name="step_credit_dialog_desc">걸음 수 동기화는 횟수제입니다. 시뮬레이션 1회당 1회를 사용합니다. 남은 횟수가 없습니다. 광고를 1개 시청하면 1회를 받을 수 있고, 구독하면 무제한입니다.</string>
+    <string name="step_credit_dialog_ad_unavailable">지금은 사용할 수 있는 광고가 없습니다. 잠시 후 다시 시도해 주세요.</string>
+    <string name="step_credit_dialog_action_watch_ad">광고 보고 1회 받기</string>
+    <string name="step_credit_dialog_action_skip">이번엔 사용 안 함</string>
+    <string name="step_credit_dialog_action_subscribe">구독하고 무제한 사용</string>
+    <!-- 걸음 수 동기화 설정 -->
+    <string name="settings_step_sync_title">걸음 수 동기화</string>
+    <string name="settings_step_sync_enable">걸음 수 동기화 사용</string>
+    <string name="settings_step_sync_enable_desc">시뮬레이션 이동 거리를 걸음 수로 환산해 Health Connect에 기록합니다.</string>
+    <string name="settings_step_sync_unsupported">이 기기는 Health Connect를 지원하지 않습니다.</string>
+    <string name="settings_step_sync_update_required">Health Connect를 설치하거나 업데이트해야 합니다.</string>
+    <string name="settings_step_sync_needs_permission">걸음 수 쓰기 권한이 필요합니다.</string>
+    <string name="settings_step_sync_connected">Health Connect에 연결되었습니다.</string>
+    <string name="settings_step_sync_open_store">스토어 열기</string>
+    <string name="settings_step_sync_grant">권한 허용</string>
+    <string name="settings_step_length">걸음 길이(미터)</string>
+    <string name="settings_step_quota">일일 걸음 수 상한</string>
+    <string name="settings_step_quota_used">오늘 기록: %1$d / %2$d 걸음</string>
+    <string name="settings_step_credits_unlimited">구독 중 — 무제한으로 사용할 수 있습니다.</string>
+    <string name="settings_step_credits_remaining">남은 횟수: %1$d (시뮬레이션 1회당 1회, 시작할 때 광고를 보면 충전됩니다)</string>
+    <!-- 걸음 수 동기화 설정 안내 -->
+    <string name="settings_step_sync_fit_missing">Google Fit이 설치되어 있지 않습니다. 걸음 수가 Health Connect에서 멈추고 다른 앱으로 전달되지 않습니다.</string>
+    <string name="settings_step_sync_setup_hint">걸음 수 동기화는 여러 앱이 함께 작동해야 하며 각 구간마다 시간이 걸립니다.</string>
+    <string name="settings_step_sync_setup_open">설정 안내 보기</string>
+    <string name="step_setup_title">걸음 수 동기화 설정 안내</string>
+    <string name="step_setup_intro">걸음 수는 목표 앱으로 바로 전달되지 않고 몇 단계를 거칩니다. 한 곳이라도 연결되지 않으면 걸음 수가 도착하지 않습니다. 각 단계의 설정 위치가 모두 다르므로 순서대로 진행해 주세요.</string>
+    <string name="step_setup_chain">이 앱 → Health Connect → Google Fit → 목표 앱</string>
+    <string name="step_setup_1_title">1. Health Connect 준비</string>
+    <string name="step_setup_1_body">Android 14 이상에는 기본 내장되어 있어 설치가 필요 없습니다. 이전 버전은 Play 스토어에서 Health Connect를 설치해 주세요.</string>
+    <string name="step_setup_2_title">2. 이 앱에 걸음 수 쓰기 권한 허용</string>
+    <string name="step_setup_2_body">허용하면 시뮬레이션 이동 거리를 걸음 수로 환산해 Health Connect에 기록할 수 있습니다. 쓰기 권한만 사용하며 회원님의 건강 데이터를 읽지 않습니다.</string>
+    <string name="step_setup_3_title">3. Google Fit 설치</string>
+    <string name="step_setup_3_body">Google Fit은 필수 중계 역할입니다. 대부분의 앱은 Health Connect를 직접 읽지 않고 Google Fit에서 가져오므로, Fit이 없으면 걸음 수가 Health Connect에서 멈춥니다.</string>
+    <string name="step_setup_4_title">4. Google Fit이 Health Connect를 읽도록 허용</string>
+    <string name="step_setup_4_body">Google Fit을 열고 홈 화면에서 \"Fit을 건강 연결과 동기화\"를 찾아 시작하기 → 설정을 누른 뒤, 권한 화면에서 \"걸음 수\"를 켜고 허용해 주세요.
+
+방향에 주의하세요: 카드 제목은 Fit의 데이터를 밖으로 제공하는 것처럼 읽히지만, 같은 흐름에서 Fit이 다른 앱의 데이터를 가져오도록 설정할 수도 있습니다. 여기서 필요한 것은 후자입니다. 이 단계는 자동으로 확인할 수 없으니 직접 확인해 주세요.</string>
+    <string name="step_setup_5_title">5. 목표 앱의 걸음 수 소스를 Google Fit으로 지정</string>
+    <string name="step_setup_5_body">사용하려는 앱에서 걸음 수 데이터 출처를 Google Fit으로 설정해 주세요. 위치는 앱마다 다르며 보통 설정 또는 계정 연결 화면에 있습니다.</string>
+    <string name="step_setup_troubleshoot">걸음 수가 보이지 않을 때: 이 경로는 구간마다 동기화 시점이 달라 어느 것도 즉시 반영되지 않습니다. 순서대로 어디까지 도달했는지 확인해 주세요.\n\n1. 이 앱 → Health Connect: 10~25초마다 나눠서 기록됩니다. 시뮬레이션 시작 후 잠시 기다린 뒤 위의 \"오늘 기록\" 수치로 확인할 수 있습니다.\n\n2. Health Connect → Google Fit: Google Fit을 열면 데이터를 가져옵니다. 연 직후에 오늘 걸음 수가 늘어나는 것이 일반적입니다.\n\n3. Google Fit → 목표 앱: 가장 느린 구간으로 몇 분이 걸리기도 합니다. 목표 앱을 열고 잠시 머무르면 대개 빨라집니다.\n\n동기화가 실패한 것처럼 보여도 대개는 다음 구간이 아직 실행되지 않았을 뿐입니다. 먼저 1번에 숫자가 있는지 확인한 뒤 아래로 내려가며 찾아보세요.</string>
+    <string name="step_setup_action_install_fit">Google Fit 설치</string>
+    <string name="step_setup_action_open_fit">Google Fit 열기</string>
+    <string name="step_setup_action_open_hc_settings">Health Connect 설정 열기</string>
+    <string name="step_setup_duplicate_note">Health Connect에 표시되는 숫자에 관하여: Google Fit은 데이터를 읽은 뒤 같은 걸음 수를 Health Connect에 다시 기록합니다. 그래서 Health Connect 목록에서는 각 시간대에 이 앱과 Fit의 기록이 두 건씩 보이고 합계가 약 두 배로 보입니다. 이는 Google Fit의 동작이며 중복 기록이 아닙니다. 이 앱의 \"오늘 기록\" 수치와 일일 한도는 실제로 기록한 양만 계산하므로 영향을 받지 않습니다.</string>
+    <!-- 걸음 수 환산 속도 상한 초과 알림 -->
+    <string name="step_too_fast_title">속도가 너무 빨라 걸음 수로 계산되지 않습니다</string>
+    <string name="step_too_fast_body">현재 시뮬레이션 속도가 20 km/h를 넘어 걷기나 달리기의 합리적인 범위를 벗어났으므로 이 구간은 걸음 수로 환산되지 않습니다. 20 km/h 미만으로 낮추면 다시 계산됩니다.</string>
+    <string name="route_speed_exceeds_step_limit">속도가 %1$d km/h를 초과하여 이 이동은 걸음 수로 계산되지 않습니다</string>
+    <string name="step_setup_speed_limit_note">시뮬레이션 속도에 관하여: %1$d km/h 이하의 이동만 걸음 수로 환산되며, 그보다 빠르면 환산되지 않습니다(걷기나 달리기의 합리적인 범위를 벗어나기 때문입니다). 기본 프리셋 중 \'걷기\'와 \'자전거\'는 범위 안이지만 \'자동차\'는 걸음 수가 생기지 않습니다. 점프 모드의 순간이동도 계산되지 않습니다.</string>
 </resources>

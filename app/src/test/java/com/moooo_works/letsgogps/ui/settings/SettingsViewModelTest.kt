@@ -17,6 +17,7 @@ import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.data.billing.RewardedAdManager
+import com.moooo_works.letsgogps.data.health.HealthConnectAvailability
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.moooo_works.letsgogps.data.backup.BackupManager
@@ -60,6 +61,7 @@ class SettingsViewModelTest {
     private val proRepository = mockk<ProRepository>(relaxed = true)
     private val systemHealthCheck = mockk<SystemHealthCheck>(relaxed = true)
     private val context = mockk<Context>(relaxed = true)
+    private val healthConnectAvailability = mockk<HealthConnectAvailability>(relaxed = true)
     private val contentResolver = mockk<ContentResolver>(relaxed = true)
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = kotlinx.coroutines.test.TestScope(testDispatcher)
@@ -109,6 +111,14 @@ class SettingsViewModelTest {
             HealthCheckItem.values().associateWith { ItemStatus.Passed }
         )
         every { settingsRepository.observeEnableTimezoneCheck() } returns MutableStateFlow(true)
+        every { settingsRepository.observeStepSyncEnabled() } returns MutableStateFlow(false)
+        every { settingsRepository.observeStepLengthMeters() } returns MutableStateFlow(0.75)
+        every { settingsRepository.observeStepDailyQuota() } returns MutableStateFlow(20_000)
+        every { settingsRepository.observeStepQuotaUsedToday() } returns MutableStateFlow(0)
+        every { proRepository.isSubscriptionActive } returns MutableStateFlow(false)
+        every { proRepository.featureCredits } returns MutableStateFlow(0)
+        every { healthConnectAvailability.status() } returns
+            HealthConnectAvailability.Status.Unsupported
 
         viewModel = buildViewModel()
     }
@@ -126,6 +136,7 @@ class SettingsViewModelTest {
             systemHealthCheck,
             rewardedAdManager,
             BackupManager(context, locationRepository, settingsRepository),
+            healthConnectAvailability,
             context
         )
         vm.nowFlowOverride = flowOf(nowMillis)
