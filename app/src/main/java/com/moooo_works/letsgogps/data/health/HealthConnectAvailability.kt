@@ -90,11 +90,17 @@ class HealthConnectAvailability @Inject constructor(
      * 存進 Google 帳戶，目標 app 再從 Fit 取用。少了 Fit，鏈路只到 Health Connect
      * 就斷了。
      */
-    fun isGoogleFitInstalled(): Boolean =
-        // getLaunchIntentForPackage 而非 getPackageInfo：前者在 package 存在但被
-        // 停用時回 null，那種狀態下使用者一樣打不開 Fit，視為未安裝才合理。
-        // 需要 manifest 的 <queries> 宣告，否則 Android 11+ 一律回 null。
-        context.packageManager.getLaunchIntentForPackage(GOOGLE_FIT_PACKAGE) != null
+    fun isGoogleFitInstalled(): Boolean = googleFitLaunchIntent() != null
+
+    /**
+     * Google Fit 的啟動 Intent；未安裝或被停用時回 null。
+     *
+     * 用 getLaunchIntentForPackage 而非 getPackageInfo：前者在 package 存在但被
+     * 停用時就回 null，那種狀態下使用者一樣打不開 Fit，視為不可用才合理。
+     * 需要 manifest 的 <queries> 宣告，否則 Android 11+ 一律回 null。
+     */
+    fun googleFitLaunchIntent(): Intent? =
+        context.packageManager.getLaunchIntentForPackage(GOOGLE_FIT_PACKAGE)
 
     /** 導向 Health Connect 的 Play 商店頁。 */
     fun openPlayStoreForProvider() = openPlayStore(HEALTH_CONNECT_PACKAGE)
@@ -111,8 +117,7 @@ class HealthConnectAvailability @Inject constructor(
      * @return 是否成功開啟
      */
     fun openGoogleFit(): Boolean {
-        val launch = context.packageManager.getLaunchIntentForPackage(GOOGLE_FIT_PACKAGE)
-            ?: return false
+        val launch = googleFitLaunchIntent() ?: return false
         return try {
             context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             true

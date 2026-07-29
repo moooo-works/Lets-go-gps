@@ -131,6 +131,16 @@ fun StepSyncSetupDialog(
                     onAction = {},
                 )
 
+                // 實測確認：Google Fit 不會在背景讀取 Health Connect，沒開就
+                // 完全不同步。這是每次模擬後都要做的動作，必須跟一次性設定
+                // 明確區分，否則使用者會以為設定完就一勞永逸。
+                Text(
+                    stringResource(R.string.step_setup_recurring_note),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.error
+                )
+
                 // 速度上限：自行車（15）在範圍內、開車（40）不在，預設模式之間
                 // 的差異不講清楚使用者不會知道。
                 Text(

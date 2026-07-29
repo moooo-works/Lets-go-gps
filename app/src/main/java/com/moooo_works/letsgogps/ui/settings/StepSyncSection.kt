@@ -189,6 +189,17 @@ fun StepSyncSection(viewModel: SettingsViewModel) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                // Google Fit 不會在背景讀取 Health Connect——實測確認沒開 Fit
+                // 步數就一直停在 Health Connect。這是每次模擬後都要做的動作，
+                // 所以放一個捷徑在這裡，不用每次鑽進設定說明找。
+                if (fitInstalled) {
+                    StatusLine(
+                        text = stringResource(R.string.settings_step_sync_open_fit_hint),
+                        actionLabel = stringResource(R.string.settings_step_sync_open_fit),
+                        onAction = { viewModel.openGoogleFit() }
+                    )
+                }
             }
         }
     }

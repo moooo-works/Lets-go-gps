@@ -431,7 +431,7 @@
 方向にご注意を：カードの見出しは Fit のデータを外部へ提供するように読めますが、同じ流れの中で Fit が他のアプリのデータを取り込む設定も行えます。ここで必要なのはそちらです。このステップは自動検出できないため、ご自身でご確認ください。</string>
     <string name="step_setup_5_title">5. 目的のアプリの歩数ソースを Google Fit にする</string>
     <string name="step_setup_5_body">使用したいアプリ側で、歩数データの取得元を Google Fit に指定してください。設定場所はアプリごとに異なり、多くは設定画面やアカウント連携画面にあります。</string>
-    <string name="step_setup_troubleshoot">歩数が表示されないとき：この経路は各区間がそれぞれのタイミングで同期し、どれも即時ではありません。どこまで届いているか順に確認してください。\n\n1. 本アプリ → Health Connect：10〜25 秒ごとにまとめて書き込まれます。シミュレーション開始後、少し待てば上の「本日の書き込み」で確認できます。\n\n2. Health Connect → Google Fit：Google Fit を開くと取り込みが実行されます。開いた直後に本日の歩数が増えるのが普通です。\n\n3. Google Fit → 目的のアプリ：ここが最も遅く、数分かかることがあります。目的のアプリを開いてしばらく留まると早まります。\n\n同期に失敗したように見えても、多くは次の区間がまだ動いていないだけです。まず 1 の数値を確認し、順に下へたどってください。</string>
+    <string name="step_setup_troubleshoot">歩数が表示されないとき：各区間はそれぞれのタイミングで同期し、どれも即時ではありません。順に確認してください。\n\n1. 本アプリ → Health Connect：10〜25 秒ごとにまとめて書き込まれます。上の「本日の書き込み」で確認できます。\n\n2. Health Connect → Google Fit：「Google Fit を開かないと同期されません」。Fit はバックグラウンドで取り込まないため、開かない限りここで止まります。反映させたいシミュレーションのあとは毎回開いてください。\n\n3. Google Fit → 目的のアプリ：最も遅く、数分かかることがあります。目的のアプリを開いてしばらく留まると早まります。\n\n最も多い原因は 2 の「Fit を開いていない」です。まず 1 の数値を確認し、次に Fit を開いて本日の歩数を見てください。</string>
     <string name="step_setup_action_install_fit">Google Fit をインストール</string>
     <string name="step_setup_action_open_fit">Google Fit を開く</string>
     <string name="step_setup_action_open_hc_settings">Health Connect の設定を開く</string>
@@ -441,4 +441,10 @@
     <string name="step_too_fast_body">現在のシミュレーション速度が 20 km/h を超えており、歩行やランニングの妥当な範囲を外れているため、この区間は歩数に換算されません。20 km/h 未満に下げると再び換算されます。</string>
     <string name="route_speed_exceeds_step_limit">速度が %1$d km/h を超えています。この移動は歩数に換算されません</string>
     <string name="step_setup_speed_limit_note">シミュレーション速度について：歩数に換算されるのは %1$d km/h 以下の移動のみで、それを超えると換算されません（歩行やランニングの妥当な範囲を外れるため）。プリセットの「徒歩」と「自転車」は範囲内ですが、「車」では歩数が発生しません。ジャンプモードの瞬間移動も同様に換算されません。</string>
+    <string name="settings_step_sync_open_fit_hint">シミュレーション後に Google Fit を開かないと先へ同期されません。</string>
+    <string name="settings_step_sync_open_fit">Google Fit を開く</string>
+    <string name="step_setup_recurring_note">重要：上記の設定が済んでいても、シミュレーションのたびに Google Fit を一度開かないと歩数は先へ進みません。Fit はバックグラウンドで Health Connect を読み取らないため、これは毎回必要な操作であり、一度きりの設定ではありません。</string>
+    <!-- Google Fit を開くリマインダー -->
+    <string name="step_open_fit_notice_title">Google Fit を開いてください</string>
+    <string name="step_open_fit_notice_body">歩数がまとまって Health Connect に書き込まれました。Google Fit はバックグラウンドで読み取らないため、一度開かないと先へ進みません。この通知をタップすると開きます。</string>
 </resources>
