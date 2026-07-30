@@ -9,7 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationCompat
 import com.moooo_works.letsgogps.MainActivity
 import com.moooo_works.letsgogps.R
@@ -20,6 +22,7 @@ import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.isRouteCompletionOnIdle
 import com.moooo_works.letsgogps.domain.MockSessionMode
 import com.moooo_works.letsgogps.domain.PersistedMockSession
+import com.moooo_works.letsgogps.domain.RoutePlaybackMode
 import com.moooo_works.letsgogps.domain.RouteSimulator
 import com.moooo_works.letsgogps.domain.SerLatLng
 import com.moooo_works.letsgogps.domain.SimulationPoint
@@ -28,9 +31,13 @@ import com.moooo_works.letsgogps.domain.repository.MockSessionRepository
 import com.moooo_works.letsgogps.domain.repository.MockStateRepository
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
+import com.moooo_works.letsgogps.domain.health.StepAccumulator
+import com.moooo_works.letsgogps.domain.health.StepSyncEngine
 import com.google.android.gms.maps.model.LatLng
+import java.time.Instant
 import javax.inject.Inject
 import com.moooo_works.letsgogps.data.engine.MockEngineError
+import com.moooo_works.letsgogps.data.health.HealthConnectAvailability
 
 @AndroidEntryPoint
 class MockLocationService : Service() {
@@ -49,6 +56,16 @@ class MockLocationService : Service() {
 
     @Inject
     lateinit var mockSessionRepository: MockSessionRepository
+
+    @Inject
+    lateinit var stepSyncEngine: StepSyncEngine
+
+    @Inject
+    lateinit var healthConnectAvailability: HealthConnectAvailability
+
+    /** 累積模擬移動距離，換算成可寫入的步數批次。只由 serviceScope 存取。 */
+    @VisibleForTesting
+    internal val stepAccumulator = StepAccumulator()
 
     // The session we are currently persisting for crash-recovery, kept in memory
     // so progress ticks only have to rewrite the changed fields. Null = nothing
@@ -82,6 +99,33 @@ class MockLocationService : Service() {
     private var cachedAltitude: Double = 15.0
     private var cachedRandomAltitude: Boolean = false
     private var cachedJitter: Boolean = false
+    private var cachedStepSyncEnabled: Boolean = false
+    private var cachedStepLengthMeters: Double = StepAccumulator.DEFAULT_STEP_LENGTH_METERS
+    private var cachedStepDailyQuota: Int = 0
+
+    /** 當日配額耗盡的通知只發一次，避免每個同步週期都轟炸使用者。 */
+    private var quotaExhaustedNotified = false
+
+    /** handleStop 可能被呼叫兩次，保證收尾 flush 只跑一次。 */
+    private var stepsFlushed = false
+
+    /** 上次成功寫入步數的 elapsedRealtime，用來算時間窗的上限。 */
+    private var lastStepSyncElapsedMs = 0L
+
+    /** 過速提醒只發一次，成功寫入後重置。 */
+    private var tooFastNotified = false
+
+    /** 距上次提醒開 Fit 之後已寫入的步數。 */
+    private var stepsSinceFitReminder = 0L
+
+    /**
+     * 本次 session 是否獲准寫入步數，由啟動 intent 的 extra 決定。
+     *
+     * 與設定開關分離：設定表達「我想用」，這個表達「這次付過了」。
+     * 免費使用者次數不足時選擇「這次不用步數同步」，設定會維持開啟，
+     * 但這個旗標是 false。
+     */
+    private var sessionStepSyncAllowed = false
 
     override fun onCreate() {
         super.onCreate()
@@ -96,6 +140,24 @@ class MockLocationService : Service() {
         }
         serviceScope.launch {
             settingsRepository.observeCoordinateJitter().collect { cachedJitter = it }
+        }
+        serviceScope.launch {
+            settingsRepository.observeStepSyncEnabled().collect { cachedStepSyncEnabled = it }
+        }
+        serviceScope.launch {
+            settingsRepository.observeStepLengthMeters().collect { cachedStepLengthMeters = it }
+        }
+        serviceScope.launch {
+            settingsRepository.observeStepDailyQuota().collect { cachedStepDailyQuota = it }
+        }
+
+        // 1b. 步數同步迴圈。間隔刻意隨機，固定週期本身就是可辨識的特徵。
+        serviceScope.launch {
+            while (isActive) {
+                delay(nextStepSyncDelayMillis())
+                runCatching { syncAccumulatedSteps() }
+                    .onFailure { Log.w(TAG, "步數同步失敗", it) }
+            }
         }
 
         // 2. Observe Route Simulation state
@@ -214,6 +276,10 @@ class MockLocationService : Service() {
                 altitude = altitude
             )
             consecutiveInjectionFailures = 0
+
+            // 用「加抖動前」的 location 累積距離：抖動幅度約 ±3 公尺，
+            // 若用抖動後的座標，站著不動也會持續累積假距離。
+            accumulateStepDistance(location)
         } catch (e: Exception) {
             Log.e(TAG, "Location injection failed", e)
             consecutiveInjectionFailures++
@@ -228,6 +294,169 @@ class MockLocationService : Service() {
         }
     }
 
+    // ── 步數同步 ──────────────────────────────────────────────────────────
+
+    /**
+     * 累積一段模擬移動。[location] 必須是**加抖動前**的原始座標。
+     *
+     * 瞬移的排除交給 [StepAccumulator] 的單段距離門檻——這裡不能用 speed 判斷，
+     * 搖桿移動走的是 speed 為 0 的注入路徑，但那是真實的連續移動，該計入。
+     */
+    private fun accumulateStepDistance(location: LatLng) {
+        if (!isStepSyncActive()) return
+
+        // 速度用**設定值**判斷，不量測。
+        // 量測版本（單段距離 ÷ 實際耗時）實測會誤判：記時間的位置在
+        // setLocation() 這個 IPC 之後，延遲浮動數十毫秒，而 19 km/h 距門檻
+        // 只有 5% 餘裕，雜訊直接吃掉整個餘裕。設定值是精確的，也與 UI 警示同源。
+        if (currentSpeedKmh > StepAccumulator.MAX_STEP_SPEED_KMH) {
+            notifyTooFastOnce()
+            return
+        }
+
+        // 跳點模式不計步：waypoint 間距若小於瞬移門檻會被當成走路，
+        // 但那本來就是瞬移。設定說明也是這樣寫的。
+        if (routeSimulator.currentPlaybackMode() == RoutePlaybackMode.JUMP) return
+
+        stepAccumulator.addDistance(location)
+    }
+
+    /** 設定開著（想用）**且**本次 session 獲准（付過了）才會寫步數。 */
+    private fun isStepSyncActive(): Boolean = cachedStepSyncEnabled && sessionStepSyncAllowed
+
+    /** 下次同步的間隔：10–25 秒隨機。 */
+    private fun nextStepSyncDelayMillis(): Long =
+        STEP_SYNC_BASE_DELAY_MS + kotlin.random.Random.nextLong(STEP_SYNC_JITTER_MS)
+
+    /**
+     * 把累積的距離換算成步數寫入 Health Connect。
+     *
+     * 任何一批寫入失敗就停止本輪——失敗多半代表權限被撤銷或 Health Connect
+     * 不可用，繼續嘗試沒有意義，未寫入的距離留到下一輪。
+     */
+    private suspend fun syncAccumulatedSteps() {
+        if (!isStepSyncActive()) return
+
+        val usedToday = settingsRepository.observeStepQuotaUsedToday().first()
+        val quotaRemaining = cachedStepDailyQuota - usedToday
+        if (quotaRemaining <= 0) {
+            if (cachedStepDailyQuota > 0) notifyQuotaExhaustedOnce()
+            return
+        }
+        quotaExhaustedNotified = false
+
+        // 距上次成功寫入實際經過的秒數。時間窗以此為上限，才不會讓批次
+        // 往回追溯到比實際經過時間更早的位置而與前一輪重疊。
+        val nowElapsed = SystemClock.elapsedRealtime()
+        val spanSeconds = ((nowElapsed - lastStepSyncElapsedMs) / 1000L)
+            .coerceAtLeast(1L)
+
+        val batches = stepAccumulator.drainBatches(
+            stepLength = cachedStepLengthMeters,
+            quotaRemaining = quotaRemaining,
+            now = Instant.now(),
+            spanSeconds = spanSeconds,
+        )
+        if (batches.isEmpty()) return
+
+        var written = 0L
+        for (batch in batches) {
+            if (!stepSyncEngine.write(batch.steps, batch.start, batch.end)) break
+            written += batch.steps
+        }
+
+        if (written > 0L) {
+            stepAccumulator.commit(written, cachedStepLengthMeters)
+            settingsRepository.addStepQuotaUsed(written.toInt())
+            lastStepSyncElapsedMs = nowElapsed
+            tooFastNotified = false
+
+            // Google Fit 不會在背景讀取 Health Connect，使用者必須手動開一次。
+            // 累積到一定量就提醒，否則跑完一整條路線可能都不知道要開。
+            stepsSinceFitReminder += written
+            if (stepsSinceFitReminder >= FIT_REMINDER_STEP_THRESHOLD) {
+                stepsSinceFitReminder = 0L
+                notifyOpenGoogleFit()
+            }
+        }
+    }
+
+    /**
+     * 平均速度超過步行／跑步範圍時提醒一次。
+     *
+     * 只發一次：高速模擬會每個同步週期都觸發，每次都發通知會變轟炸。
+     * 速度降回範圍內並成功寫入後旗標重置，下次超速會再提醒。
+     */
+    private fun notifyTooFastOnce() {
+        if (tooFastNotified) return
+        tooFastNotified = true
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(getString(R.string.step_too_fast_title))
+                .setContentText(getString(R.string.step_too_fast_body))
+                .setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(getString(R.string.step_too_fast_body))
+                )
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .build()
+            nm.notify(NOTIFICATION_ID_STEP_TOO_FAST, notification)
+        } catch (e: Exception) {
+            Log.w(TAG, "過速通知發送失敗", e)
+        }
+    }
+
+    private fun notifyQuotaExhaustedOnce() {
+        if (quotaExhaustedNotified) return
+        quotaExhaustedNotified = true
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(getString(R.string.step_quota_exhausted_title))
+                .setContentText(getString(R.string.step_quota_exhausted_body))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .build()
+            nm.notify(NOTIFICATION_ID_QUOTA_EXHAUSTED, notification)
+        } catch (e: Exception) {
+            Log.w(TAG, "配額耗盡通知發送失敗", e)
+        }
+    }
+
+    /**
+     * 提醒使用者打開 Google Fit，點擊通知直接跳過去。
+     *
+     * Fit 不會在背景讀取 Health Connect——沒開就一直停在 Health Connect，
+     * 傳不到目標 app。這是每次都要做的動作，所以累積到門檻就主動提醒。
+     * Fit 未安裝時不發（PendingIntent 會沒有去處）。
+     */
+    private fun notifyOpenGoogleFit() {
+        val launch = healthConnectAvailability.googleFitLaunchIntent() ?: return
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val pending = PendingIntent.getActivity(
+                this,
+                REQUEST_OPEN_FIT,
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val body = getString(R.string.step_open_fit_notice_body)
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(getString(R.string.step_open_fit_notice_title))
+                .setContentText(body)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .setContentIntent(pending)
+                .build()
+            nm.notify(NOTIFICATION_ID_OPEN_FIT, notification)
+        } catch (e: Exception) {
+            Log.w(TAG, "開啟 Fit 提醒發送失敗", e)
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
 
@@ -235,6 +464,13 @@ class MockLocationService : Service() {
             action == ACTION_START_EXPLORATION || action == ACTION_START_TELEPORT_EXPLORATION
         ) {
             isStopping = false // starting fresh — IDLE-as-completion detection re-armed
+            // 計費決策在 UI 層做完了，服務只接收結果。缺 extra 一律視為不允許。
+            sessionStepSyncAllowed = intent.getBooleanExtra(EXTRA_STEP_SYNC_ALLOWED, false)
+            stepsFlushed = false
+            tooFastNotified = false
+            stepsSinceFitReminder = 0L
+            lastStepSyncElapsedMs = SystemClock.elapsedRealtime()
+            stepAccumulator.reset()
             try {
                 startForeground(NOTIFICATION_ID, buildNotification(MockStatus.IDLE))
             } catch (e: RuntimeException) {
@@ -486,8 +722,28 @@ class MockLocationService : Service() {
         }
         mockStateRepository.setMockStatus(MockStatus.IDLE)
         mockStateRepository.setCurrentMockLocation(null)
+        flushStepsOnStop()
         stopForeground(true)
         stopSelf()
+    }
+
+    /**
+     * 模擬停止時把剩餘步數寫完。
+     *
+     * 用 [terminalScope] 而非 serviceScope——後者在 onDestroy 立刻被取消，
+     * 寫入會來不及完成。handleStop 可能被呼叫兩次（ACTION_STOP 再 onDestroy），
+     * 故以 [stepsFlushed] 保證只跑一次。
+     */
+    private fun flushStepsOnStop() {
+        if (stepsFlushed) return
+        stepsFlushed = true
+        if (!isStepSyncActive()) return
+        if (stepAccumulator.pendingDistanceMeters <= 0.0) return
+
+        terminalScope.launch {
+            runCatching { syncAccumulatedSteps() }
+                .onFailure { Log.w(TAG, "停止時的步數 flush 失敗", it) }
+        }
     }
 
     private fun stopLocationPushJob() {
@@ -589,8 +845,35 @@ class MockLocationService : Service() {
         private const val TAG = "MockLocationService"
         private const val MAX_INJECTION_FAILURES = 5  // 連續失敗 5 次（約 5 秒）後停止
         private const val KMH_TO_MPS_DIVISOR = 3.6
+
+        /** 步數同步間隔下限（毫秒）。 */
+        private const val STEP_SYNC_BASE_DELAY_MS = 10_000L
+
+        /** 疊加在下限之上的隨機量（毫秒），實際間隔落在 10–25 秒。 */
+        private const val STEP_SYNC_JITTER_MS = 15_000L
+
+        /**
+         * 服務終止後仍需完成的短暫寫入（步數收尾 flush）。
+         * 刻意獨立於 serviceScope——後者在 onDestroy 立刻被取消。
+         */
+        private val terminalScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
         const val CHANNEL_ID = "MockLocationServiceChannelV5"
         const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_ID_QUOTA_EXHAUSTED = 2
+        const val NOTIFICATION_ID_STEP_TOO_FAST = 3
+        const val NOTIFICATION_ID_OPEN_FIT = 4
+
+        /** PendingIntent request code；0–3 已被通知的操作按鈕佔用。 */
+        private const val REQUEST_OPEN_FIT = 4
+
+        /**
+         * 累積寫入多少步就提醒使用者開一次 Google Fit。
+         *
+         * ponytail: 先寫死。競品把這個做成可設定項，但多數人不會去調，
+         * 有需求再開放。
+         */
+        private const val FIT_REMINDER_STEP_THRESHOLD = 1000L
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"
         const val ACTION_START_ROUTE = "ACTION_START_ROUTE"
         const val ACTION_START_EXPLORATION = "ACTION_START_EXPLORATION"
@@ -603,6 +886,12 @@ class MockLocationService : Service() {
         const val EXTRA_RADIUS_M = "EXTRA_RADIUS_M"
         const val EXTRA_LATS = "EXTRA_LATS"
         const val EXTRA_LNGS = "EXTRA_LNGS"
+
+        /**
+         * 本次 session 是否允許寫入步數。由 UI 層的計次閘門決定後傳進來——
+         * 服務不參與計費判斷，只執行決定。
+         */
+        const val EXTRA_STEP_SYNC_ALLOWED = "EXTRA_STEP_SYNC_ALLOWED"
         const val EXTRA_DWELL_SEC = "EXTRA_DWELL_SEC"
         const val EXTRA_COOLDOWN_SEC = "EXTRA_COOLDOWN_SEC"
     }

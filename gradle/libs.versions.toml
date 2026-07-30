@@ -29,6 +29,7 @@ firebase-bom = "33.1.2"
 play-review = "2.0.2"
 appcompat = "1.6.1"
 reorderable = "0.9.6"
+health-connect = "1.1.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -70,6 +71,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 reorderable = { group = "org.burnoutcrew.composereorderable", name = "reorderable", version.ref = "reorderable" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+health-connect = { group = "androidx.health.connect", name = "connect-client", version.ref = "health-connect" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

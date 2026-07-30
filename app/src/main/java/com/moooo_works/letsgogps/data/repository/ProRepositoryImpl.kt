@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.annotation.VisibleForTesting
 import com.moooo_works.letsgogps.data.billing.AdUnlockStore
 import com.moooo_works.letsgogps.data.billing.BillingManager
+import com.moooo_works.letsgogps.data.billing.FeatureCreditStore
 import com.moooo_works.letsgogps.domain.model.SubscriptionOffer
 import com.moooo_works.letsgogps.domain.repository.ProRepository
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +23,7 @@ import javax.inject.Singleton
 class ProRepositoryImpl @Inject constructor(
     private val billingManager: BillingManager,
     private val adUnlockStore: AdUnlockStore,
+    private val featureCreditStore: FeatureCreditStore,
 ) : ProRepository {
 
     @VisibleForTesting
@@ -47,6 +49,17 @@ class ProRepositoryImpl @Inject constructor(
 
     override val isAdFreeActive: StateFlow<Boolean>
         get() = billingManager.isProActive
+
+    // 與 isAdFreeActive 同源。分開命名是為了語意：那個問「要不要顯示廣告」，
+    // 這個問「使用者有沒有付費」。計次制閘門必須用這個，不能用 isProActive
+    // ——後者包含 ad-unlock，會把 6 小時解鎖期內的免費使用者也放行。
+    override val isSubscriptionActive: StateFlow<Boolean>
+        get() = billingManager.isProActive
+
+    override val featureCredits: StateFlow<Int> by lazy {
+        featureCreditStore.creditsFlow
+            .stateIn(tickerScope, SharingStarted.Eagerly, featureCreditStore.currentCredits())
+    }
 
     override val subscriptionOffer: StateFlow<SubscriptionOffer?>
         get() = billingManager.subscriptionOffer
@@ -82,6 +95,13 @@ class ProRepositoryImpl @Inject constructor(
         val cap = nowMillis + 24 * HOUR_MILLIS
         adUnlockStore.setExpiry(minOf(newExpiry, cap))
     }
+
+    override suspend fun grantFeatureCredits(count: Int) {
+        featureCreditStore.add(count)
+    }
+
+    override suspend fun consumeFeatureCredits(cost: Int): Boolean =
+        featureCreditStore.consume(cost)
 
     override fun launchBillingFlow(activity: Activity) {
         billingManager.launchBillingFlow(activity)

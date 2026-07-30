@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.SyncAlt
@@ -405,6 +406,32 @@ private fun RouteControls(
                 valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH,
                 steps = ROUTE_SPEED_STEPS,
                 modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    // 速度超過計步上限時提醒。只在使用者實際開了步數同步時才顯示——
+    // 沒開的人根本不在乎這個限制，跳出來只是雜訊。
+    // 跳點模式不顯示：那個模式的瞬移本來就不會計步，速度滑桿也不在畫面上。
+    if (!isJump && uiState.stepSyncEnabled && uiState.speedKmh > STEP_SYNC_MAX_SPEED_KMH) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                stringResource(
+                    R.string.route_speed_exceeds_step_limit,
+                    STEP_SYNC_MAX_SPEED_KMH.toInt()
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
             )
         }
     }

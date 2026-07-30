@@ -30,7 +30,12 @@ class RouteController(
     private val context: Context,
     private val systemHealthCheck: SystemHealthCheck,
     private val onStopMocking: () -> Unit,
-    private val onEnsurePermission: () -> Boolean
+    private val onEnsurePermission: () -> Boolean,
+    /**
+     * 啟動成功後回報本次是否啟用了步數同步，由 MapViewModel 負責扣次數。
+     * RouteController 不碰計費，只回報事實。
+     */
+    private val onSimulationStarted: (stepSyncActive: Boolean) -> Unit = {}
 ) {
     private companion object {
         const val KMH_TO_MPS_DIVISOR = 3.6
@@ -164,17 +169,31 @@ class RouteController(
                 return
             }
         }
+        val stepSyncActive = StepSyncGate.resolve(state, PendingStart.ROUTE) ?: return
+        startRouteService(stepSyncActive)
+    }
+
+    /** 供計次對話框「看完廣告」後恢復啟動用。 */
+    fun startRouteService(stepSyncActive: Boolean) {
         ContextCompat.startForegroundService(
             context,
             Intent(context, MockLocationService::class.java).apply {
                 action = MockLocationService.ACTION_START_ROUTE
+                putExtra(MockLocationService.EXTRA_STEP_SYNC_ALLOWED, stepSyncActive)
             }
         )
+        onSimulationStarted(stepSyncActive)
     }
 
     fun startExplorationAtCenter() {
         if (!state.value.isProActive) { state.update { it.copy(showProUpgrade = true) }; return }
         if (!onEnsurePermission()) return
+        val stepSyncActive = StepSyncGate.resolve(state, PendingStart.EXPLORATION) ?: return
+        startExplorationService(stepSyncActive)
+    }
+
+    /** 供計次對話框「看完廣告」後恢復啟動用。 */
+    fun startExplorationService(stepSyncActive: Boolean) {
         val target = state.value.centerLocation
         ContextCompat.startForegroundService(
             context,
@@ -182,13 +201,23 @@ class RouteController(
                 action = MockLocationService.ACTION_START_EXPLORATION
                 putExtra(MockLocationService.EXTRA_LAT, target.latitude)
                 putExtra(MockLocationService.EXTRA_LNG, target.longitude)
+                putExtra(MockLocationService.EXTRA_STEP_SYNC_ALLOWED, stepSyncActive)
             }
         )
+        onSimulationStarted(stepSyncActive)
     }
 
     fun startTeleportExplorationOfRoute() {
         if (!state.value.isProActive) { state.update { it.copy(showProUpgrade = true) }; return }
         if (!onEnsurePermission()) return
+        if (state.value.waypoints.isEmpty()) return
+        val stepSyncActive =
+            StepSyncGate.resolve(state, PendingStart.TELEPORT_EXPLORATION) ?: return
+        startTeleportExplorationService(stepSyncActive)
+    }
+
+    /** 供計次對話框「看完廣告」後恢復啟動用。 */
+    fun startTeleportExplorationService(stepSyncActive: Boolean) {
         val targets = state.value.waypoints
         if (targets.isEmpty()) return
         ContextCompat.startForegroundService(
@@ -197,8 +226,10 @@ class RouteController(
                 action = MockLocationService.ACTION_START_TELEPORT_EXPLORATION
                 putExtra(MockLocationService.EXTRA_LATS, targets.map { it.latitude }.toDoubleArray())
                 putExtra(MockLocationService.EXTRA_LNGS, targets.map { it.longitude }.toDoubleArray())
+                putExtra(MockLocationService.EXTRA_STEP_SYNC_ALLOWED, stepSyncActive)
             }
         )
+        onSimulationStarted(stepSyncActive)
     }
 
     fun pauseRoute() {

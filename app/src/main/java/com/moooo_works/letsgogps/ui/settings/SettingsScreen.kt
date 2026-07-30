@@ -687,6 +687,9 @@ fun SettingsScreen(
                 }
             }
 
+            // 步數同步（Health Connect）
+            StepSyncSection(viewModel = viewModel)
+
             // 功能選單
             Card(
                 modifier = Modifier.fillMaxWidth(),

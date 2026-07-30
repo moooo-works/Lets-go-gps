@@ -2,6 +2,7 @@ package com.moooo_works.letsgogps.data.repository
 
 import com.moooo_works.letsgogps.data.billing.AdUnlockStore
 import com.moooo_works.letsgogps.data.billing.BillingManager
+import com.moooo_works.letsgogps.data.billing.FeatureCreditStore
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -33,6 +34,7 @@ class ProRepositoryImplTest {
         subscribed: Boolean = false,
         expiry: MutableStateFlow<Long> = MutableStateFlow(0L),
         nowMillis: Long = 1_700_000_000_000L,
+        credits: MutableStateFlow<Int> = MutableStateFlow(0),
     ): Triple<ProRepositoryImpl, BillingManager, MutableStateFlow<Long>> {
         val billing = mockk<BillingManager>(relaxed = true)
         every { billing.isProActive } returns MutableStateFlow(subscribed)
@@ -40,11 +42,20 @@ class ProRepositoryImplTest {
         every { store.expiryFlow } returns expiry
         coEvery { store.setExpiry(any()) } answers { expiry.value = firstArg() }
 
+        val creditStore = mockk<FeatureCreditStore>(relaxed = true)
+        every { creditStore.creditsFlow } returns credits
+        every { creditStore.currentCredits() } returns credits.value
+        coEvery { creditStore.add(any()) } answers { credits.value += firstArg<Int>() }
+        coEvery { creditStore.consume(any()) } answers {
+            val cost = firstArg<Int>()
+            if (credits.value >= cost) { credits.value -= cost; true } else false
+        }
+
         val dispatcher = UnconfinedTestDispatcher()
         val scope = CoroutineScope(SupervisorJob() + dispatcher)
         createdScopes += scope
 
-        val repo = ProRepositoryImpl(billing, store).apply {
+        val repo = ProRepositoryImpl(billing, store, creditStore).apply {
             clock = { nowMillis }
             tickerScope = scope
         }
@@ -143,5 +154,68 @@ class ProRepositoryImplTest {
         val (repo, billing, _) = build(subscribed = false)
         repo.refreshProStatus()
         coVerify { billing.queryActiveSubscriptions() }
+    }
+
+    // ── 次數錢包（計次制）──────────────────────────────────────────────────
+
+    @Test
+    fun `isSubscriptionActive 只反映訂閱不受 ad-unlock 影響`() = runTest {
+        val expiry = MutableStateFlow(0L)
+        val now = 1_700_000_000_000L
+        val (repo, _, _) = build(subscribed = false, expiry = expiry, nowMillis = now)
+
+        // 給一段還沒過期的 ad-unlock
+        expiry.value = now + 6 * 3600_000L
+
+        assertTrue("isProActive 應該被 ad-unlock 點亮", repo.isProActive.value)
+        assertFalse("但 isSubscriptionActive 不該", repo.isSubscriptionActive.value)
+    }
+
+    @Test
+    fun `isSubscriptionActive 在訂閱時為 true`() = runTest {
+        val (repo, _, _) = build(subscribed = true)
+        assertTrue(repo.isSubscriptionActive.value)
+    }
+
+    @Test
+    fun `grantFeatureCredits 增加餘額`() = runTest {
+        val credits = MutableStateFlow(0)
+        val (repo, _, _) = build(credits = credits)
+
+        repo.grantFeatureCredits(1)
+
+        assertEquals(1, credits.value)
+    }
+
+    @Test
+    fun `consumeFeatureCredits 餘額足夠時扣款並回傳 true`() = runTest {
+        val credits = MutableStateFlow(2)
+        val (repo, _, _) = build(credits = credits)
+
+        assertTrue(repo.consumeFeatureCredits(1))
+        assertEquals(1, credits.value)
+    }
+
+    @Test
+    fun `consumeFeatureCredits 餘額不足時不扣款並回傳 false`() = runTest {
+        val credits = MutableStateFlow(0)
+        val (repo, _, _) = build(credits = credits)
+
+        assertFalse(repo.consumeFeatureCredits(1))
+        assertEquals("不足時一分都不能扣", 0, credits.value)
+    }
+
+    @Test
+    fun `次數錢包與 ad-unlock 時數互不影響`() = runTest {
+        val expiry = MutableStateFlow(0L)
+        val credits = MutableStateFlow(0)
+        val now = 1_700_000_000_000L
+        val (repo, _, _) = build(expiry = expiry, nowMillis = now, credits = credits)
+
+        repo.grantAdUnlockHours(6)
+        assertEquals("給時數不得動到次數", 0, credits.value)
+
+        repo.grantFeatureCredits(1)
+        assertEquals("給次數不得動到時數", now + 6 * 3600_000L, expiry.value)
     }
 }

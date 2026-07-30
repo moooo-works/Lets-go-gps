@@ -376,4 +376,75 @@
     <string name="tip_gpx_body">設定 → データ管理 → インポートから「GPXからインポート」を選ぶと、.gpxファイルからルートと場所をインポートできます。</string>
     <string name="tip_jump_mode_title">「ジャンプ」再生モード登場！</string>
     <string name="tip_jump_mode_body">ルートモードの速度スライダー横に「⚡ ジャンプ」スイッチを追加しました。オンにすると歩く代わりに数秒ごとに次のポイントへ瞬間移動します。GPXルートを素早く進みたいときに便利です。間隔はスライダーで調整できます。</string>
+    <!-- Health Connect の権限利用目的（Play 審査要件） -->
+    <string name="health_rationale_title">健康データの利用について</string>
+    <string name="health_rationale_what_title">書き込む内容</string>
+    <string name="health_rationale_what_body">歩数のみです。心拍数、体重、睡眠など、その他の健康データを書き込むことはありません。</string>
+    <string name="health_rationale_why_title">この権限が必要な理由</string>
+    <string name="health_rationale_why_body">本アプリは、位置情報に依存する機能をテストする開発者・QA エンジニア向けのツールです。ルートシミュレーション実行時に、シミュレートした移動距離を歩数に換算して Health Connect に書き込むことで、歩数データを必要とするテストシナリオを最後まで検証できます。</string>
+    <string name="health_rationale_read_title">読み取りは行いません</string>
+    <string name="health_rationale_read_body">本アプリが要求するのは書き込み権限のみです。Health Connect 内のあなたの健康データを読み取ることはありません。</string>
+    <string name="health_rationale_control_title">操作はあなたの手に</string>
+    <string name="health_rationale_control_body">この機能は初期状態でオフになっており、有効化はご自身の操作が必要です。権限はいつでも Health Connect の設定から取り消せます。また、本アプリが書き込んだデータは Health Connect 内で確認・削除できます。</string>
+    <string name="health_rationale_close">閉じる</string>
+    <!-- 歩数クォータ超過の通知 -->
+    <string name="step_quota_exhausted_title">本日の歩数上限に達しました</string>
+    <string name="step_quota_exhausted_body">本日設定した歩数の上限に達したため、このシミュレーションではこれ以上歩数を書き込みません。上限は設定画面で変更できます。</string>
+    <!-- 歩数同期の従量課金ダイアログ -->
+    <string name="step_credit_dialog_title">今回のシミュレーションで歩数同期を使いますか？</string>
+    <string name="step_credit_dialog_desc">歩数同期は回数制です。シミュレーション 1 回につき 1 回分を消費します。残り回数がありません。広告を 1 本視聴すると 1 回分もらえます。定期購入なら無制限です。</string>
+    <string name="step_credit_dialog_ad_unavailable">現在利用できる広告がありません。しばらくしてからお試しください。</string>
+    <string name="step_credit_dialog_action_watch_ad">広告を見て 1 回分</string>
+    <string name="step_credit_dialog_action_skip">今回は歩数同期を使わない</string>
+    <string name="step_credit_dialog_action_subscribe">定期購入で無制限に</string>
+    <!-- 歩数同期の設定 -->
+    <string name="settings_step_sync_title">歩数同期</string>
+    <string name="settings_step_sync_enable">歩数同期を有効にする</string>
+    <string name="settings_step_sync_enable_desc">シミュレーションの移動距離を歩数に換算して Health Connect に書き込みます。</string>
+    <string name="settings_step_sync_unsupported">この端末は Health Connect に対応していません。</string>
+    <string name="settings_step_sync_update_required">Health Connect のインストールまたは更新が必要です。</string>
+    <string name="settings_step_sync_needs_permission">歩数の書き込み権限が必要です。</string>
+    <string name="settings_step_sync_connected">Health Connect に接続済みです。</string>
+    <string name="settings_step_sync_open_store">ストアを開く</string>
+    <string name="settings_step_sync_grant">許可する</string>
+    <string name="settings_step_length">歩幅（メートル）</string>
+    <string name="settings_step_quota">1 日の歩数上限</string>
+    <string name="settings_step_quota_used">本日の書き込み： %1$d / %2$d 歩</string>
+    <string name="settings_step_credits_unlimited">定期購入中 — 無制限で使えます。</string>
+    <string name="settings_step_credits_remaining">残り回数： %1$d（シミュレーション 1 回につき 1 回。開始時に広告を見ると補充できます）</string>
+    <!-- 歩数同期の設定ガイド -->
+    <string name="settings_step_sync_fit_missing">Google Fit がインストールされていません。歩数は Health Connect で止まり、他のアプリには届きません。</string>
+    <string name="settings_step_sync_setup_hint">歩数同期は複数のアプリの連携が必要で、各区間に時間がかかります。</string>
+    <string name="settings_step_sync_setup_open">設定ガイドを見る</string>
+    <string name="step_setup_title">歩数同期の設定ガイド</string>
+    <string name="step_setup_intro">歩数は目的のアプリへ直接送られるのではなく、いくつかの中継を経由します。どこか一つでも繋がっていないと歩数は届きません。各ステップの設定場所はそれぞれ異なるため、順番に進めてください。</string>
+    <string name="step_setup_chain">本アプリ → Health Connect → Google Fit → 目的のアプリ</string>
+    <string name="step_setup_1_title">1. Health Connect を用意する</string>
+    <string name="step_setup_1_body">Android 14 以降には標準搭載されており、インストールは不要です。それ以前のバージョンでは Play ストアから Health Connect を入れてください。</string>
+    <string name="step_setup_2_title">2. 本アプリに歩数の書き込みを許可する</string>
+    <string name="step_setup_2_body">許可すると、シミュレーションの移動距離を歩数に換算して Health Connect に書き込めるようになります。書き込み権限のみで、あなたの健康データを読み取ることはありません。</string>
+    <string name="step_setup_3_title">3. Google Fit をインストールする</string>
+    <string name="step_setup_3_body">Google Fit は必須の中継役です。多くのアプリは Health Connect を直接読まず Google Fit から取得するため、Fit がないと歩数は Health Connect で止まります。</string>
+    <string name="step_setup_4_title">4. Google Fit に Health Connect の読み取りを許可する</string>
+    <string name="step_setup_4_body">Google Fit を開き、ホーム画面の「Fit と『ヘルスコネクト』を同期する」を見つけて「開始」→「設定」をタップし、権限画面で「歩数」をオンにして許可してください。
+
+方向にご注意を：カードの見出しは Fit のデータを外部へ提供するように読めますが、同じ流れの中で Fit が他のアプリのデータを取り込む設定も行えます。ここで必要なのはそちらです。このステップは自動検出できないため、ご自身でご確認ください。</string>
+    <string name="step_setup_5_title">5. 目的のアプリの歩数ソースを Google Fit にする</string>
+    <string name="step_setup_5_body">使用したいアプリ側で、歩数データの取得元を Google Fit に指定してください。設定場所はアプリごとに異なり、多くは設定画面やアカウント連携画面にあります。</string>
+    <string name="step_setup_troubleshoot">歩数が表示されないとき：各区間はそれぞれのタイミングで同期し、どれも即時ではありません。順に確認してください。\n\n1. 本アプリ → Health Connect：10〜25 秒ごとにまとめて書き込まれます。上の「本日の書き込み」で確認できます。\n\n2. Health Connect → Google Fit：「Google Fit を開かないと同期されません」。Fit はバックグラウンドで取り込まないため、開かない限りここで止まります。反映させたいシミュレーションのあとは毎回開いてください。\n\n3. Google Fit → 目的のアプリ：最も遅く、数分かかることがあります。目的のアプリを開いてしばらく留まると早まります。\n\n最も多い原因は 2 の「Fit を開いていない」です。まず 1 の数値を確認し、次に Fit を開いて本日の歩数を見てください。</string>
+    <string name="step_setup_action_install_fit">Google Fit をインストール</string>
+    <string name="step_setup_action_open_fit">Google Fit を開く</string>
+    <string name="step_setup_action_open_hc_settings">Health Connect の設定を開く</string>
+    <string name="step_setup_duplicate_note">Health Connect に表示される数値について：Google Fit はデータを読み取った後、同じ歩数を Health Connect に書き戻します。そのため Health Connect の明細では各時間帯に本アプリと Fit の 2 件が並び、合計がおよそ 2 倍に見えます。これは Google Fit の動作であり、二重書き込みではありません。本アプリの「本日の書き込み」と 1 日の上限は自身が実際に書き込んだ分のみを数えるため、影響を受けません。</string>
+    <!-- 歩数換算の速度上限を超えた通知 -->
+    <string name="step_too_fast_title">速度が速すぎるため歩数に換算されません</string>
+    <string name="step_too_fast_body">現在のシミュレーション速度が 20 km/h を超えており、歩行やランニングの妥当な範囲を外れているため、この区間は歩数に換算されません。20 km/h 未満に下げると再び換算されます。</string>
+    <string name="route_speed_exceeds_step_limit">速度が %1$d km/h を超えています。この移動は歩数に換算されません</string>
+    <string name="step_setup_speed_limit_note">シミュレーション速度について：歩数に換算されるのは %1$d km/h 以下の移動のみで、それを超えると換算されません（歩行やランニングの妥当な範囲を外れるため）。プリセットの「徒歩」と「自転車」は範囲内ですが、「車」では歩数が発生しません。ジャンプモードの瞬間移動も同様に換算されません。</string>
+    <string name="settings_step_sync_open_fit_hint">シミュレーション後に Google Fit を開かないと先へ同期されません。</string>
+    <string name="settings_step_sync_open_fit">Google Fit を開く</string>
+    <string name="step_setup_recurring_note">重要：上記の設定が済んでいても、シミュレーションのたびに Google Fit を一度開かないと歩数は先へ進みません。Fit はバックグラウンドで Health Connect を読み取らないため、これは毎回必要な操作であり、一度きりの設定ではありません。</string>
+    <!-- Google Fit を開くリマインダー -->
+    <string name="step_open_fit_notice_title">Google Fit を開いてください</string>
+    <string name="step_open_fit_notice_body">歩数がまとまって Health Connect に書き込まれました。Google Fit はバックグラウンドで読み取らないため、一度開かないと先へ進みません。この通知をタップすると開きます。</string>
 </resources>

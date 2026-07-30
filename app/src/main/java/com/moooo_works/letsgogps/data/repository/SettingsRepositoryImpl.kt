@@ -9,11 +9,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.moooo_works.letsgogps.domain.health.StepAccumulator
 import com.moooo_works.letsgogps.domain.repository.SettingsRepository
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,9 +48,16 @@ class SettingsRepositoryImpl @Inject constructor(
         val HAS_SEEN_GPX_TIP = booleanPreferencesKey("has_seen_gpx_tip")
         val HAS_SEEN_JUMP_MODE_TIP = booleanPreferencesKey("has_seen_jump_mode_tip")
         val ENABLE_TIMEZONE_CHECK = booleanPreferencesKey("enable_timezone_check")
+        val STEP_SYNC_ENABLED = booleanPreferencesKey("step_sync_enabled")
+        val STEP_LENGTH_METERS = doublePreferencesKey("step_length_meters")
+        val STEP_DAILY_QUOTA = intPreferencesKey("step_daily_quota")
+        val STEP_QUOTA_USED = intPreferencesKey("step_quota_used")
+        val STEP_QUOTA_DATE = stringPreferencesKey("step_quota_date")
 
         const val DEFAULT_ALTITUDE = 15.0
         const val DEFAULT_ROUTE_SPEED = 5.0
+        const val DEFAULT_STEP_LENGTH_METERS = 0.75
+        const val DEFAULT_STEP_DAILY_QUOTA = 20_000
     }
 
     override fun observeLastCenter(): Flow<LatLng?> {
@@ -201,4 +210,56 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setEnableTimezoneCheck(enabled: Boolean) {
         dataStore.edit { it[ENABLE_TIMEZONE_CHECK] = enabled }
     }
+
+    // ── Health Connect 步數同步 ───────────────────────────────────────────
+
+    override fun observeStepSyncEnabled(): Flow<Boolean> =
+        dataStore.data.map { it[STEP_SYNC_ENABLED] ?: false }
+
+    override suspend fun setStepSyncEnabled(enabled: Boolean) {
+        dataStore.edit { it[STEP_SYNC_ENABLED] = enabled }
+    }
+
+    override fun observeStepLengthMeters(): Flow<Double> =
+        dataStore.data.map { it[STEP_LENGTH_METERS] ?: DEFAULT_STEP_LENGTH_METERS }
+
+    override suspend fun setStepLengthMeters(meters: Double) {
+        // 非正數退回預設（避免除以零）；其餘夾在合理範圍內。
+        // 沒有上限的話，輸入 100 公尺會讓步數只剩應有的 1/133。
+        val safe = if (meters > 0.0) {
+            meters.coerceIn(
+                StepAccumulator.MIN_STEP_LENGTH_METERS,
+                StepAccumulator.MAX_STEP_LENGTH_METERS,
+            )
+        } else {
+            DEFAULT_STEP_LENGTH_METERS
+        }
+        dataStore.edit { it[STEP_LENGTH_METERS] = safe }
+    }
+
+    override fun observeStepDailyQuota(): Flow<Int> =
+        dataStore.data.map { it[STEP_DAILY_QUOTA] ?: DEFAULT_STEP_DAILY_QUOTA }
+
+    override suspend fun setStepDailyQuota(quota: Int) {
+        dataStore.edit { it[STEP_DAILY_QUOTA] = quota.coerceAtLeast(0) }
+    }
+
+    override fun observeStepQuotaUsedToday(): Flow<Int> =
+        dataStore.data.map { prefs ->
+            // 桶子不是今天的就當作 0，不需要呼叫端做任何換日處理。
+            if (prefs[STEP_QUOTA_DATE] == today()) prefs[STEP_QUOTA_USED] ?: 0 else 0
+        }
+
+    override suspend fun addStepQuotaUsed(steps: Int) {
+        if (steps <= 0) return
+        dataStore.edit { prefs ->
+            val today = today()
+            val current = if (prefs[STEP_QUOTA_DATE] == today) prefs[STEP_QUOTA_USED] ?: 0 else 0
+            prefs[STEP_QUOTA_DATE] = today
+            prefs[STEP_QUOTA_USED] = current + steps
+        }
+    }
+
+    /** 以裝置本地時區判斷「今天」——使用者對配額換日的直覺是看牆上的時鐘。 */
+    private fun today(): String = LocalDate.now().toString()
 }
