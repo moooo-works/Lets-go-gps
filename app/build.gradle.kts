@@ -1,9 +1,9 @@
 import java.util.Properties
+import com.android.build.api.variant.BuildConfigField
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -22,7 +22,7 @@ val versionPatch = 1
 
 android {
     namespace = "com.moooo_works.letsgogps"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.moooo_works.letsgogps"
@@ -68,28 +68,17 @@ android {
             // com.moooo_works.letsgogps，加了 suffix 會讓 Google Services plugin
             // 以 "No matching client found" 直接 fail build。
             isDebuggable = true
-            buildConfigField("Boolean", "DEV_FORCE_PRO", "true")
-            buildConfigField("String", "ADMOB_APP_ID", "\"ca-app-pub-3940256099942544~3347511713\"")
-            buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
-            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
         }
         release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("Boolean", "DEV_FORCE_PRO", "false")
-            buildConfigField("String", "ADMOB_APP_ID", "\"ca-app-pub-7328056144057376~2219581212\"")
-            buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-7328056144057376/1824598031\"")
-            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-7328056144057376/6473078035\"")
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -117,14 +106,26 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
 
-
-    applicationVariants.all {
-        val variant = this
-        outputs.all {
-            this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            outputFileName = "letsgo-${variant.versionName}-${variant.buildType.name}.apk"
+androidComponents {
+    onVariants { variant ->
+        val fields = if (variant.buildType == "debug") {
+            mapOf(
+                "DEV_FORCE_PRO" to BuildConfigField("Boolean", "true", "Debug Pro override"),
+                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544~3347511713\"", "Google sample App ID"),
+                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/6300978111\"", "Google sample Banner unit"),
+                "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/5224354917\"", "Google sample Rewarded unit")
+            )
+        } else {
+            mapOf(
+                "DEV_FORCE_PRO" to BuildConfigField("Boolean", "false", "Release Pro behavior"),
+                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376~2219581212\"", "Production App ID"),
+                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/1824598031\"", "Production Banner unit"),
+                "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/6473078035\"", "Production Rewarded unit")
+            )
         }
+        variant.buildConfigFields?.putAll(fields)
     }
 }
 
@@ -173,7 +174,6 @@ dependencies {
 
     // Maps
     implementation(libs.google.maps.compose)
-    implementation(libs.play.services.maps)
 
     // AdMob
     implementation(libs.admob.next.gen)
