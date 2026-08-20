@@ -69,6 +69,7 @@ android {
             // 以 "No matching client found" 直接 fail build。
             isDebuggable = true
             buildConfigField("Boolean", "DEV_FORCE_PRO", "true")
+            buildConfigField("String", "ADMOB_APP_ID", "\"ca-app-pub-3940256099942544~3347511713\"")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
             buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
         }
@@ -78,6 +79,7 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             buildConfigField("Boolean", "DEV_FORCE_PRO", "false")
+            buildConfigField("String", "ADMOB_APP_ID", "\"ca-app-pub-7328056144057376~2219581212\"")
             buildConfigField("String", "BANNER_AD_UNIT_ID", "\"ca-app-pub-7328056144057376/1824598031\"")
             buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-7328056144057376/6473078035\"")
         }
@@ -174,7 +176,7 @@ dependencies {
     implementation(libs.play.services.maps)
 
     // AdMob
-    implementation(libs.admob)
+    implementation(libs.admob.next.gen)
 
     // Billing
     implementation(libs.billing)

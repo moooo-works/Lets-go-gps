@@ -36,8 +36,8 @@
 -dontwarn com.android.billingclient.**
 
 # ===== AdMob =====
--keep class com.google.android.gms.ads.** { *; }
--dontwarn com.google.android.gms.ads.**
+-keep class com.google.android.libraries.ads.mobile.sdk.** { *; }
+-dontwarn com.google.android.libraries.ads.mobile.sdk.**
 
 # ===== Coroutines =====
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
