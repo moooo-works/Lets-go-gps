@@ -16,12 +16,9 @@
     <uses-permission android:name="android.permission.health.WRITE_STEPS" />
 
     <!-- Android 13 以下的 Health Connect 是獨立 APK，需宣告 package visibility
-         才能查得到 SDK 狀態；Android 14+ 已內建於系統，此宣告無害。
-         Google Fit 則是步數同步鏈路的必要中繼（Health Connect → Fit → 目標 app），
-         沒有這個宣告在 Android 11+ 會偵測不到它是否已安裝。 -->
+         才能查得到 SDK 狀態；Android 14+ 已內建於系統，此宣告無害。 -->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
-        <package android:name="com.google.android.apps.fitness" />
     </queries>
 
     <application

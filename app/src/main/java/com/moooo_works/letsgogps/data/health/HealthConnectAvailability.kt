@@ -83,72 +83,27 @@ class HealthConnectAvailability @Inject constructor(
     fun requestPermissionsContract() =
         PermissionController.createRequestPermissionResultContract()
 
-    /**
-     * Google Fit 是否已安裝。
-     *
-     * Fit 是步數同步鏈路的必要中繼：本 app 寫入 Health Connect，Fit 讀取後
-     * 存進 Google 帳戶，目標 app 再從 Fit 取用。少了 Fit，鏈路只到 Health Connect
-     * 就斷了。
-     */
-    fun isGoogleFitInstalled(): Boolean = googleFitLaunchIntent() != null
-
-    /**
-     * Google Fit 的啟動 Intent；未安裝或被停用時回 null。
-     *
-     * 用 getLaunchIntentForPackage 而非 getPackageInfo：前者在 package 存在但被
-     * 停用時就回 null，那種狀態下使用者一樣打不開 Fit，視為不可用才合理。
-     * 需要 manifest 的 <queries> 宣告，否則 Android 11+ 一律回 null。
-     */
-    fun googleFitLaunchIntent(): Intent? =
-        context.packageManager.getLaunchIntentForPackage(GOOGLE_FIT_PACKAGE)
-
     /** 導向 Health Connect 的 Play 商店頁。 */
     fun openPlayStoreForProvider() = openPlayStore(HEALTH_CONNECT_PACKAGE)
-
-    /** 導向 Google Fit 的 Play 商店頁。 */
-    fun openPlayStoreForGoogleFit() = openPlayStore(GOOGLE_FIT_PACKAGE)
-
-    /**
-     * 開啟 Google Fit，讓使用者在其中完成「與健康資料同步平台保持同步」。
-     *
-     * 那個授權流程只能在 Fit 內部發起，沒有外部 intent 可以直接跳進去，
-     * 所以只能把使用者送到 Fit 首頁並在說明中指路。
-     *
-     * @return 是否成功開啟
-     */
-    fun openGoogleFit(): Boolean {
-        val launch = googleFitLaunchIntent() ?: return false
-        return try {
-            context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            true
-        } catch (e: Exception) {
-            Log.w(TAG, "無法開啟 Google Fit", e)
-            false
-        }
-    }
 
     /**
      * 開啟 Health Connect 設定。
      *
-     * 依序嘗試多個 action——Health Connect 在 Android 13 以下是獨立 APK、
-     * 14+ 內建於系統，入口不同；且 controller 沒有 launcher activity。
+     * Jetpack 提供的 action 會依 Android 版本選擇正確入口：Android 13 以下
+     * 使用獨立 APK，Android 14+ 使用系統內建的 Health Connect 首頁。
      *
      * @return 是否成功開啟
      */
     fun openHealthConnectSettings(): Boolean {
-        val candidates = listOf(
-            Intent("android.health.connect.action.HEALTH_CONNECT_SETTINGS"),
-            Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS"),
-        )
-        for (intent in candidates) {
-            try {
-                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                return true
-            } catch (e: Exception) {
-                Log.w(TAG, "無法以 ${intent.action} 開啟 Health Connect", e)
-            }
+        val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return try {
+            context.startActivity(intent)
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "無法開啟 Health Connect 設定", e)
+            false
         }
-        return false
     }
 
     /** 導向指定 package 的 Play 商店頁。失敗則靜默——這只是引導，不是關鍵路徑。 */
@@ -172,6 +127,5 @@ class HealthConnectAvailability @Inject constructor(
     private companion object {
         const val TAG = "HealthConnectAvail"
         const val HEALTH_CONNECT_PACKAGE = "com.google.android.apps.healthdata"
-        const val GOOGLE_FIT_PACKAGE = "com.google.android.apps.fitness"
     }
 }

@@ -416,38 +416,27 @@
     <string name="settings_step_credits_unlimited">訂閱中，無限使用。</string>
     <string name="settings_step_credits_remaining">剩餘次數：%1$d（每次模擬消耗一次，可於啟動時看廣告補充）</string>
     <!-- 步數同步設定說明 -->
-    <string name="settings_step_sync_fit_missing">尚未安裝 Google Fit。步數只會停在 Health Connect，無法傳到其他應用程式。</string>
-    <string name="settings_step_sync_setup_hint">步數同步需要多個應用程式配合，各段同步都需要時間。</string>
+    <string name="settings_step_sync_setup_hint">請確認目標應用程式已連結 Health Connect，並取得步數與背景讀取權限。</string>
     <string name="settings_step_sync_setup_open">查看設定說明</string>
     <string name="step_setup_title">步數同步設定說明</string>
-    <string name="step_setup_intro">步數不會直接送到目標應用程式，而是經過幾個中繼站。任何一段沒接上，步數就傳不過去。以下每一步的設定位置都不同，請依序完成。</string>
-    <string name="step_setup_chain">本應用程式 → Health Connect → Google Fit → 目標應用程式</string>
+    <string name="step_setup_intro">本應用程式會把模擬步數寫入 Health Connect，目標應用程式再直接從 Health Connect 讀取。Google Health 等活動追蹤應用程式也可連結 Health Connect，提供手機或穿戴裝置的日常步數。</string>
+    <string name="step_setup_chain">本應用程式 → Health Connect → 目標應用程式</string>
     <string name="step_setup_1_title">1. 準備 Health Connect</string>
     <string name="step_setup_1_body">Android 14 以上內建，無需安裝。較舊的版本需要從 Play 商店安裝「健康資料同步」（Health Connect）。</string>
     <string name="step_setup_2_title">2. 允許本應用程式寫入步數</string>
     <string name="step_setup_2_body">授權後，本應用程式才能把模擬移動的距離換算成步數寫入 Health Connect。只需要寫入權限，不會讀取你的任何健康資料。</string>
-    <string name="step_setup_3_title">3. 安裝 Google Fit</string>
-    <string name="step_setup_3_body">Google Fit 是必要的中繼站。多數應用程式讀的是 Google Fit，而不是直接讀 Health Connect，少了它步數就停在 Health Connect。</string>
-    <string name="step_setup_4_title">4. 讓 Google Fit 讀取 Health Connect</string>
-    <string name="step_setup_4_body">打開 Google Fit，在首頁找到「讓 Fit 與『健康資料同步』平台保持同步」，點「立即開始」→「設定」，然後在權限頁把「步數」打開並允許。
-
-注意方向：那張卡片的標題看起來像是把 Fit 的資料提供出去，但同一個流程也包含讓 Fit 讀取其他應用程式的資料，這正是這裡需要的。此步驟無法自動偵測，請自行確認已完成。</string>
-    <string name="step_setup_5_title">5. 把目標應用程式的步數來源設為 Google Fit</string>
-    <string name="step_setup_5_body">在你要使用的應用程式中，將計步資料來源指定為 Google Fit。設定位置依各應用程式而異，通常在其設定或帳號連結頁面。</string>
-    <string name="step_setup_troubleshoot">步數沒有出現時：每一段都有自己的同步時機，都不是即時的，請依序確認卡在哪。\n\n1. 本應用程式 → Health Connect：每隔約 10 至 25 秒分批寫入，用上方的「今日已寫入」確認。\n\n2. Health Connect → Google Fit：「必須打開 Google Fit」 才會同步。Google Fit 不會在背景自動讀取，沒開就一直停在這裡。每次模擬完想讓步數傳出去，都要開一次。\n\n3. Google Fit → 目標應用程式：這一段最慢，可能需要數分鐘。把目標應用程式打開並停留一下通常能加快。\n\n最常見的情況就是第 2 段沒開 Fit。先確認第 1 段有數字，再打開 Fit 看今日步數有沒有增加。</string>
-    <string name="step_setup_action_install_fit">安裝 Google Fit</string>
-    <string name="step_setup_action_open_fit">開啟 Google Fit</string>
+    <string name="step_setup_3_title">3. 讓目標應用程式讀取 Health Connect</string>
+    <string name="step_setup_3_body">在目標應用程式中選擇 Health Connect 作為步數來源。接著開啟 Health Connect →「應用程式權限」→目標應用程式，允許讀取「步數」；若有「新增存取權」，也要允許「在背景存取資料」。</string>
+    <string name="step_setup_pikmin_note">Pikmin Bloom 範例（僅 Android 14 以上）：設定 → 隱私權&amp;步數 → 步數 → Health Connect → 開啟設定。在 Health Connect 中對 Pikmin Bloom 選擇「全部允許」，再到「新增存取權」允許「在背景存取資料」。Android 13 以下只能使用手機追蹤，無法讀取本應用程式寫入的模擬步數。</string>
+    <string name="step_setup_4_title">4. 連結 Google Health 與 Health Connect</string>
+    <string name="step_setup_4_body">從 Health Connect：開啟「應用程式權限」→「(Google) Health」→「權限」→「健身與健康」，在讀取權限中允許「步數」。\n\n從 Google Health：右下角「健康」→「焦點」→「同步所有健康應用程式」→「設定」→再次「設定」→同意與 Health Connect 同步→選擇「健身與健康資料」→「繼續」。接著允許「步數」、「存取過去的健身與健康資料」及「在背景存取健身與健康資料」，最後點「完成」。</string>
+    <string name="step_setup_5_title">5. 確認同步結果</string>
+    <string name="step_setup_5_body">開始模擬後，先確認設定頁的「今日已寫入」持續增加，再開啟目標應用程式查看步數。Health Connect 同步可能需要幾分鐘；若仍未更新，重新啟動目標應用程式並再次檢查步數與背景讀取權限。</string>
+    <string name="step_setup_troubleshoot">步數沒有出現時，請依序確認：\n\n1. 本應用程式 → Health Connect：每隔約 10 至 25 秒分批寫入，可用「今日已寫入」確認。\n\n2. Health Connect → 目標應用程式：確認目標應用程式已取得步數讀取與背景存取權，並已選擇 Health Connect 作為步數來源。\n\n3. 日常活動來源：若目標應用程式要求活動追蹤來源，確認 Google Health 已取得步數、歷史資料與背景存取權。\n\n同步不是即時的；請等待幾分鐘、重新啟動目標應用程式，並關閉可能限制背景同步的省電模式。</string>
     <string name="step_setup_action_open_hc_settings">開啟 Health Connect 設定</string>
-    <string name="step_setup_duplicate_note">關於 Health Connect 裡的數字：Google Fit 讀取資料後會把同一批步數回寫 Health Connect，因此在 Health Connect 的明細中，每個時段會同時看到本應用程式與 Fit 兩筆相同的紀錄，總數看起來約為兩倍。這是 Google Fit 的行為，不是重複寫入；本應用程式的「今日已寫入」與每日上限只計算自己實際寫入的量，不受影響。</string>
     <!-- 超過計步速度上限的提醒 -->
     <string name="step_too_fast_title">速度過快，本段不計步數</string>
     <string name="step_too_fast_body">目前模擬速度超過 20 km/h，已超出步行與跑步的合理範圍，這段移動不會換算成步數。把速度降到 20 km/h 以下即可恢復計步。</string>
     <string name="route_speed_exceeds_step_limit">速度超過 %1$d km/h，這段移動不會計為步數</string>
     <string name="step_setup_speed_limit_note">關於模擬速度：只有 %1$d km/h 以下的移動會換算成步數，超過就不計（那已超出步行與跑步的合理範圍）。預設的「步行」與「自行車」在範圍內，「開車」則不會產生步數。跳點模式的瞬移同樣不計步。</string>
-    <string name="settings_step_sync_open_fit_hint">模擬完成後需打開 Google Fit 才會同步出去。</string>
-    <string name="settings_step_sync_open_fit">開啟 Google Fit</string>
-    <string name="step_setup_recurring_note">重要：完成上述設定後，每次模擬結束仍需打開一次 Google Fit，步數才會往後傳。Google Fit 不會在背景自動讀取 Health Connect，這是每次都要做的動作，不是一次性設定。</string>
-    <!-- 提醒打開 Google Fit -->
-    <string name="step_open_fit_notice_title">記得打開 Google Fit</string>
-    <string name="step_open_fit_notice_body">已累積一段步數寫入 Health Connect。Google Fit 不會在背景自動讀取，需打開一次才會往後傳。點這則通知即可開啟。</string>
 </resources>
