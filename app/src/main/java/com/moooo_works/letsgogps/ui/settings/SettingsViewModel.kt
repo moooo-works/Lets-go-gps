@@ -220,15 +220,6 @@ class SettingsViewModel @Inject constructor(
 
     fun openHealthConnectPlayStore() = healthConnectAvailability.openPlayStoreForProvider()
 
-    /**
-     * Google Fit 是否已安裝。每次呼叫都重查——使用者可能剛從 Play 商店裝完回來。
-     */
-    fun isGoogleFitInstalled(): Boolean = healthConnectAvailability.isGoogleFitInstalled()
-
-    fun openGoogleFitPlayStore() = healthConnectAvailability.openPlayStoreForGoogleFit()
-
-    fun openGoogleFit() = healthConnectAvailability.openGoogleFit()
-
     fun openHealthConnectSettings() = healthConnectAvailability.openHealthConnectSettings()
 
     fun setStepSyncEnabled(enabled: Boolean) {

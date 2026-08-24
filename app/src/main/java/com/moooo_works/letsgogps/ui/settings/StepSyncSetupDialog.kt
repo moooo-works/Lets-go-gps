@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,24 +32,21 @@ import com.moooo_works.letsgogps.domain.health.StepAccumulator
 /**
  * 步數同步的設定說明。
  *
- * 這條鏈路有四段，任一段沒接上步數就傳不到目標 app，而且每段的設定位置都不同
- * （本 app／系統 Health Connect／Google Fit 內部／目標 app 內部），
- * 光靠設定頁的一行狀態列講不清楚，所以獨立成一頁逐步說明。
+ * 本 app 只負責把步數寫進 Health Connect；目標 app 必須直接取得讀取與背景權限。
+ * Google Health 等活動追蹤 app 則是同一生態系中的額外資料來源，不再透過
+ * 舊版 Fit app 當中繼。
  *
- * 能偵測的步驟顯示即時狀態並提供跳轉按鈕；無法偵測的（Fit 內部授權、
- * 目標 app 的步數來源）只能給文字指路。
+ * 能偵測的步驟顯示即時狀態並提供跳轉按鈕；第三方 app 的授權無法安全查詢，
+ * 因此只提供官方流程，不顯示假完成狀態。
  */
 @Composable
 fun StepSyncSetupDialog(
     onDismiss: () -> Unit,
     healthConnectReady: Boolean,
     writePermissionGranted: Boolean,
-    googleFitInstalled: Boolean,
     onOpenHealthConnectStore: () -> Unit,
     onGrantPermission: () -> Unit,
     onOpenHealthConnectSettings: () -> Unit,
-    onInstallGoogleFit: () -> Unit,
-    onOpenGoogleFit: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -62,7 +60,9 @@ fun StepSyncSetupDialog(
         },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier
+                    .testTag("step-sync-setup-content")
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
@@ -100,25 +100,29 @@ fun StepSyncSetupDialog(
 
                 SetupStep(
                     index = 3,
-                    done = googleFitInstalled,
+                    done = false,
+                    showUncheckedAsNumber = true,
                     title = stringResource(R.string.step_setup_3_title),
                     body = stringResource(R.string.step_setup_3_body),
-                    actionLabel = if (googleFitInstalled) null
-                    else stringResource(R.string.step_setup_action_install_fit),
-                    onAction = onInstallGoogleFit,
+                    actionLabel = null,
+                    onAction = {},
                 )
 
-                // 第 4 步無法偵測：Fit 的「與健康資料同步平台保持同步」授權狀態
-                // 沒有對外 API 可查，只能給指路 + 跳轉。
+                Text(
+                    stringResource(R.string.step_setup_pikmin_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
                 SetupStep(
                     index = 4,
                     done = false,
                     showUncheckedAsNumber = true,
                     title = stringResource(R.string.step_setup_4_title),
                     body = stringResource(R.string.step_setup_4_body),
-                    actionLabel = if (googleFitInstalled)
-                        stringResource(R.string.step_setup_action_open_fit) else null,
-                    onAction = onOpenGoogleFit,
+                    actionLabel = null,
+                    onAction = {},
                 )
 
                 SetupStep(
@@ -129,16 +133,6 @@ fun StepSyncSetupDialog(
                     body = stringResource(R.string.step_setup_5_body),
                     actionLabel = null,
                     onAction = {},
-                )
-
-                // 實測確認：Google Fit 不會在背景讀取 Health Connect，沒開就
-                // 完全不同步。這是每次模擬後都要做的動作，必須跟一次性設定
-                // 明確區分，否則使用者會以為設定完就一勞永逸。
-                Text(
-                    stringResource(R.string.step_setup_recurring_note),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.error
                 )
 
                 // 速度上限：自行車（15）在範圍內、開車（40）不在，預設模式之間
@@ -154,15 +148,6 @@ fun StepSyncSetupDialog(
 
                 Text(
                     stringResource(R.string.step_setup_troubleshoot),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                // Fit 讀取後會把同一批步數回寫 Health Connect，導致 HC 的明細
-                // 每個時段出現兩筆、總數看似兩倍。實機驗證確認過，先講清楚
-                // 免得使用者以為是重複寫入的 bug。
-                Text(
-                    stringResource(R.string.step_setup_duplicate_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

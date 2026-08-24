@@ -413,38 +413,27 @@
     <string name="settings_step_credits_unlimited">Subscribed — unlimited use.</string>
     <string name="settings_step_credits_remaining">Credits left: %1$d (one per simulation; earn more by watching an ad at start)</string>
     <!-- Step sync setup guide -->
-    <string name="settings_step_sync_fit_missing">Google Fit is not installed. Steps will stop at Health Connect and never reach other apps.</string>
-    <string name="settings_step_sync_setup_hint">Step sync needs several apps working together, and each link takes time.</string>
+    <string name="settings_step_sync_setup_hint">Make sure the target app is linked to Health Connect with step-reading and background access.</string>
     <string name="settings_step_sync_setup_open">View setup guide</string>
     <string name="step_setup_title">Step sync setup guide</string>
-    <string name="step_setup_intro">Steps do not go straight to the target app — they pass through a few relays. If any link is missing, the steps never arrive. Each step below is configured in a different place, so please work through them in order.</string>
-    <string name="step_setup_chain">This app → Health Connect → Google Fit → target app</string>
+    <string name="step_setup_intro">This app writes simulated steps to Health Connect, and the target app reads them directly from Health Connect. Activity trackers such as Google Health can also connect to Health Connect to provide everyday phone or wearable steps.</string>
+    <string name="step_setup_chain">This app → Health Connect → target app</string>
     <string name="step_setup_1_title">1. Get Health Connect ready</string>
     <string name="step_setup_1_body">Built into Android 14 and later — nothing to install. Older versions need Health Connect from the Play Store.</string>
     <string name="step_setup_2_title">2. Allow this app to write steps</string>
     <string name="step_setup_2_body">This grant lets the app convert simulated travel distance into steps and write them to Health Connect. Write access only — it never reads any of your health data.</string>
-    <string name="step_setup_3_title">3. Install Google Fit</string>
-    <string name="step_setup_3_body">Google Fit is a required relay. Most apps read from Google Fit rather than from Health Connect directly, so without it the steps stop at Health Connect.</string>
-    <string name="step_setup_4_title">4. Let Google Fit read Health Connect</string>
-    <string name="step_setup_4_body">Open Google Fit, find \"Keep Fit in sync with Health Connect\" on the home screen, tap Get started → Set up, then turn on Steps on the permission screen and allow it.
-
-Watch the direction: the card title reads as if Fit is only sharing its data out, but the same flow also lets Fit pull in data from other apps — which is exactly what is needed here. This step cannot be detected automatically, so please confirm it yourself.</string>
-    <string name="step_setup_5_title">5. Point the target app at Google Fit</string>
-    <string name="step_setup_5_body">In the app you want to use, set its step data source to Google Fit. The exact location varies by app, usually under its settings or account-linking screen.</string>
-    <string name="step_setup_troubleshoot">If steps do not show up: each link syncs on its own schedule, none instantly. Work through them in order.\n\n1. This app → Health Connect: written in batches every 10–25 seconds; check the \"written today\" figure above.\n\n2. Health Connect → Google Fit: you MUST open Google Fit for this to sync. Fit does not pull data in the background — without opening it, steps stay here. Open it once after every simulation you want counted.\n\n3. Google Fit → target app: the slowest link, sometimes several minutes. Opening the target app and staying in it usually helps.\n\nBy far the most common cause is step 2: Fit was never opened. Confirm step 1 has a number, then open Fit and check today\'s count.</string>
-    <string name="step_setup_action_install_fit">Install Google Fit</string>
-    <string name="step_setup_action_open_fit">Open Google Fit</string>
+    <string name="step_setup_3_title">3. Let the target app read Health Connect</string>
+    <string name="step_setup_3_body">Choose Health Connect as the step source in the target app. Then open Health Connect → App permissions → the target app and allow it to read Steps. If Add access is available, also allow background data access.</string>
+    <string name="step_setup_pikmin_note">Pikmin Bloom example (Android 14+ only): Settings → Privacy &amp; Steps → Steps → Health Connect → Open settings. In Health Connect, choose Allow all for Pikmin Bloom, then use Add access to allow background data access. On Android 13 or earlier, phone tracking is the only option and cannot read simulated steps written by this app.</string>
+    <string name="step_setup_4_title">4. Link Google Health with Health Connect</string>
+    <string name="step_setup_4_body">From Health Connect: open App permissions → (Google) Health → Permissions → Fitness &amp; wellness, then allow Steps under Read permissions.\n\nFrom Google Health: tap Health at the bottom right → Focus → Sync all health apps → Set up → Set up again → agree to sync with Health Connect → select Fitness &amp; wellness data → Continue. Allow Steps, past fitness and wellness data, and background fitness and wellness data, then tap Done.</string>
+    <string name="step_setup_5_title">5. Verify the result</string>
+    <string name="step_setup_5_body">Start a simulation and first confirm that Written today keeps increasing in this app, then open the target app and check its step count. Health Connect sync can take a few minutes. If it is still unchanged, restart the target app and check its step-reading and background permissions again.</string>
+    <string name="step_setup_troubleshoot">If steps do not appear, check in order:\n\n1. This app → Health Connect: data is written in batches every 10–25 seconds; use Written today to confirm.\n\n2. Health Connect → target app: confirm the target app can read Steps in the background and has Health Connect selected as its step source.\n\n3. Everyday activity source: if the target app requires an activity tracker, confirm Google Health has Steps, history, and background access.\n\nSync is not instant. Wait a few minutes, restart the target app, and turn off battery saver if it restricts background sync.</string>
     <string name="step_setup_action_open_hc_settings">Open Health Connect settings</string>
-    <string name="step_setup_duplicate_note">About the number shown in Health Connect: after Google Fit reads the data it writes the same steps back into Health Connect, so each time slot appears twice in the Health Connect list — once from this app and once from Fit — making the total look roughly doubled. That is Google Fit\'s behaviour, not duplicate writing. This app\'s "written today" figure and daily limit count only what it actually wrote, so they are unaffected.</string>
     <!-- Too-fast-for-steps notice -->
     <string name="step_too_fast_title">Too fast — steps not counted</string>
     <string name="step_too_fast_body">The simulated speed is above 20 km/h, beyond any plausible walking or running pace, so this stretch is not converted into steps. Drop below 20 km/h to resume counting.</string>
     <string name="route_speed_exceeds_step_limit">Above %1$d km/h — this movement will not count as steps</string>
     <string name="step_setup_speed_limit_note">About simulated speed: only movement at or below %1$d km/h is converted into steps; anything faster is skipped because it is beyond any plausible walking or running pace. The Walk and Bike presets stay within range; Drive produces no steps. Jump-mode teleports are never counted either.</string>
-    <string name="settings_step_sync_open_fit_hint">Steps only sync onward once you open Google Fit after a simulation.</string>
-    <string name="settings_step_sync_open_fit">Open Google Fit</string>
-    <string name="step_setup_recurring_note">Important: even after the setup above, you must open Google Fit once after each simulation for the steps to move onward. Fit does not read Health Connect in the background — this is a recurring action, not a one-time setup.</string>
-    <!-- Reminder to open Google Fit -->
-    <string name="step_open_fit_notice_title">Remember to open Google Fit</string>
-    <string name="step_open_fit_notice_body">A batch of steps has been written to Health Connect. Google Fit does not read it in the background — open it once for the steps to move onward. Tap this notification to open it.</string>
 </resources>

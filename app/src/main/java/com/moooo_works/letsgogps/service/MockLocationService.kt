@@ -37,7 +37,6 @@ import com.google.android.gms.maps.model.LatLng
 import java.time.Instant
 import javax.inject.Inject
 import com.moooo_works.letsgogps.data.engine.MockEngineError
-import com.moooo_works.letsgogps.data.health.HealthConnectAvailability
 
 @AndroidEntryPoint
 class MockLocationService : Service() {
@@ -59,9 +58,6 @@ class MockLocationService : Service() {
 
     @Inject
     lateinit var stepSyncEngine: StepSyncEngine
-
-    @Inject
-    lateinit var healthConnectAvailability: HealthConnectAvailability
 
     /** 累積模擬移動距離，換算成可寫入的步數批次。只由 serviceScope 存取。 */
     @VisibleForTesting
@@ -114,9 +110,6 @@ class MockLocationService : Service() {
 
     /** 過速提醒只發一次，成功寫入後重置。 */
     private var tooFastNotified = false
-
-    /** 距上次提醒開 Fit 之後已寫入的步數。 */
-    private var stepsSinceFitReminder = 0L
 
     /**
      * 本次 session 是否獲准寫入步數，由啟動 intent 的 extra 決定。
@@ -371,13 +364,6 @@ class MockLocationService : Service() {
             lastStepSyncElapsedMs = nowElapsed
             tooFastNotified = false
 
-            // Google Fit 不會在背景讀取 Health Connect，使用者必須手動開一次。
-            // 累積到一定量就提醒，否則跑完一整條路線可能都不知道要開。
-            stepsSinceFitReminder += written
-            if (stepsSinceFitReminder >= FIT_REMINDER_STEP_THRESHOLD) {
-                stepsSinceFitReminder = 0L
-                notifyOpenGoogleFit()
-            }
         }
     }
 
@@ -425,38 +411,6 @@ class MockLocationService : Service() {
         }
     }
 
-    /**
-     * 提醒使用者打開 Google Fit，點擊通知直接跳過去。
-     *
-     * Fit 不會在背景讀取 Health Connect——沒開就一直停在 Health Connect，
-     * 傳不到目標 app。這是每次都要做的動作，所以累積到門檻就主動提醒。
-     * Fit 未安裝時不發（PendingIntent 會沒有去處）。
-     */
-    private fun notifyOpenGoogleFit() {
-        val launch = healthConnectAvailability.googleFitLaunchIntent() ?: return
-        try {
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val pending = PendingIntent.getActivity(
-                this,
-                REQUEST_OPEN_FIT,
-                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            val body = getString(R.string.step_open_fit_notice_body)
-            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(getString(R.string.step_open_fit_notice_title))
-                .setContentText(body)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setAutoCancel(true)
-                .setContentIntent(pending)
-                .build()
-            nm.notify(NOTIFICATION_ID_OPEN_FIT, notification)
-        } catch (e: Exception) {
-            Log.w(TAG, "開啟 Fit 提醒發送失敗", e)
-        }
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
 
@@ -468,7 +422,6 @@ class MockLocationService : Service() {
             sessionStepSyncAllowed = intent.getBooleanExtra(EXTRA_STEP_SYNC_ALLOWED, false)
             stepsFlushed = false
             tooFastNotified = false
-            stepsSinceFitReminder = 0L
             lastStepSyncElapsedMs = SystemClock.elapsedRealtime()
             stepAccumulator.reset()
             try {
@@ -862,18 +815,6 @@ class MockLocationService : Service() {
         const val NOTIFICATION_ID = 1
         const val NOTIFICATION_ID_QUOTA_EXHAUSTED = 2
         const val NOTIFICATION_ID_STEP_TOO_FAST = 3
-        const val NOTIFICATION_ID_OPEN_FIT = 4
-
-        /** PendingIntent request code；0–3 已被通知的操作按鈕佔用。 */
-        private const val REQUEST_OPEN_FIT = 4
-
-        /**
-         * 累積寫入多少步就提醒使用者開一次 Google Fit。
-         *
-         * ponytail: 先寫死。競品把這個做成可設定項，但多數人不會去調，
-         * 有需求再開放。
-         */
-        private const val FIT_REMINDER_STEP_THRESHOLD = 1000L
         const val ACTION_START_SINGLE = "ACTION_START_SINGLE"
         const val ACTION_START_ROUTE = "ACTION_START_ROUTE"
         const val ACTION_START_EXPLORATION = "ACTION_START_EXPLORATION"

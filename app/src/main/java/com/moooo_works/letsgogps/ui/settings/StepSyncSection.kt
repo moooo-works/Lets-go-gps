@@ -66,7 +66,6 @@ fun StepSyncSection(viewModel: SettingsViewModel) {
     }
 
     val status = remember(statusRefreshToken) { viewModel.healthConnectStatus() }
-    val fitInstalled = remember(statusRefreshToken) { viewModel.isGoogleFitInstalled() }
 
     var showSetupGuide by remember { mutableStateOf(false) }
 
@@ -79,14 +78,11 @@ fun StepSyncSection(viewModel: SettingsViewModel) {
             onDismiss = { showSetupGuide = false },
             healthConnectReady = status == HealthConnectAvailability.Status.Available,
             writePermissionGranted = hasPermission,
-            googleFitInstalled = fitInstalled,
             onOpenHealthConnectStore = { viewModel.openHealthConnectPlayStore() },
             onGrantPermission = {
                 permissionLauncher.launch(viewModel.healthConnectWritePermissions)
             },
             onOpenHealthConnectSettings = { viewModel.openHealthConnectSettings() },
-            onInstallGoogleFit = { viewModel.openGoogleFitPlayStore() },
-            onOpenGoogleFit = { viewModel.openGoogleFit() },
         )
     }
 
@@ -136,17 +132,7 @@ fun StepSyncSection(viewModel: SettingsViewModel) {
             val controlsUsable =
                 status == HealthConnectAvailability.Status.Available && hasPermission
 
-            // Google Fit 是鏈路的必要中繼——沒有它，步數只會停在 Health Connect
-            // 傳不到目標 app。缺了就明講並提供安裝入口。
-            if (!fitInstalled) {
-                StatusLine(
-                    text = stringResource(R.string.settings_step_sync_fit_missing),
-                    actionLabel = stringResource(R.string.step_setup_action_install_fit),
-                    onAction = { viewModel.openGoogleFitPlayStore() }
-                )
-            }
-
-            // 設定說明入口。四段鏈路的設定分散在四個不同 app，狀態列講不完。
+            // 第三方 app 的讀取與背景權限無法由本 app 查詢，統一在說明中指引。
             StatusLine(
                 text = stringResource(R.string.settings_step_sync_setup_hint),
                 actionLabel = stringResource(R.string.settings_step_sync_setup_open),
@@ -189,17 +175,6 @@ fun StepSyncSection(viewModel: SettingsViewModel) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                // Google Fit 不會在背景讀取 Health Connect——實測確認沒開 Fit
-                // 步數就一直停在 Health Connect。這是每次模擬後都要做的動作，
-                // 所以放一個捷徑在這裡，不用每次鑽進設定說明找。
-                if (fitInstalled) {
-                    StatusLine(
-                        text = stringResource(R.string.settings_step_sync_open_fit_hint),
-                        actionLabel = stringResource(R.string.settings_step_sync_open_fit),
-                        onAction = { viewModel.openGoogleFit() }
-                    )
-                }
             }
         }
     }
