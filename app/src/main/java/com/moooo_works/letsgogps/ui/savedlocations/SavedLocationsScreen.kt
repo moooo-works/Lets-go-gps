@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -73,10 +74,8 @@ import com.moooo_works.letsgogps.data.backup.ImportPreview
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.ui.common.ImportPreviewDialog
 import com.moooo_works.letsgogps.ui.pro.ProUpgradeDialog
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorder
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -181,19 +180,12 @@ fun SavedLocationsScreen(
         tempLocations = locations
     }
 
-    val reorderState = rememberReorderableLazyListState(
-        onMove = { from, to ->
-            tempLocations = tempLocations.toMutableList().apply {
-                add(to.index, removeAt(from.index))
-            }
-        },
-        canDragOver = { draggedOver, dragging -> canReorder },
-        onDragEnd = { _, _ ->
-            if (canReorder) {
-                viewModel.updateSortOrder(tempLocations)
-            }
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        tempLocations = tempLocations.toMutableList().apply {
+            add(to.index, removeAt(from.index))
         }
-    )
+    }
 
     Scaffold(
         topBar = {
@@ -415,10 +407,22 @@ fun SavedLocationsScreen(
                     }
                 }
             } else {
-                LazyColumn(state = reorderState.listState, modifier = Modifier.fillMaxSize().reorderable(reorderState)) {
+                LazyColumn(state = lazyListState, modifier = Modifier.fillMaxSize()) {
                     items(tempLocations, key = { it.id }) { location ->
-                        ReorderableItem(reorderState, key = location.id) { isDragging ->
+                        ReorderableItem(
+                            state = reorderState,
+                            key = location.id,
+                            enabled = canReorder && !batchSelection.active
+                        ) { isDragging ->
                             val elevation = if (isDragging) 8.dp else 0.dp
+                            val reorderModifier = Modifier.draggableHandle(
+                                enabled = canReorder && !batchSelection.active,
+                                onDragStopped = {
+                                    if (canReorder && !batchSelection.active) {
+                                        viewModel.updateSortOrder(tempLocations)
+                                    }
+                                }
+                            )
                             androidx.compose.material3.Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 tonalElevation = elevation,
@@ -429,7 +433,7 @@ fun SavedLocationsScreen(
                                     SavedLocationItem(
                                         location = location,
                                         canReorder = canReorder && !batchSelection.active,
-                                        reorderModifier = if (!batchSelection.active) Modifier.detectReorder(reorderState) else Modifier,
+                                        reorderModifier = reorderModifier,
                                         onClick = {
                                             if (batchSelection.active) {
                                                 viewModel.toggleBatchSelection(location.id)
