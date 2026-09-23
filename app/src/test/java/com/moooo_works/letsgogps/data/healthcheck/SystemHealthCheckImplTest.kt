@@ -14,6 +14,7 @@ import com.moooo_works.letsgogps.domain.healthcheck.ItemStatus
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -131,5 +132,24 @@ class SystemHealthCheckImplTest {
 
         // Fail-open: don't block users on weird ROMs; AppOps still gates real misuse.
         assertEquals(ItemStatus.Passed, state.statusOf(HealthCheckItem.DeveloperMode))
+    }
+
+    @Test
+    fun `developer mode is not applicable on android 17`() {
+        every {
+            Settings.Global.getInt(any<ContentResolver>(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0)
+        } returns 0
+
+        val state = SystemHealthCheckImpl(
+            context,
+            sdkInt = Build.VERSION_CODES.CINNAMON_BUN
+        ).refresh()
+
+        assertEquals(ItemStatus.NotApplicable, state.statusOf(HealthCheckItem.DeveloperMode))
+        assertFalse(state.hasBlockingFailure)
+        assertTrue(state.allPassed)
+        verify(exactly = 0) {
+            Settings.Global.getInt(any<ContentResolver>(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0)
+        }
     }
 }

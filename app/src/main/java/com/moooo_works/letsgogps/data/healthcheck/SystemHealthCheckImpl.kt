@@ -77,6 +77,10 @@ class SystemHealthCheckImpl : SystemHealthCheck {
     }
 
     private fun evaluateDeveloperMode(): ItemStatus {
+        // Android 17 always returns 0 for this setting to third-party apps.
+        // Hide the unverifiable row and let the mock-location AppOp gate use.
+        if (sdkInt >= Build.VERSION_CODES.CINNAMON_BUN) return ItemStatus.NotApplicable
+
         val enabled = try {
             Settings.Global.getInt(
                 context.contentResolver,

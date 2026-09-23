@@ -4,6 +4,7 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.location.LocationManager
 import android.location.provider.ProviderProperties
+import android.os.Build
 import android.provider.Settings
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import io.mockk.every
@@ -154,6 +155,54 @@ class AndroidLocationMockEngineTest {
         verify(exactly = 0) {
             appOpsManager.unsafeCheckOpNoThrow(any(), any(), any<String>())
         }
+    }
+
+    @Test
+    fun `android 17 ignores hidden developer setting when AppOps allowed`() {
+        Settings.Global.putInt(
+            ApplicationProvider.getApplicationContext<Context>().contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            0
+        )
+        every {
+            appOpsManager.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_MOCK_LOCATION, any<Int>(), any())
+        } returns AppOpsManager.MODE_ALLOWED
+
+        val engine = AndroidLocationMockEngine(context, sdkInt = Build.VERSION_CODES.CINNAMON_BUN)
+
+        assertEquals(MockPermissionStatus.Allowed, engine.getMockPermissionStatus())
+    }
+
+    @Test
+    fun `android 17 ignores hidden developer setting when AppOps denied`() {
+        Settings.Global.putInt(
+            ApplicationProvider.getApplicationContext<Context>().contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            0
+        )
+        every {
+            appOpsManager.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_MOCK_LOCATION, any<Int>(), any())
+        } returns AppOpsManager.MODE_ERRORED
+
+        val engine = AndroidLocationMockEngine(context, sdkInt = Build.VERSION_CODES.CINNAMON_BUN)
+
+        assertEquals(MockPermissionStatus.NotAllowed, engine.getMockPermissionStatus())
+    }
+
+    @Test
+    fun `android 17 returns CheckFailed when AppOps check throws`() {
+        Settings.Global.putInt(
+            ApplicationProvider.getApplicationContext<Context>().contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            0
+        )
+        every {
+            appOpsManager.unsafeCheckOpNoThrow(any(), any<Int>(), any())
+        } throws RuntimeException("appops failure")
+
+        val engine = AndroidLocationMockEngine(context, sdkInt = Build.VERSION_CODES.CINNAMON_BUN)
+
+        assertTrue(engine.getMockPermissionStatus() is MockPermissionStatus.CheckFailed)
     }
 
     @Test

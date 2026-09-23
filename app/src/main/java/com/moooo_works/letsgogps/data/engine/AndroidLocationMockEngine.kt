@@ -149,7 +149,9 @@ class AndroidLocationMockEngine : LocationMockEngine {
 
     override fun getMockPermissionStatus(): MockPermissionStatus {
         return try {
-            if (!isDeveloperModeEnabled()) {
+            // Android 17 hides this global setting from third-party apps and
+            // always reports 0, so AppOps is the only authoritative signal.
+            if (sdkInt < Build.VERSION_CODES.CINNAMON_BUN && !isDeveloperModeEnabled()) {
                 return MockPermissionStatus.DeveloperModeDisabled
             }
             val mode = if (sdkInt >= Build.VERSION_CODES.Q) {
