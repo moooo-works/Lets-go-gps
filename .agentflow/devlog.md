@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪 Unity 存取紀錄見 main Git history；產品於 draft PR #58.
+Current commit: 本輪 Unity 權限重試見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: Unity 後台存取遭 browser security policy 拒絕；未改產品.
+Tests/scenarios: cloud.unity.com 重試仍被 saved permission setting 拒絕.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity 接入授權已接受，但尚未取得後台畫面.
+Proven: 工具仍無法存取 Unity 後台.
 
-Open: cloud.unity.com 瀏覽權限；帳戶、版位、對應與 SDK 接入待完成.
+Open: Unity 網站封鎖偏好尚未對本次呼叫解除；完整接入待完成.
 
-Next: 網站權限允許後重試 Unity 後台.
+Next: 確認網站權限生效後重試並接手 Unity 配置.
 
 Artifacts: draft PR #58.
 
@@ -63,5 +63,39 @@ Streams: none.
 ---
 
 # → Ask / A-017 (Takeshi Mori)
+
++ 已允許
+
+---
+
+## [RUN-001] Event — 2026-10-07 18:58:59 +0800 (A-017)
+
+- 使用者表示已允許後重試 cloud.unity.com，仍遭 browser security policy 拒絕；此次理由 saved user permission setting blocks this action。未到登入或專案畫面，未繞過。
+
+# ← Reply / A-017
+
+* _2026-10-07 18:58:59 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已重試，但工具仍因儲存的封鎖偏好拒絕 Unity 後台存取，設定尚未生效到本次呼叫。
+
+## [FINAL REPORT]
+
+1. 「已允許」
+
+   - 已再次嘗試開啟 https://cloud.unity.com，仍被自動權限檢查拒絕，這次理由是「A saved user permission setting blocks this action」。沒有取得 Unity 登入、帳戶或專案畫面，也未以其他介面繞過。
+
+   - 請再確認 cloud.unity.com 的網站瀏覽項目已從封鎖改為允許；畫面設定與工具實際狀態目前仍不一致。若設定已正確，可先自行在 Edge 開啟 Unity 後台並登入；回覆後我會重試工具存取，仍須通過政策才能接手。不要在聊天提供密碼。
+
+   - Unity 接入授權保留；沒有建立帳戶、專案、版位或新增 adapter。Mintegral 維持排除，PR #58 保留。沒有背景工作執行。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-018 (Takeshi Mori)
 
 +
