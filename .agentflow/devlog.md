@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: A-006 紀錄見 main Git history；產品於 draft PR #58.
+Current commit: A-007 紀錄見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: 重啟後 Browser unavailable；工具 reset 後 native pipe startup failed；未改產品.
+Tests/scenarios: getState 重試仍 native pipe startup failed；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 本輪已確認瀏覽器工具沒有連線，未到網站權限檢查.
+Proven: 瀏覽器工具連線仍未恢復，未取得 AdMob 畫面.
 
-Open: Browser/Computer Use 連線待恢復；競價待帳戶核准；日期/實機待補.
+Open: 連線啟動錯誤待外部恢復；競價待核准；日期/實機待補.
 
-Next: 使用者確認 Edge 擴充功能及桌面連線，@Edge 重新綁定後重試.
+Next: 同專案新對話 @Edge 重建連線，沿用既有廣告接入授權.
 
 Artifacts: draft PR #58；.agentflow/artifacts/A-003-admob/tracker.md.
 
@@ -396,5 +396,40 @@ Streams: none.
 ---
 
 # → Ask / A-007 (Takeshi Mori)
+
++ 試試看
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:36:56 +0800 (A-007)
+
+- 再次 getState 仍無 apps/browsers，回 Sky Computer Use native pipe startup failed；工具連線尚未恢復，未讀取任何 AdMob 頁面。
+
+# ← Reply / A-007
+
+* _2026-10-07 15:36:56 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 重試仍失敗，Browser/Computer Use 工具連線尚未恢復；建議在同專案新對話 @Edge 重建連線。
+
+## [FINAL REPORT]
+
+1. 「試試看」
+
+   - 已再嘗試 cua.getState，仍回 apps=[]、browsers=[] 及 Sky Computer Use native pipe startup failed。沒有取得任何瀏覽器或 AdMob 畫面，也無法判定網站權限現在是否可用。
+
+   - 建議在同一專案開新對話，選 @Edge，並送出「接續廣告優化，先確認 Edge／AdMob 連線；既有草稿 PR #58，工作紀錄在 .agentflow/devlog.md」。官方文件列出新對話可清除對話連線狀態，但不能保證修復此啟動錯誤。[官方排解文件](https://learn.chatgpt.com/docs/chrome-extension)。
+
+   - 已完成的程式與報表分析保留；沒有改權限或產品，也沒有背景工作。第三方競價仍待工具連線與帳戶核准，實機及報表日期待補。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-008 (Takeshi Mori)
 
 +
