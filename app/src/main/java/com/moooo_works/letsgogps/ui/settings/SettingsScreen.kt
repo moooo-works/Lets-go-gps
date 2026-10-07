@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.moooo_works.letsgogps.R
+import com.moooo_works.letsgogps.ui.components.findAdActivity
+import com.moooo_works.letsgogps.data.billing.AdMobInitializerEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +61,23 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val activity = context as? android.app.Activity
+    val adEntryPoint = remember(context.applicationContext) {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            AdMobInitializerEntryPoint::class.java
+        )
+    }
+    val adConsentManager = adEntryPoint.adConsentManager()
+    val adConsentState by adConsentManager.state.collectAsState()
+    val adActivity = remember(context) {
+        context.findAdActivity()
+    }
+    val adPrivacyErrorText = stringResource(R.string.ad_privacy_error)
+    LaunchedEffect(adConsentState.error) {
+        if (adConsentState.error != null) {
+            Toast.makeText(context, adPrivacyErrorText, Toast.LENGTH_SHORT).show()
+        }
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val mockPermissionStatus by viewModel.mockPermissionStatus.collectAsState()
     val healthCheckState by viewModel.healthCheckState.collectAsState()
@@ -776,6 +796,16 @@ fun SettingsScreen(
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
                 )
+                if (adConsentState.privacyOptionsRequired && adActivity != null) {
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    SettingsMenuItem(
+                        label = stringResource(R.string.ad_privacy_options),
+                        onClick = { adConsentManager.showPrivacyOptions(adActivity) }
+                    )
+                }
             }
 
             // 版本號
@@ -975,4 +1005,3 @@ private fun ExportOptionsDialog(
         }
     )
 }
-

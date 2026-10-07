@@ -110,21 +110,27 @@ android {
 
 androidComponents {
     onVariants { variant ->
+        val adMobAppId = if (variant.buildType == "debug") {
+            "ca-app-pub-3940256099942544~3347511713"
+        } else {
+            "ca-app-pub-7328056144057376~2219581212"
+        }
         val fields = if (variant.buildType == "debug") {
             mapOf(
                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "true", "Debug Pro override"),
-                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544~3347511713\"", "Google sample App ID"),
+                "ADMOB_APP_ID" to BuildConfigField("String", "\"$adMobAppId\"", "Google sample App ID"),
                 "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/6300978111\"", "Google sample Banner unit"),
                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/5224354917\"", "Google sample Rewarded unit")
             )
         } else {
             mapOf(
                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "false", "Release Pro behavior"),
-                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376~2219581212\"", "Production App ID"),
+                "ADMOB_APP_ID" to BuildConfigField("String", "\"$adMobAppId\"", "Production App ID"),
                 "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/1824598031\"", "Production Banner unit"),
                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/6473078035\"", "Production Rewarded unit")
             )
         }
+        variant.manifestPlaceholders.put("ADMOB_APP_ID", adMobAppId)
         variant.buildConfigFields?.putAll(fields)
     }
 }

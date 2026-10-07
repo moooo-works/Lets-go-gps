@@ -496,4 +496,6 @@
     <string name="pro_dialog_feature_floating">Floating tools: search, saved places and routes</string>
     <string name="tip_floating_tools_title">Floating tools and a separate joystick are here!</string>
     <string name="tip_floating_tools_body">Two separate buttons on the map open floating tools or the virtual joystick above other apps.\n\nFloating tools offer search, saved places, routes, and coordinate copying. Selecting a point only previews it; tap Move here to move. The background is translucent, and collapsing docks the tool at the screen edge.\n\nUse the joystick to control movement direction and speed. Only one tool is shown at a time; opening the other switches tools.\n\nBoth are Pro features: unlock with a subscription or a rewarded ad for 6 hours. First use requires permission to display over other apps.</string>
+    <string name="ad_privacy_options">Ad privacy options</string>
+    <string name="ad_privacy_error">Ad privacy options could not be opened or updated. Please try again later.</string>
 </resources>
