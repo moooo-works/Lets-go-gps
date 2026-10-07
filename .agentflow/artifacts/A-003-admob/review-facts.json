@@ -1,0 +1,14 @@
+{
+  "changed_files": [
+    "app/build.gradle.kts",
+    "app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/data/billing/RewardedAdManagerTest.kt"
+  ],
+  "changed_lines": 197,
+  "behavior_change": true,
+  "trust_boundary": false,
+  "broad_change": false,
+  "consequential_change": false,
+  "owner_control": "default"
+}
