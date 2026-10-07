@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: A-005 記錄見 main Git history；產品於 draft PR #58.
+Current commit: A-006 紀錄見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: 唯讀判讀使用者截圖與 AdMob 重試；存取遭政策拒絕；未改產品.
+Tests/scenarios: 重啟後 Browser unavailable；工具 reset 後 native pipe startup failed；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 畫面兩網站瀏覽皆為一律允許，工具仍回 saved preference blocked.
+Proven: 本輪已確認瀏覽器工具沒有連線，未到網站權限檢查.
 
-Open: 工具權限與畫面不同步原因未確認；競價待帳戶核准；日期/實機待補.
+Open: Browser/Computer Use 連線待恢復；競價待帳戶核准；日期/實機待補.
 
-Next: 使用者重啟桌面 App 與 Edge 後重試網站；沿用 A-002 既有授權.
+Next: 使用者確認 Edge 擴充功能及桌面連線，@Edge 重新綁定後重試.
 
 Artifacts: draft PR #58；.agentflow/artifacts/A-003-admob/tracker.md.
 
@@ -361,5 +361,40 @@ Streams: none.
 ---
 
 # → Ask / A-006 (Takeshi Mori)
+
++ 已重啟
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:34:36 +0800 (A-006)
+
+- 重啟後原 browser 1 unavailable；getState 無 apps/browsers 並回 Sky Computer Use native pipe startup failed。已 reset cua kernel 並重新初始化，結果相同；尚未到網站存取檢查。
+
+# ← Reply / A-006
+
+* _2026-10-07 15:34:36 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已重試，但重啟後工具沒有任何瀏覽器連線；需先確認 Edge 擴充功能連線，再使用 @Edge 重新綁定。
+
+## [FINAL REPORT]
+
+1. 「已重啟」
+
+   - 已重試原 AdMob 分頁，回 Browser is not available: 1；重新取得狀態時 apps=[]、browsers=[]，錯誤為 Sky Computer Use native pipe startup failed。已重置工具 kernel 並重新初始化一次，仍相同。這次未到網站存取檢查，無法判斷先前網站封鎖是否已解除。
+
+   - 請先在 Edge 確認 ChatGPT 擴充功能已啟用，回到桌面 App 的設定 → Computer Use 確認 Edge 顯示 Manage／管理；再於此對話用 @Edge 選取目前瀏覽器，讓我重新綁定。若工具仍未連線，可在同專案開新對話並 @Edge。[官方擴充功能連線與排解文件](https://learn.chatgpt.com/docs/chrome-extension)。
+
+   - 本輪未改 App、網站權限或廣告後台。現有廣告優化保留於草稿 PR #58；報表分析已完成，第三方競價仍待可用瀏覽器連線與帳戶核准，報表日期與實機待補。沒有背景程序執行。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-007 (Takeshi Mori)
 
 +
