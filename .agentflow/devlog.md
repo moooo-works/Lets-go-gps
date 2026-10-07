@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪設定持久性說明見 Git history.
+Current commit: 設定提交 149b8b9；收尾見 Git history.
 
-Tests/scenarios: 依已讀 skill 的設定保存與 stream 複製規範；未改設定.
+Tests/scenarios: settings validate／show、獨立檢查 PASS.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 同目錄 session 沿用保存設定；worktree 建立後各自保存.
+Proven: root auto-reply on、away-gates on、streams off.
 
-Open: Unity SDK／同意訊號與測試；自主性設定尚未修改.
+Open: Unity worktree 設定未同步；SDK 與測試待續.
 
-Next: 依目標目錄保存設定一次，後續 session 沿用.
+Next: unity-ads worktree 接續開發.
 
-Artifacts: PR #58；unity-ads worktree.
+Artifacts: ag.json；PR #58；unity-ads worktree.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -649,5 +649,42 @@ Streams: none.
 ---
 
 # → Ask / A-032 (Takeshi Mori)
+
++ auto-reply: on
+  away-gates: on
+  streams: off
+
+---
+
+## [RUN-001] Event — 2026-10-07 23:50:23 +0800 (A-032)
+
+- 根專案三值已保存；settings validate／show 通過，獨立檢查 PASS。設定提交 149b8b9ec4e06bb6e59471a85de0c8310fb4bfea。Reviewer 僅修正被檢查器拒絕的第一行格式，其他內容與驗證未變。
+
+# ← Reply / A-032
+
+* _2026-10-07 23:50:23 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 根專案三項設定已保存並驗證；Unity worktree 副本未修改。
+
+## [FINAL REPORT]
+
+1. 「auto-reply: on
+away-gates: on
+streams: off」
+
+   - 已保存 ag.json 的 auto-reply on、away-gates on、streams off；官方設定驗證及獨立檢查通過，主機核對三值與範圍。其他設定保留，同目錄新 session 會沿用。
+
+   - 未改產品、未啟動背景派工。既有 Unity worktree 的設定副本未修改。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-033 (Takeshi Mori)
 
 +
