@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: A-007 紀錄見 main Git history；產品於 draft PR #58.
+Current commit: 本輪檢查紀錄見 main Git history；產品保留 draft PR #58.
 
-Tests/scenarios: getState 重試仍 native pipe startup failed；未改產品.
+Tests/scenarios: AdMob Mintegral 條款唯讀檢查；登入入口重載仍空白；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 瀏覽器工具連線仍未恢復，未取得 AdMob 畫面.
+Proven: 已到 Mintegral 啟用步驟，尚未接受條款.
 
-Open: 連線啟動錯誤待外部恢復；競價待核准；日期/實機待補.
+Open: 待本次法律條款確認、Mintegral 帳戶核准及版位資料；日期／實機待補.
 
-Next: 同專案新對話 @Edge 重建連線，沿用既有廣告接入授權.
+Next: 收到確認後啟用来源；帳戶可用後配置 mapping 與驗證 SDK.
 
-Artifacts: draft PR #58；.agentflow/artifacts/A-003-admob/tracker.md.
+Artifacts: draft PR #58；既有 A-003 tracker.
 
 Archived eras: none.
 
@@ -431,5 +431,99 @@ Streams: none.
 ---
 
 # → Ask / A-008 (Takeshi Mori)
+
++ @Computer-Use 接續廣告優化，先確認 Edge／AdMob 連線。草稿 PR #58，工作紀錄在 .agentflow/devlog.md。
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:40:32 +0800 (A-008)
+
+- Edge／AdMob 連線成功，已讀取登入後報表與中介配置；群組只有 AdMob 預設，AppLovin 有效合作關係但本 App 對應為 0。未改後台或產品。
+
+# ← Reply / A-008
+
+* _2026-10-07 15:40:32 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Edge／AdMob 已恢復連線；AppLovin 顯示有效合作關係，但 Let's Go 尚無廣告單元對應。
+
+## [FINAL REPORT]
+
+1. 「@Computer-Use 接續廣告優化，先確認 Edge／AdMob 連線。草稿 PR #58，工作紀錄在 .agentflow/devlog.md。」
+
+   - 成功讀取登入後的報表、中介群組與出價來源頁，先前連線及網站存取障礙本次未再出現。
+
+   - 群組清單只有 AdMob (預設)。AppLovin 顯示有效的合作夥伴關係，但 Let's Go 的廣告單元對應為 0，顯示尚未對應任何廣告單元；不能認定已核准發布者帳戶或開始供應廣告。下一步確認來源帳戶可用狀態與識別碼，再沿用既有接入授權。
+
+   - 未修改後台或產品，未跑 Gradle；草稿 PR #58 保留。第三方競價、報表日期與實機測試仍待補，沒有背景工作執行。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-009 (Takeshi Mori)
+
++ 進行廣告優化
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:51:14 +0800 (A-009)
+
+- 採直接路線，沿用既有廣告接入授權；查看來源清單與 Mintegral 啟用步驟，尚未接受條款或儲存。Computer Use 法律條款確認已送出，待使用者回覆。
+- Mintegral 登入頁可開啟但畫面空白，重新載入一次仍空白，未建立帳戶。官方接入文件要求 App Key、App ID、Placement ID、Ad Unit ID，核准及資料仍待補。
+- Git preflight：feat/admob-ad-optimization；status 僅 M .agentflow/devlog.md、?? ag.json；fetch 成功；origin/main 7ba0326cf97f5f85d00e615faec3d8d71ac18c66；最近五筆 7ba0326、81db489、137e2e6、ac3289f、54261b9。origin/main 含 AGENTS.md，本地 ls 已確認。main...HEAD behind=0、ahead=7；PR #58 OPEN/draft。
+- 為讓 root 筆記回到 main 正常提交，切回 main 並 merge --ff-only origin/main（Already up to date），保留所有本輪紀錄及未追蹤 ag.json；未 reset 或改產品。
+
+# ← Reply / A-009
+
+* _2026-10-07 15:51:14 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已推進至 Mintegral 出價條款確認；接入尚未完成，待你確認條款與可用發布者帳戶。
+
+## [FINAL REPORT]
+
+1. 「進行廣告優化」
+
+   - 已查閱 AdMob 可用來源並進到 Mintegral 啟用步驟，保留畫面等待具體確認。此步驟須接受出價條款，允許 Google 向買方揭露廣告版位、App 與帳戶資料，包含組織名稱及付款聯絡人姓名；另載有直接付款來源及不得依即時價格動態分配請求的約定。依 Computer Use 的法律條款確認要求，未收到本次確認前不能按「確認並同意」或儲存。已送出確認問題，未替你接受。
+
+   - Mintegral 登入入口可開啟，但畫面空白，重載一次仍相同；未建立或核准發布者帳戶。完整接入還需 App Key、App ID、Placement ID、Ad Unit ID、SDK／adapter 及實際測試供應，啟用 AdMob 來源本身不代表廣告開始供應。[Google 官方接入說明](https://developers.google.com/admob/android/next-gen/mediation/mintegral)。
+
+   - 既有自適應橫幅、載入診斷與獎勵廣告有限重試已交付草稿 PR #58，本輪未新增產品改動或未核准 adapter，未重跑 Gradle。沒有新增收益或真實供應驗證證據，沒有背景程序執行。
+
+   - Git preflight 輸出：
+
+     ```text
+     branch: feat/admob-ad-optimization
+     status: ## feat/admob-ad-optimization...origin/feat/admob-ad-optimization
+      M .agentflow/devlog.md
+     ?? ag.json
+     git fetch origin --prune: exit 0
+     origin/main: 7ba0326cf97f5f85d00e615faec3d8d71ac18c66
+     7ba0326 docs: 記錄瀏覽器重試結果與接續方式
+     81db489 docs: 記錄重啟後瀏覽器連線故障
+     137e2e6 docs: 記錄網站權限畫面與工具狀態差異
+     ac3289f docs: 說明瀏覽器網站權限管理入口
+     54261b9 docs: 保存廣告優化審查與競價追蹤
+     origin/main...HEAD: behind 0 / ahead 7
+     ```
+
+   - 已切回最新 main 保存 root 工作紀錄，保留 feature 與草稿 PR；未要求合併。
+
+## Questions (batched — each with a suggested default)
+
+1. 是否同意我現在在 AdMob 按 Mintegral「確認並同意」並儲存上述出價條款？
+
+   - Suggested default: 先閱讀目前保留的條款畫面，再明確回覆同意或暫不啟用；不預設同意。
+
+   - ans:
+
+---
+
+# → Ask / A-010 (Takeshi Mori)
 
 +
