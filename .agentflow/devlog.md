@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪重試見 main Git history；產品於 draft PR #58.
+Current commit: 本輪紀錄見 main Git history；產品仍在 draft PR #58.
 
-Tests/scenarios: getState 仍 native pipe startup failed，無 app／browser.
+Tests/scenarios: Unity 登入及專案已確認；AdMob 政策拒絕；未改產品，未跑 Gradle.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 工具連線持續無法啟動.
+Proven: Computer Use 恢復；Unity Let's Go 專案建立.
 
-Open: Computer Use 恢復；Unity Ads 完整接入待完成.
+Open: Unity 收款設定、AdMob 權限、版位與 SDK 接入.
 
-Next: 同專案新對話連接工具後接續 Unity Ads，排除 Mintegral.
+Next: 完成身份設定及允許 AdMob 後接續；排除 Mintegral.
 
-Artifacts: draft PR #58.
+Artifacts: draft PR #58；Unity 專案 fdccd0c4-db94-4cf6-8183-3f1e4a3c73a4.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -225,5 +225,84 @@ Streams: none.
 ---
 
 # → Ask / A-022 (Takeshi Mori)
+
++ 接續 Unity Ads 接入，既有 PR #58；讀取 .agentflow/devlog.md；排除 Mintegral。
+
++ 已登入
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:32:00 +0800 (A-022)
+
+- Computer Use 已恢復，使用者完成 Unity 登入；已建立 Let's Go 專案（fdccd0c4-db94-4cf6-8183-3f1e4a3c73a4）。略過非必要 Developer Data 設定，未接受資料分享條款。
+- Unity Ads 強制要求收款／帳務身份資料，已交由使用者自行填寫提交；目前尚無 Game ID 或版位。Mintegral 維持排除。
+- Git fetch 已成功；main ahead 13、behind 0，origin/main 為 7ba0326cf97f5f85d00e615faec3d8d71ac18c66。PR #58 仍 OPEN／draft，feat/admob-ad-optimization 相對 origin/main behind 0，產品差異僅四個既有廣告優化檔案。
+- 查核 Google 官方 Unity Next-Gen 接入文件；現行推薦 SDK 1.5.0、Unity 4.20.1、adapter 4.20.1.0，需排除 legacy ads SDK，另需確認同意訊號與測試供應。尚未修改產品或重跑 Gradle。
+
+## [RUN-002] Event — 2026-10-07 19:40:35 +0800 (A-022)
+
+- AdMob 瀏覽被 user declined permission 拒絕，已請使用者允許 apps.admob.com，未繞過。Unity 收款身份設定仍待使用者完成，分頁已保留。
+
+# ← Reply / A-022
+
+* _2026-10-07 19:40:35 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已建立 Unity Let's Go 專案；完整接入等待收款身份資料與 AdMob 瀏覽權限，PR #58 保留，Mintegral 排除。
+
+- 已確認登入成功，目前停在收款身份設定。
+
+## [FINAL REPORT]
+
+1. 「接續 Unity Ads 接入，既有 PR #58；讀取 .agentflow/devlog.md；排除 Mintegral。」
+
+   - 已讀取工作紀錄並建立 Let's Go 專案（fdccd0c4-db94-4cf6-8183-3f1e4a3c73a4）。尚無 Game ID、bidding 版位或 AdMob 對應，完整接入未完成。
+
+   - Unity 強制要求收款／帳務身份資料，請在保留的 Edge 分頁自行完成收款人類型、法定名稱與國家並提交，再回覆「完成」。未啟用額外 Developer Data 分享或接受其條款。
+
+   - AdMob 被自動權限檢查拒絕，理由 user declined permission；請允許 apps.admob.com 瀏覽後回覆「AdMob 已允許」。未繞過。
+
+   - [PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58) 仍 OPEN／draft，behind main = 0，保留原四個廣告優化檔案。Unity 接入維持獨立主題；Mintegral 排除，不進行註冊、對應或 SDK 接入。
+
+   - 已核對 [Google 官方 Unity 文件](https://developers.google.com/admob/android/next-gen/mediation/unity)，後續需識別碼、相容 SDK／adapter、legacy SDK 排除、同意訊號及測試供應。本輪未修改產品，未執行 Gradle 或實機測試，不聲稱廣告已供應。
+
+   - Git preflight：
+
+     ```text
+     $ git rev-parse --abbrev-ref HEAD
+     main
+     $ git status --short --branch
+     ## main...origin/main [ahead 13]
+      M .agentflow/devlog.md
+     ?? .agentflow/devlog.archive.md
+     ?? ag.json
+     $ git fetch origin --prune
+     (sandbox 無法寫 FETCH_HEAD；授權重試 exit 0、無輸出)
+     $ git rev-parse origin/main
+     7ba0326cf97f5f85d00e615faec3d8d71ac18c66
+     $ git log --oneline -5 origin/main
+     7ba0326 docs: 記錄瀏覽器重試結果與接續方式
+     81db489 docs: 記錄重啟後瀏覽器連線故障
+     137e2e6 docs: 記錄網站權限畫面與工具狀態差異
+     ac3289f docs: 說明瀏覽器網站權限管理入口
+     54261b9 docs: 保存廣告優化審查與競價追蹤
+     ```
+
+2. 「已登入」
+
+   - 已由 Unity 儀表板確認登入成功，Computer Use 連線恢復；既有接入授權保留，完成收款設定及網站權限後繼續。
+
+## Questions (batched — each with a suggested default)
+
+1. Unity 收款設定與 AdMob 瀏覽權限是否已完成？
+
+   - Suggested default: 在 Edge 自行提交收款身份資料並允許 apps.admob.com，完成後回覆；不要在聊天提供銀行、稅務或登入資料。
+
+   - ans:
+
+---
+
+# → Ask / A-023 (Takeshi Mori)
 
 +
