@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪連線重試見 main Git history；產品於 draft PR #58.
+Current commit: 本輪工具連線檢查見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: Browser 1 unavailable；工具重置後仍 native pipe startup failed.
+Tests/scenarios: getState 仍無 app／browser，native pipe startup failed.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 本次工具無 app／browser 連線，尚未到網站權限檢查.
+Proven: Computer Use 尚未建立可用連線.
 
-Open: Edge 連線恢復；Unity 網站權限狀態未知；帳戶／版位／SDK 待完成.
+Open: 工具啟動失敗；Unity 權限未知及完整接入待完成.
 
-Next: 重新連接 Edge 後接續 Unity Ads.
+Next: 桌面 App／Edge 重新連接後接續 Unity Ads.
 
 Artifacts: draft PR #58.
 
@@ -161,5 +161,37 @@ Streams: none.
 ---
 
 # → Ask / A-020 (Takeshi Mori)
+
++ @Computer-Use
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:05:43 +0800 (A-020)
+
+- 收到 Computer-Use 標記後重新 getState，仍 apps=[]、browsers=[]，Sky Computer Use native pipe startup failed。未取得 Unity 畫面。
+
+# ← Reply / A-020
+
+* _2026-10-07 19:05:43 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Computer Use 連線仍未恢復，沒有可用 app 或瀏覽器，Unity Ads 接入仍待連線。
+
+## [FINAL REPORT]
+
+1. 「@Computer-Use」
+
+   - 已重新確認工具狀態，仍回 apps=[]、browsers=[] 與 Sky Computer Use native pipe startup failed。此標記尚未建立可用連線；沒有取得 Unity 網站畫面，無法判定網站權限。
+
+   - 請重新啟動桌面 App 與 Edge，再嘗試重新連接 Computer Use；這是恢復連線的嘗試，不保證可解決啟動錯誤。連線可用後，我會沿用既有授權接續 Unity Ads，不需要重新說明任務。未改產品或後台，沒有背景工作。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-021 (Takeshi Mori)
 
 +
