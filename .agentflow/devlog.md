@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪公司背景查核見 main Git history；產品於 draft PR #58.
+Current commit: 本輪競價說明見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: Mintegral／Mobvista 官方公司介紹查核；未改產品.
+Tests/scenarios: Google bidding／eCPM 官方定義查核；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Mintegral 屬於匯量科技，母公司香港上市 01860.
+Proven: 平台價格可不同，eCPM 與總收益需一起比較.
 
-Open: 發布商帳戶與版位資料、SDK／mapping／供應驗證待完成.
+Open: 發布商帳戶、版位資料及第三方接入待完成.
 
-Next: 收到帳戶狀態後接續既有廣告優化授權.
+Next: 帳戶可用後完成接入並驗證實際收益.
 
 Artifacts: draft PR #58.
 
@@ -671,5 +671,41 @@ Streams: none.
 ---
 
 # → Ask / A-014 (Takeshi Mori)
+
++ 不同廣告平台，給的價格會不一樣嗎？
+
+---
+
+## [RUN-001] Event — 2026-10-07 16:10:16 +0800 (A-014)
+
+- 查核 Google 官方 bidding 與 eCPM 定義，回答平台價格差異與總收益比較；未操作後台或產品。
+
+# ← Reply / A-014
+
+* _2026-10-07 16:10:16 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 會，平台出價會隨廣告需求與流量改變；應以相同條件下的實際收益評估，不能保證 Mintegral 比 AdMob 高。
+
+## [FINAL REPORT]
+
+1. 「不同廣告平台，給的價格會不一樣嗎？」
+
+   - **會，而且同一平台的價格也會變。**不同平台的廣告主與需求不同，使用者國家、廣告格式與時間也會影響收益。常看的 eCPM 是每一千次實際曝光的平均收益，不是固定報價。[Google eCPM 說明](https://support.google.com/admob/answer/15337570?hl=en)。
+
+   - AdMob bidding 讓來源對同一次廣告曝光即時競價。例如假設 Google 出 US$1、Mintegral 出 US$1.40，Mintegral 的競價較高；下一次可能反過來。這些數字只是示例，不是你的實際報價。[官方競價說明](https://support.google.com/admob/answer/9234488?hl=en)。
+
+   - **高單價不一定有較高總收入。**假設 A 的 eCPM 為 US$2，展示 10,000 次，收益 US$20；B 的 eCPM 為 US$4，但只展示 3,000 次，收益 US$12。因此需一起看實際曝光、總收益、載入速度與使用体验。
+
+   - 對 Let's Go，保留 AdMob 並接入核准的新來源，目的是增加競爭與供應；Mintegral 不保證比較貴或提高收入，要在相同國家、格式、期間與相近流量條件下驗證。既有完整接入授權保留，但發布商帳戶、版位對應及真實供應測試仍待完成。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-015 (Takeshi Mori)
 
 +
