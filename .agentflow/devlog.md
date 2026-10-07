@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪重試見 main Git history；產品於 draft PR #58.
+Current commit: 本輪連線重試見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: cloud.unity.com 再次被 saved permission setting 拒絕.
+Tests/scenarios: Browser 1 unavailable；工具重置後仍 native pipe startup failed.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity 網站封鎖仍阻止工具存取.
+Proven: 本次工具無 app／browser 連線，尚未到網站權限檢查.
 
-Open: Unity 後台存取及帳戶／版位／SDK 接入待完成.
+Open: Edge 連線恢復；Unity 網站權限狀態未知；帳戶／版位／SDK 待完成.
 
-Next: 實際解除網站封鎖後重試.
+Next: 重新連接 Edge 後接續 Unity Ads.
 
 Artifacts: draft PR #58.
 
@@ -129,5 +129,37 @@ Streams: none.
 ---
 
 # → Ask / A-019 (Takeshi Mori)
+
++ 重試
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:04:44 +0800 (A-019)
+
+- 本次重試回 Browser is not available: 1；getState apps=[]、browsers=[]、Sky Computer Use native pipe startup failed。重置工具 kernel 並重新初始化一次，結果相同。未到網站權限檢查。
+
+# ← Reply / A-019
+
+* _2026-10-07 19:04:44 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 本次 Edge 工具連線已失效，重置後仍沒有可用瀏覽器；尚無法判定 Unity 網站封鎖是否解除。
+
+## [FINAL REPORT]
+
+1. 「重試」
+
+   - 已重試，但這次回 Browser is not available: 1；狀態清單沒有任何 app 或 browser，並回 Sky Computer Use native pipe startup failed。已重置工具並重新初始化一次，仍相同。這是工具連線啟動失敗，尚未到 Unity 網站存取檢查，不能認定網站仍封鎖或已解除。
+
+   - 請先讓 Edge 的 Computer Use 連線恢復，並在對話用 @Edge 重新選取瀏覽器；收到新的可用連線後沿用既有 Unity Ads 授權繼續。沒有進入 Unity 後台或改動 App，沒有背景工作。Mintegral 仍排除，draft PR #58 保留。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-020 (Takeshi Mori)
 
 +
