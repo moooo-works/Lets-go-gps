@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: A-004 說明紀錄見 main Git history；產品於 draft PR #58.
+Current commit: A-005 記錄見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: 本輪只查核官方文件，未改產品、未執行測試.
+Tests/scenarios: 唯讀判讀使用者截圖與 AdMob 重試；存取遭政策拒絕；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 官方網站允許／封鎖名單與 Edge 管理入口已確認.
+Proven: 畫面兩網站瀏覽皆為一律允許，工具仍回 saved preference blocked.
 
-Open: 待使用者解除網站封鎖；競價待帳戶核准；日期與實機待補.
+Open: 工具權限與畫面不同步原因未確認；競價待帳戶核准；日期/實機待補.
 
-Next: 權限解除後沿用 A-002 既有授權重試後台與競價申請.
+Next: 使用者重啟桌面 App 與 Edge 後重試網站；沿用 A-002 既有授權.
 
 Artifacts: draft PR #58；.agentflow/artifacts/A-003-admob/tracker.md.
 
@@ -324,5 +324,42 @@ Streams: none.
 ---
 
 # → Ask / A-005 (Takeshi Mori)
+
++ [Image #1] 這樣可以了嗎
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:31:08 +0800 (A-005)
+
+- 截圖顯示 AdMob、Mintegral 瀏覽權限皆為一律允許，下載需核准；重試 AdMob 仍回 saved user permission setting blocks this action，設定畫面與工具執行狀態不一致。未繞過。
+
+# ← Reply / A-005
+
+* _2026-10-07 15:31:08 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 截圖設定正確，但本工作階段重試 AdMob 仍被政策拒絕；建議重新啟動桌面 App 與 Edge 後重試。
+
+## [FINAL REPORT]
+
+1. 「[Image #1] 這樣可以了嗎」
+
+   - **設定看起來正確：**AdMob 與 Mintegral 的「瀏覽中」都是「一律允許」；「下載項目」保留「需要核准」可以，下載時再處理提示。
+
+   - **尚未生效到這次工具呼叫：**我已重試 AdMob，仍被自動權限檢查拒絕，理由是 saved user permission setting blocks this action。不能把畫面設定正確當成實際存取已成功，也不能確定兩者不一致的原因。
+
+   - 先重新啟動 Codex／ChatGPT 桌面 App 與 Edge，再回覆讓我重試。若仍不行，可在新對話延續本專案；官方排解文件列有重啟瀏覽器、桌面 App 與新對話以清除連線狀態，並不保證必須重啟或能解決所有權限問題。[官方排解文件](https://learn.chatgpt.com/docs/chrome-extension)。
+
+   - 本輪未修改權限或產品。第三方競價仍待可用網站權限与發布者帳戶核准；現有廣告優化維持草稿 PR #58。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-006 (Takeshi Mori)
 
 +
