@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪紀錄見 Git history；PR #58 保留.
+Current commit: 本輪說明見 Git history；PR #58 保留.
 
-Tests/scenarios: 成功讀取兩個後台；未跑 Gradle.
+Tests/scenarios: 查核 Unity 收款與 Google 接入官方文件；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 後台可存取；PR #58 OPEN／draft.
+Proven: 完整收款流程與初始身份表單不同；SDK 準備可先行.
 
-Open: Unity 收款身份設定及完整接入.
+Open: 初始身份表單、Unity 版位與完整接入.
 
-Next: 提交身份設定後接續版位與 AdMob 對應.
+Next: 先做不依賴 Game ID 的開發準備；使用者提交初始身份資料.
 
 Artifacts: PR #58；Unity／AdMob 分頁.
 
@@ -377,5 +377,36 @@ Streams: none.
 ---
 
 # → Ask / A-025 (Takeshi Mori)
+
++ 收款身分需要先處理嗎？還是可以先進行別的部分
+
+# ← Reply / A-025
+
+* _2026-10-07 19:51:11 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 可以先做 SDK、同意訊號與 AdMob 設定準備；目前 Unity 的初始身份表單仍擋住後台版位設定，完整銀行／稅務收款資料則可後續處理。
+
+## [FINAL REPORT]
+
+1. 「收款身分需要先處理嗎？還是可以先進行別的部分」
+
+   - 可以先進行別的部分。上一輪說法太籠統：目前擋住 Unity 後台的是初始身份表單（個人／公司、法定名稱、國家），並不代表必須先完成銀行帳戶與稅務資料，才能做所有接入工作。依上一輪實際畫面，初始表單仍需由你提交才能往下設定。
+
+   - 完整收款資料是領取收益時需要，官方流程包含雙重驗證、地址、付款方式與稅表，並列新增 App／專案為前置步驟。[Unity 官方收款說明](https://docs.unity.com/en-us/monetization/payments/complete-payout-profile)。
+
+   - 不依賴 Unity 識別碼的工作可以先做：檢查與接入 SDK／adapter、確認同意訊號傳遞、規劃橫幅與獎勵廣告的 AdMob 中介設定及編譯驗證。但填入 Game ID／Placement ID、完成對應與 Unity 測試廣告驗證仍需後台資料。[Google 官方接入流程](https://developers.google.com/admob/android/next-gen/mediation/unity)。
+
+   - 建議你只先完成目前三項身份資料；銀行與稅務設定稍後處理。開發準備可以先進行，PR #58 保留、Mintegral 排除。本輪為說明與文件查核，未修改產品或後台。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-026 (Takeshi Mori)
 
 +
