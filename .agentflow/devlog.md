@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪帳戶入口檢查見 main Git history；產品於 draft PR #58.
+Current commit: 本輪角色說明見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: Mintegral 登入頁 DOM／AX／截圖空白；官方 signup 無欄位.
+Tests/scenarios: 官方角色文件查核；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: AdMob 合作關係已保存；Mintegral 帳戶入口目前無法操作.
+Proven: 營利用途需 Publisher 帳戶.
 
-Open: 帳戶入口空白待外部恢復；核准、版位識別碼、mapping／SDK／供應測試待完成.
+Open: 發布商註冊與核准、版位資料及第三方接入待完成.
 
-Next: 帳戶入口可用後接手建立版位、對應與 SDK 驗證.
+Next: 發布商帳戶核准後接續版位及 SDK 接入.
 
-Artifacts: draft PR #58；既有 A-003 tracker；Mintegral signup handoff.
+Artifacts: draft PR #58.
 
 Archived eras: none.
 
@@ -603,5 +603,39 @@ Streams: none.
 ---
 
 # → Ask / A-012 (Takeshi Mori)
+
++ 還沒註冊，要選擇廣告主還是發布商？
+
+---
+
+## [RUN-001] Event — 2026-10-07 16:05:21 +0800 (A-012)
+
+- 查核 Mintegral 官方 Monetization 與 advertiser 定義；本 App 展示廣告賺收益應選 Publisher。未操作註冊或修改產品。
+
+# ← Reply / A-012
+
+* _2026-10-07 16:05:21 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 選發布商（Publisher），你要在 Let's Go 顯示廣告並收取收益。
+
+## [FINAL REPORT]
+
+1. 「還沒註冊，要選擇廣告主還是發布商？」
+
+   - **選發布商（Publisher）。**你的用途是在 Let's Go 裡展示其他公司的廣告，賺取廣告收益，屬於 Mintegral 的 App monetization 業務。[官方說明](https://www.mintegral.com/en/monetization)。
+
+   - 廣告主（Advertiser）是付費投放廣告、推廣自己產品的角色。[官方角色定義](https://helpcenter.mintegral.com/en/docs/advertiser-policies)。
+
+   - 使用發布商帳戶完成註冊，帳戶審核通過後我會接續建立 App 與橫幅／獎勵版位、AdMob 對應及 SDK 驗證。註冊完成不等於核准；不要在聊天貼密碼。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-013 (Takeshi Mori)
 
 +
