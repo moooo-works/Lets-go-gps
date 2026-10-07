@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪角色說明見 main Git history；產品於 draft PR #58.
+Current commit: 本輪公司背景查核見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: 官方角色文件查核；未改產品.
+Tests/scenarios: Mintegral／Mobvista 官方公司介紹查核；未改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 營利用途需 Publisher 帳戶.
+Proven: Mintegral 屬於匯量科技，母公司香港上市 01860.
 
-Open: 發布商註冊與核准、版位資料及第三方接入待完成.
+Open: 發布商帳戶與版位資料、SDK／mapping／供應驗證待完成.
 
-Next: 發布商帳戶核准後接續版位及 SDK 接入.
+Next: 收到帳戶狀態後接續既有廣告優化授權.
 
 Artifacts: draft PR #58.
 
@@ -637,5 +637,39 @@ Streams: none.
 ---
 
 # → Ask / A-013 (Takeshi Mori)
+
++ mintegral是哪裡的廣告商？
+
+---
+
+## [RUN-001] Event — 2026-10-07 16:09:14 +0800 (A-013)
+
+- 查核 Mintegral 中文關於頁與 Mobvista 官方公司歷程：Mintegral 為匯量科技旗下平台，母公司在香港上市 01860。本輪僅回答公司背景，未變更廣告配置。
+
+# ← Reply / A-013
+
+* _2026-10-07 16:09:14 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Mintegral 是中國背景的廣告平台，屬於匯量科技（Mobvista），母公司在香港上市。
+
+## [FINAL REPORT]
+
+1. 「mintegral是哪裡的廣告商？」
+
+   - **Mintegral 是中國背景的廣告平台**，隸屬匯量科技（Mobvista）；官方中文網站明確列為匯量科技旗下平台。[Mintegral 官方介紹](https://www.mintegral.com/cn/about-us)。
+
+   - 母公司 Mobvista 在香港聯交所上市，股票代碼 01860；Mintegral 業務涵蓋全球市場。[母公司官方歷程](https://www.mobvista.com/en/about-us)、[Mintegral 全球業務介紹](https://www.mintegral.com/en/about-us)。
+
+   - 本次僅說明背景，沒有新增 SDK 或更改後台；既有 AdMob 合作關係已保存，完整接入仍待發布商帳戶與版位資料。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-014 (Takeshi Mori)
 
 +
