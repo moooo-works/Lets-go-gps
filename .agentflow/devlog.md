@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪競價說明見 main Git history；產品於 draft PR #58.
+Current commit: 本輪替代來源查核見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: Google bidding／eCPM 官方定義查核；未改產品.
+Tests/scenarios: 官方 SEC 背景與 Google Next-Gen 格式查核；Mintegral mapping 0.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 平台價格可不同，eCPM 與總收益需一起比較.
+Proven: 停止 Mintegral 接入；Unity Ads／Liftoff 可作美國公司候選.
 
-Open: 發布商帳戶、版位資料及第三方接入待完成.
+Open: 替代來源發布商帳戶核准與實際接入；Mintegral 已保存合作關係尚未撤銷.
 
-Next: 帳戶可用後完成接入並驗證實際收益.
+Next: 以 Unity Ads 為首選確認帳戶可用性與接入.
 
 Artifacts: draft PR #58.
 
@@ -707,5 +707,45 @@ Streams: none.
 ---
 
 # → Ask / A-015 (Takeshi Mori)
+
++ 我不想使用這家中國背景的廣告平台，看看還有沒有別的
+
+---
+
+## [RUN-001] Event — 2026-10-07 16:12:39 +0800 (A-015)
+
+- 使用者撤回 Mintegral 接入意向，停止該來源的註冊、mapping 與 SDK 工作；既有廣告優化授權改以符合新偏好的來源為範圍。
+- 查核 Unity 與 Liftoff 最新 SEC 公司所在地，以及 Google Next-Gen 接入文件：兩者均支援 Android bidding、Banner、Rewarded；候選不代表保證帳戶核准或收益。
+- AdMob 唯讀確認 Mintegral 仍有已保存合作關係，但 Let's Go 對應 0，尚未新增 adapter 或接入群組；未宣稱撤銷已接受条款。
+
+# ← Reply / A-015
+
+* _2026-10-07 16:12:39 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已停止 Mintegral 接入；建議改以美國公司 Unity Ads 為第一候選，Liftoff Monetize 為第二候選。
+
+## [FINAL REPORT]
+
+1. 「我不想使用這家中國背景的廣告平台，看看還有沒有別的」
+
+   - 已排除 Mintegral，停止它的註冊、版位對應與 SDK 接入。先前 AdMob 保存的合作關係仍存在，但 Let's Go 廣告單元對應為 0，沒有 Mintegral adapter 或中介群組接入；不代表已撤銷先前接受的條款。
+
+   - **第一候選：Unity Ads。**Unity Software 是美國公司，總部在加州 San Francisco。[2025 年報](https://www.sec.gov/Archives/edgar/data/1810806/000181080626000011/unity-20251231.htm)。Google Next-Gen 文件列出 Android bidding、橫幅及獎勵支援；不需把 App 改用 Unity 引擎。新接入採 bidding，文件已標示 waterfall 支援於 2026/1/31 結束。[官方接入文件](https://developers.google.com/admob/android/next-gen/mediation/unity)。
+
+   - **第二候選：Liftoff Monetize（原 Vungle）。**Liftoff 在美國 Delaware 註冊，總部位於加州 Redwood City。[2026 季報](https://www.sec.gov/Archives/edgar/data/1850351/000162828026056398/lfto-20260630.htm)。支援本專案 Next-Gen SDK 的 bidding、橫幅與獎勵廣告。[官方接入文件](https://developers.google.com/admob/android/next-gen/mediation/liftoff-monetize)。
+
+   - 我建議先走 Unity Ads，原因是已核對能沿用目前 AdMob 與兩種廣告格式的完整接入流程；這不是收益排名，也不代表保證工具類 App 核准。申請發布商／Monetization 帳戶後，建立 Android 專案，選 Google AdMob 為中介夥伴並使用 bidding 版位，再接 Game ID／Placement ID 與 adapter。尚未建立該帳戶或接受新條款。
+
+   - 公司所在地與控制背景的判斷以目前官方披露為依據，未聲稱所有股東、合作夥伴或資料處理都完全與中國無關。本輪沒有產品改動或新來源啟用，沒有背景工作；PR #58 的既有優化保留。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-016 (Takeshi Mori)
 
 +
