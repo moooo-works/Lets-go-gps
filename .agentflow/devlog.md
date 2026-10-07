@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪 Unity 權限重試見 main Git history；產品於 draft PR #58.
+Current commit: 本輪重試見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: cloud.unity.com 重試仍被 saved permission setting 拒絕.
+Tests/scenarios: cloud.unity.com 再次被 saved permission setting 拒絕.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 工具仍無法存取 Unity 後台.
+Proven: Unity 網站封鎖仍阻止工具存取.
 
-Open: Unity 網站封鎖偏好尚未對本次呼叫解除；完整接入待完成.
+Open: Unity 後台存取及帳戶／版位／SDK 接入待完成.
 
-Next: 確認網站權限生效後重試並接手 Unity 配置.
+Next: 實際解除網站封鎖後重試.
 
 Artifacts: draft PR #58.
 
@@ -97,5 +97,37 @@ Streams: none.
 ---
 
 # → Ask / A-018 (Takeshi Mori)
+
++ 重試
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:03:24 +0800 (A-018)
+
+- 再次開啟 cloud.unity.com，仍被 saved user permission setting blocks this action 拒絕。未讀取後台，未繞過或修改產品。
+
+# ← Reply / A-018
+
+* _2026-10-07 19:03:24 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 重試仍被儲存的網站封鎖偏好拒絕，Unity 接入尚無法繼續。
+
+## [FINAL REPORT]
+
+1. 「重試」
+
+   - 已重試 https://cloud.unity.com，仍遭自動權限檢查拒絕，理由是「A saved user permission setting blocks this action」。未進入 Unity 後台，沒有建立專案、版位或修改 App。
+
+   - 必須先解除該網站的實際封鎖狀態才能接手；僅重試未能解決。不會透過其他介面繞過拒絕。既有 Unity 接入授權與 draft PR #58 保留，沒有背景工作執行。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-019 (Takeshi Mori)
 
 +
