@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪紀錄見 main Git history；產品仍在 draft PR #58.
+Current commit: 本輪重試紀錄見 main Git history；產品仍在 draft PR #58.
 
-Tests/scenarios: Unity 登入及專案已確認；AdMob 政策拒絕；未改產品，未跑 Gradle.
+Tests/scenarios: AdMob 重試被 saved permission setting 拒絕；未改產品，未跑 Gradle.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Computer Use 恢復；Unity Let's Go 專案建立.
+Proven: 現有連線仍讀到 AdMob 網站封鎖偏好.
 
-Open: Unity 收款設定、AdMob 權限、版位與 SDK 接入.
+Open: 新對話驗證網站權限、Unity 收款身份設定及完整接入.
 
-Next: 完成身份設定及允許 AdMob 後接續；排除 Mintegral.
+Next: 同專案新對話接續 Unity Ads；保留 PR #58，排除 Mintegral.
 
-Artifacts: draft PR #58；Unity 專案 fdccd0c4-db94-4cf6-8183-3f1e4a3c73a4.
+Artifacts: draft PR #58；Unity Let's Go 專案.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -304,5 +304,40 @@ Streams: none.
 ---
 
 # → Ask / A-023 (Takeshi Mori)
+
++ 允許開啟了，但可能又要另開一個session才能用，你先連看看，不行就再開
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:45:59 +0800 (A-023)
+
+- 使用者表示已允許網站後，以現有 Edge 連線重試 apps.admob.com，仍被 saved user permission setting blocks this action 拒絕。未換瀏覽器或介面繞過，未取得 AdMob 畫面。
+
+# ← Reply / A-023
+
+* _2026-10-07 19:45:59 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- AdMob 重試仍被儲存的網站權限封鎖；請在同專案另開新對話接續，我無法直接建立新的 Codex 對話 session。
+
+## [FINAL REPORT]
+
+1. 「允許開啟了，但可能又要另開一個session才能用，你先連看看，不行就再開」
+
+   - 已依指示使用現有 Edge 連線重試，仍遭自動權限檢查拒絕，理由「A saved user permission setting blocks this action」。未取得 AdMob 後台畫面。
+
+   - 我沒有可直接建立新 Codex 對話 session 的工具，且本次拒絕要求停止存取，不能改換瀏覽器或介面繞過。請在同專案另開新對話，貼上「接續 Unity Ads，讀取 .agentflow/devlog.md，保留 PR #58，排除 Mintegral」。新對話是否能取得更新後權限仍需實際驗證。
+
+   - Unity Let's Go 專案已於上一輪建立，收款身份設定仍未收到完成確認。既有完整接入授權保留；沒有改 App、AdMob 或 PR，未跑 Gradle，沒有背景工作。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-024 (Takeshi Mori)
 
 +
