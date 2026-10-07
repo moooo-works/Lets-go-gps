@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪說明見 Git history；PR #58 保留.
+Current commit: 本輪後台設定紀錄見 Git history；PR #58 保留.
 
-Tests/scenarios: 查核 Unity 收款與 Google 接入官方文件；未改產品.
+Tests/scenarios: Unity 正確 Store ID、Game ID 與兩個版位驗證；未跑 Gradle.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 完整收款流程與初始身份表單不同；SDK 準備可先行.
+Proven: Game ID 800390974；BP_Banner_Android、BP_Rewarded_Android 建立.
 
-Open: 初始身份表單、Unity 版位與完整接入.
+Open: AdMob 條款、對應／群組、SDK 同意訊號與驗證.
 
-Next: 先做不依賴 Game ID 的開發準備；使用者提交初始身份資料.
+Next: 使用者確認出價條款與工作分頁選擇後繼續.
 
-Artifacts: PR #58；Unity／AdMob 分頁.
+Artifacts: PR #58；artifacts/A-026-unity-ads/tracker.md；Unity／AdMob 分頁.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -408,5 +408,66 @@ Streams: none.
 ---
 
 # → Ask / A-026 (Takeshi Mori)
+
++ 我已經建立好名字與國籍，可以進入後台了，可以先執行的部分就先處理
+
+---
+
+## [RUN-001] Event — 2026-10-07 20:02:18 +0800 (A-026)
+
+- Unity 正確 App 已建立：Store ID com.moooo_works.letsgogps、Game ID 800390974；專案 Let's Go Android (ab25d2c1-4be1-490d-801f-e7e9c93f08ed)。版位 BP_Banner_Android、BP_Rewarded_Android 已在清單確認。
+- 初次逐字輸入網址後 Unity 最終儲存 com.moo；已以一次填入完整網址建立正確 App，錯誤 App 暫保留不使用，待改名標示。沒有刪除資料。
+- AdMob Unity bidding 來源停在條款接受頁，已請使用者批准；工作分頁 streams: ask 選擇同時待答。SDK 仍未改。
+- 工作追蹤：[tracker](artifacts/A-026-unity-ads/tracker.md)。主機直接執行後台，避免分派共享 UI；SDK 範圍待確認同意訊號後固定。
+
+## [RUN-002] Event — 2026-10-07 20:03:42 +0800 (A-026)
+
+- 錯誤 App 已更名 DO NOT USE - wrong store ID com.moo，未刪除，未建立版位；正確 Game ID 800390974 的 App 才有兩個 BP 版位。
+- 官方新文件確認 AdMob bidding 收益由 Google 支付；已更正先前條款確認題對直接付款的誤解，重新請使用者確認實際出價條款。
+- PR #58 仍 OPEN／draft、相對 origin/main behind 0；來源差異僅原四檔。本輪尚未改產品、未跑 Gradle。
+
+# ← Reply / A-026
+
+* _2026-10-07 20:05:23 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Unity 正確 Android App 與兩個版位已建立；完整接入待 AdMob 出價條款批准及 SDK 工作分頁選擇。
+
+## [FINAL REPORT]
+
+1. 「我已經建立好名字與國籍，可以進入後台了，可以先執行的部分就先處理」
+
+   - 已確認可以進入後台，並建立正確 Android App：Store ID `com.moooo_works.letsgogps`、Game ID `800390974`；專案 Let's Go Android (`ab25d2c1-4be1-490d-801f-e7e9c93f08ed`)、App `ff5e9ffd-33d6-41c6-a120-6767685d195b`。橫幅 `BP_Banner_Android`、獎勵 `BP_Rewarded_Android` 已建立並在清單驗證。未建立插頁廣告或啟用 Developer Data。
+
+   - 初次逐字填入網址後，Unity 最終儲存了錯誤 Store ID `com.moo`；已改用一次填入完整網址建立正確 App，並將舊 App 改名 `DO NOT USE - wrong store ID com.moo`。舊 Game ID `800390970` 不使用，無版位，未刪除。
+
+   - AdMob Unity bidding 來源已準備至條款接受頁，尚未接受或保存。需要你確認目前畫面上的出價條款；條款涉及資訊揭露與出價限制，瀏覽器操作規範要求在接受時確認。依 [Unity 官方說明](https://docs.unity.com/en-us/monetization/bidding/in-app-bidding/google)，AdMob bidding 收益由 Google 支付；先前把通用直接付款條文解讀為本次由 Unity 付款的說法已更正。完整 Unity 銀行／稅務設定可以稍後處理。
+
+   - SDK 尚未修改：現有 Next-Gen 1.2.1；[官方接入文件](https://developers.google.com/admob/android/next-gen/mediation/unity) 推薦配對 Next-Gen 1.5.0、Unity 4.20.1、adapter 4.20.1.0。已檢查現有初始化沒有同意表單流程，需先固定同意訊號處理範圍；未宣稱測試廣告已供應，未跑 Gradle 或實機測試。
+
+   - [PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58) 保留 OPEN／draft，behind main = 0，原四檔產品差異保留；Mintegral 排除，沒有操作既有 Mintegral 來源。
+
+   - Git preflight：main；main...origin/main [ahead 17]，M .agentflow/devlog.md、?? .agentflow/devlog.archive.md、?? ag.json；fetch exit 0；origin/main `7ba0326cf97f5f85d00e615faec3d8d71ac18c66`；最近五筆 7ba0326、81db489、137e2e6、ac3289f、54261b9。AGENTS.md 已確認存在。產品開發分支尚未建立，未 reset 既有 main。
+
+   - 工作追蹤見 [tracker](artifacts/A-026-unity-ads/tracker.md)，仍保留後續未完成項目。後台頁已保留；沒有背景工作。
+
+## Questions (batched — each with a suggested default)
+
+1. 是否授權接受目前 AdMob Unity Ads 出價條款？
+
+   - Suggested default: 先讀畫面，確認後回覆同意；未答不視為批准。
+
+   - ans:
+
+2. SDK 開發是否使用獨立 worktree？
+
+   - Suggested default: 使用独立 worktree，從最新 origin/main 建立 Unity 主題分支，保留 PR #58。依 [streams 規範](/Users/mori/.agents/skills/agentflow/references/streams.md)「streams: ask batches the same question」，目前設定要求詢問。
+
+   - ans:
+
+---
+
+# → Ask / A-027 (Takeshi Mori)
 
 +
