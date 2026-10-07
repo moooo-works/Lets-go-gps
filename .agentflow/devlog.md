@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪重試紀錄見 main Git history；產品仍在 draft PR #58.
+Current commit: 本輪紀錄見 Git history；PR #58 保留.
 
-Tests/scenarios: AdMob 重試被 saved permission setting 拒絕；未改產品，未跑 Gradle.
+Tests/scenarios: 成功讀取兩個後台；未跑 Gradle.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 現有連線仍讀到 AdMob 網站封鎖偏好.
+Proven: 後台可存取；PR #58 OPEN／draft.
 
-Open: 新對話驗證網站權限、Unity 收款身份設定及完整接入.
+Open: Unity 收款身份設定及完整接入.
 
-Next: 同專案新對話接續 Unity Ads；保留 PR #58，排除 Mintegral.
+Next: 提交身份設定後接續版位與 AdMob 對應.
 
-Artifacts: draft PR #58；Unity Let's Go 專案.
+Artifacts: PR #58；Unity／AdMob 分頁.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -339,5 +339,43 @@ Streams: none.
 ---
 
 # → Ask / A-024 (Takeshi Mori)
+
++ 接續 Unity Ads，讀取 .agentflow/devlog.md，保留 PR #58，排除 Mintegral。
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:49:25 +0800 (A-024)
+
+- Unity 與 AdMob 後台存取已恢復。Unity 仍待使用者自行提交收款身份資料；分頁已保留。AdMob 僅預設群組；PR #58 OPEN／draft，未改 App 或後台，Mintegral 排除。
+
+# ← Reply / A-024
+
+* _2026-10-07 19:49:25 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已恢復後台存取；請先在 Unity 分頁自行提交收款身份設定，完成後回覆。
+
+## [FINAL REPORT]
+
+1. 「接續 Unity Ads，讀取 .agentflow/devlog.md，保留 PR #58，排除 Mintegral。」
+
+   - 已讀取紀錄，Unity／AdMob 均可正常存取。Unity 仍要求收款人類型、法定名稱與國家，請在保留的分頁自行填寫提交，回覆「完成」；不要在聊天提供銀行或稅務資料。完整接入仍待 Game ID、版位、AdMob 對應及 SDK 驗證。
+
+   - AdMob 僅預設中介群組。[PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58) 仍 OPEN／draft；本輪未改 App、PR 或後台設定，Mintegral 排除。未跑 Gradle 或實機測試，沒有背景工作。
+
+   - Git preflight：branch main；status main...origin/main [ahead 15]、M .agentflow/devlog.md、?? .agentflow/devlog.archive.md、?? ag.json。fetch sandbox 無法寫 FETCH_HEAD，授權重試 exit 0。origin/main = 7ba0326cf97f5f85d00e615faec3d8d71ac18c66。最近五筆：7ba0326 記錄瀏覽器重試結果與接續方式；81db489 記錄重啟後瀏覽器連線故障；137e2e6 記錄網站權限畫面與工具狀態差異；ac3289f 說明瀏覽器網站權限管理入口；54261b9 保存廣告優化審查與競價追蹤。origin/main 含 AGENTS.md，工作目錄檔案存在。
+
+## Questions (batched — each with a suggested default)
+
+1. Unity 收款身份設定是否已提交完成？
+
+   - Suggested default: 在保留分頁自行填寫提交後回覆「完成」。
+
+   - ans:
+
+---
+
+# → Ask / A-025 (Takeshi Mori)
 
 +
