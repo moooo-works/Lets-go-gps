@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本轮操作紀錄見 main Git history；產品於 draft PR #58.
+Current commit: 本輪帳戶入口檢查見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: Mintegral 確認並同意後來源新增，讀回有效合作關係；mapping 0.
+Tests/scenarios: Mintegral 登入頁 DOM／AX／截圖空白；官方 signup 無欄位.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Mintegral 出價條款已接受並保存.
+Proven: AdMob 合作關係已保存；Mintegral 帳戶入口目前無法操作.
 
-Open: Mintegral 帳戶與 App／版位識別碼、mapping／adapter／供應驗證待完成.
+Open: 帳戶入口空白待外部恢復；核准、版位識別碼、mapping／SDK／供應測試待完成.
 
-Next: 帳戶可用後配置版位對應與 SDK.
+Next: 帳戶入口可用後接手建立版位、對應與 SDK 驗證.
 
-Artifacts: draft PR #58；/private/tmp/mintegral-enabled.jpg.
+Artifacts: draft PR #58；既有 A-003 tracker；Mintegral signup handoff.
 
 Archived eras: none.
 
@@ -562,5 +562,46 @@ Streams: none.
 ---
 
 # → Ask / A-011 (Takeshi Mori)
+
++ 再來怎麼處理？你來完成廣告優化的事情
+
+---
+
+## [RUN-001] Event — 2026-10-07 16:00:24 +0800 (A-011)
+
+- 沿用既有接入授權，直接檢查 Mintegral 登入頁；DOM snapshot 空白、AX 無欄位、截圖全白，console 沒有可用錯誤。依 Google 官方接入頁的 signup 連結開 /user/signup，仍無欄位。非政策拒絕，無法判定空白根因。
+- 保留 signup 分頁等待使用者自行確認顯示／登入；已送出帳戶可用狀態問題。沒有新增來源條款確認、mapping、SDK 或宣稱供應成功。
+
+# ← Reply / A-011
+
+* _2026-10-07 16:00:24 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 完整接入仍在進行範圍內，但 Mintegral 登入與官方申請頁都空白；需先恢復帳戶入口，才能取得版位資料。
+
+## [FINAL REPORT]
+
+1. 「再來怎麼處理？你來完成廣告優化的事情」
+
+   - 已承接後續完整工作：建立 Let's Go 橫幅／獎勵版位，配置 AdMob 對應與中介群組，接入相容 SDK／adapter，執行 test、lintDebug、assembleDebug，再驗證實際廣告供應。這些授權保留，不需要每一步重新確認；若新帳戶需設定密碼或接受另一份法律條款，才在實際步驟交由你處理或確認。
+
+   - **目前阻礙：**Mintegral 登入頁與 Google 文件連出的官方申請頁都空白。登入頁的 DOM、AX 與截圖均無欄位；console 無可用錯誤，不能判定根因。已保留 [官方申請頁](https://dev.mintegral.com/user/signup) 供你在 Edge 查看，並詢問手動顯示與帳戶狀態。沒有繞過網站限制或臆造帳戶識別碼。
+
+   - AdMob 合作關係已於上一輪保存，但尚無 Mintegral App Key／App ID／Placement ID／Ad Unit ID，因此 mapping、第三方 adapter 與供應測試未完成。[Google 官方接入說明](https://developers.google.com/admob/android/next-gen/mediation/mintegral)。
+
+   - 既有自適應橫幅與獎勵重試保留 draft PR #58；本輪沒有產品改動，未重跑 Gradle。完整廣告優化尚未完成，沒有背景程序執行，也沒有收益增幅證據。帳戶入口可用後我會接手其餘步驟。
+
+## Questions (batched — each with a suggested default)
+
+1. 你在 Edge 手動開啟 Mintegral 官方申請頁是否正常？若已有帳戶，請自行登入並告知是否核准。
+
+   - Suggested default: 在保留的 signup 分頁確認；若正常可註冊／登入，不在聊天提供密碼。
+
+   - ans:
+
+---
+
+# → Ask / A-012 (Takeshi Mori)
 
 +
