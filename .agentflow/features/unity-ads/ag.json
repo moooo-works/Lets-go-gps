@@ -8,8 +8,8 @@
       "host"
     ],
     "ask-names": "on",
-    "auto-reply": "off",
-    "away-gates": "off",
+    "auto-reply": "on",
+    "away-gates": "on",
     "cli-provider": "on",
     "completion-cleanup": "off",
     "completion-cleanup-interval-days": 7,
@@ -20,7 +20,7 @@
     "log-verbosity": "all",
     "notebook-ownership": "off",
     "review-policy": "prefer-independent",
-    "streams": "ask",
+    "streams": "off",
     "target-doc": ".agentflow/features/unity-ads/unity-ads.devlog.md",
     "workspace-dir": ".agentflow"
   },
