@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪自主性與批准機制說明見 Git history.
+Current commit: 本輪設定操作說明見 Git history.
 
-Tests/scenarios: 查核本地 skill／設定及 OpenAI 官方說明；未改設定或產品.
+Tests/scenarios: 依已讀取 skill／設定說明；未修改設定或產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: auto-reply off、away-gates off、streams ask；沒有 looper 執行.
+Proven: 可用聊天設定指令；root 與既有 worktree 設定分開.
 
-Open: Unity SDK／同意訊號與測試；目前設定不符合少打擾期望.
+Open: Unity SDK／同意訊號與測試；自主性設定尚未修改.
 
-Next: 依既有授權接續開發；日常操作不重複批准.
+Next: 在目標開發 session 送出設定指令後接續已授權工作.
 
 Artifacts: PR #58；unity-ads worktree.
 
@@ -581,5 +581,42 @@ Streams: none.
 ---
 
 # → Ask / A-030 (Takeshi Mori)
+
++ 怎麼改設定
+
+# ← Reply / A-030
+
+* _2026-10-07 23:44:31 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 直接在聊天逐行送出設定指令即可；建議 auto-reply: on、away-gates: on、streams: off，已有 Unity worktree 的設定需在其 session 套用。
+
+## [FINAL REPORT]
+
+1. 「怎麼改設定」
+
+   - 直接在要開發的專案 session 貼上以下三行，我會依 skill 的設定流程保存與驗證 ag.json：
+
+     ```text
+     auto-reply: on
+     away-gates: on
+     streams: off
+     ```
+
+   - auto-reply: on 讓安全的例行預設由我決定；away-gates: on 讓 consequential 工作在證據通过後自動滿足 Design Go／Result Go；streams: off 不再因一般任務詢問是否建立新 stream，Git 分支與既有工作分頁仍照適用規範管理。已有 worktree 不會因此被移除或合併。
+
+   - root 與 Unity worktree 各有設定副本。要影響 SDK 開發，請在 `.worktrees/unity-ads` 的 session 套用；只改根目錄不代表既有 worktree 同步改變。這三項設定不會啟動背景佇列，也不會略過必要測試、審查、條款接受或平台硬性批准。
+
+   - 這次是操作說明，尚未修改設定。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-031 (Takeshi Mori)
 
 +
