@@ -144,6 +144,12 @@ tasks.whenTaskAdded {
     }
 }
 
+// Unity adapter 會帶入舊版 Google Ads；Next-Gen 不可同時載入兩套 SDK。
+configurations.configureEach {
+    exclude(group = "com.google.android.gms", module = "play-services-ads")
+    exclude(group = "com.google.android.gms", module = "play-services-ads-lite")
+}
+
 dependencies {
     testImplementation(libs.robolectric)
     implementation(libs.hilt.navigation.compose)
@@ -177,6 +183,8 @@ dependencies {
 
     // AdMob
     implementation(libs.admob.next.gen)
+    implementation(libs.unity.ads)
+    implementation(libs.unity.adapter)
 
     // Billing
     implementation(libs.billing)
