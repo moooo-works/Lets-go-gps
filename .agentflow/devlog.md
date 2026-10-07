@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品 bb58f9a1244f8ce6c1d32cd39ae532c15157ad27；交付紀錄見 feature Git history.
+Current commit: A-004 說明紀錄見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: test SUCCESS（185 執行/66 skipped/0 failures）；lintDebug SUCCESS 但 34 errors 位於未改檔案；assembleDebug SUCCESS；獨立審查 PASS；實機待補.
+Tests/scenarios: 本輪只查核官方文件，未改產品、未執行測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 現有廣告優化與兩份本機 CSV 分析已交付 draft PR #58，behind main=0.
+Proven: 官方網站允許／封鎖名單與 Edge 管理入口已確認.
 
-Open: 第三方競價未接入，尚無核准帳戶；AdMob/Mintegral 瀏覽器被拒；日期與實機待補.
+Open: 待使用者解除網站封鎖；競價待帳戶核准；日期與實機待補.
 
-Next: 使用者完成 Mintegral 申請及提供日期；核准後沿用 A-002 授權接入單一來源對照.
+Next: 權限解除後沿用 A-002 既有授權重試後台與競價申請.
 
-Artifacts: PR #58；.agentflow/artifacts/A-003-admob/tracker.md；.agentflow/artifacts/A-003-admob/review.md；私人 CSV 保留 Downloads 未提交.
+Artifacts: draft PR #58；.agentflow/artifacts/A-003-admob/tracker.md.
 
 Archived eras: none.
 
@@ -287,5 +287,42 @@ Streams: none.
 ---
 
 # → Ask / A-004 (Takeshi Mori)
+
++ 自動權限檢查在哪裡修改？
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:19:27 +0800 (A-004)
+
+- 已用 OpenAI Docs 官方文件確認 Browser 與 Computer Use → Edge Manage 的網站允許／封鎖名單；本輪只說明，未修改權限。
+
+# ← Reply / A-004
+
+* _2026-10-07 15:19:27 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 在桌面 App 的設定 → Browser 管理網站封鎖；外部 Edge 的入口也可能是 Computer Use → Edge → Manage。
+
+## [FINAL REPORT]
+
+1. 「自動權限檢查在哪裡修改？」
+
+   - 已使用 OpenAI Docs 查核官方文件。開桌面 App 的 **設定 → Browser（瀏覽器）**，管理允許／封鎖網站；可用 [直接開啟瀏覽器設定](codex://settings/browser-use)。[官方設定文件](https://learn.chatgpt.com/docs/reference/settings)、[官方設定連結](https://learn.chatgpt.com/docs/reference/commands)。
+
+   - 我們使用外部 Edge。若畫面顯示 **Computer Use（電腦使用）**，進入並點 **Edge 旁的 Manage（管理）**；在封鎖名單移除 **admob.google.com** 與 **dev.mintegral.com**。這會讓工具重新詢問網站存取，下次提示選 **Allow for this site（允許此網站）**。只開啟 Edge 開關不會移除封鎖名單。[官方說明](https://learn.chatgpt.com/docs/chrome-extension)。
+
+   - 完成後回覆「已移除封鎖」即可沿用既有授權重試。若仍被拒絕，再重啟瀏覽器或桌面 App；官方也列出新對話可清除連線狀態，但不是保證必須重啟。[官方排解方式](https://learn.chatgpt.com/docs/chrome-extension)。
+
+   - 本輪未代改設定、未重試受封鎖網站，亦未修改產品。草稿 PR #58 與 A-003 的待辦保留：Mintegral 帳戶核准、第三方競價、報表日期與實機測試尚待完成。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-005 (Takeshi Mori)
 
 +
