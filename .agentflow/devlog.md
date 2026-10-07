@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪工具連線檢查見 main Git history；產品於 draft PR #58.
+Current commit: 本輪重試見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: getState 仍無 app／browser，native pipe startup failed.
+Tests/scenarios: getState 仍 native pipe startup failed，無 app／browser.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Computer Use 尚未建立可用連線.
+Proven: 工具連線持續無法啟動.
 
-Open: 工具啟動失敗；Unity 權限未知及完整接入待完成.
+Open: Computer Use 恢復；Unity Ads 完整接入待完成.
 
-Next: 桌面 App／Edge 重新連接後接續 Unity Ads.
+Next: 同專案新對話連接工具後接續 Unity Ads，排除 Mintegral.
 
 Artifacts: draft PR #58.
 
@@ -193,5 +193,37 @@ Streams: none.
 ---
 
 # → Ask / A-021 (Takeshi Mori)
+
++ 重試
+
+---
+
+## [RUN-001] Event — 2026-10-07 19:24:23 +0800 (A-021)
+
+- getState 重試仍 apps=[]、browsers=[]，Sky Computer Use native pipe startup failed；沒有進到 Unity 網站檢查。
+
+# ← Reply / A-021
+
+* _2026-10-07 19:24:23 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 重試仍失敗，Computer Use 沒有可用連線，Unity Ads 尚無法繼續。
+
+## [FINAL REPORT]
+
+1. 「重試」
+
+   - 已重試 getState，仍回 apps=[]、browsers=[]，錯誤 Sky Computer Use native pipe startup failed。未取得 Edge 或 Unity 畫面，也沒有網站權限檢查結果。
+
+   - 此對話持續遇到相同工具啟動錯誤。請在同專案開新對話並連接 Computer Use，貼上「接續 Unity Ads 接入，既有 PR #58；讀取 .agentflow/devlog.md；排除 Mintegral」。這可作為重建連線的嘗試，不能保證修復。既有授權與工作紀錄保留，沒有產品或後台改動，沒有背景工作。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-022 (Takeshi Mori)
 
 +
