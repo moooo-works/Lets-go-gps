@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪檢查紀錄見 main Git history；產品保留 draft PR #58.
+Current commit: 本轮操作紀錄見 main Git history；產品於 draft PR #58.
 
-Tests/scenarios: AdMob Mintegral 條款唯讀檢查；登入入口重載仍空白；未改產品.
+Tests/scenarios: Mintegral 確認並同意後來源新增，讀回有效合作關係；mapping 0.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 已到 Mintegral 啟用步驟，尚未接受條款.
+Proven: Mintegral 出價條款已接受並保存.
 
-Open: 待本次法律條款確認、Mintegral 帳戶核准及版位資料；日期／實機待補.
+Open: Mintegral 帳戶與 App／版位識別碼、mapping／adapter／供應驗證待完成.
 
-Next: 收到確認後啟用来源；帳戶可用後配置 mapping 與驗證 SDK.
+Next: 帳戶可用後配置版位對應與 SDK.
 
-Artifacts: draft PR #58；既有 A-003 tracker.
+Artifacts: draft PR #58；/private/tmp/mintegral-enabled.jpg.
 
 Archived eras: none.
 
@@ -525,5 +525,42 @@ Streams: none.
 ---
 
 # → Ask / A-010 (Takeshi Mori)
+
++ 同意並儲存
+
+---
+
+## [RUN-001] Event — 2026-10-07 15:53:42 +0800 (A-010)
+
+- 依本次明確授權按 Mintegral 確認並同意；網站直接保存合作關係並進入 mapping。因缺 App Key／App ID／Placement ID／Ad Unit ID，mapping 儲存按鈕 disabled，取消空白 mapping 後讀回來源：Mintegral 有效的合作夥伴關係，Let's Go 對應 0。
+- 保存結果截圖 /private/tmp/mintegral-enabled.jpg；未新增 mapping 或修改 App。
+
+# ← Reply / A-010
+
+* _2026-10-07 15:53:42 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Mintegral 出價條款已接受並由網站保存，來源顯示有效合作關係；廣告單元對應仍待帳戶及版位資料。
+
+## [FINAL REPORT]
+
+1. 「同意並儲存」
+
+   - 已成功按「確認並同意」，網站直接保存並進入廣告單元對應頁；返回來源清單確認 Mintegral 已新增且顯示「有效的合作夥伴關係」。
+
+   - mapping 的儲存按鈕因識別碼未填而停用；未儲存空白對應。Let's Go 對應仍為 0，尚未接入實際廣告供應。下一步需核准的 Mintegral 帳戶，以及 App Key、App ID、橫幅與獎勵版位各自的 Placement ID／Ad Unit ID；不要在聊天貼帳戶密碼。
+
+   - 未修改 App，沒有背景工作；既有 PR #58 保留。結果截圖：
+
+     ![Mintegral 有效合作關係](/private/tmp/mintegral-enabled.jpg)
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-011 (Takeshi Mori)
 
 +
