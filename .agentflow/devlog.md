@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪後台設定紀錄見 Git history；PR #58 保留.
+Current commit: 本輪 AdMob 對應與 worktree 交接見 Git history.
 
-Tests/scenarios: Unity 正確 Store ID、Game ID 與兩個版位驗證；未跑 Gradle.
+Tests/scenarios: AdMob 對應數 2；worktree clean、behind 0；未跑 Gradle.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Game ID 800390974；BP_Banner_Android、BP_Rewarded_Android 建立.
+Proven: Unity bidding 條款接受，兩個對應保存；unity-ads branch pushed.
 
-Open: AdMob 條款、對應／群組、SDK 同意訊號與驗證.
+Open: SDK／同意訊號、Gradle／實機驗證、啟用中介群組.
 
-Next: 使用者確認出價條款與工作分頁選擇後繼續.
+Next: 轉至 .worktrees/unity-ads session 接續已授權開發.
 
-Artifacts: PR #58；artifacts/A-026-unity-ads/tracker.md；Unity／AdMob 分頁.
+Artifacts: PR #58；Unity／AdMob 分頁；unity-ads worktree.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -469,5 +469,53 @@ Streams: none.
 ---
 
 # → Ask / A-027 (Takeshi Mori)
+
++ 接受出價條款
+  使用獨立worktree開發
+
+---
+
+## [RUN-001] Event — 2026-10-07 22:51:21 +0800 (A-027)
+
+- 已依本輪授權接受 AdMob Unity Ads 出價條款，保存 Game ID 800390974 的兩個對應：map-ad-2 → BP_Banner_Android、no-ad-6h → BP_Rewarded_Android；來源列表確認對應數 2。尚未加入中介群組。
+- agf new 建立並推送 unity-ads worktree；behind origin/main = 0、working tree clean、產品與 origin/main 無差異。依 stream 規範交由新工作目錄 session 接續 SDK 開發，未改產品。
+
+# ← Reply / A-027
+
+* _2026-10-07 22:51:21 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 出價條款已接受、兩個 AdMob 對應已保存；獨立 worktree 已建立，SDK 開發需在新工作目錄 session 接續。
+
+## [FINAL REPORT]
+
+1. 「接受出價條款
+使用獨立worktree開發」
+
+   - 已完成條款接受並保存 Unity bidding 來源。Game ID `800390974`：`map-ad-2` → `BP_Banner_Android`；`no-ad-6h` → `BP_Rewarded_Android`。後台確認對應數 2。尚未加入啟用中的中介群組，SDK／同意訊號與實機供應驗證未完成；未跑 Gradle，沒有背景工作。
+
+   - 已執行 agf new，建立並推送 `unity-ads` 分支與 `.worktrees/unity-ads`；工作樹乾淨、behind origin/main = 0，產品與 origin/main 無差異。PR #58 保留，Mintegral 排除。
+
+   - 依 [stream 規範](/Users/mori/.agents/skills/agentflow/references/streams.md) 的原文「After opening, tell the owner to exit and run the shell-quoted absolute continuation command from the CLI result.」，SDK 工作需轉到新工作目錄的 session；這是目前停下產品開發的原因，並非重新要求開發授權。
+
+   - 請退出目前 host，執行工具回傳的接續命令：
+
+     ```bash
+     cd '/Users/mori/side-project/Lets-go-gps/.worktrees/unity-ads' && codex
+     ```
+
+     新 session 輸入：「godev，接續 Unity Ads SDK 開發；讀取主工作紀錄 A-026／A-027，Game ID 800390974，BP_Banner_Android／BP_Rewarded_Android，AdMob 對應已保存；保留 PR #58，排除 Mintegral。完成 SDK、必要同意訊號、test／lintDebug／assembleDebug 與測試供應驗證後才啟用中介群組。」
+
+   - 新工作紀錄：[unity-ads.devlog.md](../.worktrees/unity-ads/.agentflow/features/unity-ads/unity-ads.devlog.md)。根工作紀錄保留所有授權與後台證據；stream session 應只更新 stream notebook。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-028 (Takeshi Mori)
 
 +
