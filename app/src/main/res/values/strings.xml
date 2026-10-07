@@ -439,4 +439,6 @@
     <string name="step_too_fast_body">目前模擬速度超過 20 km/h，已超出步行與跑步的合理範圍，這段移動不會換算成步數。把速度降到 20 km/h 以下即可恢復計步。</string>
     <string name="route_speed_exceeds_step_limit">速度超過 %1$d km/h，這段移動不會計為步數</string>
     <string name="step_setup_speed_limit_note">關於模擬速度：只有 %1$d km/h 以下的移動會換算成步數，超過就不計（那已超出步行與跑步的合理範圍）。預設的「步行」與「自行車」在範圍內，「開車」則不會產生步數。跳點模式的瞬移同樣不計步。</string>
+    <string name="ad_privacy_options">廣告隱私選項</string>
+    <string name="ad_privacy_error">目前無法開啟或更新廣告隱私選項，請稍後再試。</string>
 </resources>

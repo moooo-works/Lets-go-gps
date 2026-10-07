@@ -436,4 +436,6 @@
     <string name="step_too_fast_body">The simulated speed is above 20 km/h, beyond any plausible walking or running pace, so this stretch is not converted into steps. Drop below 20 km/h to resume counting.</string>
     <string name="route_speed_exceeds_step_limit">Above %1$d km/h — this movement will not count as steps</string>
     <string name="step_setup_speed_limit_note">About simulated speed: only movement at or below %1$d km/h is converted into steps; anything faster is skipped because it is beyond any plausible walking or running pace. The Walk and Bike presets stay within range; Drive produces no steps. Jump-mode teleports are never counted either.</string>
+    <string name="ad_privacy_options">Ad privacy options</string>
+    <string name="ad_privacy_error">Ad privacy options could not be opened or updated. Please try again later.</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.content.Context
 import com.moooo_works.letsgogps.data.imports.GpxImportBus
+import com.moooo_works.letsgogps.data.billing.AdConsentManager
 import javax.inject.Inject
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +78,7 @@ fun applyLocale(base: Context): Context {
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var gpxImportBus: GpxImportBus
+    @Inject lateinit var adConsentManager: AdConsentManager
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(applyLocale(newBase))
@@ -117,6 +119,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        adConsentManager.gatherConsent(this)
     }
 
     override fun onNewIntent(intent: Intent) {
