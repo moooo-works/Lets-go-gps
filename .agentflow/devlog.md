@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 設定提交 149b8b9；收尾見 Git history.
+Current commit: 本輪主代理與工作代理模型說明見 Git history.
 
-Tests/scenarios: settings validate／show、獨立檢查 PASS.
+Tests/scenarios: settings show 核對 profile／roles；查核官方 reasoning 文件.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: root auto-reply on、away-gates on、streams off.
+Proven: 外部工作代理按階段配置；主代理不因任務自動升級.
 
-Open: Unity worktree 設定未同步；SDK 與測試待續.
+Open: Unity SDK／同意訊號與測試待續.
 
-Next: unity-ads worktree 接續開發.
+Next: 既有 worktree 接續已授權開發.
 
 Artifacts: ag.json；PR #58；unity-ads worktree.
 
@@ -686,5 +686,36 @@ streams: off」
 ---
 
 # → Ask / A-033 (Takeshi Mori)
+
++ 你的工作流程是跟我對話時是用 low，開始執行任務時，就會提高思考跟換模型對嗎？
+
+# ← Reply / A-033
+
+* _2026-10-07 23:54:50 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 不完全是：主代理不會因開始任務自動換模型或提高 effort；godev 可依任務階段選擇不同外部工作代理，且 implementation 預設仍是 low。
+
+## [FINAL REPORT]
+
+1. 「你的工作流程是跟我對話時是用 low，開始執行任務時，就會提高思考跟換模型對嗎？」
+
+   - 主代理與工作代理不同。與你對話、規劃、操作工具的主代理沿用 host 設定；godev 不會因聊完開始動手就自動更換我的模型或 effort。目前沒有可直接更改主代理模型的工具；若 UI 顯示 low，不能以任务開始為由宣稱已提高。
+
+   - 外部工作代理則可依 ag.json 的階段角色選擇設定。Codex profile：requirements／codewalk／explore／spike／spec／acceptance／cross-check 用 better = gpt-6.1-sol/high；implementation 用 basic = gpt-6.1-sol/low；security-scan 用 best = gpt-6-astra/medium。這是設定偏好，需實際啟動該代理才能證明有用到，不是所有任務一定分派。
+
+   - 簡單任務可由主代理直接做。上一輪設定檢查派的是 native subagent，沿用主代理設定；没有證據顯示它用了 external better 模型，報告亦標 codex/unknown，不能稱為已切 high。
+
+   - low／high 是思考強度設定，不等於模型名稱；模型也會依問題難度調整實際推理量，但不表示設定值或模型已改變。官方把 reasoning.effort 與模型配置分開說明。[OpenAI 官方說明](https://developers.openai.com/api/docs/guides/reasoning)。auto-reply／away-gates／streams 控制流程，不控制主代理的模型或 effort。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-034 (Takeshi Mori)
 
 +
