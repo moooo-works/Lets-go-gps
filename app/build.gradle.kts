@@ -114,7 +114,7 @@ androidComponents {
             mapOf(
                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "true", "Debug Pro override"),
                 "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544~3347511713\"", "Google sample App ID"),
-                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/6300978111\"", "Google sample Banner unit"),
+                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/9214589741\"", "Google sample adaptive Banner unit"),
                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/5224354917\"", "Google sample Rewarded unit")
             )
         } else {

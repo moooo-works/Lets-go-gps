@@ -2,10 +2,17 @@ package com.moooo_works.letsgogps.data.billing
 
 import android.app.Activity
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class RewardedAdManagerTest {
 
     private val activity = mockk<Activity>(relaxed = true)
@@ -60,8 +67,9 @@ class RewardedAdManagerTest {
 
     private fun manager(
         loader: FakeLoader,
-        gate: FakeInitializationGate = FakeInitializationGate()
-    ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate)
+        gate: FakeInitializationGate = FakeInitializationGate(),
+        retryScope: CoroutineScope = TestScope()
+    ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate, retryScope = retryScope)
 
     @Test
     fun `preload calls loader once`() {
@@ -171,6 +179,64 @@ class RewardedAdManagerTest {
         loader.pendingDismiss?.invoke()
 
         assertEquals(1, rewardCount)
+    }
+
+    @Test
+    fun `failed load retries automatically and stops after three retries`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = this)
+        mgr.preload()
+        runCurrent()
+
+        advanceTimeBy(4_999)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+        advanceTimeBy(15_000)
+        runCurrent()
+        assertEquals(3, loader.loadCalls)
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+        advanceTimeBy(120_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+    }
+
+    @Test
+    fun `manual preload cancels scheduled retry and does not load a second cached ad`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = this)
+        mgr.preload()
+        runCurrent()
+        loader.nextOutcome = FakeLoader.Outcome.LoadOk
+        mgr.preload()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+    }
+
+    @Test
+    fun `successful retry resets backoff for the next ad`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = this)
+        mgr.preload()
+        runCurrent()
+        loader.nextOutcome = FakeLoader.Outcome.LoadOk
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+
+        mgr.showAd(activity, onReward = {}, onUnavailable = { fail("ad should be ready") })
+        loader.nextOutcome = FakeLoader.Outcome.LoadFails
+        loader.pendingDismiss?.invoke()
+        runCurrent()
+        assertEquals(3, loader.loadCalls)
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
     }
 
     private fun fail(msg: String): Nothing = throw AssertionError(msg)
