@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪諮詢紀錄見 Git history.
+Current commit: 本輪紀錄見 Git history.
 
-Tests/scenarios: 官方文件與廣告程式唯讀檢查；未執行產品測試.
+Tests/scenarios: test 下載階段終止 exit 143；lintDebug/assembleDebug 未跑.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 提供 AdMob 中介與現有廣告優化建議.
+Proven: Git preflight 通過；廣告現況及第三方接入需求已確認.
 
-Open: 尚無收益報表，無法排序來源或估計增幅.
+Open: 競價與程式優化未完成；AdMob 存取遭拒；等待報表、核准來源、工作區選擇.
 
-Next: 等待使用者提供近 28 天廣告數據.
+Next: 依 A-002 既有授權繼續廣告優化與競價接入.
 
 Artifacts: none.
 
@@ -63,5 +63,76 @@ Streams: none.
 ---
 
 # → Ask / A-002 (Takeshi Mori)
+
++ 好，保留AdMob，你來幫我處理其他競價與優化現有廣告，你有需要什麼資料嗎？還是你自己登入到admob看資料
+
+---
+
+## [RUN-001] Event — 2026-10-07 14:41:04 +0800 (A-002)
+
+- 已授權保留 AdMob、增加競價與改善既有廣告；採先讀後台與現況的路線。
+- AdMob 網站存取遭瀏覽器權限政策拒絕，不改用其他途徑繞過；已請使用者提供 28 天報表及核准來源。
+- Git preflight：branch main；status 為 main...origin/main、M .agentflow/devlog.md、?? ag.json；fetch 成功；origin/main d175081da672859136769bee5e05a69b25bfefec。
+- origin/main 最近五筆：d175081 docs: 記錄 AdMob 中介與收益優化建議；584f3fe Merge pull request #57 from moooo-works/chore/bump-version-1.3.4；ce0cee3 chore: bump version to 1.3.4；86891c8 Merge pull request #56 from moooo-works/fix/health-connect-guidance-refresh；103aa03 fix: refresh Health Connect step sync guidance。
+- origin/main:AGENTS.md 已確認存在，ls -la AGENTS.md 顯示正常檔案。產品尚未修改；已啟動 test 基線，Gradle 首次下載中。
+- 已詢問 streams: ask 的工作區選擇；待回覆前先查 SDK 文件與執行唯讀檢查。
+
+## [RUN-002] Event — 2026-10-07 14:43:11 +0800 (A-002)
+
+- 完成 SDK 官方文件查核；基線測試尚在下載，已終止並確認 exit 143。未改產品，保留原實作授權與待辦。
+
+# ← Reply / A-002
+
+* _2026-10-07 14:43:11 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已確認程式與接入需求；競價配置及廣告優化尚未實作，等待報表、核准來源與工作區選擇。AdMob 讀取遭瀏覽器權限拒絕。
+
+## [FINAL REPORT]
+
+1. 「好，保留AdMob，你來幫我處理其他競價與優化現有廣告，你有需要什麼資料嗎？還是你自己登入到admob看資料」
+
+   - 已接受保留 AdMob、增加競價與優化現有廣告的實作授權；工作仍未完成。本輪未修改產品、未建立合作、未操作中介配置。
+   - 已找到既有 AdMob 瀏覽器分頁，但綁定該分頁遭自動權限檢查拒絕，理由是使用者未允許這次網站存取；沒有繞過拒絕。請提供報表，無須提供帳號密碼。
+   - 所需資料：最近 28 天按國家與廣告格式拆分的收益、請求數、曝光數、eCPM、match rate、show rate，以及已核准第三方來源。DAU 可另外提供；若無核准來源，填尚無。
+   - 第三方接入還需要實際平台識別碼；例如 Unity bidding 需要 Game ID 和 Placement ID。建立合作時的法律條款需由使用者在具體步驟確認，不能將本次概括授權視為同意條款。[Google Unity 接入說明](https://developers.google.com/admob/android/next-gen/mediation/unity)。
+   - 現有廣告可先改善自適應橫幅與容器高度、載入診斷、獎勵廣告有限次重試；不需要等報表才能開發這部分。需避免與後台橫幅自動刷新重複重試。[Google 橫幅文件](https://developers.google.com/admob/android/next-gen/banner)。
+   - 開發工作區仍待選擇。依 [agentflow streams 規範](/Users/mori/.agents/skills/agentflow/references/streams.md)「streams: always proceeds for plain feature/parallel triggers; ask batches the same question」，現有設定 streams: ask，因此在選擇前未開工作區或改產品。
+   - Git preflight 完整輸出：
+     ```text
+     $ git rev-parse --abbrev-ref HEAD
+     main
+     $ git status --short --branch
+     ## main...origin/main
+      M .agentflow/devlog.md
+     ?? ag.json
+     $ git fetch origin --prune
+     (exit 0; no output)
+     $ git rev-parse origin/main
+     d175081da672859136769bee5e05a69b25bfefec
+     $ git log --oneline -5 origin/main
+     d175081 docs: 記錄 AdMob 中介與收益優化建議
+     584f3fe Merge pull request #57 from moooo-works/chore/bump-version-1.3.4
+     ce0cee3 chore: bump version to 1.3.4
+     86891c8 Merge pull request #56 from moooo-works/fix/health-connect-guidance-refresh
+     103aa03 fix: refresh Health Connect step sync guidance
+     ```
+   - 已確認 origin/main 的 AGENTS.md 與本地 AGENTS.md 存在。./gradlew test 停留在首次下載 Gradle 9.3.1，等待決策期間已終止該下載程序（exit 143），没有測試通過證據；lintDebug、assembleDebug 未執行。尚無 PR 或合併要求。
+   - 下一步沿用既有實作授權：收到工作區選擇後建立最新 main 上的 feature 分支，完成現有廣告改善及必跑驗證；收到報表與核准來源後完成對應競價接入。未核准來源保留待申請，不能聲稱開始供應。
+
+## Questions (batched — each with a suggested default)
+
+1. 廣告優化要使用目前 checkout 的新 feature 分支，或建立獨立工作區？
+   - Suggested default: 使用目前 checkout 的新 feature 分支。
+   - ans:
+
+2. 請提供上述最近 28 天報表數值與目前已核准競價來源。
+   - Suggested default: 匯出按國家及廣告格式拆分的報表；無核准來源填尚無。
+   - ans:
+
+---
+
+# → Ask / A-003 (Takeshi Mori)
 
 +
