@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪設定操作說明見 Git history.
+Current commit: 本輪設定持久性說明見 Git history.
 
-Tests/scenarios: 依已讀取 skill／設定說明；未修改設定或產品.
+Tests/scenarios: 依已讀 skill 的設定保存與 stream 複製規範；未改設定.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 可用聊天設定指令；root 與既有 worktree 設定分開.
+Proven: 同目錄 session 沿用保存設定；worktree 建立後各自保存.
 
 Open: Unity SDK／同意訊號與測試；自主性設定尚未修改.
 
-Next: 在目標開發 session 送出設定指令後接續已授權工作.
+Next: 依目標目錄保存設定一次，後續 session 沿用.
 
 Artifacts: PR #58；unity-ads worktree.
 
@@ -618,5 +618,36 @@ Streams: none.
 ---
 
 # → Ask / A-031 (Takeshi Mori)
+
++ 每次開新session就要設定一次嗎？
+
+# ← Reply / A-031
+
+* _2026-10-07 23:45:54 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 不用每次設定；godev 設定持久保存在該專案／worktree 的 ag.json，新 session 會沿用。
+
+## [FINAL REPORT]
+
+1. 「每次開新session就要設定一次嗎？」
+
+   - 不用。同一專案目錄的新 session 會讀取已保存的 ag.json，auto-reply、away-gates、streams 等設定會保留。
+
+   - 新建立的 worktree 會複製當時主專案的設定；建立後兩邊各有自己的副本，之後不會自動同步。現有 unity-ads worktree 是修改設定前建立，因此若主目錄後來修改，該 worktree 仍需另改一次，之後其新 session 同樣沿用。
+
+   - 全新專案則使用自己的設定，不會因這個專案改過就全部套用。裸 godev 用來啟動或恢復流程，不代表每次都要重送設定。這裡說的是 godev 設定；平台網站權限／強制條款確認屬於另一層。
+
+   - 目前只是說明，尚未修改根專案或 worktree 設定。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-032 (Takeshi Mori)
 
 +
