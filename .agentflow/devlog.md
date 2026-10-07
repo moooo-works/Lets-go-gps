@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪 AdMob 共存說明見 Git history.
+Current commit: 本輪自主性與批准機制說明見 Git history.
 
-Tests/scenarios: 查核 Google 官方中介說明；未改产品或跑測試.
+Tests/scenarios: 查核本地 skill／設定及 OpenAI 官方說明；未改設定或產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 已保存對應但尚未加入中介群組；AdMob 與 Unity 可共同供應.
+Proven: auto-reply off、away-gates off、streams ask；沒有 looper 執行.
 
-Open: SDK／同意訊號、Gradle／實機驗證、啟用中介群組.
+Open: Unity SDK／同意訊號與測試；目前設定不符合少打擾期望.
 
-Next: unity-ads worktree session 接續開發.
+Next: 依既有授權接續開發；日常操作不重複批准.
 
-Artifacts: PR #58；Unity／AdMob 分頁；unity-ads worktree.
+Artifacts: PR #58；unity-ads worktree.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -546,5 +546,40 @@ Streams: none.
 ---
 
 # → Ask / A-029 (Takeshi Mori)
+
++ 為什麼你每次都要跟我要權限？這樣怎麼不像開發godev的人說可以24小時不間斷的派你工作？是你的問題還是我不會使用godev這套工具？
+
+# ← Reply / A-029
+
+* _2026-10-07 23:40:19 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 不是你不會用；中斷來自目前保守設定、必要平台批准，以及我沒有充分延續已授權工作的處理問題。裸 godev 不會自動啟動全天候任務佇列。
+
+## [FINAL REPORT]
+
+1. 「為什麼你每次都要跟我要權限？這樣怎麼不像開發godev的人說可以24小時不間斷的派你工作？是你的問題還是我不會使用godev這套工具？」
+
+   - 不是你不會用。我應該把已授權的開發持续做下去，只在真正需要你決定時停下；先前沒有把可先行的準備工作做足，頻繁把流程選擇交給你，這部分是我的處理問題。對工作分頁，使用者已有明確執行指示時，不應把所有例行操作都重新當成權限問題。
+
+   - 實際三種停點不同：早先 git fetch 等是當時 workspace-write 沙箱批准，現在 session 已是 danger-full-access／never，因此不需要相同 shell 升權；AdMob 出價條款是瀏覽器規範要求「Confirmation Required at Action time」，需要確認一次，現在已接受，不該重問；worktree 轉 session 是 [streams 規範](/Users/mori/.agents/skills/agentflow/references/streams.md) 明文「After opening, tell the owner to exit and run the shell-quoted absolute continuation command from the CLI result.」，不是 Codex 本身不能在指定 workdir 操作 Git。
+
+   - 目前 ag.json 是 auto-reply: off、away-gates: off、streams: ask；因此 routine defaults、Design Go／Result Go 與是否開新 stream 都偏向人工確認。這些設定與你期待的長時間少打擾工作不一致。可選 auto-reply: on、away-gates: on，並依工作方式選 streams: off 或 always；always 仍有轉 session 規範，並不能消除交接。這裡只是解釋選項，未擅自改設定。
+
+   - [SKILL.md](/Users/mori/.agents/skills/agentflow/SKILL.md) 的裸 godev 是啟動／恢復工作流程，不是自動建立與啟動全天候任務排程。依 [looper 規範](/Users/mori/.agents/skills/agentflow/references/looper.md)，長佇列需先有明確計畫與範圍，再由 run-plans／run-looper 啟動。本次沒有啟動 looper，也沒有運行中的持續目標，不能宣稱背景仍在開發。
+
+   - 「24 小時」需任務佇列或持续執行機制、可用執行環境及供應商能力配合，並不保證遇到條款、登入、網站拒絕或使用者專屬決策時還能自行越過。未提供作者原始說法，不能斷言他的宣稱是什麼。OpenAI 官方也說持續目標與自動批准審查不會改變既有權限邊界。[官方說明](https://developers.openai.com/blog/automating-repetitive-work-at-openai-with-codex)。
+
+   - Unity 接入授權仍有效。SDK 與同意訊號、三項 Gradle 檢查及供應驗證仍未完成；不需重新要求你批准接入、測試或 PR #58 保留。接下來應由我減少例行提問、清楚報告真正阻塞，不能把設定不符合期望的責任推給你。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-030 (Takeshi Mori)
 
 +
