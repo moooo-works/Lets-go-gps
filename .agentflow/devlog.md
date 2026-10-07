@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪紀錄見 Git history.
+Current commit: 產品 bb58f9a1244f8ce6c1d32cd39ae532c15157ad27；交付紀錄見 feature Git history.
 
-Tests/scenarios: test 下載階段終止 exit 143；lintDebug/assembleDebug 未跑.
+Tests/scenarios: test SUCCESS（185 執行/66 skipped/0 failures）；lintDebug SUCCESS 但 34 errors 位於未改檔案；assembleDebug SUCCESS；獨立審查 PASS；實機待補.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Git preflight 通過；廣告現況及第三方接入需求已確認.
+Proven: 現有廣告優化與兩份本機 CSV 分析已交付 draft PR #58，behind main=0.
 
-Open: 競價與程式優化未完成；AdMob 存取遭拒；等待報表、核准來源、工作區選擇.
+Open: 第三方競價未接入，尚無核准帳戶；AdMob/Mintegral 瀏覽器被拒；日期與實機待補.
 
-Next: 依 A-002 既有授權繼續廣告優化與競價接入.
+Next: 使用者完成 Mintegral 申請及提供日期；核准後沿用 A-002 授權接入單一來源對照.
 
-Artifacts: none.
+Artifacts: PR #58；.agentflow/artifacts/A-003-admob/tracker.md；.agentflow/artifacts/A-003-admob/review.md；私人 CSV 保留 Downloads 未提交.
 
 Archived eras: none.
 
@@ -134,5 +134,158 @@ Streams: none.
 ---
 
 # → Ask / A-003 (Takeshi Mori)
+
++ 目前 checkout 的新 feature 分支
+  報表你看一下能不能操控瀏覽器來下載
+
++ 我開啟權限了
+
++ /Users/mori/Downloads/admob-report.csv
+
++ <send_user_message_question_reply>
+  [{"answer":"/Users/mori/Downloads/admob-report\\ \\(1\\).csv\n尚無","question":"這份 CSV 只有 App 總計。請補充報表日期範圍，並匯出按「國家＋廣告格式」拆分的同期間報表；另外，目前 Unity Ads、Mintegral、Pangle 等是否有已核准帳戶？沒有可直接填「尚無」。","questionItemId":"[\"request_user_input_async\",\"call_b139b5373d9b4110ba8fe959c6b0fb08\",0]"}]
+  </send_user_message_question_reply>
+
+---
+
+## [RUN-001] Event — 2026-10-07 14:49:51 +0800 (A-003)
+
+- 沿用 A-002 實作授權，使用者已選目前 checkout 的新 feature 分支；從 origin/main fb49d2fb1456716d44d98e6d9db05f3b104f424e 建立 feat/admob-ad-optimization，保留本輪筆記與未追蹤 ag.json，未 reset dirty files。
+- Preflight branch main；status main...origin/main、M .agentflow/devlog.md、?? ag.json；fetch exit 0；origin/main fb49d2fb1456716d44d98e6d9db05f3b104f424e；最近五筆 fb49d2f、d175081、584f3fe、ce0cee3、86891c8。origin/main:AGENTS.md 與 ls -la AGENTS.md 已確認。
+- 使用者表示已開權限後再次讀取 AdMob，仍被 saved preference blocks it 拒絕；沒有改用其他介面。T-2/T-3 等待網站權限生效或 CSV 與核准來源。
+- 直接實作路線限現有廣告改善；不增加未核准 SDK，不建立資料上傳管道。追蹤表 .agentflow/artifacts/A-003-admob/tracker.md 已驗證。
+- 新增獎勵廣告重試的三個測試：延遲與上限、手動 preload 取消重複重試、成功後重設。
+- 官方 Gradle 下載緩慢，停止兩個本輪下載程序，改同一官方檔案分段下載並以官方 SHA-256 驗證；產品 Gradle 設定不變。
+
+## [RUN-002] Event — 2026-10-07 14:52:20 +0800 (A-003)
+
+- 官方 Gradle 9.3.1 分段下載完成，SHA-256 b266d5ff6b90eada6dc3b20cb090e3731302e553a27c5d3e4df1f0d76beaff06 已驗證並安裝本機 wrapper cache；使用 Android Studio Java 21。
+- 首次 focused test 因 MAPS_API_KEY 未設定而停在 configuration。已用命令範圍 MAPS_API_KEY=build-validation-placeholder 修正驗證環境；不保存金鑰、不改設定、不代表能實際載入地圖。
+- focused test 正安裝缺少的 SDK 平台與 Build-Tools，之後會驗證新增測試在舊實作上失敗。現有 diff 僅筆記、tracker 與 RewardedAdManagerTest.kt，符合 T-1。
+
+## [WIP-001] Checkpoint — 2026-10-07 14:53:40 +0800 (A-003)
+
+- **Finished:** 新 feature 分支與 Git preflight；官方 Gradle 校驗；新增三個重試測試；AdMob 權限重試仍被封鎖。
+- **Running now:** focused test 首次編譯與下載依賴，尚未得到失敗測試結果。
+- **Still to do:** 最小廣告實作、完整 test/lintDebug/assembleDebug、獨立審查；後台報表與競價來源仍待使用者。
+- **Next work action:** 確認新增測試在舊實作上失敗後，加入有限次重試與自適應橫幅。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-07 14:56:27 +0800 (A-003)
+
+- 新增測試在舊實作上執行：12 個、2 個失敗，證明缺少自動重試與成功後重設；失敗不是編譯或環境錯誤。
+- 最小實作已完成：獎勵載入失敗後依 5/15/30 秒最多重試三次，手動 preload 取消排程；增加本機錯誤碼與曝光事件診斷。橫幅依可視容器寬度選取較小 anchored adaptive 尺寸、同步高度，寬度/方向變更釋放舊 AdView；改用 adaptive 測試版位。
+- ./gradlew test 成功；XML 合計 251 tests、0 failures、0 errors、66 skipped（實際執行 185）。三個新增重試案例及原獎勵流程均通過。
+- 使用者提供的 Downloads/admob-report.csv 已唯讀分析，UTF-16 tab 分隔、只有應用程式總計，缺日期/國家/格式及活躍使用者。私人收益與數值不寫入 Git；CSV 留原位置，未上傳。
+- lintDebug 正執行；assembleDebug 與獨立審查待完成。adb devices 無連線裝置，實機 smoke test 待補。
+
+## [RUN-004] Event — 2026-10-07 14:59:53 +0800 (A-003)
+
+- lintDebug 與 assembleDebug 命令成功。lint 報告 34 errors、91 warnings、3 hints；errors 都位於未改檔案，廣告修改檔案無列出問題。abortOnError=false 代表命令成功不等於 lint 零錯誤。
+- 產品提交 bb58f9a1244f8ce6c1d32cd39ae532c15157ad27；4 個產品檔案、197 行增刪，git diff --check 通過。審查 planner 判定 targeted。
+- 依技能要求使用 native 獨立審查 /root/ad_review，fork_turns=none、模型繼承；權限共享、唯讀僅指示未技術強制。審查只可寫 review.md，復用本輪驗證證據，禁止讀私人 CSV；coordinator 保留驗收。
+- 後台媒合來源與實際競價尚未接入，不能聲稱收益提高。CSV 缺少日期、國家與格式，已請使用者補同期間分群報表及核准帳戶。
+
+## [RUN-005] Event — 2026-10-07 15:04:48 +0800 (A-003)
+
+- 已驗收 native 審查報告，指定 bb58f9a commit、Outcome/Minimality/Conformance/Verdict 全 PASS；主審讀回 report 並確認僅授權記錄新增，產品未再變更。
+- 已唯讀分析第二份國家/格式 CSV；以欄位重算加權媒合/顯示率，不直接平均百分比。台灣為主要流量，橫幅供應應優先測試；獎勵廣告的低顯示率含預載未使用，不能直接當成故障。日期仍缺，未推算每日收益；两份報表有小幅總計差異，後續比較需統一期間與導出時間。
+- 使用者確認尚無第三方核准帳戶。建議先申請 Mintegral 作為測試來源，核准後只加一個來源做對照；這是申請/驗證順序而非收益排名。查閱 Google 官方接入文件，Mintegral 支援所需格式及 bidding。
+- 查看 dev.mintegral.com 申請頁亦遭瀏覽器政策拒絕，理由 user declined permission；未改用其他途徑。申請需使用者本人先完成；AdMob mapping 與 adapter 仍待核准。
+- feature 已 push；私人 CSV 與收益數字未進 Git，ag.json 未提交。準備既有廣告優化 draft PR，無合併要求。
+
+## [RUN-006] Event — 2026-10-07 15:07:59 +0800 (A-003)
+
+- PR #58 已確認 isDraft=true、base=main、head=feat/admob-ad-optimization；已檢查所有最終變更路徑、Git diff check、審查報告與 tracker，2/3 任務完成，競價待核准。
+
+# ← Reply / A-003
+
+* _2026-10-07 15:07:59 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已從最新 main 建立 feat/admob-ad-optimization，現有廣告優化完成並交付草稿 PR #58；瀏覽器下載被政策拒絕，改讀使用者提供的 CSV。
+
+- 使用者開權限後重試仍被儲存偏好封鎖，沒有繞過。
+
+- 第一份 CSV 已讀取，只有 App 總計；分析改以後續分群資料為準，不把私人收益提交 Git。
+
+- 第二份 CSV 已完成分群分析；優先測台灣橫幅的新競價來源。尚無核准帳戶，建議先申請 Mintegral，競價接入仍待核准。
+
+## [FINAL REPORT]
+
+1. 「目前 checkout 的新 feature 分支
+   報表你看一下能不能操控瀏覽器來下載」
+
+   - **現有廣告優化完成：**[草稿 PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58)，feature 分支 feat/admob-ad-optimization。產品 commit bb58f9a1244f8ce6c1d32cd39ae532c15157ad27。自適應橫幅依可視容器寬度請求廣告，保留相符高度，宽度或方向改變時釋放舊 AdView；Debug 改 adaptive 測試版位。
+
+   - **獎勵廣告改善：**載入失敗後依 5、15、30 秒最多自動重試三次；手動預載取消排程，成功後重設。保留一次性獎勵及關閉後預載。新增本機載入錯誤码／曝光／獎勵事件診斷，沒有新增 Analytics 上傳或未核准 adapter。
+
+   - **驗證：**./gradlew test、./gradlew lintDebug、./gradlew assembleDebug 命令成功。test XML 共 251 項、185 實際執行、66 skipped、0 failures、0 errors；新增重試案例先在舊實作出現 2 個預期 assertion failures，再修正通過。lint 設定 abortOnError=false，仍有 34 errors／91 warnings／3 hints，errors 位於未改檔案，廣告修改檔案無列出問題；不能稱全專案 lint 乾淨。
+
+   - **審查與限制：**已讀回獨立審查報告，指定產品 commit 的 Outcome、Minimality、Conformance 全 PASS。沒有連線裝置，實機 smoke test（mock app、冷啟動設定防誤觸、四項 Map UX、橫幅旋轉及獎勵流程）由提交者發布前補測。建置使用 Android Studio Java 21 與命令範圍 Maps key 占位值，實際地圖載入未驗證。尚未要求合併，沒有收益增加證據。
+
+   - **Git preflight：**
+     ```text
+     $ git rev-parse --abbrev-ref HEAD
+     main
+     $ git status --short --branch
+     ## main...origin/main
+      M .agentflow/devlog.md
+     ?? ag.json
+     $ git fetch origin --prune
+     (exit 0; no output)
+     $ git rev-parse origin/main
+     fb49d2fb1456716d44d98e6d9db05f3b104f424e
+     $ git log --oneline -5 origin/main
+     fb49d2f docs: 記錄廣告優化前置檢查與待補資料
+     d175081 docs: 記錄 AdMob 中介與收益優化建議
+     584f3fe Merge pull request #57 from moooo-works/chore/bump-version-1.3.4
+     ce0cee3 chore: bump version to 1.3.4
+     86891c8 Merge pull request #56 from moooo-works/fix/health-connect-guidance-refresh
+     ```
+
+   - 已確認 origin/main:AGENTS.md 與本地檔案存在，直接從最新 origin/main 開分支，保留本輪筆記與既有 ag.json；沒有對 dirty files 做 reset。GitHub compare API 回傳 ahead_by=1、behind_by=0、status=ahead；PR 指向 main 且 isDraft=true。
+
+   - **Key Records — read these first**
+
+     [草稿 PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58) 包含程式改動、驗證與實機待補項目。
+
+     [獨立審查報告](artifacts/A-003-admob/review.md) 說明指定產品 commit 的受影響流程與限制。
+
+     [工作追蹤](artifacts/A-003-admob/tracker.md) 保留尚未完成的競價接入與下一步。
+
+2. 「我開啟權限了」
+
+   - 已重新嘗試 AdMob 分頁；自動權限檢查仍拒絕，理由是 saved user permission setting blocks this action。未使用其他表面或 API 繞過。後續以你提供的 CSV 完成分析，但瀏覽器自行下載未成功。
+
+3. 「/Users/mori/Downloads/admob-report.csv」
+
+   - 已唯讀讀取 UTF-16、tab 分隔的原檔；只有應用程式總計，無日期、國家、格式，活躍使用者欄位為空，不能推算每日收益或 ARPDAU。初步加權計算已與曝光／請求／收益定義核對。
+
+   - CSV 留在 Downloads，沒有上傳或提交；私人收益與百分比不寫入 Git。本輪完整分析的原始輸入可在 [原總計 CSV](/Users/mori/Downloads/admob-report.csv) 與後續分群檔核對。以後續分群檔作目前判斷，不混用兩次匯出的小幅總計差異。
+
+4. 「/Users/mori/Downloads/admob-report\ \(1\).csv
+   尚無」
+
+   - 已讀取實際路徑 [分群 CSV](</Users/mori/Downloads/admob-report (1).csv>)，104 筆國家／格式資料，重算曝光／媒合請求及加權率；未直接平均百分比。**優先處理台灣橫幅供應。**獎勵廣告主要市場的媒合已接近完整；低顯示率包括預載未使用，不能直接當成故障，更不能因此強迫看廣告。新增重試能改善暫時載入失敗，但不宣稱能解決這份報表的主要收益問題。
+
+   - 兩份 CSV 的請求總計相同，但曝光與逐列四捨五入的收益有小幅差異；不能判定全部差異原因。報表缺日期，還需起迄日期供後續同期間對照；不推算每日或月收益。
+
+   - **競價仍未完成：**你已確認尚無核准帳戶。建議先申請 [Mintegral 發布者帳戶](https://dev.mintegral.com)，作第一個待核准測試來源。Google 文件列出 Android bidding 與橫幅／獎勵格式接入；這是可接入候選，不能證明對你的台灣流量一定較高收益。[官方接入說明](https://developers.google.com/admob/android/next-gen/mediation/mintegral)。
+
+   - 本機嘗試查看 Mintegral 申請頁也被自動權限檢查拒絕，理由是 user declined permission。你需先自行完成帳戶申請與條款確認；核准後沿用 A-002 的既有授權接 SDK／adapter、AdMob mapping、測試供應，再一次只加一個來源做 A/B 對照。網站權限仍需可用，不能聲稱已開始供應。
+
+   - 現有廣告程式與報表分析已交付；帳戶申請、第三方競價、真實廣告 smoke test 與收益對照尚未完成，沒有背景工作在執行。
+
+## Questions (batched — each with a suggested default)
+
+1. 請補兩份 CSV 的報表起迄日期。
+   - Suggested default: 回覆 AdMob 匯出時選擇的日期範圍；不要從檔案下載日期推定。
+   - ans:
+
+---
+
+# → Ask / A-004 (Takeshi Mori)
 
 +
