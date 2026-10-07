@@ -169,4 +169,23 @@ class AdConsentManagerTest {
         manager.gatherConsent(mockk(relaxed = true))
         assertEquals(2, backend.updateCalls)
     }
+
+    @Test fun `each request reasserts privacy restriction and failure revokes current revision`() {
+        val backend = FakeBackend()
+        val manager = AdConsentManager(backend)
+        assertFalse(manager.prepareAdRequest())
+        assertEquals(0, backend.privacyApplyCalls)
+        manager.gatherConsent(activity)
+        backend.canRequestAds = true
+        backend.success()
+        backend.dismissed(null)
+        assertTrue(manager.prepareAdRequest())
+        assertTrue(manager.prepareAdRequest())
+        assertEquals(3, backend.privacyApplyCalls)
+        val previousRevision = manager.state.value.revision
+        backend.privacyApplied = false
+        assertFalse(manager.prepareAdRequest())
+        assertFalse(manager.state.value.canRequestAds)
+        assertTrue(manager.state.value.revision > previousRevision)
+    }
 }
