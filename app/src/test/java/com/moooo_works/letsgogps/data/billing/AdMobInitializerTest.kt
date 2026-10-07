@@ -36,6 +36,7 @@ class AdMobInitializerTest {
     @Before fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         every { consent.state } returns consentState
+        every { consent.prepareAdRequest() } answers { consentState.value.canRequestAds }
         mockkObject(MobileAds.Companion)
         every { MobileAds.initialize(any(), any(), capture(listener)) } answers { initialized.countDown() }
         initializer = AdMobInitializer(mockk<Context>(relaxed = true), consent)
@@ -77,5 +78,15 @@ class AdMobInitializerTest {
         initializer.whenReady { ready = it }
         shadowOf(Looper.getMainLooper()).idle()
         assertEquals(false, ready)
+    }
+
+    @Test fun `privacy preparation failure never initializes and releases waiting caller`() {
+        every { consent.prepareAdRequest() } returns false
+        consentState.value = AdConsentState(canRequestAds = true, revision = 1)
+        var ready: Boolean? = null
+        initializer.whenReady { ready = it }
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(false, ready)
+        verify(exactly = 0) { MobileAds.initialize(any(), any(), any()) }
     }
 }

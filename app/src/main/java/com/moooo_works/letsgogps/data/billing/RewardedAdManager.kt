@@ -76,6 +76,10 @@ class RewardedAdManager(
                 isLoading = false
                 return@whenReady
             }
+            if (!consent.prepareAdRequest() || !current()) {
+                isLoading = false
+                return@whenReady
+            }
             loader.load(
                 unitId = unitId,
                 onLoaded = { ad ->
@@ -112,8 +116,14 @@ class RewardedAdManager(
             preload()
             return
         }
-        loadedAd = null
         val revision = consent.state.value.revision
+        if (!consent.prepareAdRequest() || !consent.state.value.canRequestAds ||
+            consent.state.value.revision != revision) {
+            invalidate()
+            onUnavailable()
+            return
+        }
+        loadedAd = null
         val rewardDelivered = AtomicBoolean(false)
         ad.show(
             activity = activity,

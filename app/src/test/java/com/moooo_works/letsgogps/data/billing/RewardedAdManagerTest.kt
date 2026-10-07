@@ -46,6 +46,12 @@ class RewardedAdManagerTest {
 
     private class FakeConsent : AdConsentGate {
         override val state = MutableStateFlow(AdConsentState(canRequestAds = true))
+        var privacyReady = true
+        var preparations = 0
+        override fun prepareAdRequest(): Boolean {
+            preparations++
+            return state.value.canRequestAds && privacyReady
+        }
         fun update(allowed: Boolean) {
             state.value = state.value.copy(canRequestAds = allowed, revision = state.value.revision + 1)
         }
@@ -257,6 +263,23 @@ class RewardedAdManagerTest {
         loader.pendingDismiss?.invoke()
         assertEquals(0, rewards)
         assertEquals(1, loader.loadCalls)
+    }
+
+    @Test fun `privacy preparation failure blocks real load and cached ad show`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
+        val consent = FakeConsent().apply { privacyReady = false }
+        val mgr = manager(loader, consent = consent)
+        mgr.preload()
+        assertEquals(0, loader.loadCalls)
+        consent.privacyReady = true
+        mgr.preload()
+        assertEquals(1, loader.loadCalls)
+        consent.privacyReady = false
+        var unavailable = false
+        mgr.showAd(activity, { fail("must not reward") }, { unavailable = true })
+        assertTrue(unavailable)
+        assertEquals(1, loader.destroyCalls)
+        assertEquals(3, consent.preparations)
     }
 
     private fun fail(msg: String): Nothing = throw AssertionError(msg)

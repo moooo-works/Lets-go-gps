@@ -25,6 +25,7 @@ data class AdConsentState(
 
 interface AdConsentGate {
     val state: StateFlow<AdConsentState>
+    fun prepareAdRequest(): Boolean
 }
 
 internal interface ConsentBackend {
@@ -47,6 +48,17 @@ class AdConsentManager internal constructor(private val backend: ConsentBackend)
     private var owner = WeakReference<Activity>(null)
     private enum class Phase { Idle, Updating, Form }
     private var phase = Phase.Idle
+
+    @MainThread
+    override fun prepareAdRequest(): Boolean {
+        if (!state.value.canRequestAds) return false
+        if (backend.canRequestAds && backend.applyMediationPrivacy()) return true
+        mutableState.value = state.value.copy(
+            canRequestAds = false, revision = state.value.revision + 1,
+            error = "Mediation privacy configuration failed"
+        )
+        return false
+    }
 
     @MainThread
     fun gatherConsent(activity: Activity) {
