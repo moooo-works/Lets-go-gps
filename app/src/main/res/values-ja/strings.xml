@@ -436,4 +436,6 @@
     <string name="step_too_fast_body">現在のシミュレーション速度が 20 km/h を超えており、歩行やランニングの妥当な範囲を外れているため、この区間は歩数に換算されません。20 km/h 未満に下げると再び換算されます。</string>
     <string name="route_speed_exceeds_step_limit">速度が %1$d km/h を超えています。この移動は歩数に換算されません</string>
     <string name="step_setup_speed_limit_note">シミュレーション速度について：歩数に換算されるのは %1$d km/h 以下の移動のみで、それを超えると換算されません（歩行やランニングの妥当な範囲を外れるため）。プリセットの「徒歩」と「自転車」は範囲内ですが、「車」では歩数が発生しません。ジャンプモードの瞬間移動も同様に換算されません。</string>
+    <string name="ad_privacy_options">広告のプライバシー設定</string>
+    <string name="ad_privacy_error">広告のプライバシー設定を開くか更新できませんでした。後でもう一度お試しください。</string>
 </resources>

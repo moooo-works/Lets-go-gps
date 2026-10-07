@@ -436,4 +436,6 @@
     <string name="step_too_fast_body">현재 시뮬레이션 속도가 20 km/h를 넘어 걷기나 달리기의 합리적인 범위를 벗어났으므로 이 구간은 걸음 수로 환산되지 않습니다. 20 km/h 미만으로 낮추면 다시 계산됩니다.</string>
     <string name="route_speed_exceeds_step_limit">속도가 %1$d km/h를 초과하여 이 이동은 걸음 수로 계산되지 않습니다</string>
     <string name="step_setup_speed_limit_note">시뮬레이션 속도에 관하여: %1$d km/h 이하의 이동만 걸음 수로 환산되며, 그보다 빠르면 환산되지 않습니다(걷기나 달리기의 합리적인 범위를 벗어나기 때문입니다). 기본 프리셋 중 \'걷기\'와 \'자전거\'는 범위 안이지만 \'자동차\'는 걸음 수가 생기지 않습니다. 점프 모드의 순간이동도 계산되지 않습니다.</string>
+    <string name="ad_privacy_options">광고 개인정보 보호 옵션</string>
+    <string name="ad_privacy_error">광고 개인정보 보호 옵션을 열거나 업데이트할 수 없습니다. 나중에 다시 시도해 주세요.</string>
 </resources>

@@ -10,6 +10,10 @@ import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
 import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
 import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAdEventCallback
 import com.moooo_works.letsgogps.BuildConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,25 +22,56 @@ import javax.inject.Singleton
 class RewardedAdManager(
     private val loader: RewardedAdLoader,
     private val unitId: String,
-    private val initializationGate: AdMobInitializationGate
+    private val initializationGate: AdMobInitializationGate,
+    private val consent: AdConsentGate,
+    scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 ) {
 
     @Inject
     constructor(
-        adMobInitializer: AdMobInitializer
+        adMobInitializer: AdMobInitializer,
+        adConsentManager: AdConsentManager
     ) : this(
         loader = AdMobRewardedAdLoader(),
         unitId = BuildConfig.REWARDED_AD_UNIT_ID,
-        initializationGate = adMobInitializer
+        initializationGate = adMobInitializer,
+        consent = adConsentManager
     )
 
     private var loadedAd: LoadedAd? = null
     private var isLoading = false
+    private var generation = 0L
+    private var consentRevision = consent.state.value.revision
+
+    init {
+        scope.launch {
+            consent.state.collect { state ->
+                if (!state.canRequestAds || state.revision != consentRevision) {
+                    invalidate()
+                }
+                consentRevision = state.revision
+            }
+        }
+    }
+
+    private fun invalidate() {
+        generation++
+        loadedAd?.destroy()
+        loadedAd = null
+        isLoading = false
+    }
 
     fun preload() {
+        refreshConsent()
+        if (!consent.state.value.canRequestAds) return
         if (isLoading || loadedAd != null) return
         isLoading = true
+        val token = generation
+        val revision = consent.state.value.revision
+        fun current() = token == generation && revision == consent.state.value.revision &&
+            consent.state.value.canRequestAds
         initializationGate.whenReady { ready ->
+            if (!current()) return@whenReady
             if (!ready) {
                 isLoading = false
                 return@whenReady
@@ -44,18 +79,33 @@ class RewardedAdManager(
             loader.load(
                 unitId = unitId,
                 onLoaded = { ad ->
-                    loadedAd = ad
-                    isLoading = false
+                    if (current()) {
+                        loadedAd = ad
+                        isLoading = false
+                    } else ad.destroy()
                 },
                 onFailed = {
-                    loadedAd = null
-                    isLoading = false
+                    if (current()) {
+                        loadedAd = null
+                        isLoading = false
+                    }
                 }
             )
         }
     }
 
+    private fun refreshConsent() {
+        val state = consent.state.value
+        if (!state.canRequestAds || state.revision != consentRevision) invalidate()
+        consentRevision = state.revision
+    }
+
     fun showAd(activity: Activity, onReward: () -> Unit, onUnavailable: () -> Unit) {
+        refreshConsent()
+        if (!consent.state.value.canRequestAds) {
+            onUnavailable()
+            return
+        }
         val ad = loadedAd
         if (ad == null) {
             onUnavailable()
@@ -63,11 +113,13 @@ class RewardedAdManager(
             return
         }
         loadedAd = null
+        val revision = consent.state.value.revision
         val rewardDelivered = AtomicBoolean(false)
         ad.show(
             activity = activity,
             onReward = {
-                if (rewardDelivered.compareAndSet(false, true)) {
+                if (consent.state.value.canRequestAds && consent.state.value.revision == revision &&
+                    rewardDelivered.compareAndSet(false, true)) {
                     onReward()
                 }
             },
@@ -83,6 +135,7 @@ class RewardedAdManager(
 
     interface LoadedAd {
         fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit)
+        fun destroy()
     }
 
     private class AdMobRewardedAdLoader : RewardedAdLoader {
@@ -106,6 +159,8 @@ class RewardedAdManager(
         private val ad: RewardedAd,
         private val mainHandler: Handler
     ) : LoadedAd {
+        override fun destroy() { ad.destroy() }
+
         override fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit) {
             val completed = AtomicBoolean(false)
             ad.adEventCallback = object : RewardedAdEventCallback {
