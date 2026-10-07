@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪 AdMob 對應與 worktree 交接見 Git history.
+Current commit: 本輪 AdMob 共存說明見 Git history.
 
-Tests/scenarios: AdMob 對應數 2；worktree clean、behind 0；未跑 Gradle.
+Tests/scenarios: 查核 Google 官方中介說明；未改产品或跑測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity bidding 條款接受，兩個對應保存；unity-ads branch pushed.
+Proven: 已保存對應但尚未加入中介群組；AdMob 與 Unity 可共同供應.
 
 Open: SDK／同意訊號、Gradle／實機驗證、啟用中介群組.
 
-Next: 轉至 .worktrees/unity-ads session 接續已授權開發.
+Next: unity-ads worktree session 接續開發.
 
 Artifacts: PR #58；Unity／AdMob 分頁；unity-ads worktree.
 
@@ -517,5 +517,34 @@ Streams: none.
 ---
 
 # → Ask / A-028 (Takeshi Mori)
+
++ 設定好unity ads的版位後，admob還會運作嗎？
+
+# ← Reply / A-028
+
+* _2026-10-07 22:58:26 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 會，Unity 是加入 AdMob 中介的額外廣告來源；目前只保存版位對應，尚未改變既有供應設定。
+
+## [FINAL REPORT]
+
+1. 「設定好unity ads的版位後，admob還會運作嗎？」
+
+   - 會。App 仍透過原本 AdMob 廣告單元請求廣告；Unity 是額外來源，不會因建立版位就取代 AdMob。正式接入後，保留 AdMob 聯播網並加入 Unity bidding，來源會競價供應廣告，每次曝光可能來自 Google 或 Unity。[Google 官方中介說明](https://support.google.com/admob/answer/13420272?hl=en)。
+
+   - 目前已完成 Unity 版位與 AdMob 對應，尚未加入中介群組、尚未修改 SDK。因此這次設定本身不改變原本廣告供應；這是根據已確認設定的判斷，並非新的實機測試結果。
+
+   - 後續會保留現有橫幅／獎勵廣告單元，完成 SDK 與測試後再啟用 Unity。若 Unity 沒有合適廣告，其他來源仍可參與供應；不保證每次請求都有廣告或收益一定增加。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-029 (Takeshi Mori)
 
 +
