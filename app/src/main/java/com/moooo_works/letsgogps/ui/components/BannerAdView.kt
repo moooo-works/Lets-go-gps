@@ -1,5 +1,10 @@
 package com.moooo_works.letsgogps.ui.components
 
+import android.util.Log
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalConfiguration
+import com.google.android.libraries.ads.mobile.sdk.banner.BannerAdEventCallback
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,37 +46,45 @@ fun BannerAdView(modifier: Modifier = Modifier) {
     val initializationState by initializer.state.collectAsStateWithLifecycle()
     val activity = remember(context) { context.findAdActivity() }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(50.dp)
-    ) {
-        if (initializationState == AdMobInitializationState.Ready && consentState.canRequestAds && activity != null) {
-            key(consentState.revision) {
-                AndroidView(
-                    modifier = Modifier.fillMaxWidth(),
-                    factory = {
-                        AdView(activity).apply {
-                            val request = BannerAdRequest.Builder(
-                                BuildConfig.BANNER_AD_UNIT_ID,
-                                AdSize.BANNER
-                            ).build()
-                            if (consentManager.prepareAdRequest() &&
-                                consentManager.state.value.revision == consentState.revision &&
-                                !activity.isFinishing && !activity.isDestroyed) {
-                                loadAd(request, object : AdLoadCallback<BannerAd> {
-                                    override fun onAdLoaded(ad: BannerAd) = Unit
-
-                                    override fun onAdFailedToLoad(error: LoadAdError) = Unit
-                                })
+    val orientation = LocalConfiguration.current.orientation
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val widthDp = maxWidth.value.takeIf { it.isFinite() }?.toInt() ?: 0
+        val adSize = remember(context, widthDp, orientation) {
+            if (widthDp > 0) AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp) else null
+        }
+        Box(
+            modifier = Modifier.fillMaxWidth().height(adSize?.height?.dp ?: 50.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (initializationState == AdMobInitializationState.Ready && consentState.canRequestAds &&
+                activity != null && adSize != null) {
+                key(consentState.revision, widthDp, orientation) {
+                    AndroidView(
+                        modifier = Modifier.fillMaxWidth(),
+                        factory = {
+                            AdView(activity).apply {
+                                val request = BannerAdRequest.Builder(BuildConfig.BANNER_AD_UNIT_ID, adSize).build()
+                                if (consentManager.prepareAdRequest() &&
+                                    consentManager.state.value.revision == consentState.revision &&
+                                    !activity.isFinishing && !activity.isDestroyed) {
+                                    loadAd(request, object : AdLoadCallback<BannerAd> {
+                                        override fun onAdLoaded(ad: BannerAd) {
+                                            Log.d("BannerAdView", "Banner ad loaded")
+                                            ad.adEventCallback = object : BannerAdEventCallback {
+                                                override fun onAdImpression() { Log.d("BannerAdView", "Banner ad impression") }
+                                            }
+                                        }
+                                        override fun onAdFailedToLoad(error: LoadAdError) {
+                                            Log.w("BannerAdView", "Banner ad load failed: ${error.code}")
+                                        }
+                                    })
+                                }
                             }
-                        }
-                    },
-                    // Every tab switch / ad-free toggle disposes this composable and creates a
-                    // fresh AdView; without destroy() AdMob keeps the old WebView-backed view
-                    // registered (refresh timers), leaking ~MBs per switch until OOM.
-                    onRelease = { it.destroy() }
-                )
+                        },
+                        // 寬度、方向或同意變更時，釋放 SDK 視窗。
+                        onRelease = { it.destroy() }
+                    )
+                }
             }
         }
     }

@@ -5,10 +5,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class RewardedAdManagerTest {
 
     private val activity = mockk<Activity>(relaxed = true)
@@ -85,9 +90,10 @@ class RewardedAdManagerTest {
     private fun manager(
         loader: FakeLoader,
         gate: FakeInitializationGate = FakeInitializationGate(),
-        consent: FakeConsent = FakeConsent()
+        consent: FakeConsent = FakeConsent(),
+        retryScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
     ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate,
-        consent = consent, scope = CoroutineScope(Dispatchers.Unconfined))
+        consent = consent, scope = retryScope)
 
     @Test
     fun `preload calls loader once`() {
@@ -280,6 +286,91 @@ class RewardedAdManagerTest {
         assertTrue(unavailable)
         assertEquals(1, loader.destroyCalls)
         assertEquals(3, consent.preparations)
+    }
+
+    @Test
+    fun `failed load retries automatically and stops after three retries`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+
+        advanceTimeBy(4_999)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+        advanceTimeBy(15_000)
+        runCurrent()
+        assertEquals(3, loader.loadCalls)
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+        advanceTimeBy(120_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+    }
+
+    @Test
+    fun `manual preload cancels scheduled retry and does not load a second cached ad`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        loader.nextOutcome = FakeLoader.Outcome.LoadOk
+        mgr.preload()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+    }
+
+    @Test
+    fun `successful retry resets backoff for the next ad`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        loader.nextOutcome = FakeLoader.Outcome.LoadOk
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+
+        mgr.showAd(activity, onReward = {}, onUnavailable = { fail("ad should be ready") })
+        loader.nextOutcome = FakeLoader.Outcome.LoadFails
+        loader.pendingDismiss?.invoke()
+        runCurrent()
+        assertEquals(3, loader.loadCalls)
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+    }
+
+    @Test fun `retry rechecks mediation privacy before loading`() = runTest {
+        val loader = FakeLoader()
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        consent.privacyReady = false
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        assertEquals(2, consent.preparations)
+    }
+
+    @Test fun `consent withdrawal cancels pending retry`() = runTest {
+        val loader = FakeLoader()
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        consent.update(false)
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        assertEquals(1, consent.preparations)
     }
 
     private fun fail(msg: String): Nothing = throw AssertionError(msg)
