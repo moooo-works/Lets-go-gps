@@ -10,7 +10,7 @@
 
 - **Last update:** 2026-10-07 23:07:00 +0800.
 
-- **Evidence commit:** 5adca013828aeddc21f462ea0edbff30ab967848.
+- **Evidence commit:** 7fa932facb9289ac5bd14a7880412c68277c8042.
 
 ## Overall state
 
@@ -42,9 +42,9 @@
 
 - **Last proven result:** SDK 配對及 legacy／Mintegral 排除確認；三項 Gradle 任務成功，248 tests（66 skipped），lint 34 個既有 Error 與先前報告一致；獨立審查 PASS。
 
-- **Active blocker or running process:** 同意流程 Design Go 與 AdMob 條款批准待答；無背景程序。
+- **Active blocker or running process:** Design Go已收到；同意程式與單元驗證完成，剩Result Go、AdMob條款與實機／供應驗證，無背景程序。
 
-- **Next safe action:** 取得 design.md 在 commit 5adca01 的 Design Go 後，固定同意訊號契約並接續流程；條款批准前不保存 AdMob 中介來源。
+- **Next safe action:** 接續A-002-consent成果；Result Go與AdMob條款待答，實機／供應未證明，條款批准前不保存中介來源。
 
 - **Expected changed files:** app/build.gradle.kts、gradle/libs.versions.toml、ag.json、stream notebook、此工作資料夾.
 
@@ -52,7 +52,7 @@
 
 - **All accepted tasks checked:** no.
 
-- **Blocking accepted decision:** 同意流程 Design Go、AdMob 出價條款批准。
+- **Blocking accepted decision:** 程式成果Result Go、AdMob出價條款批准、實機／供應證據。
 
 - **Operation running:** no.
 
