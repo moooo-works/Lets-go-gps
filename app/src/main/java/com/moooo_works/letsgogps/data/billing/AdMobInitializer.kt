@@ -40,7 +40,7 @@ class AdMobInitializer @Inject constructor(
     private val consent: AdConsentManager
 ) : AdMobInitializationGate {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val started = AtomicBoolean(false)
     private val callbackLock = Any()
@@ -50,24 +50,21 @@ class AdMobInitializer @Inject constructor(
     val state: StateFlow<AdMobInitializationState> = mutableState.asStateFlow()
 
     init {
-        scope.launch(Dispatchers.Main.immediate) {
+        scope.launch {
             consent.state.collect { if (it.canRequestAds) initialize() }
         }
     }
 
     override fun initialize() {
-        if (!consent.state.value.canRequestAds) return
-        if (!started.compareAndSet(false, true)) return
-
-        mutableState.value = AdMobInitializationState.Initializing
         scope.launch {
+            if (started.get()) return@launch
+            if (!consent.prepareAdRequest()) {
+                drainCallbacks(success = false)
+                return@launch
+            }
+            if (!started.compareAndSet(false, true)) return@launch
+            mutableState.value = AdMobInitializationState.Initializing
             try {
-                if (!consent.state.value.canRequestAds) {
-                    started.set(false)
-                    mutableState.value = AdMobInitializationState.NotStarted
-                    drainCallbacks(success = false)
-                    return@launch
-                }
                 val requestConfiguration = RequestConfiguration.Builder()
                     .apply {
                         if (BuildConfig.DEBUG) {

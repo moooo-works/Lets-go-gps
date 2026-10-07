@@ -56,7 +56,7 @@ fun BannerAdView(modifier: Modifier = Modifier) {
                                 BuildConfig.BANNER_AD_UNIT_ID,
                                 AdSize.BANNER
                             ).build()
-                            if (consentManager.state.value.canRequestAds &&
+                            if (consentManager.prepareAdRequest() &&
                                 consentManager.state.value.revision == consentState.revision &&
                                 !activity.isFinishing && !activity.isDestroyed) {
                                 loadAd(request, object : AdLoadCallback<BannerAd> {
