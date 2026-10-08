@@ -5,16 +5,16 @@
 - **Work key:** A-049-floating-companion.
 - **Active Ask:** A-049.
 - **Goal:** 開發獨立Pro懸浮搜尋、收藏/資料夾、路線/控制、座標複製與小地圖選點，保留既有模擬與資料。
-- **Last update:** 2026-10-08 17:09:16 +0800.
+- **Last update:** 2026-10-08 17:20:32 +0800.
 - **Evidence commit:** 915546401df32839243034deb6185a1b36794364.
 
 ## Overall state
 
 - **State:** active.
 - **Reason:** 程式與Code review完成，草稿PR59已建立；完整Acceptance等待Pixel7Pro系統授權及實機。
-- **Total:** 6.
+- **Total:** 7.
 - **Completed:** 4.
-- **Remaining:** 2.
+- **Remaining:** 3.
 
 ## Accepted task checklist
 
@@ -25,15 +25,17 @@
 - [ ] **T-5:** test/lintDebug/assembleDebug及Pixel7Pro備份/同簽章測試版驗證搜尋/IME/外部App觸控/小地圖/座標/收藏/route/關閉；測試前取得必要使用者系統授權，另一Pixel10不操作。保留原DB/路線/point計數及Mapskey。失敗時恢復已保存APK與資料。Source: A-049、既有備份替換授權與AGENTS。
 - [ ] **T-6:** 獨立最終防守性security/acceptance review覆蓋R/INV並引用精確source；處理必要發現、Result Go、同步main/behind0、單一主題draft PR（不合併）、push與完整交付。保留PR58及Unity群組。Source: A-049、Agentflow與AGENTS。
 
+- [ ] **T-7:** 先修Android17/API37 developer設定向一般App回0導致誤判；獨立fix/android17-developer-status worktree/PR，限engine、health consumer、必要測試，AppOps三態不得放寬，修復實機證實後才續T5浮窗。Source: A-049新追問原文及android17-fix-design.md；Proof: 待red/green、App UID/健康UI與required checks/review。
+
 ## Accepted scope changes
 
-- None.
+- Change: 新增Android17開發者選項誤判修復。 Source: A-049「你先檢查android 17的版本，我已經開啟開發者選項，但是app這邊監測結果是「未開啟」，這是bug需修復，修復完成後再來測試懸浮工具」。 Effect: T7先於T5，獨立fix PR避免與PR59混題。
 
 ## Current recovery
 
-- **Current item:** T-5.
+- **Current item:** T-7.
 - **Last proven result:** 完整274tests0fail60skip，相關32實際執行；最新VM13已補Allowed再PASS；build/lint命令成功但34既有lint errors。Source9155464 Code review PASS、PR59 draft；備份安裝後DB375/6/591不變，主地圖有圖資。
-- **Active blocker or running process:** 沒有執行中工具/worker；Pixel7Pro overlay/mock授權async問題待使用者回覆。
+- **Active blocker or running process:** Android17 false-negative修復中；手機已自行授權mock/overlay allow，舊pending設定問題已被實際證據解除。
 - **Next safe action:** 收到手機設定完成後先讀AppOps確認，再執行overlay/IME/外部觸控/小地圖/route/主地圖4UX；不自動grant。
 - **Expected changed files:** worktree ui/map新state/controller/view及JoystickController/OverlayManager/MapViewModel/MapOverlays或字串、對應tests；rootartifact/design/requirements/codewalk/spec/reports/tracker及devlog。不修改外部Unity stream。
 
