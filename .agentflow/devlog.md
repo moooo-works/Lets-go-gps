@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 同意流程測試說明見Git history.
+Current commit: 同意表單地區與政策日期說明見Git history.
 
-Tests/scenarios: 本輪僅說明，無新測試.
+Tests/scenarios: 官方CMP／UMP文件及既有同意manager核對；本輪無新測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 正式CMP已發布並於隔離診斷App驗證；Unity工單00939092已送出.
+Proven: 正式CMP已發布、正式AppID隔離EEA測試通過；Mintegral營運排除；Unity工單已送出.
 
-Open: 完整App整合實機測試待續；UnityGame ID與供應待客服.
+Open: 完整App整合與正式打包驗證待續；Unity Game ID拒絕待客服查核.
 
-Next: 完整App同意流程測試及正式打包準備.
+Next: 完整App同意流程與打包準備，Unity回覆後供應重測.
 
 Artifacts: Unity00939092；PR58；unity-ads worktree；A-036-pixel-test/tracker.md.
 
@@ -361,5 +361,38 @@ Streams: none.
 ---
 
 # → Ask / A-041 (Takeshi Mori)
+
++ 這只有在歐洲地區會出現嗎？之前我安裝時沒有廣告隱私同意的選項，還是這是google的新規定？
+
+---
+
+## [RUN-001] Event — 2026-10-08 14:01:14 +0800 (A-041)
+
+- 已核對Google官方CMP要求與UMP文件：EEA／UK個人化廣告認證CMP要求自2024-01-16，瑞士自2024-07-31；表單與隱私入口由requestConsentInfoUpdate結果決定是否required。正式表單A037才發布，台灣非EEA診斷結果亦為NOT_REQUIRED。本輪無新產品／後台修改。
+
+# ← Reply / A-041
+
+* _2026-10-08 14:01:14 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 目前這份歐洲表單主要針對EEA、英國、瑞士，台灣一般不自動顯示。認證CMP要求自2024年實施，並非這幾天才新增。
+
+## [FINAL REPORT]
+
+1. 「這只有在歐洲地區會出現嗎？之前我安裝時沒有廣告隱私同意的選項，還是這是google的新規定？」
+
+   - 目前設定的歐洲法規表單主要針對歐洲經濟區、英國與瑞士；台灣一般不會自動彈出。設定頁的隱私入口也依Google UMP是否判定需要而顯示，不是全球每次安裝都必須有畫面。[UMP官方文件](https://developers.google.com/admob/android/next-gen/privacy)。UMP也支援其他訊息類型，因此不能泛稱所有廣告隱私畫面都限歐洲。
+   - 這不是最近才發布的規定。Google要求在EEA與英國放送個人化廣告使用認證CMP，自2024年1月16日開始；瑞士自2024年7月31日開始。原本使用AdMob也適用，本次整合一起補齊。[Google官方政策](https://support.google.com/admob/answer/13554116?hl=en)。
+   - 你先前沒有看到，與台灣通常不在這份訊息的地區條件，以及當時正式後台尚未配置／發布本次表單有關；不能僅凭原安裝畫面推定其他地區流程已完整。這次測試使用EEA debug設定，以便在台灣手機驗證歐洲流程，不更改手機實際位置。
+   - 本輪只核對官方文件與既有程式，沒有新測試或改動。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-042 (Takeshi Mori)
 
 +
