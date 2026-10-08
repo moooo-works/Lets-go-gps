@@ -23,12 +23,21 @@ class JoystickController(
     private val context: Context,
     private val onStopMocking: () -> Unit,
     private val onCameraMove: (LatLng) -> Unit,
-    private val onSetTransportMode: (TransportMode) -> Unit
+    private val onSetTransportMode: (TransportMode) -> Unit,
+    private val onOverlayDismissed: () -> Unit = {}
 ) {
     private var tickerJob: Job? = null
     private var currentX = 0f
     private var currentY = 0f
     private var overlayWrapper: (@Composable (@Composable () -> Unit) -> Unit)? = null
+
+    init {
+        overlayManager.setOnDismissedListener {
+            state.update { it.copy(isJoystickEnabled = false) }
+            stopTicker()
+            onOverlayDismissed()
+        }
+    }
 
     fun setOverlayWrapper(wrapper: @Composable (@Composable () -> Unit) -> Unit) {
         overlayWrapper = wrapper
@@ -129,6 +138,7 @@ class JoystickController(
     fun onCleared() {
         stopTicker()
         overlayManager.hide()
+        overlayManager.setOnDismissedListener(null)
     }
 
     internal fun applyMovementForTest(dx: Float, dy: Float) = applyMovement(dx, dy)

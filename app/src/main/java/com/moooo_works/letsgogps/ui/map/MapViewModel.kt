@@ -106,7 +106,11 @@ class MapViewModel @Inject constructor(
         context = context,
         onStopMocking = ::stopMocking,
         onCameraMove = ::onCameraMove,
-        onSetTransportMode = ::setTransportMode
+        onSetTransportMode = ::setTransportMode,
+        onOverlayDismissed = {
+            cancelCompanionPending()
+            floatingCompanionController.close()
+        }
     )
 
     private val companionRequests = CompanionExecutionRequests()
@@ -218,6 +222,7 @@ class MapViewModel @Inject constructor(
     }
 
     private fun cancelCompanionPending() {
+        floatingCompanionController.cancelPendingActions()
         companionRequests.invalidate()
         companionJob?.cancel()
         if (companionPending != null) clearStepSyncCreditDialogState()

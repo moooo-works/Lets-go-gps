@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Build
+import android.view.View
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
@@ -40,6 +41,9 @@ class JoystickOverlayManager @Inject constructor(
     private var inputFocusable = false
     private val prefs: SharedPreferences by lazy { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
 
+    private var onDismissed: (() -> Unit)? = null
+    fun setOnDismissedListener(listener: (() -> Unit)?) { onDismissed = listener }
+
     @MainThread
     fun show(content: @Composable () -> Unit) {
         if (composeView != null) return
@@ -65,6 +69,12 @@ class JoystickOverlayManager @Inject constructor(
         owner = lifecycleOwner
         composeView = view
         inputFocusable = false
+        view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) = Unit
+            override fun onViewDetachedFromWindow(v: View) {
+                if (composeView === v) hide()
+            }
+        })
         view.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> clampPosition() }
         view.viewTreeObserver.addOnWindowFocusChangeListener { hasFocus ->
             if (hasFocus) {
@@ -133,6 +143,7 @@ class JoystickOverlayManager @Inject constructor(
             try { windowManager.removeViewImmediate(view) } catch (_: RuntimeException) { /* 已被系統撤銷。 */ }
         }
         lifecycleOwner?.destroy()
+        if (view != null || lifecycleOwner != null) onDismissed?.invoke()
     }
 
     @MainThread

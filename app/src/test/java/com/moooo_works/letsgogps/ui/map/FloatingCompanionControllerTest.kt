@@ -2,6 +2,9 @@ package com.moooo_works.letsgogps.ui.map
 
 import com.google.android.gms.maps.model.LatLng
 import com.moooo_works.letsgogps.data.model.SavedLocation
+import com.moooo_works.letsgogps.data.model.Route
+import com.moooo_works.letsgogps.data.model.RoutePoint
+import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import com.moooo_works.letsgogps.domain.repository.LocationRepository
 import com.moooo_works.letsgogps.domain.repository.SearchRepository
@@ -132,6 +135,35 @@ class FloatingCompanionControllerTest {
         controller.setFolder(7)
         controller.setFavoritesOnly(true)
         assertEquals(listOf(1),controller.state.value.savedLocations.map { it.id })
+        assertTrue(actions.isEmpty())
+    }
+
+    @Test fun `older saved route cannot supersede a newer locate command`() = runTest {
+        val reply=CompletableDeferred<RouteWithPoints?>()
+        coEvery { repository.getRouteWithPoints(1) } coAnswers { withContext(NonCancellable) { reply.await() } }
+        val controller=FloatingCompanionController(map,repository,search,settings,backgroundScope,actions::add)
+        controller.requestLoadRoute(1)
+        runCurrent()
+        controller.select(target)
+        controller.requestLocate()
+        reply.complete(RouteWithPoints(Route(id=1,name="old"),listOf(
+            RoutePoint(routeId=1,orderIndex=0,latitude=1.0,longitude=2.0),
+            RoutePoint(routeId=1,orderIndex=1,latitude=3.0,longitude=4.0))))
+        runCurrent()
+        assertEquals(listOf(CompanionAction.Locate(target)),actions)
+    }
+
+    @Test fun `explicit stop invalidates a pending saved route even if read ignores cancellation`() = runTest {
+        val reply=CompletableDeferred<RouteWithPoints?>()
+        coEvery { repository.getRouteWithPoints(1) } coAnswers { withContext(NonCancellable) { reply.await() } }
+        val controller=FloatingCompanionController(map,repository,search,settings,backgroundScope,actions::add)
+        controller.requestLoadRoute(1)
+        runCurrent()
+        controller.cancelPendingActions()
+        reply.complete(RouteWithPoints(Route(id=1,name="old"),listOf(
+            RoutePoint(routeId=1,orderIndex=0,latitude=1.0,longitude=2.0),
+            RoutePoint(routeId=1,orderIndex=1,latitude=3.0,longitude=4.0))))
+        runCurrent()
         assertTrue(actions.isEmpty())
     }
 

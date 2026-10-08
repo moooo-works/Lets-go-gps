@@ -56,4 +56,22 @@ class JoystickOverlayManagerTest {
         assertEquals(2, views.size)
         manager.hide()
     }
+    @Test fun `window update failure notifies dismissal once and destroys owner`() {
+        val windows=mockk<WindowManager>(relaxed=true)
+        val context=object:ContextWrapper(RuntimeEnvironment.getApplication()) {
+            override fun getSystemService(name:String):Any?=if(name==Context.WINDOW_SERVICE) windows else super.getSystemService(name)
+        }
+        val view=slot<ComposeView>()
+        every { windows.addView(capture(view),any()) } just Runs
+        every { windows.updateViewLayout(any(),any()) } throws SecurityException("revoked")
+        val manager=JoystickOverlayManager(context)
+        var dismissed=0
+        manager.setOnDismissedListener { dismissed++ }
+        manager.show { }
+        manager.setInputFocusable(true)
+        manager.hide()
+        assertEquals(1,dismissed)
+        assertEquals(Lifecycle.State.DESTROYED,view.captured.findViewTreeLifecycleOwner()!!.lifecycle.currentState)
+    }
+
 }

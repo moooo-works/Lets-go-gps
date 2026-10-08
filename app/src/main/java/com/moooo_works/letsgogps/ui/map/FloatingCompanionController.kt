@@ -144,6 +144,7 @@ class FloatingCompanionController(
     }
 
     fun select(location: GeocodedLocation) {
+        cancelPendingActions()
         mutableState.update { it.copy(selectedLocation = location, replacement = null, message = null) }
     }
 
@@ -183,6 +184,7 @@ class FloatingCompanionController(
     }
 
     private fun request(action: CompanionAction) {
+        cancelPendingActions()
         if (!mapState.value.isProActive) { setMessage(CompanionMessage.NEED_PRO); return }
         synchronizeRouteRevision()
         val route = activeRouteKey()
@@ -192,6 +194,13 @@ class FloatingCompanionController(
     }
 
     fun cancelReplacement() { mutableState.update { it.copy(replacement = null) } }
+
+    /** 新的明確操作與停止使仍在讀取的舊路線失效。 */
+    fun cancelPendingActions() {
+        loadGeneration++
+        loadJob?.cancel()
+        cancelReplacement()
+    }
 
     fun confirmReplacement() {
         val pending = state.value.replacement ?: return
