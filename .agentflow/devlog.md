@@ -4,23 +4,25 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪廣告同意流程優先順序說明由Git紀錄保存.
+Current commit: 同意流程來源88bc790；驗證證據0d8b5b2；本輪交付見Git history.
 
-Tests/scenarios: Google官方CMP政策查核；本輪無產品修改或新實機測試.
+Tests/scenarios: 完整App首次同意／拒絕／管理／重啟及恢復；test lintDebug assembleDebug成功；269測試0失敗66skipped；34既有lint errors.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity分支已有同意流程；正式表單隔離診斷已通；完整App串接尚待驗證.
+Proven: 完整App同意流程驗證完成；一般APK與原資料已恢復；地圖正常；PR58保留與Mintegral排除.
 
-Open: Unity Game ID供應問題；完整App同意流程及正式版驗證.
+Open: Unity Game ID供應問題；Pro略過多餘表單延後.
 
-Next: 等待後續指示；既有Unity工單待回覆.
+Next: Unity00939092回覆後依精確修正重測；正式群組維持暫停.
 
-Artifacts: .agentflow/artifacts/A-036-pixel-test/tracker.md.
+Artifacts: .agentflow/artifacts/A-044-consent-verification/results.md、tracker.md；A-036 tracker.
 
 Archived eras: .agentflow/devlog.archive.md.
 
-Streams: none.
+Streams:
+
+stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.md
 ---
 
 # → Ask / A-035 (Takeshi Mori)
@@ -462,5 +464,46 @@ Streams: none.
 ---
 
 # → Ask / A-044 (Takeshi Mori)
+
++ 好，那先完成這個需求
+
+---
+
+## [RUN-001] Event — 2026-10-08 14:28:29 +0800 (A-044)
+
+- Git preflight：main；root僅當輪devlog變動；fetch成功；origin/main=c021bb8f159ed73fa5368854ff1d8cb91beacede，最近五提交c021bb8/2a43073/bf9f091/78b4840/faec240。獨立worktree consent-verification自最新main建立，cherry-pick既有Unity三提交後88bc790；app/gradle與unity-ads完全一致，未碰其工作區。
+- Pixel7Pro已連線；原App最新資料已另存私有tmp備份，一般測試APK亦保存。測試範圍與恢復程序記於A-044 tracker，Pro優化延後、不開正式Unity群組。
+
+## [RUN-002] Event — 2026-10-08 14:38:14 +0800 (A-044)
+
+- 完整App正式表單實機通過：首次拒絕／直接同意、管理選項、拒絕→同意→拒絕、兩種選擇後重啟；選擇前沒有GMA初始化，UMP依完成狀態允許請求，拒絕用途旗標全0，Mintegral兩種選擇均0。Google範例橫幅／獎勵正常，未驗證Unity實際供應。
+- 必跑test／lintDebug／assembleDebug BUILD SUCCESSFUL；269測試0失敗、66跳過，30個廣告測試未跳過；lint34 errors／92 warnings／3 hints，34個errors與既有Unity分支完全一致。沒有新增產品程式修改。
+- 已裝回一般測試APK並恢復原資料。DB/WAL與原隱私／獎勵狀態核對一致；清除原本不存在的測試獎勵檔後375儲存點／6路線／591路線點維持，地圖正常，一般地區無多餘隱私入口。PR58仍OPEN draft、Mintegral無SDK依賴；正式群組未變動。
+
+# ← Reply / A-044
+
+* _2026-10-08 14:39:30 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 完整App廣告同意流程實機驗證完成，未測出需新增產品修改的問題；手機已恢復一般測試版與原資料。Unity供應仍待GameID修復。
+
+## [FINAL REPORT]
+
+1. 「好，那先完成這個需求」
+
+   - 成功：Pixel7Pro完整App已驗證首次同意／拒絕、選擇前不初始化廣告、重啟保留選擇，以及設定頁管理與同意→拒絕修改。Google範例橫幅與獎勵正常；Mintegral同意旗標始終0、無相關SDK。未發現需要新增產品程式修正的問題。
+   - 已恢復一般測試版及原資料，375儲存點／6路線／591路線點保留，測試獎勵清除、地圖正常；一般地區沒有多餘隱私入口。
+   - 必跑test／lintDebug／assembleDebug BUILD SUCCESSFUL；269測試0失敗、66既有跳過，30廣告測試全通過。lint仍有34個既有errors，與Unity分支位置及訊息一致，不宣稱零錯誤或正式發布完成。
+   - 獨立worktree自最新main建立，既有三個Unity功能提交帶入後88bc790；產品內容與unity-ads一致，沒有編輯外部session。PR58維持OPEN draft。Pro略過表單延後，Unity群組未啟用、既有GameID工單仍待回覆。
+   - 完整來源、情境、測試結果與恢復證據見[實機驗證結果](artifacts/A-044-consent-verification/results.md)；[tracker](artifacts/A-044-consent-verification/tracker.md)已完成3/3，證據提交0d8b5b200f0940f946cdf815d7226109c4d31568。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-045 (Takeshi Mori)
 
 +
