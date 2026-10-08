@@ -35,6 +35,7 @@ fun JoystickOverlayView(
     onToggleSpeed: () -> Unit,
     onStop: () -> Unit
 ) {
+    DisposableEffect(Unit) { onDispose { onMove(0f, 0f) } }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
     var isExpanded by remember { mutableStateOf(false) }

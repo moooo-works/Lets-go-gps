@@ -52,7 +52,7 @@ import com.google.android.gms.maps.model.LatLng
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
+@Config(sdk = [28], manifest = Config.NONE, application = android.app.Application::class)
 class MapViewModelTest {
 
     private val mockEngine = mockk<LocationMockEngine>(relaxed = true)
@@ -82,6 +82,13 @@ class MapViewModelTest {
     fun setup() {
         Dispatchers.setMain(dispatcher)
         every { repository.getAllLocations() } returns emptyFlow()
+        every { repository.observeFolders() } returns emptyFlow()
+        every { repository.observeRoutes() } returns emptyFlow()
+        every { settingsRepository.observeStepQuotaUsedToday() } returns flowOf(0)
+        every { settingsRepository.observeStepDailyQuota() } returns flowOf(10_000)
+        every { settingsRepository.observeStepSyncEnabled() } returns flowOf(false)
+        every { proRepository.isSubscriptionActive } returns MutableStateFlow(false)
+        every { proRepository.featureCredits } returns MutableStateFlow(0)
         every { routeSimulator.simulationState } returns simulationStateFlow
         every { routeSimulator.currentLocation } returns currentLocationFlow
         every { mockStateRepository.mockStatus } returns mockStatusFlow
@@ -123,8 +130,94 @@ class MapViewModelTest {
     private fun createViewModel() = MapViewModel(
         mockEngine, repository, mockStateRepository, settingsRepository,
         routeSimulator, joystickOverlayManager, proRepository, rewardedAdManager, systemHealthCheck,
-        timezoneRepository, context
+        timezoneRepository, mockk(relaxed = true), context
     )
+
+    @Test
+    fun `companion denied Pro never dispatches or stops active simulation`() = runTest {
+        val vm = createViewModel()
+        advanceUntilIdle()
+        vm.executeCompanionAction(CompanionAction.Locate(GeocodedLocation("selected", "", LatLng(-12.0, -34.0))))
+        vm.awaitCompanionCommandForTest()
+        verify(exactly = 0) { context.startForegroundService(any()) }
+        verify(exactly = 0) { context.startService(any()) }
+    }
+
+    @Test
+    fun `companion locate keeps original target when selection changes during startup`() = runTest {
+        isProActiveFlow.value = true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { settingsRepository.observeStepSyncEnabled() } returns flowOf(false)
+        val vm = createViewModel()
+        advanceUntilIdle()
+        val target = LatLng(-12.0, -34.0)
+        vm.executeCompanionAction(CompanionAction.Locate(GeocodedLocation("selected", "", target)))
+        vm.selectSearchResult(GeocodedLocation("later", "", LatLng(40.0, 50.0)))
+        vm.awaitCompanionCommandForTest()
+        val captured = slot<Intent>()
+        verify(exactly = 1) { context.startForegroundService(capture(captured)) }
+        assertEquals(MockLocationService.ACTION_START_SINGLE, captured.captured.action)
+        assertEquals(target.latitude, captured.captured.getDoubleExtra(MockLocationService.EXTRA_LAT, 0.0), 0.0)
+        assertEquals(target.longitude, captured.captured.getDoubleExtra(MockLocationService.EXTRA_LNG, 0.0), 0.0)
+        verify(exactly = 0) { context.startService(any()) }
+    }
+
+    @Test
+    fun `companion AppOps denial keeps active route and sends no commands`() = runTest {
+        isProActiveFlow.value = true
+        mockStatusFlow.value = MockStatus.ROUTE_PAUSED
+        activeRouteWaypointsFlow.value = listOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0))
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.NotAllowed
+        val vm = createViewModel()
+        advanceUntilIdle()
+        val route = vm.uiState.value.waypoints
+        vm.executeCompanionAction(CompanionAction.Locate(GeocodedLocation("selected", "", LatLng(-12.0, -34.0))))
+        vm.awaitCompanionCommandForTest()
+        assertEquals(route, vm.uiState.value.waypoints)
+        assertTrue(vm.uiState.value.mockError is MockError.NotMockAppSelected)
+        verify(exactly = 0) { context.startForegroundService(any()) }
+        verify(exactly = 0) { context.startService(any()) }
+    }
+
+    @Test
+    fun `main explicit exploration replaces old companion credit target`() = runTest {
+        isProActiveFlow.value = true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { settingsRepository.observeStepSyncEnabled() } returns flowOf(true)
+        val vm = createViewModel()
+        advanceUntilIdle()
+        vm.executeCompanionAction(CompanionAction.Locate(GeocodedLocation("old companion", "", LatLng(-12.0, -34.0))))
+        vm.awaitCompanionCommandForTest()
+        assertTrue(vm.uiState.value.showStepSyncCreditDialog)
+        val mainTarget = LatLng(40.0, 50.0)
+        vm.selectSearchResult(GeocodedLocation("main", "", mainTarget))
+        vm.startExplorationAtCenter()
+        vm.startWithoutStepSync()
+        val captured = slot<Intent>()
+        verify(exactly = 1) { context.startForegroundService(capture(captured)) }
+        assertEquals(MockLocationService.ACTION_START_EXPLORATION, captured.captured.action)
+        assertEquals(mainTarget.latitude, captured.captured.getDoubleExtra(MockLocationService.EXTRA_LAT, 0.0), 0.0)
+        assertEquals(mainTarget.longitude, captured.captured.getDoubleExtra(MockLocationService.EXTRA_LNG, 0.0), 0.0)
+    }
+
+    @Test
+    fun `companion pending step cancellation cannot start without steps later`() = runTest {
+        isProActiveFlow.value = true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { settingsRepository.observeStepSyncEnabled() } returns flowOf(true)
+        every { proRepository.isSubscriptionActive } returns MutableStateFlow(false)
+        every { proRepository.featureCredits } returns MutableStateFlow(0)
+        val vm = createViewModel()
+        advanceUntilIdle()
+        vm.executeCompanionAction(CompanionAction.Locate(GeocodedLocation("selected", "", LatLng(-12.0, -34.0))))
+        vm.awaitCompanionCommandForTest()
+        assertTrue(vm.uiState.value.showStepSyncCreditDialog)
+        vm.dismissStepSyncCreditDialog()
+        vm.startWithoutStepSync()
+        advanceUntilIdle()
+        verify(exactly = 0) { context.startForegroundService(any()) }
+        verify(exactly = 0) { context.startService(any()) }
+    }
 
     @Test
     fun `init loads last center from settings repository`() = runTest {
@@ -150,8 +243,14 @@ class MapViewModelTest {
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         val viewModel = createViewModel()
 
+        val dispatched = kotlinx.coroutines.CompletableDeferred<Unit>()
+        every { context.startForegroundService(any()) } answers {
+            dispatched.complete(Unit)
+            null
+        }
         viewModel.startMocking()
         advanceUntilIdle()
+        dispatched.await()
 
         val intentSlot = slot<Intent>()
         verify(atLeast = 1) { context.startForegroundService(capture(intentSlot)) }
