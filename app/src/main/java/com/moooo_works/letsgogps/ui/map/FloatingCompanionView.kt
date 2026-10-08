@@ -59,6 +59,7 @@ fun FloatingCompanionView(
     }
     val config = LocalConfiguration.current
     val panelHeight = minOf(600, config.screenHeightDp - 100).coerceAtLeast(200).dp
+    val compactHeight = config.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     Surface(shape = MaterialTheme.shapes.large, shadowElevation = 6.dp,
         modifier = Modifier.widthIn(max = 320.dp).width(320.dp).heightIn(max = panelHeight).imePadding()) {
         Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -77,10 +78,13 @@ fun FloatingCompanionView(
                 Text(stringResource(R.string.floating_blocked), color = MaterialTheme.colorScheme.error)
                 TextButton(onClick = { releaseInput(); actions.onOpenApp() }) { Text(stringResource(R.string.floating_open_app)) }
             }
-            if (companionState.tab == CompanionTab.MAP) {
+            if (companionState.tab == CompanionTab.MAP && !compactHeight) {
                 CompanionMap(mapState, companionState, actions)
             }
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (companionState.tab == CompanionTab.MAP && compactHeight) {
+                CompanionMap(mapState, companionState, actions)
+            }
             val current = currentCompanionCoordinate(mapState)
             Text(stringResource(R.string.floating_current, current?.let(::formatCompanionCoordinate) ?: stringResource(R.string.floating_inactive)))
             TextButton(onClick = actions.onCopyCurrent, enabled = current != null) { Text(stringResource(R.string.floating_copy_current)) }
