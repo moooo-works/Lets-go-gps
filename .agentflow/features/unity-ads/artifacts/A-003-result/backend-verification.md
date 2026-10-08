@@ -21,10 +21,11 @@
 
 ![已暫停群組列表](groups-paused.jpg)
 
-[橫幅已保存畫面](banner-paused.jpg)包含群組 ID、map-ad-2、已暫停與 AdMob／Unity 兩個來源。
+[橫幅已保存頁面上方](banner-paused.jpg)顯示群組名稱、ID8708929545、橫幅／Android及已暫停；map-ad-2與AdMob／Unity來源由該保存頁的可見UI／AX核對，未宣稱都出現在這張截圖。
 
-[獎勵已保存畫面](rewarded-paused.jpg)包含群組 ID、no-ad-6h、已暫停與 AdMob／Unity 兩個來源。
+[獎勵已保存頁面上方](rewarded-paused.jpg)顯示群組名稱、ID8676901314、獎勵／Android及已暫停；no-ad-6h與AdMob／Unity來源由該保存頁的可見UI／AX核對，未宣稱都出現在這張截圖。
 
+- 初次詳細截圖只拍到下方來源區，無法支持先前對ID／單元／狀態的圖片描述；獨立review指出後，已在已保存群組的edit頁重新核對並補拍上方截圖。原圖片與BLOCKING報告保留於Git history，後台設定未再修改。
 - 列表截圖只保存本次群組及周圍操作脈絡；不包含帳戶聯絡資料或其他群組收益。
 - 本輪未改 App source；沿用 7fa932f 的 269 tests、三項 Gradle、34 個既有 lint Error 無新增與安全／程式驗收證據，沒有重跑未失效的套件。
 - 使用者A-003明確回覆「- 先保留待驗證」；本輪 adb devices 再查仍無裝置，實機測試延期，沒有背景测试。CMP 後台地區設定、真實訊號送達、Unity 單一來源 banner／rewarded、map/mock smoke 與實際供應仍未驗證。
