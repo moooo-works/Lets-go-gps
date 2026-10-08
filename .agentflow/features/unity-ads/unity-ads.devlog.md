@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: source 7fa932facb9289ac5bd14a7880412c68277c8042 已推送；本輪紀錄見 Git history.
+Current commit: source 7fa932f 已Result Go；sync/review db7c443；本輪交付見Git history.
 
-Tests/scenarios: test/lintDebug/assembleDebug成功；269 tests，66既有略過；34既有lint Error無新增；實機未測.
+Tests/scenarios: 沿用269 tests（66既有略過）、三項Gradle成功、34既有lint Error無新增；本輪GUI保存與截圖核對；實機延期.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: UMP程式／廣告限制與30項相關測試，native security/acceptance PASS限程式準備；behind main0，PR58保留.
+Proven: Result Go已收到；三設定on/on/off；Unity兩格式群組保存且暫停；final review PASS；behind main0，PR58保留.
 
-Open: Result Go；AdMob條款／對應；R-7實機、訊號送達及單一Unity來源供應未證明.
+Open: R-7實機／CMP／訊號送達／Unity實際供應，使用者先保留待驗證.
 
-Next: 接受source程式準備成果後接續後台與實機驗證；未完成前不啟用生產供應.
+Next: 依使用者指示保留待驗證；兩群組維持暫停，沒有背景實機測試或生產啟用.
 
-Artifacts: artifacts/A-002-consent/contract-report.md、acceptance-report-2.md、tracker.md；A-001-unity-sdk/tracker.md.
+Artifacts: artifacts/A-003-result/backend-verification.md、final-review.md、tracker.md、三張截圖；PR58.
 
 Archived eras: none.
 
@@ -257,3 +257,97 @@ Streams: none.
 **Next work action:** 接收審查結果，完成已授權紀錄交付。
 
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-004] Event — 2026-10-08 12:35:37 +0800 (A-003)
+
+- 截圖初查指出下方viewport不含文件聲稱的ID／狀態；已保存原BLOCKING報告cf57bdd，重新在保存的edit頁拍上方並修正描述，ec525396獨立review PASS。群組設定沒有再改，圖片不冒充保存toast或實機證據。
+- 最後fetch發現main新增7筆文件／設定提交；origin/unity-ads沒有上游diverged（只有本機ahead），因此使用AGENTS允許的merge同步，不重寫遠端。已先提交本輪紀錄3463065，merge origin/main得到db7c443，behind main0。
+- main新追蹤根層ag.json會與本輪啟動修復副本碰撞；已證明該本機副本等於原stream-open設定並搬存/private/tmp/letsgo-unity-startup-ag.json，未丟棄資料。合併帶入main自己的root config／notebook，兩檔blob逐字等於origin/main；本session不手改主notebook。
+- 合併差異只主線文件／設定；app、gradle及建置inputs相對已審ec525396完全無diff，三項測試／269測試證據仍有效，不重跑。stream設定驗證有效，主線及stream的三個requested值均on/on/off。最後source identity同步審查後交付。
+
+## [RUN-005] Event — 2026-10-08 12:42:00 +0800 (A-003)
+
+- 主機已核對final-review：db7c443的main原blob一致、active stream三開關on/on/off、App／建置inputs未變，Outcome／Minimality／Conformance PASS。沿用既有驗證，不重跑測試；PR58仍OPEN/draft，Mintegral排除。
+
+## [RUN-006] Event — 2026-10-08 12:42:00 +0800 (A-003)
+
+- 本輪所有owner消息已逐項保存與回答：Design Go重複、Result Go接受、三項設定生效、實機先保留。兩群組已保存並暫停；截圖初次證據描述已補正且歷史保留。最終新增紀錄只保存同一已核對事實，無背景程序，R-7未證明。
+
+## [RUN-007] Event — 2026-10-08 12:42:00 +0800 (A-003)
+
+- closeout指出tracker Last update仍早於已保存WIP；已核對当前恢復狀態並刷新時間與merge evidence identity，沒有改任務完成判斷。WIP標題呈現只advisory warning，保留歷史，不重跑測試／review。
+
+# ← Reply / A-003
+
+* _2026-10-08 12:42:00 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 重複 Design Go 已記錄，沿用已完成的設計實作，沒有重做程式。
+
+- Result Go 已接受；Unity 橫幅與獎勵中介群組已保存並保持暫停，PR #58 保留、Mintegral 排除。
+
+- auto-reply:on、away-gates:on、streams:off 已生效並驗證，既有 worktree 繼續使用。
+
+- 實機驗證依你的選擇保留待辦，兩個群組維持暫停，不宣稱 Unity 已實際供應。
+
+## [FINAL REPORT]
+
+1. 「Design Go 5adca013828aeddc21f462ea0edbff30ab967848」
+
+   - 已記錄重複批准。該設計已在前輪實作並驗證；本輪沒有重做 App 程式或重新索取設計批准。
+
+2. 「Result Go 7fa932facb9289ac5bd14a7880412c68277c8042」
+
+   - 已接受精確程式成果並接續後台準備。接手時 AdMob 顯示 Unity 合作夥伴關係有效、兩個對應已存在；本輪沒有接受條款，也沒有操作既有 Mintegral 來源。先前待條款的恢復資訊已依新可見狀態更新，建立者未推定。
+
+   - 已保存兩個 Android Unity bidding 群組，僅含預設 AdMob Network 與 Unity Ads，無 Mintegral、其他廣告網路或 waterfall。兩者均保持已暫停：
+
+     |群組|ID|單元|Game ID|Placement ID|
+     |---|---|---|---|---|
+     |Let's Go - Unity Banner Android|8708929545|map-ad-2|800390974|BP_Banner_Android|
+     |Let's Go - Unity Rewarded Android|8676901314|no-ad-6h|800390974|BP_Rewarded_Android|
+
+   - GUI 保存成功與重新開啟的編輯頁、最後列表已核對。初次詳細截圖只拍到來源區，審查指出它不能支持文件對 ID／狀態的圖片描述；已补拍頁面上方並修正描述。原圖與 BLOCKING 報告保留 Git history，後台設定沒有再改。最新圖片證明名稱、ID、格式、Android 與暫停；單元／來源／mapping 另由可見 UI／AX 核對，不把圖片當成實機證據。
+
+     ![兩個已暫停的 Unity 中介群組](artifacts/A-003-result/groups-paused.jpg)
+
+   - [PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58) 再查仍 OPEN／draft，head feat/admob-ad-optimization，未修改或關閉。Unity 工作維持獨立分支。
+
+   - 本輪 App、Gradle 與建置輸入完全未變，沿用 7fa932f 的 `./gradlew test`、`./gradlew lintDebug`、`./gradlew assembleDebug` 成功證據：269 tests、203 實際執行無失敗、66 既有略過；34 個既有 lint Error 無新增，不能稱零 Error。未對未變程式重跑套件。
+
+   - 最後 fetch 發現 main 新增 7 筆文件／設定。origin/unity-ads 只有本機 ahead，沒有上游 diverged；正常 merge origin/main 後 behind main = 0，沒有 force-push。合併 identity `db7c443a9fb19623ca3e86523bcca4b721e4d8df`；root notebook／config 帶入 main 原 blob，沒有手改其他 session 的對話。啟動修復的本機根層 ag.json 已驗證等於原 stream 設定並搬存 `/private/tmp/letsgo-unity-startup-ag.json`，沒有丟棄。App／建置輸入未改，既有測試證據有效。
+
+   - Native review 在 ec525396 核對補正截圖 PASS，再在 db7c443 核對合併 currentness PASS；主機已讀報告並检查最終差異、來源 UI 及圖片。Reviewer 與主機共享權限與上下文，唯讀是指派限制，沒有 OS 強制隔離。PASS 限於程式準備／後台配置與證據，未驗證完整 pipeline 或實際供應。
+
+   Key Records — read these first
+
+   [後台核對與截圖](artifacts/A-003-result/backend-verification.md)：兩個群組、來源／對應、已暫停狀態及圖片可證明的範圍。
+
+   [最終審查](artifacts/A-003-result/final-review.md)：精確 merge identity、主線原檔與 active stream 設定、App 未變及既有驗證的有效性。
+
+   [本輪追蹤](artifacts/A-003-result/tracker.md)：本輪三項完成，實機 R-7 依使用者指示延期。
+
+3. 「auto-reply: on
+away-gates: on
+streams: off」
+
+   - 設定工具已保存目前 stream 的三個值並 validate 有效，diff 只有這三個 requested 值；既有 worktree 繼續使用。合併主線後，main 原 root config 的三值也為 on／on／off；兩者 target-doc 各自保留原路由。
+
+   - 安全 routine defaults 可自動採用，驗證通過後適用的開發門檻可自動處理，新 stream 不自動建立。法律條款、缺少的實機證據及你的明確延期不會由這些開關取代。
+
+4. 「- 先保留待驗證」
+
+   - 已延期實機驗證，沒有背景裝置測試或自動啟用。adb devices 仍無裝置；CMP 地區設定、真實同意訊號送達、Unity 單一來源 banner／rewarded 及 map/mock smoke 保留為 R-7 待辦。
+
+   - 兩個群組維持暫停，未啟用生產 Unity 供應。本次完成程式結果批准、設定與後台準備；整體 Unity 真實供應仍未完成，沒有把說明延期當成測試通過。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-004 (Takeshi Mori)
+
++

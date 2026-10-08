@@ -8,9 +8,9 @@
 
 - **Goal:** 記錄Design／Result Go、套用三項設定、接續Unity後台準備與實機驗證；PR58保留、Mintegral排除.
 
-- **Last update:** 2026-10-07 23:54:08 +0800.
+- **Last update:** 2026-10-08 12:41:59 +0800.
 
-- **Evidence commit:** ec525396d12fb62bde86a69f0eea752651bd7479.
+- **Evidence commit:** db7c443a9fb19623ca3e86523bcca4b721e4d8df.
 
 ## Overall state
 
@@ -46,7 +46,7 @@
 
 - **Active blocker or running process:** 使用者A-003明確先保留待驗證；R-7未證明，兩群組維持暫停；設定／後台證據review已PASS；沒有背景程序。
 
-- **Next safe action:** 已完成本輪紀錄交付；依使用者指示保留R-7待驗證，沒有自動實機測試或生產啟用。
+- **Next safe action:** 完成本輪紀錄交付；依使用者指示保留R-7待驗證，沒有自動實機測試或生產啟用。
 
 - **Expected changed files:** .agentflow/features/unity-ads/ag.json、stream notebook、A-001與A-002 trackers、A-003-result的tracker／後台證據／截圖／審查紀錄.
 
