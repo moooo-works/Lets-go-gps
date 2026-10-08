@@ -296,6 +296,7 @@ class MapViewModelTest {
     }
     @Test fun `VM stop prevents delayed controller route load from sending another command`() = runTest {
         isProActiveFlow.value=true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         val reply=CompletableDeferred<RouteWithPoints?>()
         coEvery { repository.getRouteWithPoints(1) } coAnswers { withContext(NonCancellable) { reply.await() } }
         val vm=createViewModel()
