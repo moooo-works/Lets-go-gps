@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪主代理與工作代理模型說明見 Git history.
+Current commit: 本輪程式接入狀態說明見 Git history.
 
-Tests/scenarios: settings show 核對 profile／roles；查核官方 reasoning 文件.
+Tests/scenarios: 讀取 stream 程式與紀錄；本輪未重跑測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 外部工作代理按階段配置；主代理不因任務自動升級.
+Proven: Unity worktree 已含 SDK／adapter 與 UMP；main 未整合.
 
-Open: Unity SDK／同意訊號與測試待續.
+Open: 實機／CMP 供應驗證延期，兩個中介群組暫停.
 
-Next: 既有 worktree 接續已授權開發.
+Next: 沿用 stream 成果，完成待驗證項後再啟用與整合.
 
-Artifacts: ag.json；PR #58；unity-ads worktree.
+Artifacts: PR #58；unity-ads worktree；程式提交 7fa932f.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -717,5 +717,38 @@ streams: off」
 ---
 
 # → Ask / A-034 (Takeshi Mori)
+
++ 現在廣告單元已經建立好了，那程式碼有需要修改的部分嗎
+
+# ← Reply / A-034
+
+* _2026-10-08 12:29:44 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 需要程式接入，且 Unity worktree 已完成相關修改；main 尚未整合，實機供應仍待驗證，兩群組依最新 stream 紀錄維持暫停。
+
+## [FINAL REPORT]
+
+1. 「現在廣告單元已經建立好了，那程式碼有需要修改的部分嗎」
+
+   - 需要。只建立版位與後台對應，舊 App 不會自動取得 Unity SDK。必須加入 Unity SDK／AdMob adapter、使用相容 Next-Gen 配對並排除 legacy ads 依賴，處理同意流程與廣告請求時機。[Google 官方接入文件](https://developers.google.com/admob/android/next-gen/mediation/unity)。
+
+   - 我已讀取現有 worktree，該 session 已完成 Next-Gen 1.5.0／Unity 4.20.1／adapter 4.20.1.0，排除 play-services-ads／ads-lite；新增 UMP 同意流程，依 canRequestAds 控制初始化及請求，並處理撤回／更新選擇後的旧廣告失效。最新程式準備提交為 7fa932facb9289ac5bd14a7880412c68277c8042。這些是目前檔案及 Git 已核對的事實，不會另做重复修改。
+
+   - Game ID 800390974、BP_Banner_Android、BP_Rewarded_Android 保存在 AdMob 對應；App 仍用原本的 AdMob banner／rewarded 單元 ID，不需要改成 Unity Placement ID，也不另手動初始化 Unity。
+
+   - 根專案 main 仍是 Next-Gen 1.2.1、未含 Unity 接入。開發分支完成不代表已合併／發版。stream 紀錄表示三項 Gradle 檢查通過，但 lint 有既有錯誤且部分 Robolectric 測試略過，不能稱全零錯誤；本輪未重新執行測試。最新 stream 紀錄有「先保留待驗證」指示、兩個中介群組維持暫停，仍需實機／同意訊號／Unity 單一來源供應驗證後才啟用。
+
+   - [stream 工作紀錄](../.worktrees/unity-ads/.agentflow/features/unity-ads/unity-ads.devlog.md) 保留詳細結果；該 session 有進行中的收尾，這裡只讀取，不寫其 notebook、設定或程式。PR #58 保留，Mintegral 排除。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-035 (Takeshi Mori)
 
 +
