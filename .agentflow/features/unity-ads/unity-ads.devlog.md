@@ -210,4 +210,50 @@ Streams: none.
 
 # → Ask / A-003 (Takeshi Mori)
 
-+
++ Design Go 5adca013828aeddc21f462ea0edbff30ab967848
+
++ Result Go 7fa932facb9289ac5bd14a7880412c68277c8042
+
++ auto-reply: on
+  away-gates: on
+  streams: off
+
++ - 先保留待驗證
+
+---
+
+## [RUN-001] Event — 2026-10-07 23:44:59 +0800 (A-003)
+
+- 已收到重複Design Go5adca01及Result Go7fa932f，程式成果已批准。git fetch成功、behind main0；PR58仍OPEN/draft，source及前輪紀錄均已遠端交付，沒有重跑未變測試。
+- 後台新證據：Unity合作夥伴關係有效；兩個對應已存在，Game ID800390974，map-ad-2→BP_Banner_Android，no-ad-6h→BP_Rewarded_Android。本輪未接受任何條款；先前待條款紀錄已被可見有效關係取代，建立者未知，不推定本輪接受。
+- 依既有完整接入及Result Go接續整合授權，建立暫停的中介群組，避免在R-7未證明前啟用生產來源。Banner群組已保存ID8708929545，僅AdMob+Unity出價，map-ad-2，狀態已暫停；無Mintegral或waterfall。準備Rewarded群組中。
+
+## [RUN-002] Event — 2026-10-07 23:54:08 +0800 (A-003)
+
+- 設定工具已保存auto-reply:on、away-gates:on、streams:off至目前stream ag.json，validate有效且diff僅三值。沿用既有worktree，主設定不写入。
+- Rewarded群組保存ID8676901314，no-ad-6h→BP_Rewarded_Android，Game ID800390974；Banner ID8708929545。兩者均已暫停，只有AdMob+Unity出價，無Mintegral／waterfall。
+- 兩次保存UI成功及最後列表已核對，已保存三張截圖與backend-verification.md；沒有接受條款或啟用生產供應。adb仍無裝置，已詢問實機接續方式，其他紀錄與review繼續。
+
+## [RUN-003] Event — 2026-10-08 07:55:48 +0800 (A-003)
+
+- 使用者「- 先保留待驗證」：實機R-7延期，群組維持暫停，不標整體供應完成；沒有背景裝置測試。
+- 設定及後台證據commit430975d已建立，僅stream三項設定與兩群組保存證據／截圖。主機核對diff及JPEG，無App source變化，不重跑已通過測試。以targeted native review核對exact設定與可見後台資料，唯一輸出review-report.md；UI由主機執行，reviewer只讀檔／圖片。
+- Tracker3/4完成，T-4延期；已對照本輪所有owner消息與原Unity接入約束。更新兩份前輪tracker只是恢复投影，記錄Result Go已收到、合作關係有效與群組已保存，但實機／CMP仍未證明。
+
+## [WIP-001] Checkpoint — 2026-10-08 07:55:49 +0800 (A-003)
+
+**Finished:**
+
+1. 程式成果批准、三項工作設定生效、两個暫停的Unity bidding群組已保存並有截圖。
+
+**Running now:**
+
+1. 設定與後台證據的獨立只讀審查。
+
+**Still to do:**
+
+1. 保存並推送本輪結果；實機／CMP／Unity單一來源驗證由使用者決定延期，兩群組維持暫停。
+
+**Next work action:** 接收審查結果，完成已授權紀錄交付。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker

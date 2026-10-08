@@ -28,9 +28,9 @@
 
 - [x] **T-1:** 相容 SDK／adapter 與 legacy 排除，僅改兩個 Gradle 檔；test、lintDebug、assembleDebug 與依賴圖驗證. Proof: /private/tmp/letsgo-unity-validation.log BUILD SUCCESSFUL；review-report.md PASS；commit 5adca013828aeddc21f462ea0edbff30ab967848. Source: A-001.
 
-- [ ] **T-2:** 依 design.md 取得 Design Go 後接入 UMP、同意限制與隱私入口；當前未改此流程，需單元與實機驗證。Source: A-001／主 A-026.
+- [ ] **T-2:** UMP、同意限制與隱私入口已實作，7fa932f已收到Result Go，單元及編譯驗證通過；實機／R-7由使用者A-003延期，仍未證明。Source: A-001／主 A-026.
 
-- [ ] **T-3:** AdMob 條款批准後完成 Unity bidding 對應與實機單一來源驗證；Game ID 800390974，兩個 BP 版位，Mintegral 排除。Source: A-001 (接續主 A-026).
+- [ ] **T-3:** AdMob合作關係有效、對應已存在且兩個暫停群組已保存；實機單一來源驗證由使用者A-003延期，仍未證明；Game ID 800390974，兩個 BP 版位，Mintegral 排除。Source: A-001 (接續主 A-026).
 
 ## Accepted scope changes
 
@@ -42,9 +42,9 @@
 
 - **Last proven result:** SDK 配對及 legacy／Mintegral 排除確認；三項 Gradle 任務成功，248 tests（66 skipped），lint 34 個既有 Error 與先前報告一致；獨立審查 PASS。
 
-- **Active blocker or running process:** Design Go已收到；同意程式與單元驗證完成，剩Result Go、AdMob條款與實機／供應驗證，無背景程序。
+- **Active blocker or running process:** Design Go已收到；同意程式與單元驗證完成，Result Go已收到、合作有效與暫停群組已保存；剩實機／CMP與供應驗證，無背景程序。
 
-- **Next safe action:** 接續A-002-consent成果；Result Go與AdMob條款待答，實機／供應未證明，條款批准前不保存中介來源。
+- **Next safe action:** 接續A-003-result成果；Result Go已收到，合作關係有效且兩個群組已保存並暫停；實機／CMP與供應未證明。
 
 - **Expected changed files:** app/build.gradle.kts、gradle/libs.versions.toml、ag.json、stream notebook、此工作資料夾.
 
@@ -52,7 +52,7 @@
 
 - **All accepted tasks checked:** no.
 
-- **Blocking accepted decision:** 程式成果Result Go、AdMob出價條款批准、實機／供應證據。
+- **Blocking accepted decision:** 實機／CMP與供應證據；Result Go已收到，合作關係有效。
 
 - **Operation running:** no.
 

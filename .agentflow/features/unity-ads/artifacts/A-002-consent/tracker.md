@@ -30,7 +30,7 @@
 
 - [x] **T-2:** 完成UMP更新／表單／隱私選項、初始化與橫幅／獎勵限制，失效舊廣告；focused tests及test/lintDebug/assembleDebug驗證。Proof: /private/tmp/letsgo-consent-reviewed-validation.log exit0，269 tests無失敗、66既有略過，commit7fa932f；source實作完成，實機由T-3追蹤。Source: A-002 (批准design5adca01).
 
-- [ ] **T-3:** security與獨立acceptance/review後提交結果供Result Go；遠端交付若GitHub仍500則保留本機並記錄；實機與AdMob条款仍待，不能聲稱完整供應。Source: A-002 (沿用design門檻).
+- [ ] **T-3:** security／程式acceptance已PASS，7fa932f Result Go已收到並已遠端交付；AdMob合作有效且對應／暫停群組完成；R-7實機由使用者A-003延期，不能聲稱完整供應。Source: A-002 (沿用design門檻).
 
 ## Accepted scope changes
 
@@ -42,9 +42,9 @@
 
 - **Last proven result:** 7fa932f完成兩項security finding修正；269 tests（203執行）無失敗、66既有略過；34既有lint Error無新增；manifest配對正確。
 
-- **Active blocker or running process:** 程式security/acceptance PASS、source已推送；Result Go待答，R-7實機／訊號送達與AdMob條款仍未證明，無背景程序。
+- **Active blocker or running process:** 程式security/acceptance PASS、source已推送；Result Go已收到，R-7實機／CMP及訊號送達由使用者A-003延期，合作關係有效且暫停群組已保存，無背景程序。
 
-- **Next safe action:** 取得Result Go接受程式準備成果；另完成條款、對應與實機驗證，未完成前不啟用生產供應。
+- **Next safe action:** Result Go已收到；兩個群組已保存且暫停，接續A-003-result的實機／CMP驗證；未完成前不啟用生產供應。
 
 - **Expected changed files:** MainApplication.kt、MainActivity.kt、AdMobInitializer.kt、RewardedAdManager.kt、新AdConsentManager.kt、BannerAdView.kt、SettingsScreen.kt、manifest、app/build.gradle.kts、各語言strings、相關測試、stream notebook與本工作資料夾.
 
@@ -52,7 +52,7 @@
 
 - **All accepted tasks checked:** no.
 
-- **Blocking accepted decision:** Result Go（僅程式準備）；AdMob條款；實機／供應證據。
+- **Blocking accepted decision:** 實機／CMP與供應證據；Result Go已收到、後台合作有效且對應存在。
 
 - **Operation running:** no.
 
