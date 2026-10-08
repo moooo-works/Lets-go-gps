@@ -149,7 +149,8 @@ class AndroidLocationMockEngine : LocationMockEngine {
 
     override fun getMockPermissionStatus(): MockPermissionStatus {
         return try {
-            if (!isDeveloperModeEnabled()) {
+            // Android 17 的全域開發者設定向一般 App 固定回 0，不能阻擋 AppOps 檢查。
+            if (sdkInt < 37 && !isDeveloperModeEnabled()) {
                 return MockPermissionStatus.DeveloperModeDisabled
             }
             val mode = if (sdkInt >= Build.VERSION_CODES.Q) {
