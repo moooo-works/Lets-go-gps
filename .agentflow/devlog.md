@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: Mintegral範圍釐清與工單結果見Git history.
+Current commit: 待辦優先順序說明見Git history.
 
-Tests/scenarios: 沿用A037UI保存／SDK／正式AppID EEA與Maps實機證據；本輪無新測試.
+Tests/scenarios: 本輪read-only核對Unity branch、驗收紀錄、open PR；無新测试.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Mintegral營運設定排除；不發终止信；Unity00939092已送出；正式CMP发布及隔離實機通過.
+Proven: Unity00939092已送出；CMP正式AppID隔離工具通過；Mintegral營運排除.
 
-Open: UnityGame ID拒絕待客服查核及Unity供應驗證.
+Open: Unity Game ID拒絕及供應待查；完整App整合實機／正式打包與發布準備待續.
 
-Next: Unity工單回覆後修正與重測；正式群組保持暫停.
+Next: 優先完整App同意流程驗證，再正式打包準備；Unity回覆後供應重測.
 
-Artifacts: A-036-pixel-test/tracker.md；Unity00939092；PR58；/private/tmp證據與未寄草稿.
+Artifacts: A-036-pixel-test/tracker.md；Unity00939092；PR58；unity-ads worktree.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -298,5 +298,43 @@ Streams: none.
 ---
 
 # → Ask / A-039 (Takeshi Mori)
+
++ 那現在還可以做什麼？
+
+---
+
+## [RUN-001] Event — 2026-10-08 13:55:18 +0800 (A-039)
+
+- 已讀目前Ask及Unity stream驗收／tracker，source分支乾淨，GitHub開啟PR只有保留的#58 draft；Unity App尚無獨立PR。本輪只核對待辦，不修改stream或執行新測試。
+
+# ← Reply / A-039
+
+* _2026-10-08 13:55:18 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 可以先做完整App同意流程實機驗證、正式打包設定核對，以及Unity獨立草稿PR與發布文件。
+- 優先完整App驗證；實際Unity供應與正式群組啟用仍需先解決Game ID拒絕。
+
+## [FINAL REPORT]
+
+1. 「那現在還可以做什麼？」
+
+   - 建議依序推進：
+
+     1. 完整App的正式同意流程實機驗證：接受／拒絕、重啟、隱私選項重新開啟、廣告隨同意狀態切換。先前正式AppID後台表單在隔離UMP工具驗證，還不能取代完整App整合測試。
+     2. 正式打包準備：核對簽章、Maps配置、正式App／廣告單元ID與test-only設定，避免再裝到佔位配置版本；補完mock開始／停止的實機檢查，重裝後mock權限需重新設定。
+     3. 整理Unity單一主題草稿PR與發布文件：保留PR58，寫清測試結果與Unity未通過項；同步最新main，依AGENTS完成test／lintDebug／assembleDebug與lint基線判讀。發布前也要補齊Unity第三方SDK的隱私揭露。
+
+   - 優先第1項，接著第2項；這些工作可在Unity客服00939092查核期間進行。第3項是準備可審閱變更，不代表已符合上線條件。正式Unity群組繼續暫停；成功初始化、實際Unity橫幅／reward供應後才進入啟用與正式發布。
+   - 本輪只有查核與建議，沒有開始上述新coding、沒有新實機測試，沒有變更PR58或Unity worktree。既有R7供應驗證仍未完成。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-040 (Takeshi Mori)
 
 +
