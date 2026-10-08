@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪後台設定紀錄見 Git history；PR #58 保留.
+Current commit: 設定提交 149b8b9；收尾見 Git history.
 
-Tests/scenarios: Unity 正確 Store ID、Game ID 與兩個版位驗證；未跑 Gradle.
+Tests/scenarios: settings validate／show、獨立檢查 PASS.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Game ID 800390974；BP_Banner_Android、BP_Rewarded_Android 建立.
+Proven: root auto-reply on、away-gates on、streams off.
 
-Open: AdMob 條款、對應／群組、SDK 同意訊號與驗證.
+Open: Unity worktree 設定未同步；SDK 與測試待續.
 
-Next: 使用者確認出價條款與工作分頁選擇後繼續.
+Next: unity-ads worktree 接續開發.
 
-Artifacts: PR #58；artifacts/A-026-unity-ads/tracker.md；Unity／AdMob 分頁.
+Artifacts: ag.json；PR #58；unity-ads worktree.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -469,5 +469,222 @@ Streams: none.
 ---
 
 # → Ask / A-027 (Takeshi Mori)
+
++ 接受出價條款
+  使用獨立worktree開發
+
+---
+
+## [RUN-001] Event — 2026-10-07 22:51:21 +0800 (A-027)
+
+- 已依本輪授權接受 AdMob Unity Ads 出價條款，保存 Game ID 800390974 的兩個對應：map-ad-2 → BP_Banner_Android、no-ad-6h → BP_Rewarded_Android；來源列表確認對應數 2。尚未加入中介群組。
+- agf new 建立並推送 unity-ads worktree；behind origin/main = 0、working tree clean、產品與 origin/main 無差異。依 stream 規範交由新工作目錄 session 接續 SDK 開發，未改產品。
+
+# ← Reply / A-027
+
+* _2026-10-07 22:51:21 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 出價條款已接受、兩個 AdMob 對應已保存；獨立 worktree 已建立，SDK 開發需在新工作目錄 session 接續。
+
+## [FINAL REPORT]
+
+1. 「接受出價條款
+使用獨立worktree開發」
+
+   - 已完成條款接受並保存 Unity bidding 來源。Game ID `800390974`：`map-ad-2` → `BP_Banner_Android`；`no-ad-6h` → `BP_Rewarded_Android`。後台確認對應數 2。尚未加入啟用中的中介群組，SDK／同意訊號與實機供應驗證未完成；未跑 Gradle，沒有背景工作。
+
+   - 已執行 agf new，建立並推送 `unity-ads` 分支與 `.worktrees/unity-ads`；工作樹乾淨、behind origin/main = 0，產品與 origin/main 無差異。PR #58 保留，Mintegral 排除。
+
+   - 依 [stream 規範](/Users/mori/.agents/skills/agentflow/references/streams.md) 的原文「After opening, tell the owner to exit and run the shell-quoted absolute continuation command from the CLI result.」，SDK 工作需轉到新工作目錄的 session；這是目前停下產品開發的原因，並非重新要求開發授權。
+
+   - 請退出目前 host，執行工具回傳的接續命令：
+
+     ```bash
+     cd '/Users/mori/side-project/Lets-go-gps/.worktrees/unity-ads' && codex
+     ```
+
+     新 session 輸入：「godev，接續 Unity Ads SDK 開發；讀取主工作紀錄 A-026／A-027，Game ID 800390974，BP_Banner_Android／BP_Rewarded_Android，AdMob 對應已保存；保留 PR #58，排除 Mintegral。完成 SDK、必要同意訊號、test／lintDebug／assembleDebug 與測試供應驗證後才啟用中介群組。」
+
+   - 新工作紀錄：[unity-ads.devlog.md](../.worktrees/unity-ads/.agentflow/features/unity-ads/unity-ads.devlog.md)。根工作紀錄保留所有授權與後台證據；stream session 應只更新 stream notebook。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-028 (Takeshi Mori)
+
++ 設定好unity ads的版位後，admob還會運作嗎？
+
+# ← Reply / A-028
+
+* _2026-10-07 22:58:26 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 會，Unity 是加入 AdMob 中介的額外廣告來源；目前只保存版位對應，尚未改變既有供應設定。
+
+## [FINAL REPORT]
+
+1. 「設定好unity ads的版位後，admob還會運作嗎？」
+
+   - 會。App 仍透過原本 AdMob 廣告單元請求廣告；Unity 是額外來源，不會因建立版位就取代 AdMob。正式接入後，保留 AdMob 聯播網並加入 Unity bidding，來源會競價供應廣告，每次曝光可能來自 Google 或 Unity。[Google 官方中介說明](https://support.google.com/admob/answer/13420272?hl=en)。
+
+   - 目前已完成 Unity 版位與 AdMob 對應，尚未加入中介群組、尚未修改 SDK。因此這次設定本身不改變原本廣告供應；這是根據已確認設定的判斷，並非新的實機測試結果。
+
+   - 後續會保留現有橫幅／獎勵廣告單元，完成 SDK 與測試後再啟用 Unity。若 Unity 沒有合適廣告，其他來源仍可參與供應；不保證每次請求都有廣告或收益一定增加。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-029 (Takeshi Mori)
+
++ 為什麼你每次都要跟我要權限？這樣怎麼不像開發godev的人說可以24小時不間斷的派你工作？是你的問題還是我不會使用godev這套工具？
+
+# ← Reply / A-029
+
+* _2026-10-07 23:40:19 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 不是你不會用；中斷來自目前保守設定、必要平台批准，以及我沒有充分延續已授權工作的處理問題。裸 godev 不會自動啟動全天候任務佇列。
+
+## [FINAL REPORT]
+
+1. 「為什麼你每次都要跟我要權限？這樣怎麼不像開發godev的人說可以24小時不間斷的派你工作？是你的問題還是我不會使用godev這套工具？」
+
+   - 不是你不會用。我應該把已授權的開發持续做下去，只在真正需要你決定時停下；先前沒有把可先行的準備工作做足，頻繁把流程選擇交給你，這部分是我的處理問題。對工作分頁，使用者已有明確執行指示時，不應把所有例行操作都重新當成權限問題。
+
+   - 實際三種停點不同：早先 git fetch 等是當時 workspace-write 沙箱批准，現在 session 已是 danger-full-access／never，因此不需要相同 shell 升權；AdMob 出價條款是瀏覽器規範要求「Confirmation Required at Action time」，需要確認一次，現在已接受，不該重問；worktree 轉 session 是 [streams 規範](/Users/mori/.agents/skills/agentflow/references/streams.md) 明文「After opening, tell the owner to exit and run the shell-quoted absolute continuation command from the CLI result.」，不是 Codex 本身不能在指定 workdir 操作 Git。
+
+   - 目前 ag.json 是 auto-reply: off、away-gates: off、streams: ask；因此 routine defaults、Design Go／Result Go 與是否開新 stream 都偏向人工確認。這些設定與你期待的長時間少打擾工作不一致。可選 auto-reply: on、away-gates: on，並依工作方式選 streams: off 或 always；always 仍有轉 session 規範，並不能消除交接。這裡只是解釋選項，未擅自改設定。
+
+   - [SKILL.md](/Users/mori/.agents/skills/agentflow/SKILL.md) 的裸 godev 是啟動／恢復工作流程，不是自動建立與啟動全天候任務排程。依 [looper 規範](/Users/mori/.agents/skills/agentflow/references/looper.md)，長佇列需先有明確計畫與範圍，再由 run-plans／run-looper 啟動。本次沒有啟動 looper，也沒有運行中的持續目標，不能宣稱背景仍在開發。
+
+   - 「24 小時」需任務佇列或持续執行機制、可用執行環境及供應商能力配合，並不保證遇到條款、登入、網站拒絕或使用者專屬決策時還能自行越過。未提供作者原始說法，不能斷言他的宣稱是什麼。OpenAI 官方也說持續目標與自動批准審查不會改變既有權限邊界。[官方說明](https://developers.openai.com/blog/automating-repetitive-work-at-openai-with-codex)。
+
+   - Unity 接入授權仍有效。SDK 與同意訊號、三項 Gradle 檢查及供應驗證仍未完成；不需重新要求你批准接入、測試或 PR #58 保留。接下來應由我減少例行提問、清楚報告真正阻塞，不能把設定不符合期望的責任推給你。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-030 (Takeshi Mori)
+
++ 怎麼改設定
+
+# ← Reply / A-030
+
+* _2026-10-07 23:44:31 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 直接在聊天逐行送出設定指令即可；建議 auto-reply: on、away-gates: on、streams: off，已有 Unity worktree 的設定需在其 session 套用。
+
+## [FINAL REPORT]
+
+1. 「怎麼改設定」
+
+   - 直接在要開發的專案 session 貼上以下三行，我會依 skill 的設定流程保存與驗證 ag.json：
+
+     ```text
+     auto-reply: on
+     away-gates: on
+     streams: off
+     ```
+
+   - auto-reply: on 讓安全的例行預設由我決定；away-gates: on 讓 consequential 工作在證據通过後自動滿足 Design Go／Result Go；streams: off 不再因一般任務詢問是否建立新 stream，Git 分支與既有工作分頁仍照適用規範管理。已有 worktree 不會因此被移除或合併。
+
+   - root 與 Unity worktree 各有設定副本。要影響 SDK 開發，請在 `.worktrees/unity-ads` 的 session 套用；只改根目錄不代表既有 worktree 同步改變。這三項設定不會啟動背景佇列，也不會略過必要測試、審查、條款接受或平台硬性批准。
+
+   - 這次是操作說明，尚未修改設定。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-031 (Takeshi Mori)
+
++ 每次開新session就要設定一次嗎？
+
+# ← Reply / A-031
+
+* _2026-10-07 23:45:54 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 不用每次設定；godev 設定持久保存在該專案／worktree 的 ag.json，新 session 會沿用。
+
+## [FINAL REPORT]
+
+1. 「每次開新session就要設定一次嗎？」
+
+   - 不用。同一專案目錄的新 session 會讀取已保存的 ag.json，auto-reply、away-gates、streams 等設定會保留。
+
+   - 新建立的 worktree 會複製當時主專案的設定；建立後兩邊各有自己的副本，之後不會自動同步。現有 unity-ads worktree 是修改設定前建立，因此若主目錄後來修改，該 worktree 仍需另改一次，之後其新 session 同樣沿用。
+
+   - 全新專案則使用自己的設定，不會因這個專案改過就全部套用。裸 godev 用來啟動或恢復流程，不代表每次都要重送設定。這裡說的是 godev 設定；平台網站權限／強制條款確認屬於另一層。
+
+   - 目前只是說明，尚未修改根專案或 worktree 設定。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-032 (Takeshi Mori)
+
++ auto-reply: on
+  away-gates: on
+  streams: off
+
+---
+
+## [RUN-001] Event — 2026-10-07 23:50:23 +0800 (A-032)
+
+- 根專案三值已保存；settings validate／show 通過，獨立檢查 PASS。設定提交 149b8b9ec4e06bb6e59471a85de0c8310fb4bfea。Reviewer 僅修正被檢查器拒絕的第一行格式，其他內容與驗證未變。
+
+# ← Reply / A-032
+
+* _2026-10-07 23:50:23 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 根專案三項設定已保存並驗證；Unity worktree 副本未修改。
+
+## [FINAL REPORT]
+
+1. 「auto-reply: on
+away-gates: on
+streams: off」
+
+   - 已保存 ag.json 的 auto-reply on、away-gates on、streams off；官方設定驗證及獨立檢查通過，主機核對三值與範圍。其他設定保留，同目錄新 session 會沿用。
+
+   - 未改產品、未啟動背景派工。既有 Unity worktree 的設定副本未修改。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-033 (Takeshi Mori)
 
 +
