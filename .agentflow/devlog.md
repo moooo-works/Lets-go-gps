@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: Unity工單與Mintegral移除結果見Git history.
+Current commit: Mintegral範圍釐清與工單結果見Git history.
 
-Tests/scenarios: GDPR／US伙伴保存核對、Mintegral0對應及共用停用、runtime依賴／APK、正式AppID EEA表單與拒絕回呼、地圖冷啟動.
+Tests/scenarios: 沿用A037UI保存／SDK／正式AppID EEA與Maps實機證據；本輪無新測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity00939092已送出Open；MintegralGDPR／US伙伴移除及資料共用停用；正式CMP發布與隔離實機通過.
+Proven: Mintegral營運設定排除；不發终止信；Unity00939092已送出；正式CMP发布及隔離實機通過.
 
-Open: Mintegral供應商合作終止請求待發送授權；UnityGame ID待客服查核及供應驗證.
+Open: UnityGame ID拒絕待客服查核及Unity供應驗證.
 
-Next: 依授權寄Mintegral終止信；Unity回覆後修正與重測，正式群組維持暫停.
+Next: Unity工單回覆後修正與重測；正式群組保持暫停.
 
-Artifacts: A-036-pixel-test/tracker.md；Unity00939092；/private/tmp截圖與Mintegral終止草稿；PR58.
+Artifacts: A-036-pixel-test/tracker.md；Unity00939092；PR58；/private/tmp證據與未寄草稿.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -263,5 +263,40 @@ Streams: none.
 ---
 
 # → Ask / A-038 (Takeshi Mori)
+
++ <send_user_message_question_reply>
+  [{"answer":"我目前只有註冊而已，還沒真的開始用，也沒有建立個人資料（因為看到「中國附屬台灣地區」）我就終止了，這樣還要寫信嗎？","question":"要完全終止 AdMob 裡仍顯示的 Mintegral 合作關係，需要直接聯絡該供應商。我已備妥請求，僅含 AdMob 發布商 ID 與終止 Mintegral 合作的要求。是否授權寄到 Google 官方列出的 developer@mintegral.com？這是另一個對外收件者，因此需要明確發送授權。","questionItemId":"[\"request_user_input_async\",\"call_ab3f3a0f654e429dbdab617220b4ebad\",0]"}]
+  </send_user_message_question_reply>
+
+---
+
+## [RUN-001] Event — 2026-10-08 13:51:05 +0800 (A-038)
+
+- 使用者說明Mintegral僅註冊、未啟用、未建立個人資料，詢問是否仍需寫信。已釐清停止使用不要求刪除合作關係列名；不發送Mintegral終止信，保留未寄草稿。營運排除已由A037實際UI／SDK證據確認；tracker T7完成營運範圍，仍保留Unity T3待客服。
+
+# ← Reply / A-038
+
+* _2026-10-08 13:51:05 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 不需要為了停止使用Mintegral再寫信；不會寄出Mintegral終止請求。
+- Mintegral營運排除已完成；Unity工單00939092已送出，正式CMP發布與隔離EEA測試通過。
+
+## [FINAL REPORT]
+
+1. 「我目前只有註冊而已，還沒真的開始用，也沒有建立個人資料（因為看到『中國附屬台灣地區』）我就終止了，這樣還要寫信嗎？」
+
+   - 不需要為了停止使用再寫信。我先前把停止使用和終止AdMob既有合作記錄混在一起，應分開處理。現有核對結果：三App無Mintegral廣告單元對應、沒有waterfall來源、Lets-go-gps無Mintegral SDK，GDPR與US伙伴及相關資料共用設定都已移除／停用。合作關係列名仍存在，不代表正在投放。
+   - 寄信只是在另行要求供應商終止合作記錄或處理註冊帳戶；本次不把這項額外工作當成啟用Unity的前提，不寄信，也不宣稱對方帳戶或合作關係已刪除。未發送草稿留/private/tmp/mintegral-termination-request.txt。
+   - Unity技術工單已成功送出，編號00939092、Open。[工單](https://support-ads.unity.com/s/cases?id=500Qv00000janJjIAI)。正式同意表單已發布，隔離測試用正式AppID＋EEA後表單及拒絕回呼正常；目前仍待Unity客服修正或說明Game ID拒絕，正式群組保持暫停。手機正常測試版圖資與Google Test Ad已再次確認，PR58保留。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-039 (Takeshi Mori)
 
 +

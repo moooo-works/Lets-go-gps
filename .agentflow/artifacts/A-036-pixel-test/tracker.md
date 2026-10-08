@@ -4,11 +4,11 @@
 
 - **Work key:** A-036-pixel-test.
 
-- **Active Ask:** A-037.
+- **Active Ask:** A-038.
 
 - **Goal:** 沿用 A-035 實機測試授權，備份替換測試版並修正地圖圖資.
 
-- **Last update:** 2026-10-08 13:46:53 +0800.
+- **Last update:** 2026-10-08 13:51:04 +0800.
 
 - **Evidence commit:** uncommitted.
 
@@ -20,9 +20,9 @@
 
 - **Total:** 7.
 
-- **Completed:** 5.
+- **Completed:** 6.
 
-- **Remaining:** 2.
+- **Remaining:** 1.
 
 ## Accepted task checklist
 
@@ -38,7 +38,7 @@
 
 - [x] **T-6:** 依明確授權送出Unity技術工單，核對成功頁／工單編號／狀態，不附手機資料或金鑰。Source: A-037. Proof: 使用者完成CAPTCHA後成功頁與工單00939092／Open。
 
-- [ ] **T-7:** 全帳戶移除Mintegral同意與資料共用設定，確認SDK／對應／waterfall均無Mintegral；終止既有合作記錄須供應商確認。Source: A-037.
+- [x] **T-7:** 全帳戶移除Mintegral同意與資料共用設定，確認SDK／對應／waterfall均無Mintegral；營運排除已完成；依A038未使用服務的說明，合作記錄／供應商帳戶刪除不列本次必要工作，不寄終止信。Source: A-037、A-038. Proof: GDPR197／US333排除、共用停用、三App0對應、無waterfall及SDK。
 
 ## Accepted scope changes
 
@@ -46,15 +46,17 @@
 
 - Change: 授權Unity工單與全帳戶Mintegral移除；Source: A-037「1，同意／2，完全移除」；Effect: 增加T-6、T-7並發布正式CMP。
 
+- Change: 明確區分停止使用與刪除合作記錄；Source: A-038「只有註冊、尚未使用」及是否需寄信的詢問；Effect: T7營運排除完成、不發Mintegral信，供應商帳戶／合作記錄保留。
+
 ## Current recovery
 
-- **Current item:** T-7.
+- **Current item:** T-3.
 
 - **Last proven result:** Unity00939092已送出Open；GDPR197／US333伙伴均排除Mintegral；Mintegral NPA信號與PFID關閉；正式CMP發布及拒絕回呼通過。
 
-- **Active blocker or running process:** Unity ID仍待客服查核；Mintegral合作記錄需供應商處理，終止請求已備妥、待新的收件者發送授權。沒有程序執行。
+- **Active blocker or running process:** Unity Game ID仍待客服查核；沒有程序執行。Mintegral不寄信。
 
-- **Next safe action:** 取得Mintegral終止信發送授權後寄出；Unity回覆後依精確修正重測。
+- **Next safe action:** Unity00939092有回覆後依精確修正重測，正式群組維持暫停。
 
 - **Expected changed files:** 本repo notebook／tracker；網站repo僅app-ads.txt已發布；/private/tmp診斷APK及支援草稿／截圖；unity-ads程式與PR58保留。
 
@@ -66,7 +68,7 @@
 
 - **Operation running:** no.
 
-- **Next action remaining:** T-3、T-7.
+- **Next action remaining:** T-3.
 
 - **Evidence status:** current.
 
