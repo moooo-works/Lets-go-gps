@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 待辦優先順序說明見Git history.
+Current commit: 同意流程測試說明見Git history.
 
-Tests/scenarios: 本輪read-only核對Unity branch、驗收紀錄、open PR；無新测试.
+Tests/scenarios: 本輪僅說明，無新測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity00939092已送出；CMP正式AppID隔離工具通過；Mintegral營運排除.
+Proven: 正式CMP已發布並於隔離診斷App驗證；Unity工單00939092已送出.
 
-Open: Unity Game ID拒絕及供應待查；完整App整合實機／正式打包與發布準備待續.
+Open: 完整App整合實機測試待續；UnityGame ID與供應待客服.
 
-Next: 優先完整App同意流程驗證，再正式打包準備；Unity回覆後供應重測.
+Next: 完整App同意流程測試及正式打包準備.
 
-Artifacts: A-036-pixel-test/tracker.md；Unity00939092；PR58；unity-ads worktree.
+Artifacts: Unity00939092；PR58；unity-ads worktree；A-036-pixel-test/tracker.md.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -336,5 +336,30 @@ Streams: none.
 ---
 
 # → Ask / A-040 (Takeshi Mori)
+
++ 第一點是什麼
+
+# ← Reply / A-040
+
+* _2026-10-08 13:58:13 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 第一點是完整Lets-go-gps的廣告隱私同意流程實機測試。
+
+## [FINAL REPORT]
+
+1. 「第一點是什麼」
+
+   - 用測試設定模擬需要顯示表單的地區，在完整Lets-go-gps裡操作同意／不同意／管理選項，確認選擇會正確影響廣告。包括選擇前不提前載入廣告、拒絕不被當作同意、重啟保留選擇、設定頁可重新開啟隱私選項。拒絕個人化不一定代表完全沒有廣告，廣告請求應依UMP結果處理。
+   - 前次證明正式AdMob表單可在隔離診斷App載入及完成拒絕回呼；這一步改驗證真正Lets-go-gps的整體串接。可以先驗證AdMob與同意流程，Unity實際廣告仍待Game ID問題修復。本輪是說明，沒有開始新測試或修改程式。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-041 (Takeshi Mori)
 
 +
