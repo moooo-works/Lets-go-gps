@@ -5,6 +5,12 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.content.Context
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.moooo_works.letsgogps.ui.theme.MockGpsTheme
+import com.moooo_works.letsgogps.domain.repository.SearchRepository
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +33,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.service.MockLocationService
 import com.google.android.gms.maps.model.LatLng
@@ -62,6 +69,7 @@ class MapViewModel @Inject constructor(
     private val rewardedAdManager: RewardedAdManager,
     private val systemHealthCheck: SystemHealthCheck,
     private val timezoneRepository: TimezoneRepository,
+    private val searchRepository: SearchRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -98,7 +106,200 @@ class MapViewModel @Inject constructor(
         context = context,
         onStopMocking = ::stopMocking,
         onCameraMove = ::onCameraMove,
-        onSetTransportMode = ::setTransportMode
+        onSetTransportMode = ::setTransportMode,
+        onOverlayDismissed = {
+            cancelCompanionPending()
+            floatingCompanionController.close()
+        }
+    )
+
+    private val companionRequests = CompanionExecutionRequests()
+    private var companionPending: CompanionExecutionRequests.Request? = null
+    private var companionJob: Job? = null
+    val floatingCompanionController = FloatingCompanionController(
+        _uiState, repository, searchRepository, settingsRepository, viewModelScope, ::executeCompanionAction
+    )
+
+    private fun companionRouteKey(): List<LatLng>? = _uiState.value.let {
+        it.waypoints.toList().takeIf { _ -> it.isMocking && it.mapMode == MapMode.ROUTE }
+    }
+
+    internal fun executeCompanionAction(action: CompanionAction) {
+        cancelCompanionPending()
+        val request = companionRequests.create(action, companionRouteKey())
+        executeCompanionRequest(request)
+    }
+
+    internal suspend fun awaitCompanionCommandForTest() { companionJob?.join() }
+
+    private fun executeCompanionRequest(request: CompanionExecutionRequests.Request, withoutSteps: Boolean = false) {
+        companionJob?.cancel()
+        companionJob = viewModelScope.launch {
+            val health = withContext(Dispatchers.IO) { systemHealthCheck.refresh() }
+            if (!companionRequests.isValid(request, companionRouteKey()) ||
+                (request.action is CompanionAction.PlayRoute && request.action.points != _uiState.value.waypoints)) {
+                floatingCompanionController.setMessage(CompanionMessage.ROUTE_CHANGED)
+                return@launch
+            }
+            if (!_uiState.value.isProActive || !proRepository.isProActive.value) {
+                floatingCompanionController.setMessage(CompanionMessage.NEED_PRO)
+                return@launch
+            }
+            if (health.hasBlockingFailure) {
+                _uiState.update { it.copy(showHealthCheck = true, healthCheckState = health) }
+                return@launch
+            }
+            if (!ensurePermission()) return@launch
+            val action = request.action
+            if (action is CompanionAction.UseRoute) {
+                // Loading prepares an immutable route; playing is a separate explicit action.
+                if (action.points.size < 2) return@launch
+                if (_uiState.value.isMocking) {
+                    try {
+                        context.startService(Intent(context, MockLocationService::class.java).apply {
+                            this.action = MockLocationService.ACTION_STOP
+                        })
+                    } catch (error: RuntimeException) {
+                        setMockError(MockError.Unknown(error.message ?: "Unable to stop simulation"))
+                        return@launch
+                    }
+                    // Apply only once the old service has stopped; a late STOP must not stop new playback.
+                    val stopped = withTimeoutOrNull(5_000L) {
+                        mockStateRepository.mockStatus.first { it == MockStatus.IDLE }
+                    }
+                    if (stopped == null || !companionRequests.isCurrent(request)) return@launch
+                }
+                routeSimulator.stop()
+                mockStateRepository.setActiveRouteWaypoints(action.points)
+                routeSimulator.setRoute(action.points)
+                _uiState.update { it.copy(mapMode = MapMode.ROUTE, waypoints = action.points,
+                    centerLocation = action.points.first(), routeFitRequestToken = System.currentTimeMillis()) }
+                companionRequests.invalidate()
+                return@launch
+            }
+            val pending = when (action) {
+                is CompanionAction.Locate -> PendingStart.SINGLE
+                is CompanionAction.Explore -> PendingStart.EXPLORATION
+                is CompanionAction.PlayRoute -> PendingStart.ROUTE
+                else -> return@launch
+            }
+            val steps = if (withoutSteps) false else StepSyncGate.resolve(_uiState, pending)
+            if (steps == null) { companionPending = request; return@launch }
+            if (!companionRequests.isValid(request, companionRouteKey())) return@launch
+            val intent = Intent(context, MockLocationService::class.java).apply {
+                putExtra(MockLocationService.EXTRA_STEP_SYNC_ALLOWED, steps)
+                when (action) {
+                    is CompanionAction.Locate -> {
+                        this.action = MockLocationService.ACTION_START_SINGLE
+                        putExtra(MockLocationService.EXTRA_LAT, action.target.latLng.latitude)
+                        putExtra(MockLocationService.EXTRA_LNG, action.target.latLng.longitude)
+                    }
+                    is CompanionAction.Explore -> {
+                        this.action = MockLocationService.ACTION_START_EXPLORATION
+                        putExtra(MockLocationService.EXTRA_LAT, action.target.latLng.latitude)
+                        putExtra(MockLocationService.EXTRA_LNG, action.target.latLng.longitude)
+                    }
+                    is CompanionAction.PlayRoute -> this.action = MockLocationService.ACTION_START_ROUTE
+                    else -> Unit
+                }
+            }
+            try {
+                ContextCompat.startForegroundService(context, intent)
+            } catch (error: RuntimeException) {
+                setMockError(MockError.Unknown(error.message ?: "Unable to start simulation"))
+                companionPending = null
+                companionRequests.invalidate()
+                return@launch
+            }
+            consumeStepSyncCreditIfNeeded(steps)
+            companionPending = null
+            companionRequests.invalidate()
+            if (action is CompanionAction.Locate) {
+                _uiState.update { it.copy(mapMode = MapMode.SINGLE, centerLocation = action.target.latLng) }
+                maybeCheckTimezoneMismatch(action.target.latLng)
+            }
+        }
+    }
+
+    private fun cancelCompanionPending() {
+        floatingCompanionController.cancelPendingActions()
+        companionRequests.invalidate()
+        companionJob?.cancel()
+        if (companionPending != null) clearStepSyncCreditDialogState()
+        companionPending = null
+    }
+
+    private fun companionPlayPause() {
+        when (_uiState.value.simulationState) {
+            SimulationState.PLAYING -> pauseRoute()
+            SimulationState.PAUSED -> {
+                cancelCompanionPending()
+                if (_uiState.value.isProActive && ensurePermission()) context.startService(
+                    Intent(context, MockLocationService::class.java).apply { action = MockLocationService.ACTION_RESUME_ROUTE })
+            }
+            else -> if (_uiState.value.waypoints.size >= 2)
+                executeCompanionAction(CompanionAction.PlayRoute(_uiState.value.waypoints.toList()))
+        }
+    }
+
+    private fun releaseCompanionInput() {
+        joystickController.releaseMovement()
+        joystickOverlayManager.setInputFocusable(false)
+    }
+
+    private fun copyCompanionCoordinate(point: LatLng?) {
+        if (point == null) { floatingCompanionController.setMessage(CompanionMessage.UNKNOWN_LOCATION); return }
+        (context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)
+            ?.setPrimaryClip(ClipData.newPlainText("GPS", formatCompanionCoordinate(point)))
+        floatingCompanionController.setMessage(CompanionMessage.COPIED)
+    }
+
+    private fun closeCompanion() {
+        cancelCompanionPending()
+        floatingCompanionController.close()
+        releaseCompanionInput()
+        if (_uiState.value.isJoystickEnabled) joystickController.toggle()
+    }
+
+    private fun openAppFromCompanion() {
+        releaseCompanionInput()
+        context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
+            context.startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+        }
+    }
+
+    private fun companionActions() = FloatingCompanionActions(
+        onExpandedChange = { releaseCompanionInput(); floatingCompanionController.setExpanded(it) },
+        onTabChange = { releaseCompanionInput(); floatingCompanionController.setTab(it) },
+        onQueryChange = floatingCompanionController::setQuery,
+        onSearch = floatingCompanionController::search,
+        onPaste = { joystickOverlayManager.runWhenFocused {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString()?.let {
+                floatingCompanionController.setQuery(it); floatingCompanionController.search()
+            }
+            joystickOverlayManager.setInputFocusable(false)
+        } },
+        onSelect = floatingCompanionController::select,
+        onFolderChange = floatingCompanionController::setFolder,
+        onFavoritesChange = floatingCompanionController::setFavoritesOnly,
+        onLoadRoute = floatingCompanionController::requestLoadRoute,
+        onLocate = floatingCompanionController::requestLocate,
+        onQueue = floatingCompanionController::queueSelected,
+        onApplyQueue = floatingCompanionController::applyQueue,
+        onSave = floatingCompanionController::saveSelected,
+        onConfirmReplacement = floatingCompanionController::confirmReplacement,
+        onCancelReplacement = floatingCompanionController::cancelReplacement,
+        onPlayPause = ::companionPlayPause,
+        onStop = { cancelCompanionPending(); joystickController.releaseMovement(); stopMocking() },
+        onSpeedChange = ::setSpeed, onLoopChange = ::cycleLoopMode,
+        onExplore = floatingCompanionController::requestExplore,
+        onCopyCurrent = { copyCompanionCoordinate(currentCompanionCoordinate(_uiState.value)) },
+        onCopySelected = { copyCompanionCoordinate(floatingCompanionController.state.value.selectedLocation?.latLng) },
+        onClose = ::closeCompanion, onOpenApp = ::openAppFromCompanion,
+        onInputFocus = joystickOverlayManager::setInputFocusable,
+        onWindowDrag = { x, y -> joystickOverlayManager.updatePosition(x.toInt(), y.toInt()) },
+        onWindowDragEnd = joystickOverlayManager::snapToEdge
     )
 
     private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -106,6 +307,7 @@ class MapViewModel @Inject constructor(
 
     fun setMapMode(mode: MapMode) {
         if (_uiState.value.mapMode == mode) return
+        cancelCompanionPending()
 
         if (mode == MapMode.SINGLE) {
             if (_uiState.value.simulationState != SimulationState.IDLE) {
@@ -116,6 +318,11 @@ class MapViewModel @Inject constructor(
     }
 
     init {
+        joystickController.setOverlayWrapper { joystick ->
+            val map by uiState.collectAsState()
+            val companion by floatingCompanionController.state.collectAsState()
+            MockGpsTheme { FloatingCompanionView(map, companion, companionActions(), joystick) }
+        }
         viewModelScope.launch {
             settingsRepository.observeLastCenter().collect { center ->
                 if (isFirstLoad && center != null) {
@@ -203,6 +410,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             proRepository.isProActive.collect { isPro ->
                 _uiState.update { it.copy(isProActive = isPro) }
+                if (!isPro && _uiState.value.isJoystickEnabled) closeCompanion()
             }
         }
 
@@ -357,6 +565,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun startMocking() {
+        cancelCompanionPending()
         // Debounce + idempotent: ignore taps while a start is already in flight
         // or mocking is already active. Without this guard a rapid double-tap
         // could fire two `startForegroundService` calls.
@@ -492,6 +701,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun stopMocking() {
+        cancelCompanionPending()
         val intent = Intent(context, MockLocationService::class.java).apply {
             action = MockLocationService.ACTION_STOP
         }
@@ -504,7 +714,9 @@ class MapViewModel @Inject constructor(
         mockStateRepository.clearError()
     }
 
-    fun toggleJoystick() = joystickController.toggle()
+    fun toggleJoystick() {
+        if (_uiState.value.isJoystickEnabled) closeCompanion() else joystickController.toggle()
+    }
 
     fun selectSearchResult(location: GeocodedLocation) {
         _uiState.update { it.copy(centerLocation = location.latLng) }
@@ -570,12 +782,23 @@ class MapViewModel @Inject constructor(
 
     /** 「這次不用步數同步」——照常啟動模擬，只是不寫步數，也不扣次數。 */
     fun startWithoutStepSync() {
+        companionPending?.let { request ->
+            companionPending = null
+            clearStepSyncCreditDialogState()
+            executeCompanionRequest(request, withoutSteps = true)
+            return
+        }
         val pending = _uiState.value.pendingStepSyncStart ?: return
         dismissStepSyncCreditDialog()
         resumePendingStart(pending, stepSyncActive = false)
     }
 
     fun dismissStepSyncCreditDialog() {
+        cancelCompanionPending()
+        clearStepSyncCreditDialogState()
+    }
+
+    private fun clearStepSyncCreditDialogState() {
         _uiState.update {
             it.copy(
                 showStepSyncCreditDialog = false,
@@ -587,6 +810,7 @@ class MapViewModel @Inject constructor(
 
     /** 看一支獎勵廣告換一次步數同步。中途關閉或無庫存都不扣次數。 */
     fun watchAdForStepSyncCredit(activity: Activity) {
+        val companionRequest = companionPending
         val pending = _uiState.value.pendingStepSyncStart ?: return
         // 刻意不設 loading 旗標：RewardedAdManager 在「使用者看到一半關掉」時
         // onReward 與 onUnavailable 都不會觸發，旗標會永遠卡在 true 而鎖死
@@ -597,11 +821,20 @@ class MapViewModel @Inject constructor(
             onReward = {
                 viewModelScope.launch {
                     proRepository.grantFeatureCredits(FeatureCost.CREDITS_PER_REWARDED_AD)
-                    dismissStepSyncCreditDialog()
-                    resumePendingStart(pending, stepSyncActive = true)
+                    if (companionRequest != null) {
+                        if (companionPending !== companionRequest || !companionRequests.isValid(companionRequest, companionRouteKey())) return@launch
+                        companionPending = null
+                        clearStepSyncCreditDialogState()
+                        executeCompanionRequest(companionRequest)
+                    } else {
+                        dismissStepSyncCreditDialog()
+                        resumePendingStart(pending, stepSyncActive = true)
+                    }
                 }
             },
             onUnavailable = {
+                if (companionRequest != null && (companionPending !== companionRequest ||
+                        !companionRequests.isValid(companionRequest, companionRouteKey()))) return@showAd
                 // 不扣次數、不關對話框——使用者仍可改選「這次不用步數同步」。
                 _uiState.update { it.copy(stepSyncAdUnavailable = true) }
             }
@@ -654,22 +887,22 @@ class MapViewModel @Inject constructor(
 
     fun setSpeed(speedKmh: Double) = routeController.setSpeed(speedKmh)
 
-    fun playRoute() = routeController.playRoute()
+    fun playRoute() { cancelCompanionPending(); routeController.playRoute() }
 
     /**
      * Start spiral exploration around the current map center. Pro-gated like
      * playRoute since it leans on the same continuous simulation pipeline.
      */
-    fun startExplorationAtCenter() = routeController.startExplorationAtCenter()
+    fun startExplorationAtCenter() { cancelCompanionPending(); routeController.startExplorationAtCenter() }
 
     /**
      * Teleport-explore the currently loaded route's waypoints. No-op when no
      * route is loaded — calling site should hide/disable the entry point in
      * that case.
      */
-    fun startTeleportExplorationOfRoute() = routeController.startTeleportExplorationOfRoute()
+    fun startTeleportExplorationOfRoute() { cancelCompanionPending(); routeController.startTeleportExplorationOfRoute() }
 
-    fun pauseRoute() = routeController.pauseRoute()
+    fun pauseRoute() { cancelCompanionPending(); routeController.pauseRoute() }
 
     fun stopRoute() = routeController.stopRoute()
 
@@ -727,6 +960,8 @@ class MapViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        cancelCompanionPending()
+        floatingCompanionController.dispose()
         joystickController.onCleared()
         super.onCleared()
     }

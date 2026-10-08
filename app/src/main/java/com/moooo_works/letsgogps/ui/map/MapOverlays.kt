@@ -190,7 +190,7 @@ fun MapActionFabs(
         ) {
             Icon(
                 if (uiState.isProActive) Icons.Default.ControlCamera else Icons.Default.Lock,
-                contentDescription = stringResource(R.string.map_joystick_toggle)
+                contentDescription = stringResource(R.string.floating_title)
             )
         }
     }

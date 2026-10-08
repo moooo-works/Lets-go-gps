@@ -3,6 +3,7 @@ package com.moooo_works.letsgogps.ui.map
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.google.android.gms.maps.model.LatLng
@@ -22,11 +23,27 @@ class JoystickController(
     private val context: Context,
     private val onStopMocking: () -> Unit,
     private val onCameraMove: (LatLng) -> Unit,
-    private val onSetTransportMode: (TransportMode) -> Unit
+    private val onSetTransportMode: (TransportMode) -> Unit,
+    private val onOverlayDismissed: () -> Unit = {}
 ) {
     private var tickerJob: Job? = null
     private var currentX = 0f
     private var currentY = 0f
+    private var overlayWrapper: (@Composable (@Composable () -> Unit) -> Unit)? = null
+
+    init {
+        overlayManager.setOnDismissedListener {
+            state.update { it.copy(isJoystickEnabled = false) }
+            stopTicker()
+            onOverlayDismissed()
+        }
+    }
+
+    fun setOverlayWrapper(wrapper: @Composable (@Composable () -> Unit) -> Unit) {
+        overlayWrapper = wrapper
+    }
+
+    fun releaseMovement() { currentX = 0f; currentY = 0f }
 
     fun toggle() {
         if (!state.value.isJoystickEnabled) {
@@ -37,16 +54,23 @@ class JoystickController(
             if (!ensureFloatingWindowPermission()) return
             state.update { it.copy(isJoystickEnabled = true) }
             startTicker()
-            overlayManager.show {
+            try { overlayManager.show {
                 val s by state.collectAsState()
-                JoystickOverlayView(
+                val joystick: @Composable () -> Unit = { JoystickOverlayView(
                     transportMode = s.transportMode,
                     onMove = { dx, dy -> currentX = dx; currentY = dy },
                     onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
                     onWindowDragEnd = { overlayManager.snapToEdge() },
                     onToggleSpeed = { cycleTransportMode() },
                     onStop = { stopMockingFromJoystick() }
-                )
+                ) }
+                val wrapper = overlayWrapper
+                if (wrapper == null) joystick() else wrapper(joystick)
+            }
+            } catch (error: RuntimeException) {
+                stopTicker()
+                overlayManager.hide()
+                state.update { it.copy(isJoystickEnabled = false, mockError = MockError.Unknown(error.message ?: "Unable to open floating window")) }
             }
         } else {
             state.update { it.copy(isJoystickEnabled = false) }
@@ -114,6 +138,7 @@ class JoystickController(
     fun onCleared() {
         stopTicker()
         overlayManager.hide()
+        overlayManager.setOnDismissedListener(null)
     }
 
     internal fun applyMovementForTest(dx: Float, dy: Float) = applyMovement(dx, dy)
