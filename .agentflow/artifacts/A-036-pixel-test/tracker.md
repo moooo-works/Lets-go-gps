@@ -4,11 +4,11 @@
 
 - **Work key:** A-036-pixel-test.
 
-- **Active Ask:** A-036.
+- **Active Ask:** A-037.
 
 - **Goal:** 沿用 A-035 實機測試授權，備份替換測試版並修正地圖圖資.
 
-- **Last update:** 2026-10-08 13:27:23 +0800.
+- **Last update:** 2026-10-08 13:46:53 +0800.
 
 - **Evidence commit:** uncommitted.
 
@@ -18,9 +18,9 @@
 
 - **Reason:** Smoke test finished; Unity supply and production CMP remain failed.
 
-- **Total:** 5.
+- **Total:** 7.
 
-- **Completed:** 3.
+- **Completed:** 5.
 
 - **Remaining:** 2.
 
@@ -34,21 +34,27 @@
 
 - [x] **T-4:** 修正Unity組織開發者網站及官方app-ads.txt授權清單；網站repo獨立worktree，保留原AdMob，核對正式URL部署。Source: A-036. Proof: website PR#2 merged f82981b2495fe31d6290616bf857b1234785882c; GitHub Pages built; Unity dashboard says app-ads.txt up-to-date.
 
-- [ ] **T-5:** 設定Lets-go-gps正式AdMob歐洲同意表單，核對App與隱私網址及Unity伙伴；必要時保留草稿，避免影響其他App。Source: A-036.
+- [x] **T-5:** 設定Lets-go-gps正式AdMob歐洲同意表單，核對App與隱私網址及Unity伙伴；必要時保留草稿，避免影響其他App。Source: A-036. Proof: 正式App表單已發布；隔離UMP4.0.0正式AppID＋EEA測試顯示表單，拒絕後status3/canRequestAds=true/privacyOptions=REQUIRED。
+
+- [x] **T-6:** 依明確授權送出Unity技術工單，核對成功頁／工單編號／狀態，不附手機資料或金鑰。Source: A-037. Proof: 使用者完成CAPTCHA後成功頁與工單00939092／Open。
+
+- [ ] **T-7:** 全帳戶移除Mintegral同意與資料共用設定，確認SDK／對應／waterfall均無Mintegral；終止既有合作記錄須供應商確認。Source: A-037.
 
 ## Accepted scope changes
 
 - Change: 查核Unity已申請ID、修正網站與同意表單；Source: A-036「自行想辦法解決這些問題」；Effect: 增加T-4、T-5，必要時諮詢Claude Code。
 
+- Change: 授權Unity工單與全帳戶Mintegral移除；Source: A-037「1，同意／2，完全移除」；Effect: 增加T-6、T-7並發布正式CMP。
+
 ## Current recovery
 
-- **Current item:** T-3.
+- **Current item:** T-7.
 
-- **Last proven result:** Maps恢復／資料保留，Unity網站與app-ads.txt檢查通過；SDK4.20.1／4.21.0獨立初始化皆失敗，正式同意表單草稿保存。
+- **Last proven result:** Unity00939092已送出Open；GDPR197／US333伙伴均排除Mintegral；Mintegral NPA信號與PFID關閉；正式CMP發布及拒絕回呼通過。
 
-- **Active blocker or running process:** Unity Game ID800390974仍被gateway拒絕；待Unity支援發送授權及AdMob全帳戶Mintegral同意名單範圍回答。沒有程序執行。
+- **Active blocker or running process:** Unity ID仍待客服查核；Mintegral合作記錄需供應商處理，終止請求已備妥、待新的收件者發送授權。沒有程序執行。
 
-- **Next safe action:** 回覆後送出已準備的技術工單，或依Mintegral範圍決策發布已保存的App同意草稿。
+- **Next safe action:** 取得Mintegral終止信發送授權後寄出；Unity回覆後依精確修正重測。
 
 - **Expected changed files:** 本repo notebook／tracker；網站repo僅app-ads.txt已發布；/private/tmp診斷APK及支援草稿／截圖；unity-ads程式與PR58保留。
 
@@ -60,7 +66,7 @@
 
 - **Operation running:** no.
 
-- **Next action remaining:** T-3、T-5.
+- **Next action remaining:** T-3、T-7.
 
 - **Evidence status:** current.
 

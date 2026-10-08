@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: Unity查核與Pixel測試結果見Git history.
+Current commit: Unity工單與Mintegral移除結果見Git history.
 
-Tests/scenarios: Maps與DB、Google範例廣告、Unity SDK4.20.1／4.21.0初始化、app-ads.txt官方清單及Unity接受狀態.
+Tests/scenarios: GDPR／US伙伴保存核對、Mintegral0對應及共用停用、runtime依賴／APK、正式AppID EEA表單與拒絕回呼、地圖冷啟動.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 圖資恢復與資料保留；Unity ID已申請；網站與app-ads.txt檢查通過；正式同意草稿保存.
+Proven: Unity00939092已送出Open；MintegralGDPR／US伙伴移除及資料共用停用；正式CMP發布與隔離實機通過.
 
-Open: Unity Game ID仍被拒絕；工單發送授權及Mintegral共用名單範圍回答；正式CMP發布與實機驗證.
+Open: Mintegral供應商合作終止請求待發送授權；UnityGame ID待客服查核及供應驗證.
 
-Next: 依回答處理工單及CMP，Unity供應通過前維持正式群組暫停.
+Next: 依授權寄Mintegral終止信；Unity回覆後修正與重測，正式群組維持暫停.
 
-Artifacts: A-036-pixel-test/tracker.md；/private/tmp備份／截圖／工單草稿；網站PR#2；App PR#58.
+Artifacts: A-036-pixel-test/tracker.md；Unity00939092；/private/tmp截圖與Mintegral終止草稿；PR58.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -193,5 +193,75 @@ Streams: none.
 ---
 
 # → Ask / A-037 (Takeshi Mori)
+
++ 1，同意
+  2，完全移除
+
++ <send_user_message_question_reply>
+  [{"answer":"驗證好了","question":"Unity 工單被 CAPTCHA 機器人驗證擋住。請在 Edge 的「Submit a request」頁完成驗證後回覆「驗證好了」，我會接續送出。瀏覽器操作規則要求這一步另行確認，前面的工單發送授權仍有效。","questionItemId":"[\"request_user_input_async\",\"call_05fca5f8ce91422d897ff4796697933f\",0]"}]
+  </send_user_message_question_reply>
+
+---
+
+## [RUN-001] Event — 2026-10-08 13:46:00 +0800 (A-037)
+
+- 已依「1，同意／2，完全移除」處理。Unity表單初次送出要求CAPTCHA；使用者回覆驗證好了後，頁面顯示Thanks for reaching out／received request，My Requests查得00939092／Open，網址https://support-ads.unity.com/s/cases?id=500Qv00000janJjIAI。沒有重複提交或附私密資料。
+- GDPR常用名單改自訂、僅移除Mintegral867，198→197，Unity1549保留；再次開啟確認Mintegral未選並已保存。US州級有效名單改自訂，僅取消Mobvista/Mintegral，334→333並保存。兩個自動來源加入設定不啟用。
+- 出價來源Mintegral仍顯示有效合作關係，但三App對應都是0；waterfall來源空白。已關閉其NPA／受限廣告安全信號與Publisher First-party ID共用並保存。source與runtime dependency tree無Mintegral／Mobvista／MBridge；實機保留APK無MBridge SDK class descriptor。
+- 正式App CMP已發布；隔離UMP4.0.0測試最初AndroidX core transitive版本過舊，遇WindowCompat NoSuchMethodError，已只修正tmp測試依賴core1.17，正式App原core1.19不受此問題。正式AppID＋註冊test hash＋EEA後表單顯示209伙伴（原210）；拒絕後status3/canRequestAds=true/privacyOptions=REQUIRED。TCF Mintegral867同意及LI均false。診斷App已移除，正常App保留，資料未被覆寫。
+- Google官方Bidding FAQ要求直接聯絡廣告來源才能終止合作，不能宣稱合作記錄已刪除。已備妥/private/tmp/mintegral-termination-request.txt，詢問新收件者developer@mintegral.com發送授權，未寄出。來源https://support.google.com/admob/answer/9360574?hl=en及官方bidding partners。
+- tracker沿用既有檔並轉A037，5/7完成、T3與T7待續；實際只改根notebook與tracker，tmp測試／截圖，無正式App或PR58修改，四Unity群組仍暫停。
+
+## [WIP-001] Checkpoint — 2026-10-08 13:46:00 +0800 (A-037)
+
+**Finished:** Unity工單00939092送出／Open；Mintegral GDPR與US伙伴、共用設定移除／停用；CMP發布及正式AppID EEA表單拒絕回呼通過，tmp診斷App已清理。
+
+**Running now:** 無程序。等待Mintegral新收件者發送授權，以及Unity客服的ID查核回覆。
+
+**Still to do:** 寄Mintegral終止請求並取得合作關係終止確認；Unity初始化與實際供應通過。
+
+**Next work action:** 依回覆處理已備妥的Mintegral終止信；保持Unity正式群組暫停。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-002] Event — 2026-10-08 13:49:02 +0800 (A-037)
+
+- tmp UMP診斷App已移除，正常Lets-go-gps冷啟動成功，/private/tmp/letsgps-post-cmp-map-ready.png確認圖資、既有marker與Google Test Ad正常。手機資料未覆寫；正式Unity群組仍暫停。
+
+# ← Reply / A-037
+
+* _2026-10-08 13:49:02 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Unity技術工單已送出，00939092／Open。
+- Mintegral已從GDPR與US共用伙伴清單移除，相關資料共用停用；正式CMP已發布並以正式App ID完成EEA表單／拒絕回呼驗證。
+- Mintegral既有合作關係仍由供應商管理，终止請求已備妥、待新的收件者發送授權；Unity ID查核仍待客服。
+
+## [FINAL REPORT]
+
+1. 「1，同意／2，完全移除」
+
+   - 依第1項明確授權，將已備妥的技術工單填入Unity Ads Monetization／Technical issue／SDK Integration assistance。包含組織、App、Game ID及SDK版本與公開錯誤；沒有附件、手機私人資料或金鑰。成功頁確認收到請求，My Requests顯示工單00939092／Open。[工單](https://support-ads.unity.com/s/cases?id=500Qv00000janJjIAI)。
+   - 第2項按全帳戶範圍處理：GDPR常用伙伴改自訂，僅移除Mintegral867，198→197，Unity1549保留；保存後重新打開確認未選。US州級伙伴僅移除Mobvista/Mintegral，334→333並保存。自動加入伙伴保持關閉。
+   - Mintegral出價來源的三個App皆0廣告單元對應，waterfall來源空白；另外已停用Mintegral非個人化／受限廣告安全信號與發布商First-party ID共用並保存。Lets-go-gps runtime依賴、原始碼沒有Mintegral／Mobvista／MBridge，測試APK無MBridge SDK class descriptor。
+   - **合作關係尚未完全終止：**AdMob仍顯示歷史有效合作，介面不提供退出。Google要求直接聯絡廣告來源終止，不能宣稱已刪除這層記錄。[官方說明](https://support.google.com/admob/answer/9360574?hl=en)。已準備/private/tmp/mintegral-termination-request.txt，收件者為Google官方列出的developer@mintegral.com；尚未寄出，已詢問新收件者發送授權。
+   - 正式CMP訊息Lets-go-gps — European consent已發布，仅本App、公開隱私URL與同意／拒絕／管理選項。隔離UMP4.0.0測試使用正式App ID及EEA test geography，表單209伙伴可見；拒絕後status3／canRequestAds=true／privacyOptions=REQUIRED，Mintegral867同意及正當利益bits都false。測試App最初transitive core過舊造成WindowCompat錯誤，已只在tmp修正core1.17；正式App原core1.19未修改。這證明正式後台表單可載入，不等於正式App發布或Unity供應通過。
+   - 測試App已移除，正常App冷啟动後圖資／marker／Google測試banner可見，資料未覆寫。PR58保留OPEN draft，Unity四正式／測試群組維持暫停。沒有產品Git程式變更，未重跑App test/lint；tmp assembleDebug與runtime依賴核對完成。
+
+2. 「驗證好了」（Unity工單CAPTCHA回覆）
+
+   - 使用者完成驗證後，Unity頁面顯示已收到請求。已核對00939092／Open，未重複提交，沒有代為解CAPTCHA。後續客服回覆仍待處理，沒有宣稱ID已修復。
+
+## Questions (batched — each with a suggested default)
+
+1. 是否授權將已備妥的Mintegral終止合作請求，寄到developer@mintegral.com？
+
+   - Suggested default: 授權寄出終止請求；此為不同於Unity的新收件者，未回覆不視為發送授權。
+   - ans:
+
+---
+
+# → Ask / A-038 (Takeshi Mori)
 
 +
