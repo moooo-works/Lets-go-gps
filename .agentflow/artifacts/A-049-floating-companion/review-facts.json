@@ -1,0 +1,29 @@
+{
+  "changed_files": [
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/CompanionExecutionRequests.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionController.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionState.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickController.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManager.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayView.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt",
+    "app/src/main/res/values-en/strings.xml",
+    "app/src/main/res/values-ja/strings.xml",
+    "app/src/main/res/values-ko/strings.xml",
+    "app/src/main/res/values/strings.xml",
+    "app/src/test/java/com/moooo_works/letsgogps/ui/map/CompanionExecutionRequestsTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionControllerTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManagerTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/ui/map/OverlayPositionTest.kt"
+  ],
+  "behavior_change": true,
+  "broad_change": false,
+  "changed_lines": 1597,
+  "trust_boundary": true,
+  "consequential_change": true,
+  "original_ask_path": ".agentflow/devlog.md",
+  "normal_journey_path": ".agentflow/artifacts/A-049-floating-companion/design.md"
+}
