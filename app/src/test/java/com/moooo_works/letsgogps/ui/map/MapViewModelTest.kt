@@ -27,6 +27,13 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import io.mockk.slot
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.test.runCurrent
+import com.moooo_works.letsgogps.data.model.Route
+import com.moooo_works.letsgogps.data.model.RoutePoint
+import com.moooo_works.letsgogps.data.model.RouteWithPoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -287,4 +294,45 @@ class MapViewModelTest {
         assertEquals(MapMode.ROUTE, viewModel.uiState.value.mapMode)
         assertEquals(SimulationState.IDLE, viewModel.uiState.value.simulationState)
     }
+    @Test fun `VM stop prevents delayed controller route load from sending another command`() = runTest {
+        isProActiveFlow.value=true
+        val reply=CompletableDeferred<RouteWithPoints?>()
+        coEvery { repository.getRouteWithPoints(1) } coAnswers { withContext(NonCancellable) { reply.await() } }
+        val vm=createViewModel()
+        advanceUntilIdle()
+        io.mockk.clearMocks(routeSimulator, answers = false)
+        vm.floatingCompanionController.requestLoadRoute(1)
+        runCurrent()
+        vm.stopMocking()
+        reply.complete(RouteWithPoints(Route(id=1,name="old"),listOf(
+            RoutePoint(routeId=1,orderIndex=0,latitude=1.0,longitude=2.0),
+            RoutePoint(routeId=1,orderIndex=1,latitude=3.0,longitude=4.0))))
+        runCurrent()
+        vm.awaitCompanionCommandForTest()
+        verify(exactly=1) { context.startService(match { it.action==MockLocationService.ACTION_STOP }) }
+        verify(exactly=0) { context.startForegroundService(any()) }
+        verify(exactly=0) { routeSimulator.setRoute(any()) }
+        io.mockk.coVerify(exactly=0) { proRepository.consumeFeatureCredits(any()) }
+    }
+
+    @Test fun `manager dismissal bridge clears credit pending and prevents late startup`() = runTest {
+        isProActiveFlow.value=true
+        every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+        every { settingsRepository.observeStepSyncEnabled() } returns flowOf(true)
+        val dismissed=slot<(() -> Unit)>()
+        every { joystickOverlayManager.setOnDismissedListener(capture(dismissed)) } just runs
+        val vm=createViewModel()
+        advanceUntilIdle()
+        vm.executeCompanionAction(CompanionAction.Locate(GeocodedLocation("old","",LatLng(-12.0,-34.0))))
+        vm.awaitCompanionCommandForTest()
+        assertTrue(vm.uiState.value.showStepSyncCreditDialog)
+        dismissed.captured.invoke()
+        assertFalse(vm.uiState.value.showStepSyncCreditDialog)
+        assertFalse(vm.uiState.value.isJoystickEnabled)
+        vm.startWithoutStepSync()
+        vm.awaitCompanionCommandForTest()
+        verify(exactly=0) { context.startForegroundService(any()) }
+        io.mockk.coVerify(exactly=0) { proRepository.consumeFeatureCredits(any()) }
+    }
+
 }
