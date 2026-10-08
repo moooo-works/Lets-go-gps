@@ -1,0 +1,16 @@
+{
+  "changed_files": [
+    "app/src/androidTest/java/com/moooo_works/letsgogps/Android17DeveloperSettingsTest.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngine.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/data/healthcheck/SystemHealthCheckImpl.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/data/engine/Android17MockPermissionTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/data/healthcheck/SystemHealthCheckImplTest.kt"
+  ],
+  "changed_lines": 101,
+  "behavior_change": true,
+  "trust_boundary": true,
+  "broad_change": false,
+  "consequential_change": true,
+  "original_ask_path": ".agentflow/devlog.md",
+  "normal_journey_path": ".agentflow/artifacts/A-049-floating-companion/android17-fix-design.md"
+}
