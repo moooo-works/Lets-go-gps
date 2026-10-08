@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: Claude討論證據29d1f99；本輪最終建議交付見Git history.
+Current commit: 本輪懸浮控制評估見Git history；既有產品未修改.
 
-Tests/scenarios: 既有程式與Pikmin官方文件只讀查核；Claude兩輪exit0，無remote clone無變更；無產品修改未重跑Gradle.
+Tests/scenarios: 沿用A045懸浮搖桿與通知程式查核；本輪為功能評估，無新測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Pikmin玩家便利功能五項建議及第一版兩項共識已交付；未實作.
+Proven: 懸浮控制的適用情境與最小增量範圍已說明.
 
-Open: 候選待使用者選擇；UnityGameID工單仍待回覆；Pro表單優化延後.
+Open: 候選功能待選擇；UnityGameID工單待回覆；Pro表單優化延後.
 
-Next: 依使用者選定功能另行規劃；既有Unity群組維持暫停.
+Next: 依使用者選定需求規劃；懸浮控制提案尚未實作.
 
-Artifacts: .agentflow/artifacts/A-045-pikmin-brainstorm/claude-followup.md、tracker.md、dispatch.md；A-044完整App同意驗證結果.
+Artifacts: .agentflow/artifacts/A-045-pikmin-brainstorm/claude-followup.md、tracker.md.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -563,5 +563,32 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-046 (Takeshi Mori)
+
++ 懸浮視窗有沒有必要作
+
+# ← Reply / A-046
+
+* _2026-10-08 14:55:03 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 懸浮視窗值得做成選用功能，尤其常在遊戲內手動控制的玩家；建議擴充既有搖桿為小型路線控制，不做完整懸浮地圖，也不是第一版必備。
+
+## [FINAL REPORT]
+
+1. 「懸浮視窗有沒有必要作」
+
+   - 我認為有價值，但取決於使用方式：常在Pikmin畫面中微調方向、暫停或切換地點的人，懸浮控制比下拉通知更直接；一次設定好路線就很少干預的人，通知控制已足夠。這是操作情境判斷，尚無玩家使用數據證明其必要性。
+   - 現在已有懸浮搖桿，不必再做一套視窗。建議擴充成可切換的「搖桿／路線控制」：收合時一顆可拖曳按鈕，展開顯示暫停／繼續、停止、速度及倒數；下一站等路線引擎有對應行為後再加入。通知作為另一個操作入口。
+   - 先做小面板即可，完整懸浮地圖會佔遊戲畫面且成本較高。是否啟用由使用者選擇，保留收合、移動及關閉；不要求所有人開啟。
+   - Claude前輪建議先用通知壓低成本；我的判斷是常需手動控制的玩家值得更早做懸浮擴充。原先收藏建立路線／倒數提醒仍可先完成，懸浮面板後續直接呈現相同控制與狀態。本輪是評估，未視為實作授權、未改程式。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-047 (Takeshi Mori)
 
 +
