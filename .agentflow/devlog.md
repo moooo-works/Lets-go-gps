@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪懸浮控制評估見Git history；既有產品未修改.
+Current commit: 本輪現有功能及懸浮組合評估見Git history；source1cf733d未改.
 
-Tests/scenarios: 沿用A045懸浮搖桿與通知程式查核；本輪為功能評估，無新測試.
+Tests/scenarios: 搜尋／收藏／剪貼簿／路線／探索／overlay／步數UI只讀完整查核；未跑新實機或Gradle.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 懸浮控制的適用情境與最小增量範圍已說明.
+Proven: 搜尋与懸浮搭配以及六組已有功能整合提案已說明；前輪步數指南重複建議已更正.
 
-Open: 候選功能待選擇；UnityGameID工單待回覆；Pro表單優化延後.
+Open: 懸浮搜尋／收藏及候選功能尚未實作；UnityGameID待工單；Pro表單優化延後.
 
-Next: 依使用者選定需求規劃；懸浮控制提案尚未實作.
+Next: 依使用者選定組合另行規劃；正式Unity群組維持暫停.
 
-Artifacts: .agentflow/artifacts/A-045-pikmin-brainstorm/claude-followup.md、tracker.md.
+Artifacts: .agentflow/devlog.md A047；A045Claude討論為較早候選，優先順序以A047為準.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -590,5 +590,51 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-047 (Takeshi Mori)
+
++ 你要先了解目前app有提供什麼功能，再來回答是否值得。我現在有搜尋功能，這跟懸浮視窗有沒有搭配的可能性，除了我提的，還要思考其他功能搭配
+
+---
+
+## [RUN-001] Event — 2026-10-08 15:02:16 +0800 (A-047)
+
+- 已重新查核main1cf733d現有搜尋完整鏈：SearchDialog解析座標／Plus Code，SearchRepositoryImpl以Nominatim搜尋一般地點，selectSearchResult只更新地圖中心；收藏名搜尋與收藏／資料夾篩選是另一套。MapScreen剪貼簿提示於返回／前景處理；目前overlay FLAG_NOT_FOCUSABLE且由JoystickController／MapViewModel持有，僅搖桿／速度／停止。路線可新增指定點、儲存、載入、合併、模式控制；StepSync已有Pikmin專屬完整指南與今日寫入／上限／次數，前輪稱要補指南不夠準確。本輪無源碼改動。
+
+# ← Reply / A-047
+
+* _2026-10-08 15:02:16 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 重新盤點後，建議優先做懸浮搜尋與收藏快捷，結合座標貼上、路線選用、探索及同步狀態；其價值是留在遊戲畫面完成找點與操作，而非只搬暫停按鈕。
+
+## [FINAL REPORT]
+
+1. 「你要先了解目前app有提供什麼功能，再來回答是否值得。我現在有搜尋功能，這跟懸浮視窗有沒有搭配的可能性，除了我提的，還要思考其他功能搭配」
+
+   - 前面只聚焦搖桿與通知控制，沒有把現有搜尋及其他流程串起來，評估不完整。本輪重新讀SearchDialog／SearchViewModel／SearchRepositoryImpl、LocationQueryParser、MapScreen／MapViewModel、收藏DAO與UI、RouteController／RoutesViewModel、JoystickOverlayManager／Controller及步數UI與字串，再作下面判斷；未執行新實機測試或聲稱已建好懸浮搜尋。
+   - **搜尋確實很適合搭配。** 現有地圖搜尋支援地點名稱、座標及Plus Code；收藏列表另有名稱搜尋與收藏／資料夾篩選。兩套目前沒有整合成同一個懸浮入口。可以在遊戲上點小泡泡搜尋，結果分「我的收藏」與「一般地點」，選一個後提供「設為定位點／加入待走路線／存入收藏」。例如先搜尋公園，再從自己的收藏選蘑菇附近地點，不用反覆切回本App。搜尋不是遊戲POI資料庫，不能聲稱能自動搜出蘑菇或巨大花朵。
+
+   | 已有功能 | 懸浮搭配提案 | 對使用者的便利 |
+   |---|---|---|
+   | 地點／座標／Plus Code搜尋，收藏名稱搜尋 | 共用搜尋入口、分組顯示收藏與一般地點，選點後明確指定操作 | 在遊戲畫面完成找點、選定位點或準備路線 |
+   | 收藏、資料夾、說明、排序 | 小列表切換收藏／資料夾，顯示名稱與說明，選點後定位或加入路線 | 常用蘑菇／明信片地點能直接找回，沿用已有分類不用重建 |
+   | 座標解析、剪貼簿智慧提示 | 搜尋面板提供明確「貼上座標／Plus Code」入口 | 從其他App複製座標後少一次回主畫面的操作；不假設背景能自動讀取剪貼簿 |
+   | 已儲存路線、載入、暫停／繼續、速度、循環／往返 | 懸浮選既有路線、查看模式與進度並操作；搜尋與收藏結果可加入待走路線 | 準備與執行串在一起，不只控制一條已開始的路線 |
+   | 單點探索、多點跳轉探索、懸浮搖桿 | 選定點後可開始已有探索模式，並切換到搖桿微調 | 找到目標後直接操作；不把探索當新引擎或改成保證遊戲效果 |
+   | 步數同步、今日寫入／每日上限／剩餘次數、Pro剩餘時間及健康檢查 | 懸浮顯示精簡狀態與出錯提示，需要調設定時開主App對應頁 | 遊戲中能看出App是否仍運作、是否寫入或到上限，少猜測 |
+
+   - **因此修正優先順序：第一版先做「懸浮搜尋＋收藏／資料夾＋明確選點操作」，再接現有搖桿與基本狀態；路線選用與探索列下一步。** 這些可重用現有能力，無須先做A045建議的新倒數、每站停留或下一站。那些仍是另外的功能提案，不是懸浮視窗的先決條件。
+   - 收合一顆可拖曳泡泡，展開顯示搜尋、收藏、路線與控制分頁，一次只開需要的內容；清楚的名稱／說明列表通常即可。若使用者需確認目標或微調座標，可下一階段加小型地圖預覽，重用已有一般／衛星圖；不把整個App塞進視窗。
+   - 必須補上的實作不是只搬搜尋框：目前overlay不接键盤焦點，搜尋需要輸入法處理並在收合後恢復遊戲觸控；目前搜尋選點只是移地圖中心，懸浮面板要接明確定位／路線命令與同一份狀態。編輯或載入路線目前會重設路線，因此執行中的路線要有清楚的取代／暫停流程，不能直接偷偷改。沿用既有Pro、步數授權與計次規則。
+   - 另外更正前輪建議：現有StepSyncSetupDialog與字串已包含Pikmin Health Connect設定、同步排錯，以及今日已寫入等，無需重寫指南；真正增量是懸浮呈現現有狀態，未來有需要再新增最近一次成功／失敗紀錄。
+   - **結論：把搜尋、收藏與後續操作一起連接時，懸浮視窗值得優先做。** 便利性仍是基於目前操作流程的判斷，沒有冒稱已取得玩家統計。本輪只交付查核與組合建議，未修改App或開始實作。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-048 (Takeshi Mori)
 
 +
