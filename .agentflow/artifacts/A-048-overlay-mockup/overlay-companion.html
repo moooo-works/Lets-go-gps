@@ -1,0 +1,152 @@
+<style>
+#gps-overlay-demo { color-scheme: light dark; --gps-paper: light-dark(#ffffff,#26282c); --gps-ink: light-dark(#24272d,#f5f5f7); --gps-subtle: light-dark(#626975,#b7bdc8); --gps-line: light-dark(#e4e6eb,#424650); --gps-soft: light-dark(#f4f5f8,#34373d); --gps-orange:#ff5722; --gps-orange-ink:#ffffff; --game-ground:light-dark(#e7efdc,#26332a); --game-road:light-dark(#f8faf2,#435047); --game-water:light-dark(#c9e1e6,#28464c); font-family: system-ui,-apple-system,"Noto Sans TC",sans-serif; }
+#gps-overlay-demo * { box-sizing:border-box; }
+#gps-overlay-demo [hidden] { display:none !important; }
+#gps-overlay-demo .stage { min-height:770px; padding:22px 8px 12px; display:flex; justify-content:center; align-items:flex-start; }
+#gps-overlay-demo .phone { width:min(100%,375px); height:724px; position:relative; border:7px solid light-dark(#30343a,#68707a); border-radius:34px; overflow:hidden; background:var(--game-ground); color:var(--gps-ink); box-shadow:0 14px 35px #00000020; }
+#gps-overlay-demo .game { position:absolute; inset:0; }
+#gps-overlay-demo .road { position:absolute; background:var(--game-road); border-radius:50px; }
+#gps-overlay-demo .road.one { width:62px;height:900px;transform:rotate(27deg);left:135px;top:-80px; }
+#gps-overlay-demo .road.two { width:480px;height:43px;transform:rotate(-13deg);left:-55px;top:335px; }
+#gps-overlay-demo .park { position:absolute; background:light-dark(#bfd5aa,#375239); border-radius:40%; }
+#gps-overlay-demo .park.one { width:115px;height:135px;left:18px;top:157px; }
+#gps-overlay-demo .park.two { width:140px;height:125px;right:-25px;top:478px; }
+#gps-overlay-demo .water { position:absolute;width:70px;height:700px;right:-23px;top:110px;background:var(--game-water);transform:rotate(-9deg);border-radius:45%; }
+#gps-overlay-demo .statusbar { position:absolute;top:14px;left:18px;right:18px;display:flex;justify-content:space-between;font-size:12px;font-weight:500; }
+#gps-overlay-demo .game-title { position:absolute;top:48px;left:16px;right:16px;padding:12px 14px;background:var(--gps-paper);border-radius:17px;display:flex;justify-content:space-between;align-items:center;font-size:13px; }
+#gps-overlay-demo .game-title span { color:var(--gps-subtle);font-size:11px; }
+#gps-overlay-demo .flower { position:absolute;font-size:27px; }
+#gps-overlay-demo .game-bottom { position:absolute;bottom:23px;left:17px;right:17px;display:flex;gap:12px;align-items:center;justify-content:space-between; }
+#gps-overlay-demo .game-bottom span { background:var(--gps-paper);border-radius:25px;padding:12px;font-size:12px; }
+#gps-overlay-demo .avatar { position:absolute;left:175px;top:510px;font-size:31px; }
+#gps-overlay-demo .bubble { position:absolute;right:8px;top:115px;width:48px;height:48px;border-radius:50%;background:var(--gps-orange);color:var(--gps-orange-ink);border:0;display:grid;place-items:center;box-shadow:0 4px 13px #00000035; }
+#gps-overlay-demo i { font-style:normal; }
+#gps-overlay-demo .bubble svg { width:23px;height:23px; }
+#gps-overlay-demo .panel { position:absolute;right:8px;top:172px;width:calc(100% - 40px);max-width:304px;background:var(--gps-paper);border:1px solid var(--gps-line);border-radius:19px;box-shadow:0 10px 26px #00000030;overflow:hidden; }
+#gps-overlay-demo .bottom-layout .panel { left:9px;right:9px;top:auto;bottom:74px;width:auto;max-width:none; }
+#gps-overlay-demo .header { display:flex;align-items:center;justify-content:space-between;padding:12px 13px 9px;font-size:14px;font-weight:500; }
+#gps-overlay-demo .header .app { display:flex;align-items:center;gap:7px; }
+#gps-overlay-demo .app i { color:var(--gps-orange); }
+#gps-overlay-demo .iconbutton { border:0;background:transparent;color:var(--gps-subtle);width:34px;height:34px;display:grid;place-items:center;border-radius:9px; }
+#gps-overlay-demo .tabs { display:flex;gap:3px;padding:0 10px 9px; }
+#gps-overlay-demo .tab { flex:1;min-width:0;padding:9px 4px;border:0;border-radius:9px;background:transparent;color:var(--gps-subtle);font-size:12px;font-weight:500; }
+#gps-overlay-demo .tab[aria-selected="true"] { color:var(--gps-orange);background:light-dark(#fff0e9,#4b3027); }
+#gps-overlay-demo .content { padding:0 12px 12px; }
+#gps-overlay-demo .searchbox { display:flex;align-items:center;gap:7px;background:var(--gps-soft);border-radius:11px;padding:9px 10px; }
+#gps-overlay-demo .searchbox i { color:var(--gps-subtle); }
+#gps-overlay-demo input { min-width:0;width:100%;border:0;background:transparent;color:var(--gps-ink);font-family:inherit;font-size:14px;outline-offset:3px; }
+#gps-overlay-demo .section-label { font-size:11px;color:var(--gps-subtle);margin:13px 0 5px; }
+#gps-overlay-demo .result { display:flex;align-items:center;gap:9px;width:100%;border:0;background:transparent;text-align:left;padding:11px 5px;color:var(--gps-ink);font-family:inherit;border-radius:9px; }
+#gps-overlay-demo .result[aria-pressed="true"] { background:var(--gps-soft); }
+#gps-overlay-demo .result .marker { flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--gps-soft);color:var(--gps-orange); }
+#gps-overlay-demo .result .text { min-width:0;flex:1; }
+#gps-overlay-demo .result strong { display:block;font-weight:500;font-size:13px; }
+#gps-overlay-demo .result small { display:block;font-size:11px;color:var(--gps-subtle);margin-top:3px; }
+#gps-overlay-demo .folderbar { display:flex;gap:5px;margin:0 0 10px; }
+#gps-overlay-demo .folderbar button { border:1px solid var(--gps-line);border-radius:20px;background:var(--gps-paper);color:var(--gps-subtle);padding:7px 9px;font-size:11px; }
+#gps-overlay-demo .folderbar button[aria-pressed="true"] { background:var(--gps-soft);color:var(--gps-ink); }
+#gps-overlay-demo .selection { border-top:1px solid var(--gps-line);margin-top:8px;padding-top:11px; }
+#gps-overlay-demo .selected-title { font-size:12px;font-weight:500;margin-bottom:8px; }
+#gps-overlay-demo .actions { display:flex;gap:6px;flex-wrap:wrap; }
+#gps-overlay-demo .actions button { flex:1;white-space:nowrap;border:1px solid var(--gps-line);border-radius:9px;padding:9px 7px;background:var(--gps-paper);color:var(--gps-ink);font-family:inherit;font-size:12px; }
+#gps-overlay-demo .actions .main { background:var(--gps-orange);border-color:var(--gps-orange);color:var(--gps-orange-ink); }
+#gps-overlay-demo .sync { background:var(--gps-soft);border-top:1px solid var(--gps-line);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--gps-subtle); }
+#gps-overlay-demo .route-name { margin:12px 0 7px;font-size:14px;font-weight:500; }
+#gps-overlay-demo .route-info { display:flex;justify-content:space-between;font-size:12px;color:var(--gps-subtle); }
+#gps-overlay-demo .track { height:5px;border-radius:5px;margin:12px 0 14px;background:var(--gps-soft);overflow:hidden; }
+#gps-overlay-demo .fill { height:100%;width:38%;background:var(--gps-orange); }
+#gps-overlay-demo .route-settings { display:flex;justify-content:space-between;padding:10px 0;font-size:12px; }
+#gps-overlay-demo .notice { min-height:24px;margin-top:8px;font-size:11px;color:var(--gps-subtle); }
+#gps-overlay-demo .joy { display:grid;place-items:center;width:120px;height:120px;border-radius:50%;background:var(--gps-soft);margin:13px auto; }
+#gps-overlay-demo .joy button { width:53px;height:53px;background:var(--gps-orange);border:0;border-radius:50%;color:var(--gps-orange-ink);font-size:18px; }
+#gps-overlay-demo .preview-label { position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:11px;color:var(--gps-subtle); }
+@media(max-width:370px) { #gps-overlay-demo .stage { padding:15px 0 8px; } #gps-overlay-demo .phone { border-width:5px; } #gps-overlay-demo .panel { width:calc(100% - 20px);right:5px; } }
+@media(pointer:coarse) { #gps-overlay-demo .tab,#gps-overlay-demo .actions button,#gps-overlay-demo .folderbar button,#gps-overlay-demo .iconbutton { min-height:44px; } }
+</style>
+<div id="gps-overlay-demo">
+<div class="viz-carousel viz-dotted-background" aria-label="懸浮視窗設計提案" data-previous-label="上一款" data-next-label="下一款">
+<section data-variant="側邊浮窗" aria-label="側邊浮窗概念設計">
+<div class="stage"><div class="phone">
+<div class="game" aria-label="遊戲背景示意，非Pikmin實際畫面"><div class="road one"></div><div class="road two"></div><div class="park one"></div><div class="park two"></div><div class="water"></div><span class="flower" style="left:43px;top:130px">🌼</span><span class="flower" style="left:250px;top:390px">🌷</span><span class="flower" style="left:36px;top:488px">🍄</span><span class="avatar">🌱</span></div>
+<div class="statusbar"><span>14:30</span><span>▰ 100%</span></div><div class="game-title"><b style="font-weight:500">散步遊戲</b><span>遊戲背景示意</span></div><div class="game-bottom"><span>隊伍</span><span>種花中</span><span>地圖</span></div>
+<button type="button" class="bubble cursor-interaction" aria-label="展開或收合懸浮視窗"><i data-lucide="map-pin" aria-hidden="true">⌖</i></button>
+<div class="panel" aria-label="Let's Go GPS懸浮面板">
+<div class="header"><span class="app"><i data-lucide="map-pin" aria-hidden="true">⌖</i>Let's Go GPS</span><button type="button" class="iconbutton collapse cursor-interaction" aria-label="收合面板"><i data-lucide="minus" aria-hidden="true">−</i></button></div>
+<div class="tabs" role="tablist" aria-label="功能"><button type="button" class="tab cursor-interaction" data-tab="search" role="tab" aria-selected="true">搜尋</button><button type="button" class="tab cursor-interaction" data-tab="saved" role="tab" aria-selected="false">收藏</button><button type="button" class="tab cursor-interaction" data-tab="route" role="tab" aria-selected="false">路線</button><button type="button" class="tab cursor-interaction" data-tab="control" role="tab" aria-selected="false">控制</button></div>
+<div class="content">
+<div data-screen="search"><div class="searchbox"><i data-lucide="search" aria-hidden="true">⌕</i><input aria-label="搜尋地點、座標或Plus Code" placeholder="地點、座標、Plus Code" value="公園"></div><div class="section-label">我的收藏</div><button type="button" class="result cursor-interaction" data-place="公園東側入口" aria-pressed="true"><span class="marker"><i data-lucide="star" aria-hidden="true">☆</i></span><span class="text"><strong>公園東側入口</strong><small>週末路線 · 明信片地點備註</small></span></button><div class="section-label">一般地點</div><button type="button" class="result cursor-interaction" data-place="中央公園" aria-pressed="false"><span class="marker"><i data-lucide="map-pin" aria-hidden="true">⌖</i></span><span class="text"><strong>中央公園</strong><small>示例地址 · 公園路 12 號</small></span></button><div class="selection"><div class="selected-title">已選：<span data-selected>公園東側入口</span></div><div class="actions"><button type="button" class="main cursor-interaction" data-action="locate">設為定位點</button><button type="button" class="cursor-interaction" data-action="queue">加入路線</button><button type="button" class="cursor-interaction" data-action="save">收藏</button></div></div></div>
+<div data-screen="saved" hidden><div class="folderbar"><button type="button" class="cursor-interaction" aria-pressed="true" data-folder="all">全部</button><button type="button" class="cursor-interaction" aria-pressed="false" data-folder="park">公園</button><button type="button" class="cursor-interaction" aria-pressed="false" data-folder="postcard">明信片</button></div><div class="searchbox"><i data-lucide="search" aria-hidden="true">⌕</i><input aria-label="搜尋收藏名稱" placeholder="搜尋收藏名稱"></div><button type="button" class="result cursor-interaction" data-place="公園東側入口" data-group="park" aria-pressed="true"><span class="marker"><i data-lucide="star" aria-hidden="true">☆</i></span><span class="text"><strong>公園東側入口</strong><small>明信片地點 · 入口雕像旁</small></span></button><button type="button" class="result cursor-interaction" data-place="河濱步道入口" data-group="postcard" aria-pressed="false"><span class="marker"><i data-lucide="star" aria-hidden="true">☆</i></span><span class="text"><strong>河濱步道入口</strong><small>傍晚路線 · 橋邊</small></span></button><div class="selection"><div class="selected-title">已選：<span data-selected>公園東側入口</span></div><div class="actions"><button type="button" class="main cursor-interaction" data-action="locate">設為定位點</button><button type="button" class="cursor-interaction" data-action="queue">加入路線</button></div></div></div>
+<div data-screen="route" hidden><div class="folderbar"><button type="button" class="cursor-interaction" data-route="週末公園路線" aria-pressed="true">公園路線</button><button type="button" class="cursor-interaction" data-route="河濱散步路線" aria-pressed="false">河濱路線</button></div><div class="route-name" data-route-name>週末公園路線</div><div class="route-info"><span>已走 0.8 / 2.1 km</span><span data-play-state>進行中</span></div><div class="track"><div class="fill"></div></div><div class="route-settings"><span>步行 5 km/h</span><span>往返模式</span></div><div class="actions"><button type="button" class="main cursor-interaction" data-action="pause">暫停</button><button type="button" class="cursor-interaction" data-action="stop">停止</button></div><div class="section-label">待加入地點：<span data-queue>0</span></div></div>
+<div data-screen="control" hidden><div class="route-info"><span>搖桿控制</span><span data-speed>步行 5 km/h</span></div><div class="joy"><button type="button" class="cursor-interaction" data-action="joystick" aria-label="示意搖桿微調">✥</button></div><div class="actions"><button type="button" class="cursor-interaction" data-action="speed">切換速度</button><button type="button" class="cursor-interaction" data-action="explore">探索選定點</button></div></div>
+<div class="notice" aria-live="polite">僅介面示意，所有數值與地點均為範例</div>
+</div><div class="sync"><span>今日已寫入 1,240 步</span><span data-location>公園東側入口</span></div></div>
+<div class="preview-label">設計提案 · 未實作 · 非實際遊戲畫面</div>
+</div></div>
+</section>
+<section data-variant="底部面板" aria-label="底部展開的概念設計" hidden><div class="stage"></div></section>
+</div>
+</div>
+<script>
+(() => {
+ const root=document.getElementById('gps-overlay-demo');
+ const variants=root.querySelectorAll('[data-variant]');
+ const firstPhone=variants[0].querySelector('.phone');
+ const secondPhone=firstPhone.cloneNode(true);
+ secondPhone.classList.add('bottom-layout');
+ variants[1].querySelector('.stage').appendChild(secondPhone);
+ const saved=window.openai?.widgetState?.privateContent;
+ variants.forEach((variant,index)=>{
+  const phone=variant.querySelector('.phone');
+  const state={tab:'search',open:true,selected:'公園東側入口',queue:0,playing:true,stopped:false,currentLocation:'公園東側入口',route:'週末公園路線',speed:0,folder:'all',...(saved?.[index]||{})};
+  const store=()=>{ const all=Array.from(variants).map(v=>v.__demoState); if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{selected:state.selected,view:state.tab},privateContent:all}).catch(()=>{}); };
+  variant.__demoState=state;
+  const notice=phone.querySelector('.notice');
+  const render=()=>{
+   phone.querySelector('.panel').hidden=!state.open;
+   phone.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===state.tab)));
+   phone.querySelectorAll('[data-screen]').forEach(p=>p.hidden=p.dataset.screen!==state.tab);
+   phone.querySelectorAll('[data-selected]').forEach(e=>e.textContent=state.selected);
+   phone.querySelector('[data-location]').textContent=state.currentLocation;
+   phone.querySelectorAll('[data-place]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.place===state.selected)));
+   phone.querySelector('[data-queue]').textContent=state.queue;
+   phone.querySelector('[data-route-name]').textContent=state.route;
+   phone.querySelector('[data-play-state]').textContent=state.playing?'進行中':(state.stopped?'已停止':'已暫停');
+   phone.querySelector('[data-action="pause"]').textContent=state.stopped?'開始':(state.playing?'暫停':'繼續');
+   phone.querySelector('[data-speed]').textContent=['步行 5 km/h','自行車 15 km/h','開車 40 km/h'][state.speed];
+  };
+  phone.querySelector('.bubble').addEventListener('click',()=>{state.open=!state.open;render();store();});
+  phone.querySelector('.collapse').addEventListener('click',()=>{state.open=false;render();store();});
+  phone.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{state.tab=b.dataset.tab;notice.textContent='僅介面示意，所有數值與地點均為範例';render();store();}));
+  phone.querySelectorAll('[data-place]').forEach(b=>b.addEventListener('click',()=>{state.selected=b.dataset.place;render();store();}));
+  phone.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>{
+   const action=b.dataset.action;
+   if(action==='locate'){state.currentLocation=state.selected;notice.textContent='示意：已選定位點 '+state.selected+'，未改變手機定位';}
+   if(action==='queue'){state.queue++;notice.textContent='示意：加入待走路線；執行中的路線保持原樣';}
+   if(action==='save'){notice.textContent='示意：收藏 '+state.selected;}
+   if(action==='pause'){state.playing=state.stopped?true:!state.playing;state.stopped=false;notice.textContent='示意：'+(state.playing?'繼續':'暫停')+'路線';}
+   if(action==='stop'){state.playing=false;state.stopped=true;notice.textContent='示意：已停止路線，未操作手機';}
+   if(action==='speed'){state.speed=(state.speed+1)%3;notice.textContent='示意：切換現有交通模式';}
+   if(action==='explore'){notice.textContent='示意：探索 '+state.selected+'，未改變手機定位';}
+   if(action==='joystick'){notice.textContent='示意：搖桿微調位置';}
+   render();store();
+  }));
+  phone.querySelectorAll('[data-folder]').forEach(b=>b.addEventListener('click',()=>{
+   state.folder=b.dataset.folder;
+   phone.querySelectorAll('[data-folder]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+   phone.querySelectorAll('[data-group]').forEach(r=>r.hidden=b.dataset.folder!=='all'&&r.dataset.group!==b.dataset.folder);
+   notice.textContent='示意：切換收藏資料夾';
+  }));
+  phone.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>{state.route=b.dataset.route;phone.querySelectorAll('[data-route]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();store();}));
+  phone.querySelectorAll('input').forEach(input=>input.addEventListener('input',()=>{
+   const screen=input.closest('[data-screen]'); const query=input.value.trim().toLowerCase();
+   screen.querySelectorAll('[data-place]').forEach(r=>r.hidden=(query!==''&&!r.textContent.toLowerCase().includes(query))||(screen.dataset.screen==='saved'&&state.folder!=='all'&&r.dataset.group!==state.folder));
+   notice.textContent='僅範例清單篩選，不連線搜尋';
+  }));
+  variant.__render=render;
+  render();
+  if(globalThis.Tweak){const design={radius:19};const panel=phone.querySelector('.panel'); const tweak=new Tweak({container:panel,onChange:()=>{panel.style.borderRadius=design.radius+'px';}});tweak.addSlider(design,'radius',{label:'面板圓角',min:8,max:28,step:1,unit:'px'});}
+ });
+ window.addEventListener('openai:set_globals',event=>{const states=event.detail?.globals?.widgetState?.privateContent;if(!Array.isArray(states))return;states.forEach((s,i)=>{if(variants[i]&&s){Object.assign(variants[i].__demoState,s);variants[i].__render();}});});
+ if(globalThis.lucide)lucide.createIcons();
+})();
+</script>
