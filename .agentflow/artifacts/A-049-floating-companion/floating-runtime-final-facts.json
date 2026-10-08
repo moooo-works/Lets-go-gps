@@ -1,0 +1,12 @@
+{
+  "changed_files": [
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt"
+  ],
+  "changed_lines": 6,
+  "behavior_change": true,
+  "trust_boundary": false,
+  "broad_change": false,
+  "consequential_change": true,
+  "original_ask_path": ".agentflow/devlog.md",
+  "normal_journey_path": ".agentflow/artifacts/A-049-floating-companion/requirements.md"
+}

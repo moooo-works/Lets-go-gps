@@ -1,0 +1,55 @@
+{
+  "before": {
+    "android_metadata": {
+      "count": 1,
+      "sha256": "c57e79f1b18a0ab54c56c284387f4379246f5432b868c323465b4f01ff5ed3d5"
+    },
+    "saved_locations": {
+      "count": 375,
+      "sha256": "f067fd1bde84a1bf093b170337bd7b7a6bb961006ad89c5a2633e3850e6a04eb"
+    },
+    "routes": {
+      "count": 6,
+      "sha256": "c3ddce68a5e193eaccdecf7d854e60eed8e567de2c9fcd31cb741badb30a1d6c"
+    },
+    "route_points": {
+      "count": 591,
+      "sha256": "9726e84cb2db5b895331b84c7bf6ceab9a96a0bd8a9ebc575560a04780c0ca81"
+    },
+    "room_master_table": {
+      "count": 1,
+      "sha256": "ec4d85d309e7ad9599b890150356ecc9a06bee2cd20f3ce2b4df92c3b82a11fa"
+    },
+    "location_folders": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "after": {
+    "android_metadata": {
+      "count": 1,
+      "sha256": "c57e79f1b18a0ab54c56c284387f4379246f5432b868c323465b4f01ff5ed3d5"
+    },
+    "saved_locations": {
+      "count": 375,
+      "sha256": "f067fd1bde84a1bf093b170337bd7b7a6bb961006ad89c5a2633e3850e6a04eb"
+    },
+    "routes": {
+      "count": 6,
+      "sha256": "c3ddce68a5e193eaccdecf7d854e60eed8e567de2c9fcd31cb741badb30a1d6c"
+    },
+    "route_points": {
+      "count": 591,
+      "sha256": "9726e84cb2db5b895331b84c7bf6ceab9a96a0bd8a9ebc575560a04780c0ca81"
+    },
+    "room_master_table": {
+      "count": 1,
+      "sha256": "ec4d85d309e7ad9599b890150356ecc9a06bee2cd20f3ce2b4df92c3b82a11fa"
+    },
+    "location_folders": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "identical": true
+}
