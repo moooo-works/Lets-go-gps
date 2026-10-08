@@ -4,17 +4,17 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 同意表單地區與政策日期說明見Git history.
+Current commit: 同意流程變更與使用者影響說明見Git history.
 
-Tests/scenarios: 官方CMP／UMP文件及既有同意manager核對；本輪無新測試.
+Tests/scenarios: read-only檢查同意／廣告／設定／Billing程式及Google UMP文件；無新測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 正式CMP已發布、正式AppID隔離EEA測試通過；Mintegral營運排除；Unity工單已送出.
+Proven: Unity分支已有同意gate及隱私入口；正式CMP已發布且隔離實機通過.
 
-Open: 完整App整合與正式打包驗證待續；Unity Game ID拒絕待客服查核.
+Open: 完整App實機及Pro多餘表單檢查待續；UnityGame ID拒絕待客服.
 
-Next: 完整App同意流程與打包準備，Unity回覆後供應重測.
+Next: 完整App同意流程驗證並整理打包準備；Pro跳過表單為待實作提案.
 
 Artifacts: Unity00939092；PR58；unity-ads worktree；A-036-pixel-test/tracker.md.
 
@@ -394,5 +394,41 @@ Streams: none.
 ---
 
 # → Ask / A-042 (Takeshi Mori)
+
++ 妳打算怎麼修改？會出現什麼變化？對使用者有什麼影響
+
+---
+
+## [RUN-001] Event — 2026-10-08 14:09:34 +0800 (A-042)
+
+- 已核對Unity分支MainActivity、AdConsentManager、BannerAdView、RewardedAdManager、SettingsScreen及BillingManager。廣告同意與設定入口已有實作；MainActivity目前不分Pro即gatherConsent，故不能宣稱Pro絕不見表單。本輪只說明現況及驗證／修正計畫，未改程式。
+
+# ← Reply / A-042
+
+* _2026-10-08 14:09:34 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 主要變動是廣告啟動前的同意檢查、必要地區表單、設定頁廣告隱私入口。Unity分支已有這些邏輯，下一步完整App驗證後修正問題。
+- 台灣通常無新表單；EEA／UK／瑞士需要時出現選擇畫面。Pro無廣告維持，但現有分支仍可能向歐洲Pro顯示表單，需要納入檢查。
+
+## [FINAL REPORT]
+
+1. 「妳打算怎麼修改？會出現什麼變化？對使用者有什麼影響」
+
+   - 接下來先驗證既有Unity分支的整體串接，修正實機发现的問題；不把目前已寫好的同意流程描述成尚未開始實作，也不在本輪直接修改或發布。主要改動範圍：啟動先查Google允許的廣告狀態；需要時顯示同意／不同意／管理選項；設定頁依Google要求顯示廣告隱私選項；更新選擇時清掉舊廣告並依新狀態重新載入。[Google流程說明](https://developers.google.com/admob/android/next-gen/privacy)。
+   - 台灣等不需此表單的地區：通常無新彈窗，既有橫幅及看廣告解鎖流程維持；啟動時先檢查狀態，橫幅可能稍晚出現。
+   - EEA／英國／瑞士：首次需要蒐集選擇或既有選擇過期時，顯示同意／不同意／管理選項；設定頁可再次開啟廣告隱私選項。不是每次開App都重問。
+   - 拒絕個人化不等於免費免廣告：仍可能有非個人化或受限廣告，依Google結果決定是否能請求。未取得可請求狀態時，橫幅不載入、獎勵廣告暫不可用；不因拒絕鎖住免費定位或儲存。修改隱私選擇時，廣告可能短暫消失／重載。
+   - 付費Pro維持無廣告。需特別核對：目前MainActivity啟動一律gatherConsent，沒有Pro條件，所以歐洲Pro也可能看到表單。我建議對已確認Pro身份略過不必要的廣告同意流程，但這項優化尚未實作、也未由本輪問句直接視為新實作授權。
+   - 地圖、定位及儲存資料使用方式維持；測試地區強制設定僅在測試工具／版本使用，正式版採Google正常判斷。Unity供應與正式群組仍待Game ID修復，不能宣稱已啟用或已正式發布。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-043 (Takeshi Mori)
 
 +
