@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 同意流程變更與使用者影響說明見Git history.
+Current commit: 本輪廣告同意流程優先順序說明由Git紀錄保存.
 
-Tests/scenarios: read-only檢查同意／廣告／設定／Billing程式及Google UMP文件；無新測試.
+Tests/scenarios: Google官方CMP政策查核；本輪無產品修改或新實機測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity分支已有同意gate及隱私入口；正式CMP已發布且隔離實機通過.
+Proven: Unity分支已有同意流程；正式表單隔離診斷已通；完整App串接尚待驗證.
 
-Open: 完整App實機及Pro多餘表單檢查待續；UnityGame ID拒絕待客服.
+Open: Unity Game ID供應問題；完整App同意流程及正式版驗證.
 
-Next: 完整App同意流程驗證並整理打包準備；Pro跳過表單為待實作提案.
+Next: 等待後續指示；既有Unity工單待回覆.
 
-Artifacts: Unity00939092；PR58；unity-ads worktree；A-036-pixel-test/tracker.md.
+Artifacts: .agentflow/artifacts/A-036-pixel-test/tracker.md.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -430,5 +430,37 @@ Streams: none.
 ---
 
 # → Ask / A-043 (Takeshi Mori)
+
++ 這是有必要先處理的嗎？
+
+---
+
+## [RUN-001] Event — 2026-10-08 14:14:33 +0800 (A-043)
+
+- 核對Google官方認證CMP政策及A042既有程式查核；區分正式廣告發布前應完成的同意流程驗證、可延後的Pro體驗優化，以及獨立的Unity Game ID阻塞。本輪未修改產品程式或後台。
+
+# ← Reply / A-043
+
+* _2026-10-08 14:14:33 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 廣告同意流程應在正式發布前完成驗證；Pro略過表單屬體驗優化可延後，兩者都不是Unity Game ID修復的前置條件。
+
+## [FINAL REPORT]
+
+1. 「這是有必要先處理的嗎？」
+
+   - 若指整體廣告隱私流程：正式發布前有必要確認。Google要求對EEA、英國及瑞士使用者放送個人化廣告採用認證CMP；原本AdMob也適用，不是加Unity才需要。[Google官方要求](https://support.google.com/admob/answer/13554116?hl=en)。分支已有基本實作，目前主要缺完整App同意／拒絕／重新啟動／修改選擇的串接驗證。
+   - 若指Pro不顯示多餘表單：是體驗優化，可以排在基本流程驗證之後，不必因此暫停其他開發。
+   - 兩者都不必先完成才能處理Unity Game ID；Unity供應仍由後台ID問題阻塞。我的建議是在等待Unity回覆期間先驗證既有同意流程，確保正式版不會提前載入廣告或誤解使用者選擇，再依測試結果修正。這輪只回答優先順序，沒有開始新程式修改。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-044 (Takeshi Mori)
 
 +
