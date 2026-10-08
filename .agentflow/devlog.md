@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪現有功能及懸浮組合評估見Git history；source1cf733d未改.
+Current commit: 示意source11b4ec6；Claude查核PASS；本輪交付見Git history.
 
-Tests/scenarios: 搜尋／收藏／剪貼簿／路線／探索／overlay／步數UI只讀完整查核；未跑新實機或Gradle.
+Tests/scenarios: HTML讀回／node語法；Edge兩配置及主要互動；320/360寬；Claude唯讀PASS；座標來源程式查核；非正式App測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 搜尋与懸浮搭配以及六組已有功能整合提案已說明；前輪步數指南重複建議已更正.
+Proven: 兩款懸浮概念圖及座標來源說明完成，預覽程序停止，App未修改.
 
-Open: 懸浮搜尋／收藏及候選功能尚未實作；UnityGameID待工單；Pro表單優化延後.
+Open: 懸浮搜尋／收藏／座標／小地圖未實作；UnityGameID待工單；Pro表單優化延後.
 
-Next: 依使用者選定組合另行規劃；正式Unity群組維持暫停.
+Next: 依使用者回饋調整設計或選定實作範圍；本機preview server已停止.
 
-Artifacts: .agentflow/devlog.md A047；A045Claude討論為較早候選，優先順序以A047為準.
+Artifacts: .agentflow/artifacts/A-048-overlay-mockup/overlay-companion.html、preview.png、review.md、tracker.md.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -636,5 +636,73 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-048 (Takeshi Mori)
+
++ 有沒有圖示可以參考
+
++ 但是在遊戲中，想要知道座標位置，還是只能跳到google map中才能取得對吧？
+
+---
+
+## [RUN-001] Event — 2026-10-08 15:31:19 +0800 (A-048)
+
+- 已建立可互動懸浮設計示意，包含側邊浮窗／底部面板、搜尋／收藏／路線／控制、泡泡收合、選點與精簡步數狀態；所有地點／遊戲背景／數字均為範例，沒有App或遊戲串接。
+- HTML片段保存並讀回、JS node --check通過，沒有fetch/XHR/WebSocket。Edge本機預覽已確認分頁、待走路線計數、暫停／繼續／停止、收合及明確選點後狀態更新；360與320寬畫面已截圖查核，viewport已reset。Console只有瀏覽器擴充套件null-origin postMessage錯誤，沒有將它冒稱示意程式錯誤或零錯誤。
+- 私有本機preview server僅綁127.0.0.1及此Ask的忽略預覽目錄，不對外部署；將停止預覽程序後交付對話內示意。實際App源碼／PR58／Unity後台未修改。
+
+## [RUN-002] Event — 2026-10-08 15:36:17 +0800 (A-048)
+
+- 新座標追問已納入：目前模擬座標與App地圖中心可取得，遊戲任意蘑菇/花朵沒有座標API可讀；Google Maps不是唯一找點來源，可用既有App地圖/搜尋/收藏，懸浮顯示/小地圖則為提案。
+- 首次closeout因互動HTML需外部查核而未完成，未寫入Reply或push成功。HTML/PNG來源已提交11b4ec6，planner指定targeted；Claude唯讀review已啟動session63855、無工具/remote，凍結source与host實測證據，不传手機資料。候選範圍與目前changed paths符合tracker，不改App或額外功能。
+
+## [WIP-001] Checkpoint — 2026-10-08 15:36:17 +0800 (A-048)
+
+- **Finished:** 兩款懸浮示意、語法/介面/窄畫面查核及座標來源說明；本機server停止。
+- **Running now:** Claude針對source11b4ec6唯讀檢查，session63855。
+- **Still to do:** 核對查核報告、保存圖與座標回答、推送紀錄。
+- **Next work action:** 收到Claude報告後只处理必要發現，完成交付。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-08 15:41:01 +0800 (A-048)
+
+- 外部Claude targeted review對11b4ec6返回Outcome／Minimality／Conformance／Verdict PASS，CLI exit0，clone無變更/remote；host核對低風險示意狀態不一致不影響主要展示，不擴充App或重跑已通過檢查。示意來源審查後未修改。預覽程序已確認exit143（正常停止）；座標回答同時核對MapState.currentMockLocation與MapOverlays顯示地圖中心座標。
+
+# ← Reply / A-048
+
+* _2026-10-08 15:41:01 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已提供側邊浮窗與底部面板兩款可互動概念示意；是設計提案，尚未實作到App。
+
+- 不一定要開Google Maps：本App已有地圖與中心座標，自己的模擬座標也已知；遊戲任意蘑菇／花朵的位置則沒有直接讀取來源，仍需手動找點或使用已知座標。
+
+## [FINAL REPORT]
+
+1. 「有沒有圖示可以參考」
+
+   - 成功：已做側邊浮窗與底部面板兩種配置，可切换搜尋／收藏／路線／控制、收合泡泡與範例選點。搜尋結果分我的收藏与一般地點，顯示設為定位點／加入待走路線／收藏、路線操作及精簡步數狀態。所有地點／數值為範例，背景不是Pikmin實際畫面。
+   - 圖示可點選探索配置，按鈕只更新示意狀態，不會操作手機、搜尋外部資料或改變遊戲。
+
+   visualize{"path":"/Users/mori/side-project/Lets-go-gps/.agentflow/artifacts/A-048-overlay-mockup/overlay-companion.html"}
+
+   - host已讀回HTML、通過JS語法檢查及Edge主互動／320與360寬画面查核。Claude唯讀查核source11b4ec6為PASS，列出低風險的保存狀態／示意文字不一致，不影響主要展示；未冒稱所有互動或正式App已驗收。工具關閉的reviewer沒有看PNG或執行頁面，畫面查核由host完成。本機server已停止、viewport已reset；App／PR58／Unity後台未修改。
+   - 已驗證的靜態預覽：
+
+   ![懸浮搜尋設計預覽](artifacts/A-048-overlay-mockup/preview.png)
+
+2. 「但是在遊戲中，想要知道座標位置，還是只能跳到google map中才能取得對吧？」
+
+   - **不一定。** 本App已有地圖，畫面上方顯示地圖中心座標；可以直接在本App找位置，不必一定開Google Maps。搜尋一般地點、輸入座標／Plus Code、選既有收藏，也能得到目標座標。
+   - **看自己目前模擬所在位置：** App已持有currentMockLocation，懸浮面板可以顯示並提供複製，不需要外部地圖。這是可新增的介面功能，目前搖桿沒有這個顯示／複製入口；地圖中心可能與執行中的模擬位置不同，正式設計必須明確標示。
+   - **找遊戲地圖上指定的蘑菇／巨大花朵：** 目前App沒有遊戲POI或畫面座標轉換串接，不能只點遊戲圖上的圖示就取得精確經緯度。可用地標搜尋、別人提供的座標，或在本App／外部地圖手動比對選點；找到一般地點不保證就是遊戲POI的精確位置。
+   - 所以更完整的搭配是「目前模擬座標＋複製」以及需要時展開「小地圖選點／查看選中座標」。小地圖可以減少切換到另一個App，仍不能自動讀出遊戲任意點的位置。本輪圖示目前以地點名稱呈現，這個延伸是提案，不宣稱已加進App或已完成地圖串接。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-049 (Takeshi Mori)
 
 +
