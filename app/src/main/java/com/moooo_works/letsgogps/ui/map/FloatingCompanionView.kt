@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -57,7 +60,7 @@ fun FloatingCompanionView(
     val config = LocalConfiguration.current
     val panelHeight = minOf(600, config.screenHeightDp - 100).coerceAtLeast(200).dp
     Surface(shape = MaterialTheme.shapes.large, shadowElevation = 6.dp,
-        modifier = Modifier.widthIn(max = 320.dp).width(320.dp).heightIn(max = panelHeight)) {
+        modifier = Modifier.widthIn(max = 320.dp).width(320.dp).heightIn(max = panelHeight).imePadding()) {
         Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.floating_title), Modifier.fillMaxWidth().then(drag).padding(8.dp), style = MaterialTheme.typography.titleMedium)
             Row {
@@ -86,6 +89,8 @@ fun FloatingCompanionView(
                 CompanionTab.SEARCH -> {
                     OutlinedTextField(value = companionState.query, onValueChange = actions.onQueryChange,
                         label = { Text(stringResource(R.string.floating_query)) }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { releaseInput(); actions.onSearch() }),
                         modifier = Modifier.fillMaxWidth().onFocusChanged { actions.onInputFocus(it.isFocused) })
                     Row {
                         TextButton(onClick = { releaseInput(); actions.onSearch() }, enabled = !companionState.searching) { Text(stringResource(R.string.floating_search)) }
@@ -102,6 +107,8 @@ fun FloatingCompanionView(
                 CompanionTab.SAVED -> {
                     OutlinedTextField(value = companionState.query, onValueChange = actions.onQueryChange,
                         label = { Text(stringResource(R.string.floating_query)) }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { releaseInput() }),
                         modifier = Modifier.fillMaxWidth().onFocusChanged { actions.onInputFocus(it.isFocused) })
                     Row(Modifier.horizontalScroll(rememberScrollState())) {
                         FilterChip(selected = companionState.folderId == null, onClick = { actions.onFolderChange(null) }, label = { Text(stringResource(R.string.floating_all)) })
