@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: root record72ac0aa; product ddeb51c and1ecc8a4 remain in draft PR59/60.
+Current commit: root review2a29; producta6cf with records-only sync in draft PR61.
 
-Tests/scenarios: 279/0fail/60skip; Gradle successful; lint34 existing Error; Pixel7Pro smoke and original DB rows identical.
+Tests/scenarios: 280 tests; 220 executed/0fail/60skip; Gradle successful; four-language AppUID OK1; Pixel7Pro theme/language/input smoke.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Android17 repaired first; floating tested; data/input/rotation preserved; mock stopped; PR58 unchanged.
+Proven: Floating theme/locale fixed; original data/settings preserved; PR58 retained; independent PASS.
 
-Open: UnityGameID support ticket; release/other Android versions not tested.
+Open: UnityGameID support ticket; final warning screen/Pikmin/release/older Android untested.
 
-Next: await owner experience; PR59/60 draft, unmerged.
+Next: await owner experience; PR61/59/60 remain draft and unmerged.
 
-Artifacts: .agentflow/artifacts/A-049-floating-companion/floating-runtime-final.md, device-acceptance.md, android17-review.md, data-preservation.json.
+Artifacts: .agentflow/artifacts/A-050-floating-appearance/review-corrections-delivery.md, device-acceptance.md, data-preservation.json.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -260,3 +260,55 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 - **Still to do:** 審查、單一主題stacked draft PR、紀錄closeout及push。
 - **Next work action:** 固定root接受證據commit及product commit，review同時查code/保存證據，不重跑通過測試。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-12 11:20:52 +0800 (A-050)
+
+- 首次review固定eb12/5c9保留BLOCKING，唯一F1深色error對比3.36；真實Red500 test先紅，局部error/onError修正後required三Gradle成功280/0fail/60skip。最新APK install Success，不冒稱鎖定後再次看到warning。
+- 修正審查第二次bounded native續接固定root2a29/producta6cf，僅新report；PR61 draft已建立base59，58/59/60未改。root只紀錄與patch，product仍獨立worktree，changed paths符合T4，不動engine/permission/schema/ads。
+
+## [WIP-002] Checkpoint — 2026-10-12 11:20:52 +0800 (A-050)
+
+- **Finished:** 主題/四語/keyboard與資料實測；警告對比回歸修正；最新安裝與draft PR61。
+- **Running now:** 固定commit bounded修正審查。
+- **Still to do:** 最終PASS核對、main紀錄同步behind0、closeout。
+- **Next work action:** 讀取review-corrections.md並完成真實交付記錄。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-004] Event — 2026-10-12 11:24:45 +0800 (A-050)
+
+- 最終root2a29/producta6cf獨立PASS，警告對比9.57，host核對source、測試、實機及資料接受記錄；PR61 draft、behindmain0，main不含產品code。更正文件162add16del及此前RUN002改前150add16del統計筆誤，不改歷史內容。紀錄同步7973對a6cf appdiff空。
+- 最終changed paths只有root接受紀錄／原report／dispatch／tracker及devlog，均保留已接受事實；產品警告2行和必要回歸test已審查，沒有新增範圍或重跑成功檢查。
+
+# ← Reply / A-050
+
+* _2026-10-12 11:24:45 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 浮窗配色與多語同步修正完成，已安裝Pixel7Pro，PR61保持草稿。
+
+## [FINAL REPORT]
+
+1. 「懸浮鍵盤的UI配色需要跟主題色有調整，現在深色跟淺色會跟原app吃色，不容易分辨，雖然進到pikmin bloom或其他app可以看得到，但整體顏色不好辨識，而且並沒有跟多國語系一起改變語言」
+
+   - 成功：浮窗即時沿用App深色／淺色與語言設定，不透明底色、橘色外框、搖桿及齒輪提高辨識度；日文／韓文／繁中／英文已實機切換確認。搜尋與鍵盤仍可操作，原資料及English/DARK設定保留；最新debug APK成功安裝。
+   - 獨立worktree產品a6cf172、紀錄同步7973c21已push，[PR61](https://github.com/moooo-works/Lets-go-gps/pull/61)草稿承接PR59，GitHub behindmain0；58/59/60保留，沒有合併或發布。root main只紀錄與凍結patch，不含產品修正。
+   - 首次審查發現深色警告字對比3.36，局部修到9.57後Outcome/Minimality/Conformance全PASS；原審查與戳記副本保留；交付副本僅由我整理identity/Self-check/verdict/commit標記以符合檢查器，不改判定。我核對最終差異、原始要求、報告及接受證據。test/lintDebug/assembleDebug成功，280tests／220實際執行／0fail／60既有skip；四語AppUID instrumentOK1，lint仍34既有Error／95Warning／3Hint。
+   - 限制：未實測Pikmin Bloom本身、olderAndroid或release付費。手機鎖定後最終warning畫面沒有再實測，以真實色組先紅後綠確認；沒有改Google輸入法的配色或設定。此前RUN002改前行數寫152add為統計筆誤，實際150add16del；最終Git為162add16del。
+   - Key Records — read these first
+
+     [最終修正審查](artifacts/A-050-floating-appearance/review-corrections-delivery.md)：記錄主題、語系與警告對比修正PASS及未測限制。
+
+     [實機接受紀錄](artifacts/A-050-floating-appearance/device-acceptance.md)：列出持續開窗切換、鍵盤與資料／設定保留證據。
+
+     [資料保留證明](artifacts/A-050-floating-appearance/data-preservation.json)：全DB原行數及內容hash一致，不含私密地點內容。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-051 (Takeshi Mori)
+
++
