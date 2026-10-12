@@ -8,21 +8,21 @@
 
 - **Goal:** 依Pen設計實作浮窗UI，修正收合靠邊與透明觸控攔截.
 
-- **Last update:** 2026-10-12 19:49:04 +0800.
+- **Last update:** 2026-10-12 20:03:33 +0800.
 
 - **Evidence commit:** 85ca56486538913ff64cf17e86d75eace4173579.
 
 ## Overall state
 
-- **State:** active.
+- **State:** complete.
 
-- **Reason:** Work remains.
+- **Reason:** All accepted outcomes have current evidence; limits are recorded..
 
 - **Total:** 5.
 
-- **Completed:** 4.
+- **Completed:** 5.
 
-- **Remaining:** 1.
+- **Remaining:** 0.
 
 ## Accepted task checklist
 
@@ -30,7 +30,7 @@
 
 - [x] **T-2:** 修正展開後收合停留原地；scope Manager dock anchor與VM收合接線，先紅後綠、required Gradle及手機左右側實測，保留完全close。Proof: Manager初始四測試真實紅綠、左右實機位置、最終公開UI實際window bounds與兩種close通過；device-acceptance.md。Source: A-051.
 
-- [ ] **T-3:** 獨立最終審查、single-topic draft PR與資料設定保留、紀錄push，未完成pen則維持open不假稱完成。Source: A-051/AGENTS/Agentflow.
+- [x] **T-3:** 獨立最終審查、single-topic draft PR與資料設定保留、紀錄push，Proof: 原始review.md四項PASS，draft PR62 base61已建立並保留58-61；mockgps.db全rows/hash相同，appearance差異保留目前LIGHT並如實記錄。Source: A-051/AGENTS/Agentflow.
 
 - [x] **T-4:** 收合/換頁後黏著側底層App按鈕可點，先Calculator實機red、最小focus/padding修正、IME與底層綠驗證。Scope: FloatingCompanionView及必要接受紀錄，不改系統安全。Proof: Calculator同側3→3−、最終真實IME／輸入欄bounds及收合window≤64dp instrument OK1；最新跨App逐鍵重測限制明列device-acceptance.md。Source: A-051 新增觸控回報.
 
@@ -45,29 +45,29 @@
 
 ## Current recovery
 
-- **Current item:** T-3.
+- **Current item:** none.
 
 - **Last proven result:** required Gradle通過284/0fail/60skip；最終IME與實際window bounds／模式／兩面板close實機OK1；資料mockgps.db rows/hash一致。詳見device-acceptance.md與data-preservation.json。
 
-- **Active blocker or running process:** 無；即將固定root證據並發出最終只讀審查。最新跨App逐鍵測試與原主題差異已明列限制，沒有假稱全部手機設定一致。
+- **Active blocker or running process:** none.
 
-- **Next safe action:** full native review、host核對、draft PR與closeout；只重用有效證據，不再操作正在使用的手機。
+- **Next safe action:** none.
 
 - **Expected changed files:** Manager/VM/ManagerTest、MapState/MapScreen/MapOverlays、CompanionState/View、OverlayTheme、JoystickController/View、ProDialog、four locale labels/platform及VM/UI tests；A051設計／接受記錄。拆分平台／UI／語系／驗證子項，不混ads/engine/schema.
 
 ## Completion proof
 
-- **All accepted tasks checked:** no.
+- **All accepted tasks checked:** yes.
 
 - **Blocking accepted decision:** none.
 
 - **Operation running:** no.
 
-- **Next action remaining:** T-3.
+- **Next action remaining:** none.
 
-- **Evidence status:** current.
+- **Evidence status:** complete.
 
-- **Judgment:** active.
+- **Judgment:** complete.
 
 ## Update meaning
 
