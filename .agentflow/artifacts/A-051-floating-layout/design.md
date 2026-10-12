@@ -4,13 +4,13 @@ A051兩項原要求：1.重規劃UI並請pen.dev協作；2.展開後關閉文字
 
 ## 範圍與方法
 
-UI先交付設計稿與配置說明，不在尚未看過設計時直接重寫全部Compose。既有五項搜尋／收藏／路線／控制／小地圖與主題／多語保留。主要操作與座標移到頁內，避免常駐資訊把主內容推下；五個入口全部可见；收合入口小型圖示，拖曳可移動，完全關閉獨立在更多選單，不跟收合混淆。
+初期先交付設計稿與配置說明；Pen完成並取得「實現未完成項目」授權後，已依後續採用章節實作Compose。既有五項搜尋／收藏／路線／控制／小地圖與主題／多語保留。主要操作與座標移到頁內，避免常駐資訊把主內容推下；五個入口全部可见；收合入口小型圖示，拖曳可移動，完全關閉獨立在更多選單，不跟收合混淆。
 收合bug獨立修復：Manager維持吸附邊緣狀態，後續真正layout/寬度變化仍計算新邊界；拖曳開始解除吸附。VM收合呼叫snap。既有完全關閉仍hide，不停止背景定位。
-pen.dev本機設定0.6.34路徑失效，已找到0.6.49 MCP，tools/list可讀但get_editor_state連antigravity三次失敗；CUA無該app。等待使用者說明使用入口，先完成獨立bug修復，不宣稱完成pen協作。
+pen.dev本機設定0.6.34路徑失效，已找到0.6.49 MCP，tools/list可讀但get_editor_state連antigravity三次失敗；CUA無該app。以上是初期連線診斷；之後改用使用者指定的Pen桌面內建助理完成設計，原始.pen／PNG已保存。
 
 ## Minimality check
 
-只有在收合按下立即snap一次不夠：此時仍是320dp寬，縮小後會停內側。延遲固定毫秒也無法保證Compose實際重測時間。沿用現有layout listener和snap機制保存anchor，避免timer/新window/新動畫引擎。
+只有在收合按下立即snap一次不夠：此時仍是展開面板的寬度，縮小後會停內側。延遲固定毫秒也無法保證Compose實際重測時間。沿用現有layout listener和snap機制保存anchor，避免timer/新window/新動畫引擎。
 
 ## Invariants
 
@@ -30,7 +30,7 @@ A051新增「懸浮視窗黏著的那一邊，底層app的按鈕都會失效，�
 
 AC4: 未被可見浮窗遮住的左右底層按鈕可點；IME開啟時搜尋欄不被蓋，收起IME／換頁後無透明攔截區。正常安全input/owner不放寬。
 
-pen桌面已signed in，readstate成功但execute/read references逾時；參考桌面已安裝bundle內同版pen-dev schema/execute/mobile指南；使用者明確要求Pen協作，已經CUA送非私密設計brief至Pen內建Claude Opus5.5，目前有Designed/ToolOutput，實際進行中。無App code／裝置／帳號操作授權给Pen worker。
+pen桌面已signed in，readstate成功但execute/read references逾時；參考桌面已安裝bundle內同版pen-dev schema/execute/mobile指南；使用者明確要求Pen協作，已經CUA送非私密設計brief至Pen內建Claude Opus5.5，已完成可編輯設計及四狀態PNG，實際交付檔已保存。無App code／裝置／帳號操作授權给Pen worker。
 
 ## UI實作授權與採用
 
