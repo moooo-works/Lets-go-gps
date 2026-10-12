@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: source 7fa932f 已Result Go；sync/review db7c443；本輪交付見Git history.
+Current commit: source沿用既有；本輪僅查核客服回覆並保存紀錄.
 
-Tests/scenarios: 沿用269 tests（66既有略過）、三項Gradle成功、34既有lint Error無新增；本輪GUI保存與截圖核對；實機延期.
+Tests/scenarios: Unity工單與Gmail只讀查核；未改App，不重跑測試.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: Result Go已收到；三設定on/on/off；Unity兩格式群組保存且暫停；final review PASS；behind main0，PR58保留.
+Proven: 00939092仍Open；可見對話沒有客服留言，Gmail只有10/8自動建單通知.
 
-Open: R-7實機／CMP／訊號送達／Unity實際供應，使用者先保留待驗證.
+Open: Unity Game ID800390974支援單與實際Unity供應.
 
-Next: 依使用者指示保留待驗證；兩群組維持暫停，沒有背景實機測試或生產啟用.
+Next: 等待Unity客服回覆；沒有背景監控或催辦.
 
-Artifacts: artifacts/A-003-result/backend-verification.md、final-review.md、tracker.md、三張截圖；PR58.
+Artifacts: Unity00939092；Gmail工單號搜尋結果；既有開發與測試紀錄.
 
 Archived eras: none.
 
@@ -349,5 +349,39 @@ streams: off」
 ---
 
 # → Ask / A-004 (Takeshi Mori)
+
++ 查看unity-ads是否有回復
+
+---
+
+## [RUN-001] Event — 2026-10-12 09:25:51 +0800 (A-004)
+
+- 只讀查核Unity00939092：Open、Conversation只有原始提問，last activity10/10 23:23（頁面時區未標）；Gmail工單號搜尋1封10/8自動建單通知，無客服實質回覆。未發送消息或改產品／後台。
+
+# ← Reply / A-004
+
+* _2026-10-12 09:25:51 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 尚未看到 Unity 客服的實質回覆；工單00939092仍Open，Gmail只有10/8自動建單通知。
+
+## [FINAL REPORT]
+
+1. 「查看unity-ads是否有回復」
+
+   - 已查[Unity工單00939092](https://support-ads.unity.com/s/cases?id=500Qv00000janJjIAI)與對應Gmail郵件。目前工單Conversation只有原始提問，沒有客服新增留言；狀態Open。Last activity顯示10.10.2026 23:23，但這不是可見客服回覆，頁面未標示該時間的時區，不自行轉換。
+
+   - Gmail以工單號00939092搜尋只有1封：10/8下午1:40的Unity自動建單通知，寄件者donotreply@unity3d.com，內容只說工單已建立、審查中，有更新會另寄通知。尚未找到Game ID問題的處理方案或需補資料的客服回覆。
+
+   - 最初GitHub查核：head unity-ads沒有PR，保留的PR58沒有留言或reviews；主工作紀錄指出目前等待的是Unity Game ID支援單，因此改查該單。未發送回覆、催辦或關閉工單，未修改App／後台／PR，未重跑測試。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-005 (Takeshi Mori)
 
 +
