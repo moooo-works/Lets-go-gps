@@ -311,4 +311,67 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 
 # → Ask / A-051 (Takeshi Mori)
 
-+
++ 1.我測試過可以用，但是這個UI的配置不太好，需要重新規劃，請pen.dev協作
+  2.懸浮工具點開後關閉，文字會停留在原地，影響其他app視窗，所以關閉後需要回到邊緣
+
++ <send_user_message_question_reply>
+  [{"answer":"pen.dev 桌面版","question":"pen.dev 的本機 MCP 找到了，但無法連上 Pencil／Antigravity，電腦上也沒有可啟動的對應 App。你目前使用 pen.dev 桌面版、瀏覽器版，還是其他 IDE 裡的 Pencil？我會先繼續修復收合後回到邊緣的問題。","questionItemId":"[\"request_user_input_async\",\"call_83639b618253401387b3e61385dd89f0\",0]"}]
+  </send_user_message_question_reply>
+
++ 出現什麼錯誤
+
++ 懸浮視窗黏著的那一邊，底層app的按鈕都會失效，無法點擊，反對側的可以
+
++ 實現未完成項目
+
++ 你是照著pen.dev的設計稿做成app ui嗎？怎麼看起來不一樣
+
++ 我覺得懸浮視窗的背景全實色會看不到底層，可以把背景增加透明度嗎
+
++ 懸浮視窗的「路線」模式，雙向箭頭是做什麼用的？
+
++ 需要修正
+
++ 好，懸浮視窗跟虛擬搖桿的按鍵需分開，而且一樣要歸類在pro功能中，付費解鎖或是看廣告解鎖
+
+---
+
+## [RUN-001] Event — 2026-10-12 14:13:53 +0800 (A-051)
+
+- preflight main；root僅hook當輪devlog dirty；fetch成功；origin/main5b09bde4fe25417288650514bb7eced62d66b3b1，latest5 5b09bde/2a29ab9/eb12d49/b1590f0/72ac0aa。獨立fix/floating-dock自latest main建立再承接未合併PR61 source2d8e3eb，產品不合併main。
+- A051分UI規劃/pen協作與靠邊bug修復；規劃先交付設計，不擅自實作全部新配置。bug根因展開clamp改位置，收合不snap；固定延遲不可靠，沿用layout anchor方案及必要回歸測試。scope3產品paths與A051紀錄，保留engine/資料/主題多語/PR58。
+- 使用Plugin Management查pen無可用connector；本機Pencil設定舊binary失效，0.6.49可tools/list但antigravity transport三次連線失敗，CUA app不存在。既有pen browser停CompleteProfile要求密碼，使用者接續；保持open，host先修可獨立bug。
+
+## [RUN-002] Event — 2026-10-12 14:56:57 +0800 (A-051)
+
+- Pen桌面signed-in，實際agent ClaudeOpus5.5完成48dp入口／4手機狀態／收藏路線更多／keyboard/橫向/長字提案。host已看PNG並保存.pen/exports。舊MCP筆誤路徑及Antigravity不匹配；桌面state可讀，execute/read references仍timeout，改用內建助理完成，未改host MCP設定。設計worker原brief限制沒有改App／device／帳號，UI只批准單次純對比計算，不SwitchToAuto。
+- 新owner「實現未完成項目」授權實作已完成UI配置。採用48dp入口、單列toolbar/更多、五固定導航、內容先/額度後及控制鍵初始可見；保留onStop完整停止語義，不採用Pen額外presets/exploreSwitch/close確認。source子項拆平台3paths、UI2paths、四語shortLabel、必要instrument；scope無engine/schema/ads。
+- 收合右frame816..1080及左0..264已實測，單元4實執先1fail後green；新發現重新開啟仍用舊panelx240，first-layout吸附加assert先紅後修。Owner新增sticky側tap缺陷，Calculator大Map面板一度可見下方仍被舊觸控框覆蓋；加入focus-onlyIME及compact尺寸，先probe再完整綠驗證，現收合後3與同側減號已可點（3→3−），未稱所有遊戲按鈕PASS。
+
+## [WIP-001] Checkpoint — 2026-10-12 14:56:57 +0800 (A-051)
+
+- **Finished:** Pen設計協作、靠邊紅綠與初步左右實測；新UI與shortLabel實作。
+- **Running now:** 最新phone build與5入口/收合/更多instrument。
+- **Still to do:** 手機compact觸控與IME/各頁、多語/資料保留、最終審查/PR/closeout。
+- **Next work action:** 讀儀器結果，再實測window實際frame與底層點擊。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-12 19:02:02 +0800 (A-051)
+
+- 半透明背景已實作並安裝Pixel：展開82%、收合90%，文字／搜尋／操作維持清楚；未選導航透明，沒有調WindowManager alpha或觸控安全flags。使用者要求覆蓋Pen原實色背景。
+- 原視覺對齊產品daadbf8已push，透明度commit另記於產品分支。required test/lintDebug/assembleDebug成功，281 tests/0fail/60既有skip；最新解鎖public UI instrument OK1。前一次鎖定找不到入口的失敗保留，不算App功能通過。
+- 實機已觀察Calculator及遊戲底層透出；含私密收藏的截圖只留private/tmp、不入Git。最新收合實際frame/touchableRegion=[0,1144][126,1270]，WindowManager alpha仍1。手機有人持續切換前景，後續逐步核對前景再操作，尚未完成全部IME/資料/審查交付。
+
+## [RUN-004] Event — 2026-10-12 19:11:32 +0800 (A-051)
+
+- 路線雙向箭頭原接cycleLoopMode：一次／循環／折返依序切換；循環重新從起點開始，折返沿反序原路往返。使用者要求修正辨識，現改可見模式文字＋三種圖示及accessibility stateDescription，四語沿用既有字串；不改引擎或播放權限。
+- required test/lintDebug/assembleDebug及AndroidTest建置成功，兩APK安裝Success。最初測試雖state=LOOP卻看不到新文字，是AccessibilityNodeInfo快取未refresh；加入public refresh後三種文字及回到一次的UI儀器OK1（5.542s），保留實際失敗log於private/tmp。不宣稱先前失敗是App模式切換bug。
+- 最新产品已commit/push，正常路徑與通過測試一致；只移除臨時失敗截圖診斷，不重跑無改動的產品套件。完整A051驗收／獨立審查／PR紀錄仍待完成，手機穩定操作時段問題保持pending。
+
+## [WIP-002] Checkpoint — 2026-10-12 19:12:31 +0800 (A-051)
+
+- **Finished:** Pen設計配置與半透明背景已實作安裝；路線模式文字＋圖示辨識已push ca7ea03，模式切換UI instrument通過。
+- **Running now:** 無背景程序，保存接受狀態。
+- **Still to do:** 全A051手機IME／兩側觸控／資料保留，最終獨立審查、draft PR及紀錄交付。
+- **Next work action:** 原穩定手機測試時段問題仍pending；收到可測試答覆後逐步核對實機，未稱整輪完成。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
