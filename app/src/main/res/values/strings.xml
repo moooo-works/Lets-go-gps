@@ -58,7 +58,7 @@
     <string name="action_open_about_phone">開啟「關於手機」</string>
     <string name="error_location_permission">此功能需要定位權限才能運作。</string>
     <string name="error_notification_permission">此功能需要通知權限以顯示背景控制項。</string>
-    <string name="error_floating_window">搖桿功能需要「顯示在其他應用程式上層」權限。請在設定中開啟。</string>
+    <string name="error_floating_window">懸浮工具及搖桿需要「顯示在其他應用程式上層」權限。請在設定中開啟。</string>
     <string name="error_provider_setup_failed">模擬引擎設定失敗: %1$s</string>
     <string name="error_set_location_failed">位置推送失敗: %1$s</string>
     <string name="error_provider_teardown_failed">停止失敗: %1$s</string>
@@ -492,4 +492,8 @@
     <string name="floating_zoom_out">縮小地圖</string>
     <string name="floating_slower">降低速度</string>
     <string name="floating_faster">增加速度</string>
+    <string name="joystick_title">虛擬搖桿</string>
+    <string name="joystick_open">開啟獨立搖桿</string>
+    <string name="joystick_close">關閉搖桿</string>
+    <string name="pro_dialog_feature_floating">懸浮工具：搜尋、收藏與路線</string>
 </resources>

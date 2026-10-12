@@ -7,6 +7,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.graphics.Rect
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityWindowInfo
 import androidx.compose.runtime.mutableStateOf
 import androidx.test.platform.app.InstrumentationRegistry
 import com.moooo_works.letsgogps.ui.map.*
@@ -35,6 +36,7 @@ class FloatingLayoutTest {
         var selections = 0
         var closed = false
         lateinit var manager: JoystickOverlayManager
+        var joystickClosed = false
         val actions = FloatingCompanionActions(
             onExpandedChange = { state.value = state.value.copy(expanded = it) },
             onTabChange = { state.value = state.value.copy(tab = it) },
@@ -50,7 +52,7 @@ class FloatingLayoutTest {
                 })
             }, onExplore = {},
             onCopyCurrent = {}, onCopySelected = {}, onClose = { closed = true; manager.hide() },
-            onOpenApp = {}, onInputFocus = {}, onWindowDrag = { _, _ -> }, onWindowDragEnd = {}, onCopyLocation = { copied = it }
+            onOpenApp = {}, onInputFocus = { manager.setInputFocusable(it) }, onWindowDrag = { _, _ -> }, onWindowDragEnd = {}, onCopyLocation = { copied = it }
         )
         fun nodes(node: AccessibilityNodeInfo): List<AccessibilityNodeInfo> = buildList {
             node.refresh()
@@ -73,6 +75,20 @@ class FloatingLayoutTest {
             throw AssertionError("Missing clickable: $description")
         }
         fun click(description: String) { assertTrue(find(description).performAction(AccessibilityNodeInfo.ACTION_CLICK)) }
+        fun assertSmallWindow(description: String, maximum: Int) {
+            val deadline = SystemClock.uptimeMillis() + 5000
+            while (SystemClock.uptimeMillis() < deadline) {
+                for (window in automation.windows) {
+                    val root = window.root ?: continue
+                    if (root.packageName?.toString() != context.packageName ||
+                        nodes(root).none { it.contentDescription?.toString() == description }) continue
+                    val rect = Rect().also(window::getBoundsInScreen)
+                    if (rect.width() in 1..maximum && rect.height() in 1..maximum) return
+                }
+                SystemClock.sleep(100)
+            }
+            fail("Collapsed WindowManager bounds must be small: $description")
+        }
         try {
             instrument.runOnMainSync {
                 manager = JoystickOverlayManager(context)
@@ -85,12 +101,39 @@ class FloatingLayoutTest {
             val maxEntry = (64 * context.resources.displayMetrics.density).toInt()
             assertTrue(bounds.width() in 1..maxEntry && bounds.height() in 1..maxEntry)
             assertNotEquals(title, entry.text?.toString())
+            assertSmallWindow(title, maxEntry)
             click(title)
             for (label in listOf(R.string.floating_search, R.string.floating_saved, R.string.nav_routes, R.string.floating_control, R.string.floating_map)) {
                 val tab = find(strings.getString(label))
                 val rect = Rect().also(tab::getBoundsInScreen)
                 assertFalse(rect.isEmpty)
             }
+            val fieldDeadline = SystemClock.uptimeMillis() + 5000
+            var field: AccessibilityNodeInfo? = null
+            while (field == null && SystemClock.uptimeMillis() < fieldDeadline) {
+                field = automation.windows.mapNotNull { it.root }
+                    .filter { it.packageName?.toString() == context.packageName }
+                    .flatMap(::nodes).firstOrNull { it.className?.toString() == "android.widget.EditText" }
+                if (field == null) SystemClock.sleep(100)
+            }
+            assertNotNull(field)
+            assertTrue(field!!.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+            val keyboardDeadline = SystemClock.uptimeMillis() + 5000
+            var keyboard: AccessibilityWindowInfo? = null
+            while (keyboard == null && SystemClock.uptimeMillis() < keyboardDeadline) {
+                keyboard = automation.windows.firstOrNull { it.type == AccessibilityWindowInfo.TYPE_INPUT_METHOD }
+                if (keyboard == null) SystemClock.sleep(100)
+            }
+            assertNotNull("Search must open the keyboard", keyboard)
+            field!!.refresh()
+            val fieldBounds = Rect().also(field!!::getBoundsInScreen)
+            val keyboardBounds = Rect().also(keyboard!!::getBoundsInScreen)
+            assertTrue("Search field must remain above keyboard", fieldBounds.bottom <= keyboardBounds.top)
+            click(strings.getString(R.string.floating_collapse))
+            val collapsedBounds = Rect().also(find(title)::getBoundsInScreen)
+            assertTrue("No transparent full-height window after collapse", collapsedBounds.height() <= maxEntry)
+            assertSmallWindow(title, maxEntry)
+            click(title)
             click(strings.getString(R.string.floating_copy_selected))
             instrument.runOnMainSync { assertEquals(sample.latLng, copied); assertEquals(0, selections); assertEquals(CompanionTab.SEARCH, state.value.tab) }
             click(strings.getString(R.string.nav_routes))
@@ -127,7 +170,25 @@ class FloatingLayoutTest {
             assertNotNull(close)
             assertTrue(close!!.performAction(AccessibilityNodeInfo.ACTION_CLICK))
             instrument.waitForIdleSync()
-            instrument.runOnMainSync { assertTrue(closed) }
+            instrument.runOnMainSync {
+                assertTrue(closed)
+                manager.show {
+                    StandaloneJoystickOverlay(
+                        onClose = { joystickClosed = true; manager.hide() },
+                        onCollapse = { manager.snapToEdge() },
+                        onWindowDrag = { dx, dy -> manager.updatePosition(dx, dy) },
+                        onWindowDragEnd = { manager.snapToEdge() }
+                    ) {
+                        JoystickOverlayView(TransportMode.WALKING, { _, _ -> }, { _, _ -> }, {}, {}, {})
+                    }
+                }
+            }
+            click(strings.getString(R.string.joystick_collapse))
+            find(strings.getString(R.string.joystick_title))
+            assertSmallWindow(strings.getString(R.string.joystick_title), maxEntry)
+            click(strings.getString(R.string.joystick_title))
+            click(strings.getString(R.string.joystick_close))
+            instrument.runOnMainSync { assertTrue(joystickClosed) }
         } finally {
             instrument.runOnMainSync { manager.hide(); activity.finish() }
             val editor = prefs.edit()

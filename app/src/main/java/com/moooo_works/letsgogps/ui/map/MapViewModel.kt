@@ -7,6 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.ClipData
 import android.content.ClipboardManager
+import androidx.compose.material3.Text
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.ui.res.stringResource
+import com.moooo_works.letsgogps.R
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.moooo_works.letsgogps.domain.repository.SearchRepository
@@ -109,6 +113,7 @@ class MapViewModel @Inject constructor(
         onOverlayDismissed = {
             cancelCompanionPending()
             floatingCompanionController.close()
+            _uiState.update { it.copy(isCompanionEnabled = false) }
         }
     )
 
@@ -254,10 +259,12 @@ class MapViewModel @Inject constructor(
     }
 
     private fun closeCompanion() {
+        if (!_uiState.value.isCompanionEnabled) return
         cancelCompanionPending()
         floatingCompanionController.close()
         releaseCompanionInput()
-        if (_uiState.value.isJoystickEnabled) joystickController.toggle()
+        _uiState.update { it.copy(isCompanionEnabled = false) }
+        joystickOverlayManager.hide()
     }
 
     private fun openAppFromCompanion() {
@@ -327,11 +334,6 @@ class MapViewModel @Inject constructor(
     }
 
     init {
-        joystickController.setOverlayWrapper { joystick ->
-            val map by uiState.collectAsState()
-            val companion by floatingCompanionController.state.collectAsState()
-            FloatingCompanionView(map, companion, companionActions(), joystick)
-        }
         viewModelScope.launch {
             settingsRepository.observeLastCenter().collect { center ->
                 if (isFirstLoad && center != null) {
@@ -419,7 +421,10 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             proRepository.isProActive.collect { isPro ->
                 _uiState.update { it.copy(isProActive = isPro) }
-                if (!isPro && _uiState.value.isJoystickEnabled) closeCompanion()
+                if (!isPro) {
+                    if (_uiState.value.isCompanionEnabled) closeCompanion()
+                    if (_uiState.value.isJoystickEnabled) joystickController.toggle()
+                }
             }
         }
 
@@ -724,7 +729,39 @@ class MapViewModel @Inject constructor(
     }
 
     fun toggleJoystick() {
-        if (_uiState.value.isJoystickEnabled) closeCompanion() else joystickController.toggle()
+        if (_uiState.value.isJoystickEnabled) { joystickController.toggle(); return }
+        if (!_uiState.value.isProActive || !proRepository.isProActive.value) { showProUpgradeDialog(); return }
+        if (!joystickOverlayManager.hasPermission()) {
+            _uiState.update { it.copy(mockError = MockError.FloatingWindowPermissionMissing) }
+            return
+        }
+        if (_uiState.value.isCompanionEnabled) closeCompanion()
+        joystickController.toggle()
+    }
+
+    fun toggleCompanion() {
+        if (_uiState.value.isCompanionEnabled) { closeCompanion(); return }
+        if (!_uiState.value.isProActive || !proRepository.isProActive.value) { showProUpgradeDialog(); return }
+        if (!joystickOverlayManager.hasPermission()) {
+            _uiState.update { it.copy(mockError = MockError.FloatingWindowPermissionMissing) }
+            return
+        }
+        if (_uiState.value.isJoystickEnabled) joystickController.toggle()
+        _uiState.update { it.copy(isCompanionEnabled = true) }
+        try {
+            joystickOverlayManager.show {
+                val map by uiState.collectAsState()
+                val companion by floatingCompanionController.state.collectAsState()
+                FloatingCompanionView(map, companion, companionActions()) {
+                    FilledTonalButton(onClick = ::toggleJoystick) {
+                        Text(stringResource(R.string.joystick_open))
+                    }
+                }
+            }
+        } catch (error: RuntimeException) {
+            closeCompanion()
+            _uiState.update { it.copy(mockError = MockError.Unknown(error.message ?: "Unable to open floating window")) }
+        }
     }
 
     fun selectSearchResult(location: GeocodedLocation) {

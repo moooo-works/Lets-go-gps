@@ -22,7 +22,7 @@ internal fun overlayConfiguration(base: Configuration, language: String): Config
 
 internal fun floatingOverlayColors(base: ColorScheme, dark: Boolean): ColorScheme {
     val foreground = if (dark) Color(0xFFF8FAFC) else Color(0xFF202124)
-    val secondaryText = if (dark) Color(0xFFAAB4C3) else Color(0xFF5F6368)
+    val secondaryText = if (dark) Color(0xFFB4C0D1) else Color(0xFF4F545B)
     val selected = if (dark) Color(0xFF3B2E2C) else Color(0xFFFBE6DA)
     val selectedText = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10)
     return base.copy(
@@ -30,9 +30,9 @@ internal fun floatingOverlayColors(base: ColorScheme, dark: Boolean): ColorSchem
         onSurface = foreground,
         surfaceVariant = if (dark) Color(0xFF222D3A) else Color(0xFFF3E8DE),
         onSurfaceVariant = secondaryText,
-        primary = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10),
+        primary = if (dark) Color(0xFFFFAB91) else Color(0xFF9D2808),
         onPrimary = if (dark) Color(0xFF18212C) else Color.White,
-        error = if (dark) Color(0xFFFF8A80) else Color(0xFFB3261E),
+        error = if (dark) Color(0xFFFFA49C) else Color(0xFFA51C16),
         onError = if (dark) Color(0xFF690005) else Color.White,
         primaryContainer = selected, onPrimaryContainer = selectedText,
         secondaryContainer = selected, onSecondaryContainer = selectedText,

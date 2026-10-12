@@ -58,7 +58,7 @@
     <string name="action_open_about_phone">Open About phone</string>
     <string name="error_location_permission">Location permission is required for this feature.</string>
     <string name="error_notification_permission">Notification permission is required for background controls.</string>
-    <string name="error_floating_window">Floating window permission is required for the joystick. Please enable it in Settings.</string>
+    <string name="error_floating_window">Floating tools and the joystick need permission to display over other apps. Enable it in Settings.</string>
     <string name="error_provider_setup_failed">Engine setup failed: %1$s</string>
     <string name="error_set_location_failed">Location push failed: %1$s</string>
     <string name="error_provider_teardown_failed">Stop failed: %1$s</string>
@@ -489,4 +489,8 @@
     <string name="floating_zoom_out">Zoom out</string>
     <string name="floating_slower">Slower</string>
     <string name="floating_faster">Faster</string>
+    <string name="joystick_title">Virtual joystick</string>
+    <string name="joystick_open">Open joystick</string>
+    <string name="joystick_close">Close joystick</string>
+    <string name="pro_dialog_feature_floating">Floating tools: search, saved places and routes</string>
 </resources>

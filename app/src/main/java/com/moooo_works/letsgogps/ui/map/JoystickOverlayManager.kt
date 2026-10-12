@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Build
+import android.provider.Settings
 import android.view.View
 import android.view.Gravity
 import android.view.WindowManager
@@ -35,6 +36,8 @@ internal fun clampOverlayPosition(position: Int, screen: Int, view: Int): Int =
 class JoystickOverlayManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    fun hasPermission(): Boolean = Settings.canDrawOverlays(context)
+
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var composeView: ComposeView? = null
     private var params: WindowManager.LayoutParams? = null

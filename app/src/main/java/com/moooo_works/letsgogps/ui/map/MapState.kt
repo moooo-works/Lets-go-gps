@@ -60,6 +60,7 @@ data class MapUiState(
     val currentMockLocation: LatLng? = null,
     val routeFitRequestToken: Long? = null,
     val isJoystickEnabled: Boolean = false,
+    val isCompanionEnabled: Boolean = false,
     val isProActive: Boolean = false,
     val isAdFreeActive: Boolean = false,
     val adUnlockRemainingMillis: Long = 0L,

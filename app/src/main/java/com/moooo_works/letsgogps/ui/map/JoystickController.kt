@@ -1,9 +1,6 @@
 package com.moooo_works.letsgogps.ui.map
 
 import android.content.Context
-import android.os.Build
-import android.provider.Settings
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.google.android.gms.maps.model.LatLng
@@ -29,7 +26,6 @@ class JoystickController(
     private var tickerJob: Job? = null
     private var currentX = 0f
     private var currentY = 0f
-    private var overlayWrapper: (@Composable (@Composable () -> Unit) -> Unit)? = null
 
     init {
         overlayManager.setOnDismissedListener {
@@ -37,10 +33,6 @@ class JoystickController(
             stopTicker()
             onOverlayDismissed()
         }
-    }
-
-    fun setOverlayWrapper(wrapper: @Composable (@Composable () -> Unit) -> Unit) {
-        overlayWrapper = wrapper
     }
 
     fun releaseMovement() { currentX = 0f; currentY = 0f }
@@ -56,7 +48,12 @@ class JoystickController(
             startTicker()
             try { overlayManager.show {
                 val s by state.collectAsState()
-                val joystick: @Composable () -> Unit = { JoystickOverlayView(
+                StandaloneJoystickOverlay(
+                    onClose = ::toggle,
+                    onCollapse = { releaseMovement(); overlayManager.snapToEdge() },
+                    onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
+                    onWindowDragEnd = { overlayManager.snapToEdge() }
+                ) { JoystickOverlayView(
                     transportMode = s.transportMode,
                     onMove = { dx, dy -> currentX = dx; currentY = dy },
                     onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
@@ -64,8 +61,6 @@ class JoystickController(
                     onTransportModeChange = onSetTransportMode,
                     onStop = { stopMockingFromJoystick() }
                 ) }
-                val wrapper = overlayWrapper
-                if (wrapper == null) joystick() else wrapper(joystick)
             }
             } catch (error: RuntimeException) {
                 stopTicker()
@@ -128,7 +123,7 @@ class JoystickController(
     }
 
     private fun ensureFloatingWindowPermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
+        if (!overlayManager.hasPermission()) {
             state.update { it.copy(mockError = MockError.FloatingWindowPermissionMissing) }
             return false
         }

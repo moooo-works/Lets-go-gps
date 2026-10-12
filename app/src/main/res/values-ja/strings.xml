@@ -58,7 +58,7 @@
     <string name="action_open_about_phone">「端末情報」を開く</string>
     <string name="error_location_permission">この機能には位置情報の権限が必要です。</string>
     <string name="error_notification_permission">バックグラウンド操作には通知の権限が必要です。</string>
-    <string name="error_floating_window">ジョイスティック機能には「他のアプリの上に重ねて表示」の権限が必要です。設定で有効にしてください。</string>
+    <string name="error_floating_window">フローティングツールとジョイスティックには他のアプリの上に表示する権限が必要です。設定で有効にしてください。</string>
     <string name="error_provider_setup_failed">エンジン設定失敗: %1$s</string>
     <string name="error_set_location_failed">位置情報の送信失敗: %1$s</string>
     <string name="error_provider_teardown_failed">停止失敗: %1$s</string>
@@ -489,4 +489,8 @@
     <string name="floating_zoom_out">地図を縮小</string>
     <string name="floating_slower">減速</string>
     <string name="floating_faster">加速</string>
+    <string name="joystick_title">仮想ジョイスティック</string>
+    <string name="joystick_open">ジョイスティックを開く</string>
+    <string name="joystick_close">ジョイスティックを閉じる</string>
+    <string name="pro_dialog_feature_floating">フローティングツール：検索・保存地点・ルート</string>
 </resources>

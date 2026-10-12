@@ -58,7 +58,7 @@
     <string name="action_open_about_phone">휴대전화 정보 열기</string>
     <string name="error_location_permission">이 기능을 사용하려면 위치 권한이 필요합니다.</string>
     <string name="error_notification_permission">백그라운드 제어를 위해 알림 권한이 필요합니다.</string>
-    <string name="error_floating_window">조이스틱 기능을 사용하려면 다른 앱 위에 표시 권한이 필요합니다. 설정에서 활성화해 주세요.</string>
+    <string name="error_floating_window">플로팅 도구와 조이스틱에는 다른 앱 위에 표시 권한이 필요합니다. 설정에서 활성화하세요.</string>
     <string name="error_provider_setup_failed">엔진 설정 실패: %1$s</string>
     <string name="error_set_location_failed">위치 전송 실패: %1$s</string>
     <string name="error_provider_teardown_failed">정지 실패: %1$s</string>
@@ -489,4 +489,8 @@
     <string name="floating_zoom_out">지도 축소</string>
     <string name="floating_slower">속도 줄이기</string>
     <string name="floating_faster">속도 늘리기</string>
+    <string name="joystick_title">가상 조이스틱</string>
+    <string name="joystick_open">조이스틱 열기</string>
+    <string name="joystick_close">조이스틱 닫기</string>
+    <string name="pro_dialog_feature_floating">플로팅 도구: 검색, 저장 장소 및 경로</string>
 </resources>

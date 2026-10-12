@@ -2,6 +2,7 @@ package com.moooo_works.letsgogps.ui.map
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloseFullscreen
+import androidx.compose.material.icons.filled.ControlCamera
+import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
@@ -97,6 +102,49 @@ fun JoystickOverlayView(
         OutlinedButton(onClick = { onMove(0f, 0f); onStop() }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp),
             border = BorderStroke(1.dp, colors.error), colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error)) {
             Icon(Icons.Default.Stop, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.action_stop), fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+
+@Composable
+internal fun StandaloneJoystickOverlay(
+    onClose: () -> Unit,
+    onCollapse: () -> Unit,
+    onWindowDrag: (Int, Int) -> Unit,
+    onWindowDragEnd: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    var expanded by remember { mutableStateOf(true) }
+    val dragWindow by rememberUpdatedState(onWindowDrag)
+    val finishDrag by rememberUpdatedState(onWindowDragEnd)
+    val drag = Modifier.pointerInput(Unit) {
+        detectDragGestures(onDragEnd = { finishDrag() }, onDragCancel = { finishDrag() }) { change, delta ->
+            change.consume(); dragWindow(delta.x.roundToInt(), delta.y.roundToInt())
+        }
+    }
+    val colors = MaterialTheme.colorScheme
+    if (!expanded) {
+        Surface(color = colors.surface.copy(alpha = .90f), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.5.dp, colors.primary)) {
+            Box(Modifier.size(48.dp).then(drag).clickable { expanded = true; onCollapse() }, contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.ControlCamera, stringResource(R.string.joystick_title), tint = colors.primary)
+            }
+        }
+        return
+    }
+    val config = LocalConfiguration.current
+    Surface(modifier = Modifier.width(minOf(358, config.screenWidthDp - 32).coerceAtLeast(280).dp),
+        color = colors.surface.copy(alpha = .82f), shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, colors.outlineVariant)) {
+        Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.DragIndicator, null, Modifier.size(24.dp).then(drag), tint = colors.onSurfaceVariant)
+                Text(stringResource(R.string.joystick_title), Modifier.weight(1f).then(drag), fontWeight = FontWeight.Bold)
+                IconButton(onClick = { expanded = false; onCollapse() }) {
+                    Icon(Icons.Default.CloseFullscreen, stringResource(R.string.joystick_collapse))
+                }
+                IconButton(onClick = onClose) { Icon(Icons.Default.Close, stringResource(R.string.joystick_close)) }
+            }
+            content()
         }
     }
 }

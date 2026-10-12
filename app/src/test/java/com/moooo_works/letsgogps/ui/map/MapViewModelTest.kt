@@ -88,6 +88,7 @@ class MapViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(dispatcher)
+        every { joystickOverlayManager.hasPermission() } returns true
         every { repository.getAllLocations() } returns emptyFlow()
         every { repository.observeFolders() } returns emptyFlow()
         every { repository.observeRoutes() } returns emptyFlow()
@@ -139,6 +140,60 @@ class MapViewModelTest {
         routeSimulator, joystickOverlayManager, proRepository, rewardedAdManager, systemHealthCheck,
         timezoneRepository, mockk(relaxed = true), context
     )
+
+    @Test
+    fun `both overlay entry points require Pro`() = runTest {
+        val vm = createViewModel()
+        runCurrent()
+        vm.toggleCompanion()
+        assertTrue(vm.uiState.value.showProUpgrade)
+        vm.dismissProUpgrade()
+        vm.toggleJoystick()
+        assertTrue(vm.uiState.value.showProUpgrade)
+        assertFalse(vm.uiState.value.isCompanionEnabled)
+        assertFalse(vm.uiState.value.isJoystickEnabled)
+        verify(exactly = 0) { joystickOverlayManager.show(any()) }
+    }
+
+    @Test
+    fun `revoked repository entitlement rejects both entries before UI collector updates`() = runTest {
+        isProActiveFlow.value = true
+        val vm = createViewModel()
+        runCurrent()
+        assertTrue(vm.uiState.value.isProActive)
+        isProActiveFlow.value = false
+        vm.toggleCompanion()
+        vm.toggleJoystick()
+        assertTrue(vm.uiState.value.showProUpgrade)
+        assertFalse(vm.uiState.value.isCompanionEnabled)
+        assertFalse(vm.uiState.value.isJoystickEnabled)
+        verify(exactly = 0) { joystickOverlayManager.show(any()) }
+        runCurrent()
+    }
+
+    @Test
+    fun `switching overlays stays exclusive and revocation closes the window without stopping simulation`() = runTest {
+        isProActiveFlow.value = true
+        val vm = createViewModel()
+        runCurrent()
+        vm.toggleCompanion()
+        assertTrue(vm.uiState.value.isCompanionEnabled)
+        assertFalse(vm.uiState.value.isJoystickEnabled)
+        vm.toggleJoystick()
+        assertFalse(vm.uiState.value.isCompanionEnabled)
+        assertTrue(vm.uiState.value.isJoystickEnabled)
+        vm.toggleCompanion()
+        assertTrue(vm.uiState.value.isCompanionEnabled)
+        assertFalse(vm.uiState.value.isJoystickEnabled)
+        verify(exactly = 3) { joystickOverlayManager.show(any()) }
+        verify(exactly = 2) { joystickOverlayManager.hide() }
+        isProActiveFlow.value = false
+        runCurrent()
+        assertFalse(vm.uiState.value.isCompanionEnabled)
+        assertFalse(vm.uiState.value.isJoystickEnabled)
+        verify(exactly = 3) { joystickOverlayManager.hide() }
+        verify(exactly = 0) { context.startService(any()) }
+    }
 
     @Test
     fun `companion denied Pro never dispatches or stops active simulation`() = runTest {
@@ -316,7 +371,7 @@ class MapViewModelTest {
         io.mockk.coVerify(exactly=0) { proRepository.consumeFeatureCredits(any()) }
     }
 
-    @Test fun `manager dismissal bridge clears credit pending and prevents late startup`() = runTest {
+    @Test fun `companion manager dismissal bridge clears credit pending and prevents late startup`() = runTest {
         isProActiveFlow.value=true
         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
         every { settingsRepository.observeStepSyncEnabled() } returns flowOf(true)

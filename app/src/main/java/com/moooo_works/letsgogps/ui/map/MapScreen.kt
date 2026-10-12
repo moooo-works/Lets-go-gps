@@ -324,6 +324,7 @@ fun MapScreen(
                     uiState = uiState,
                     onToggleMapType = { viewModel.toggleMapType() },
                     onToggleJoystick = { viewModel.toggleJoystick() },
+                    onToggleCompanion = { viewModel.toggleCompanion() },
                     modifier = Modifier.align(Alignment.BottomEnd)
                 )
 
