@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: 來源7fa932facb9289ac5bd14a7880412c68277c8042；紀錄交付見Git歷史.
+Current commit: 查核HEAD0227e20；origin/main a7151ee；交付見Git歷史.
 
-Tests/scenarios: 核讀backend-verification與Google官方Unity中介文件；本輪無新實機測試.
+Tests/scenarios: fetch／ahead-behind／Unity changed paths與PR62、61、59、58 metadata核對；無新測試.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: AdMob基礎設定已有保存紀錄；A-006獨立Unity測試通過.
+Proven: Unity與PR62不同主題；Unity behind34，PR62 draft且base非main.
 
-Open: 隔離AdMob群組現況與正式App中介／獎勵流程驗證.
+Open: Unity最新main整合與必跑驗證；AdMob供應與reward解鎖；PR62自身review.
 
-Next: 核對既有測試設定並完成單一Unity來源測試，正式群組維持暫停.
+Next: Unity獨立同步與驗證後處理合併；正式群組保持暫停.
 
-Artifacts: A-003-result/backend-verification.md；PR58；Unity00939092.
+Artifacts: PR62／61／59／58；Unity stream紀錄.
 
 Archived eras: none.
 
@@ -515,5 +515,35 @@ streams: off」
 ---
 
 # → Ask / A-009 (Takeshi Mori)
+
++ 這邊應該可以先合併到main嗎？還是要等 ＃pr62 review完再一起處理？
+
+# ← Reply / A-009
+
+* _2026-10-12 20:19:31 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Unity不必等PR62一起合併，但目前分支落後main34個commit，需同步並驗證後獨立處理；PR62仍draft且屬堆疊PR。
+
+## [FINAL REPORT]
+
+1. 「這邊應該可以先合併到main嗎？還是要等 ＃pr62 review完再一起處理？」
+
+   - 建議分開處理。Unity SDK／同意流程與PR62懸浮工具不同主題，沒有看到Unity對PR62的直接程式相依；Unity可在自己通過合併門檻後先合併，不必為PR62等待。不要把兩者混成一個PR。
+
+   - 目前不能直接合併：fetch後unity-ads相對origin/main為ahead19／behind34；最新main a7151ee9b94f212502ed6a4757184e4d823cdd7e。GitHub尚無unity-ads PR。依AGENTS需先基於最新main整合功能、behind=0、跑test／lintDebug／assembleDebug及實機smoke，並把已驗證和剩餘Unity供應限制寫明。若分支整合需要改寫已推送歷史，採新分支cherry-pick功能commit，不force-push。PR58仍保持獨立draft。
+
+   - PR62為OPEN／draft，base=fix/floating-theme-locale，head=fix/floating-dock；MERGEABLE／CLEAN只表示它對自己的base可合併，並非對main已完成驗收。GitHubreviewDecision空、statusCheckRollup空，沒有GitHub批准或CI結果的證據。它堆疊於PR61（base feat/floating-companion），後者堆疊於PR59（base fix/android17-developer-status）。它仍應依本身依賴與review處理。[PR62](https://github.com/moooo-works/Lets-go-gps/pull/62)。
+
+   - Unity與PR62都改多語系strings，整合時需核對衝突與保留雙方字串；未見Unity修改PR62的MapScreen／MapViewModel。合併程式與啟用Unity正式中介群組分開判定：可以在通過程式整合門檻且群組保持暫停的前提下合併，但實際AdMob Unity供應與reward解鎖仍須測試後才能啟用。此次僅查核，沒有合併、同步source、建立PR或啟用群組。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-010 (Takeshi Mori)
 
 +
