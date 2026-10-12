@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: SDK來源7fa932facb9289ac5bd14a7880412c68277c8042；紀錄交付見Git歷史.
+Current commit: 來源7fa932facb9289ac5bd14a7880412c68277c8042；紀錄交付見Git歷史.
 
-Tests/scenarios: 沿用A-006：4.20.1初始化／banner顯示／reward載入通過；本輪未新增測試.
+Tests/scenarios: 核讀backend-verification與Google官方Unity中介文件；本輪無新實機測試.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: 獨立Unity測試可用；發布就緒證據仍不足.
+Proven: AdMob基礎設定已有保存紀錄；A-006獨立Unity測試通過.
 
-Open: AdMob中介與reward解鎖、main同步後候選版驗證.
+Open: 隔離AdMob群組現況與正式App中介／獎勵流程驗證.
 
-Next: 先完成App整合測試與候選版必跑驗證，再判定發布.
+Next: 核對既有測試設定並完成單一Unity來源測試，正式群組維持暫停.
 
-Artifacts: A-006診斷紀錄；PR58保留；Unity00939092.
+Artifacts: A-003-result/backend-verification.md；PR58；Unity00939092.
 
 Archived eras: none.
 
@@ -485,5 +485,35 @@ streams: off」
 ---
 
 # → Ask / A-008 (Takeshi Mori)
+
++ admob端需要進行設定嗎？
+
+# ← Reply / A-008
+
+* _2026-10-12 20:04:16 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- AdMob需要Unity中介設定，但本專案已保存合作關係、兩個對應及暫停群組；下一步是核對隔離測試設定並驗證，通過後才啟用正式群組。
+
+## [FINAL REPORT]
+
+1. 「admob端需要進行設定嗎？」
+
+   - 需要，但依已保存紀錄，基礎設定已完成，不用重建。Unity bidding合作關係與Game ID 800390974的兩個對應已保存：map-ad-2 → BP_Banner_Android；no-ad-6h → BP_Rewarded_Android。正式群組8708929545／8676901314已建立、目前紀錄為暫停，只含AdMob＋Unity，排除Mintegral。此次未重新開後台確認現況。
+
+   - 主工作紀錄另記載隔離測試單元Banner8648995174／Rewarded8563391382與群組2920871738／7981624829已建立。下一步先核對這些測試群組的狀態與mapping、測試App使用對應單元，再透過Ad Inspector的Unity Ads (Bidding)單一來源測試。Google官方整合文件同樣要求以單一來源測試確認Unity測試供應：[NextGen Unity整合文件](https://developers.google.com/admob/android/next-gen/mediation/unity)。
+
+   - 獨立Unity SDK測試成功不會自動啟用AdMob正式群組；正式App需經AdMob路徑通過banner／reward與解鎖驗證，再啟用正式群組。App使用AdMob廣告單元ID，Unity Game／Placement ID留在來源對應設定，不改成App直接使用的廣告單元ID。
+
+   - 本輪回答設定缺口，沒有修改AdMob或啟用生產來源；PR58保留，Mintegral排除。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-009 (Takeshi Mori)
 
 +
