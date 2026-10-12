@@ -504,4 +504,22 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 
 # → Ask / A-052 (Takeshi Mori)
 
-+
++ 使用claude code進行review
+
+---
+
+## [RUN-001] Event — 2026-10-12 20:24:27 +0800 (A-052)
+
+- 使用者指定Claude Code，外部profile claude-default／better選擇成功；CLI2.1.289已登入。固定PR62產品85ca564及ROOT證據a7151ee，clone HEAD eaddeca的app與產品一致；保留原Codex審查，不讓Claude先讀舊判定。
+- external-runner-v1獨立no-remotes clone；fresh print、safe-mode/restricted，只讀工具與單一report寫入，無Bash／Agent／Web。沒有OS sandbox，不誇稱完全隔離；本輪只審查，不改程式／付款／廣告／裝置。既有284/0fail/60skip與公開UI有效結果重用。
+
+## [RUN-002] Event — 2026-10-12 20:35:59 +0800 (A-052)
+
+- 第一輪Claude Code退出0且實際modelUsage為claude-opus-5-5，完成19檔審查並回報無blocking／2個小問題。Write報告被單一路徑權限拒絕，fallback JSON19,325bytes超過runner4KB上限，未取得完整報告；沒有其他clone改動或nested worker，原片段與runner結果保留，不偽造完整report。
+- 精確session debug檔不存在，不能取回原全文。只派一次同profile的輸出修正：Read/Grep/Glob不寫檔，核對已發現2問題與原摘要，回傳≤1600bytes完整report；不重做完整19檔review或產品checks。第一次是物質證據缺檔／截斷，不是因cosmetic戳記重跑。
+
+## [RUN-003] Event — 2026-10-12 20:41:41 +0800 (A-052)
+
+- 一次輸出修正已退出0，完整JSON未截斷，實際modelUsage仍claude-opus-5-5、無permission denial／nested worker／clone改動。已逐byte保存model result原報告review.md及第一輪原始4KB片段。這不是第一輪全文重建，也不是重跑完整審查；report已明列依第一輪19檔審查及本輪2finding核對。
+- Claude總判定PASS、2非blocking：UI顯示transportMode.speedKmh但移動用state.speedKmh；自訂12而模式仍WALKING時顯示5，源碼查核成立。繁中／英文map提示「定位」／Locate與Move here名稱不符成立。主持者只讀核對，沒有修改產品、測試或手機，也沒有發起交易／廣告。
+- 原報告格式三項結論為文字、總Verdict PASS；self-check誤稱少於1600bytes，實際1709。保留原bytes與警告，不因cosmetic差異再付費重跑或改作者判定。可讀報告與實際模型／clone／exit證據已完成。
