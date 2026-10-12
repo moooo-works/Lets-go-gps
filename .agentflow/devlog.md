@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: root review2a29; producta6cf with records-only sync in draft PR61.
+Current commit: 產品85ca564；ROOT審查70c1ec7；main只紀錄，最終紀錄commit見Git history.
 
-Tests/scenarios: 280 tests; 220 executed/0fail/60skip; Gradle successful; four-language AppUID OK1; Pixel7Pro theme/language/input smoke.
+Tests/scenarios: 284 tests／224 executed／0fail／60skip；required Gradle成功；Pixel7Pro IME／actual window bounds／mode／兩面板close OK1.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Floating theme/locale fixed; original data/settings preserved; PR58 retained; independent PASS.
+Proven: Pen配置、靠邊與透明觸控区、半透明可讀性、模式辨識、獨立互斥Pro入口已完成與安裝；獨立PASS；使用者資料rows/hash一致；PR58保留.
 
-Open: UnityGameID support ticket; final warning screen/Pikmin/release/older Android untested.
+Open: 原UnityGameID工單；最新跨App逐鍵、正式付款／廣告、release與olderAndroid未實測；主題DARK→LIGHT差異保留目前設定.
 
-Next: await owner experience; PR61/59/60 remain draft and unmerged.
+Next: 等待使用者體驗；PR62／61／59／60保持草稿未合併.
 
-Artifacts: .agentflow/artifacts/A-050-floating-appearance/review-corrections-delivery.md, device-acceptance.md, data-preservation.json.
+Artifacts: .agentflow/artifacts/A-051-floating-layout/review.md、device-acceptance.md、data-preservation.json、floating-layout.pen與exports.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -405,3 +405,103 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 - 最終native gpt-6.1-sol/high fresh context只讀審查四項PASS，原report bytes未改。host已讀完整report、核對產品85ca564／ROOT70c1ec7、原Ask較新互斥選擇、source.diff、VM/Controller清理、測試XML與公開UI／資料限制，接受固定結果；away-gates:on在證據通過後供Result Go，不發起付款／廣告。
 - PR62 draft已建立base61並更新審查PASS；58／59／60／61皆保留。產品branch a769896僅同步main紀錄，85ca564..a769896 appdiff空；GH behindmain0，無合併或發布。tracker正式5/5 PASS，核心實作沒有再改或重跑檢查。
 - source.diff／設計／資料接受證據在已審ROOT中固定。新增原report與派發紀錄、tracker／RUN只保存同一接受事實；closeout後再同步main紀錄到feature保持behind0，不改產品程式。
+
+# ← Reply / A-051
+
+* _2026-10-12 20:08:46 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- Pen協作與重新配置已完成，後續修改依較新要求採用。
+- 收合回到邊緣、完全關閉移除浮窗。
+- 使用Pen桌面內建助理完成可編輯稿。
+- 初期MCP路徑／目標錯誤已繞過，App尺寸重測問題已修復。
+- 浮窗外觸控區修復有實機與最終window尺寸證據；未逐鍵重測全部遊戲。
+- 未完成實作已完成並安裝Pixel7Pro，PR62保持草稿。
+- 最初只套配置的落差已補正；真實地圖及較新需求會與示意稿不同。
+- 背景改為展開82%、收合90%不透明度。
+- 路線箭頭是一次／循環／折返模式切換。
+- 模式按鈕已改文字＋不同圖示，四語及實機測試通過。
+- 兩個入口皆沿用Pro訂閱或廣告解鎖6小時。
+- 依最後選擇，一次只顯示一種，開另一種時切換。
+
+## [FINAL REPORT]
+
+1. 「1.我測試過可以用，但是這個UI的配置不太好，需要重新規劃，請pen.dev協作」
+
+   - 成功：Pen桌面內建助理實際完成可編輯稿及四狀態PNG；App採用48dp入口、單列toolbar／更多、五入口、結果直接複製與選點主操作。沒有加入示意稿的假ETA或未存在的資料編輯功能。
+
+2. 「2.懸浮工具點開後關閉，文字會停留在原地，影響其他app視窗，所以關閉後需要回到邊緣」
+
+   - 成功：收合後依實際重測尺寸維持左右吸附；拖曳仍可移動。完全關閉獨立移除window，保留既有定位服務語義。Manager紅綠測試、左右實機位置與最終小window檢查通過。
+
+3. 「pen.dev 桌面版」
+
+   - 已依答覆使用Pen桌面內建助理，保存.pen與PNG；原空白Frame保留。沒有修改使用者帳號或全域MCP設定。
+
+4. 「出現什麼錯誤」
+
+   - 初期MCP指向不存在的0.6.34路徑與Antigravity目標；桌面接口亦曾逾時，後來透過Pen內建助理完成。App則在展開clamp後收合沒有持續重新吸附，已修復。後續測試中的API37舊Espresso及無障礙node快取失敗，未冒稱App功能通過，已改公開API／refresh並取得有效結果。
+
+5. 「懸浮視窗黏著的那一邊，底層app的按鈕都會失效，無法點擊，反對側的可以」
+
+   - 修正完成：視窗隨內容真正縮小，只有輸入聚焦時保留IME padding。最終實機驗證的是WindowManager實際寬高≤64dp，並確認輸入欄在真實鍵盤上方；此前Calculator同側3→3−與左右靠邊亦已實測。
+   - 限制：手機持續被操作，最新跨App逐鍵重測未完成；不宣稱所有Pikmin按鍵通過。可見浮窗內仍操作浮窗，修復目標是外側底層區域。
+
+6. 「實現未完成項目」
+
+   - 成功：產品85ca564已commit／push並安裝Pixel7Pro Android17。test／lintDebug／assembleDebug成功，284 tests／224實際執行／0fail／60既有skip；最新IME／window bounds／模式／工具與搖桿close公開UI instrument OK1。lint仍34既有Error／97Warning／3Hint，不是零問題。
+   - 獨立full native審查Outcome／Minimality／Conformance／Verdict全PASS；我已讀完整原報告、核對原Ask、最終差異、權限／清理及接受證據。Root接受證據70c1ec7與產品85ca564雙固定，patch逐byte一致；原review bytes未改。較新main同步只有紀錄，app diff空。
+   - [PR62](https://github.com/moooo-works/Lets-go-gps/pull/62)為stacked draft、base61，GitHub behindmain0；58／59／60／61保留，沒有合併或發布。
+   - mockgps.db所有rows/hash一致：收藏375／路線6／路線點591。Google傳輸事件庫不同；語言仍zh-TW，但主題從DARK到LIGHT的來源不能單靠備份判定，保留目前LIGHT，不回寫覆蓋、不宣稱全部設定一致。
+   - 未觸發正式付款／廣告、Play發布或其他Android版本。既有付費／廣告來源、engine／schema／Navigation未改；UnityGameID工單仍屬原待處理項，這輪未操作。
+
+   - Key Records — read these first
+
+     [最終獨立審查](artifacts/A-051-floating-layout/review.md)：固定產品的功能、最小性與一致性PASS，以及實測限制。
+
+     [實機接受紀錄](artifacts/A-051-floating-layout/device-acceptance.md)：列出IME、實際window尺寸、模式與兩面板close，以及正常使用流程。
+
+     [資料證明](artifacts/A-051-floating-layout/data-preservation.json)：只含筆數／雜湊與設定差異，不含私密地點內容。
+
+     [Pen四狀態圖](artifacts/A-051-floating-layout/exports/four-states.png)：設計參考；後續透明度／獨立搖桿以本輪較新要求為準。
+
+     [可編輯Pen稿](artifacts/A-051-floating-layout/floating-layout.pen)：保留完整提案與原Frame。
+
+     [採用設計與限制](artifacts/A-051-floating-layout/design.md)：記錄採用規格、互斥選擇與未新增的示意功能。
+
+7. 「你是照著pen.dev的設計稿做成app ui嗎？怎麼看起來不一樣」
+
+   - 最初只套了配置，沒有完整还原外觀，這是實作落差。現已補上358dp上限面板、22dp圓角、6dp間距、搜尋框清除／貼上、結果旁複製、選點三個次要操作與滿寬主按鈕。
+   - 真實Google Maps、實際資料、依螢幕可用寬度縮小，以及後續半透明／獨立搖桿需求會與原示意稿不同；沒有宣稱逐像素或所有橫向／大字組合完全一致。
+
+8. 「我覺得懸浮視窗的背景全實色會看不到底層，可以把背景增加透明度嗎」
+
+   - 成功：展開82%、收合90%不透明度，可透出底層；文字與主要操作保持清楚。局部調整次要／accent／error文字，黑白底層合成對比回歸≥4.5。WindowManager alpha仍1，不改觸控安全flags。
+
+9. 「懸浮視窗的「路線」模式，雙向箭頭是做什麼用的？」
+
+   - 切換一次→循環→折返→一次。一次走到終點結束；循環從起點重新播放；折返沿原路反向返回再往返。例如A→B→C，折返為A→B→C→B→A。原引擎未改。
+
+10. 「需要修正」
+
+   - 成功：模式顯示「單向箭頭＋一次」、「循環箭頭＋循環」、「雙向箭頭＋折返」，文字與图示一起更新，也提供accessibility stateDescription。四語沿用既有字串，實機三模式文字與回到一次通過。
+
+11. 「好，懸浮視窗跟虛擬搖桿的按鍵需分開，而且一樣要歸類在pro功能中，付費解鎖或是看廣告解鎖」
+
+   - 成功：地圖有懸浮工具與虛擬搖桿兩個不同圖示／按鍵，Pro說明四語明列兩項。兩個新開入口皆檢查UI及repository當下Pro，免費或已撤銷不能開窗；沿用訂閱OR原廣告解鎖6小時，不是步數計次制。
+   - 沒有新增付費商品或變更reward；廣告仍只在SDK實際獎勵後授權。VM測試涵蓋免費、尚未收到撤銷的UI、切換及撤銷清理；正式付費／廣告未觸發。
+
+12. 「一次顯示一種，開另一種時切換」
+
+   - 成功：較新選擇取代暫定同時開啟方案。開另一種前先hide旧模式、釋放輸入／pending／movement，共用原Manager；兩個enabled flags保持互斥。切換不停止原定位服務；Pro撤銷或ViewModel清理會移除window／ticker。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-052 (Takeshi Mori)
+
++
