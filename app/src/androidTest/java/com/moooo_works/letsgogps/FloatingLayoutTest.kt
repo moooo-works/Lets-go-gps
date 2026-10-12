@@ -12,6 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.moooo_works.letsgogps.ui.map.*
 import com.google.android.gms.maps.model.LatLng
 import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
+import com.moooo_works.letsgogps.domain.LoopMode
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -29,6 +30,7 @@ class FloatingLayoutTest {
         automation.serviceInfo = automation.serviceInfo.apply { flags = flags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS }
         val sample = GeocodedLocation("中央公園（示意）", "示意中山路", LatLng(25.03401, 121.56447))
         val state = mutableStateOf(FloatingCompanionState(searchResults = listOf(sample)))
+        val mapState = mutableStateOf(MapUiState())
         var copied: LatLng? = null
         var selections = 0
         var closed = false
@@ -40,11 +42,18 @@ class FloatingLayoutTest {
             onFolderChange = {}, onFavoritesChange = {}, onLoadRoute = {},
             onLocate = {}, onQueue = {}, onApplyQueue = {}, onSave = {},
             onConfirmReplacement = {}, onCancelReplacement = {}, onPlayPause = {},
-            onStop = {}, onSpeedChange = {}, onLoopChange = {}, onExplore = {},
+            onStop = {}, onSpeedChange = {}, onLoopChange = {
+                mapState.value = mapState.value.copy(loopMode = when (mapState.value.loopMode) {
+                    LoopMode.NONE -> LoopMode.LOOP
+                    LoopMode.LOOP -> LoopMode.BOUNCE
+                    LoopMode.BOUNCE -> LoopMode.NONE
+                })
+            }, onExplore = {},
             onCopyCurrent = {}, onCopySelected = {}, onClose = { closed = true; manager.hide() },
             onOpenApp = {}, onInputFocus = {}, onWindowDrag = { _, _ -> }, onWindowDragEnd = {}, onCopyLocation = { copied = it }
         )
         fun nodes(node: AccessibilityNodeInfo): List<AccessibilityNodeInfo> = buildList {
+            node.refresh()
             add(node)
             for (index in 0 until node.childCount) node.getChild(index)?.let { addAll(nodes(it)) }
         }
@@ -67,7 +76,7 @@ class FloatingLayoutTest {
         try {
             instrument.runOnMainSync {
                 manager = JoystickOverlayManager(context)
-                manager.show { FloatingCompanionView(MapUiState(), state.value, actions) {} }
+                manager.show { FloatingCompanionView(mapState.value, state.value, actions) {} }
                 manager.setInputFocusable(true)
             }
             val title = strings.getString(R.string.floating_title)
@@ -85,6 +94,23 @@ class FloatingLayoutTest {
             click(strings.getString(R.string.floating_copy_selected))
             instrument.runOnMainSync { assertEquals(sample.latLng, copied); assertEquals(0, selections); assertEquals(CompanionTab.SEARCH, state.value.tab) }
             click(strings.getString(R.string.nav_routes))
+            val switchMode = strings.getString(R.string.route_loop_cd)
+            for ((index, label) in listOf(R.string.route_loop_none, R.string.route_loop_loop, R.string.route_loop_bounce, R.string.route_loop_none).withIndex()) {
+                val deadline = SystemClock.uptimeMillis() + 5000
+                var visible = false
+                while (!visible && SystemClock.uptimeMillis() < deadline) {
+                    visible = automation.windows.mapNotNull { it.root }
+                        .filter { it.packageName?.toString() == context.packageName }
+                        .flatMap(::nodes).any { it.text?.toString() == strings.getString(label) && it.isVisibleToUser }
+                    if (!visible) SystemClock.sleep(100)
+                }
+                assertTrue("Mode label must be visible: ${strings.getString(label)}; state=${mapState.value.loopMode}", visible)
+                if (index < 3) {
+                    click(switchMode)
+                    instrument.waitForIdleSync()
+                    SystemClock.sleep(300)
+                }
+            }
             click(strings.getString(R.string.floating_collapse))
             find(title)
             instrument.runOnMainSync { assertFalse(state.value.expanded); assertFalse(closed) }

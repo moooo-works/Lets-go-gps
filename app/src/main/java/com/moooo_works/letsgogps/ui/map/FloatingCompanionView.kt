@@ -36,6 +36,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -181,7 +184,22 @@ fun FloatingCompanionView(
                         Surface(shape = RoundedCornerShape(16.dp), color = colors.surfaceVariant) {
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                                    IconButton(onClick = actions.onLoopChange) { Icon(Icons.Default.Repeat, stringResource(when(mapState.loopMode) { LoopMode.NONE -> R.string.route_loop_none; LoopMode.LOOP -> R.string.route_loop_loop; LoopMode.BOUNCE -> R.string.route_loop_bounce }), tint = colors.primary) }
+                                    val (modeIcon, modeLabel) = when (mapState.loopMode) {
+                                        LoopMode.NONE -> Icons.Default.ArrowForward to stringResource(R.string.route_loop_none)
+                                        LoopMode.LOOP -> Icons.Default.Repeat to stringResource(R.string.route_loop_loop)
+                                        LoopMode.BOUNCE -> Icons.Default.SyncAlt to stringResource(R.string.route_loop_bounce)
+                                    }
+                                    val switchMode = stringResource(R.string.route_loop_cd)
+                                    FilledTonalButton(onClick = actions.onLoopChange,
+                                        modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = switchMode; stateDescription = modeLabel },
+                                        shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 10.dp),
+                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                            containerColor = if (mapState.loopMode == LoopMode.NONE) colors.surface else colors.secondaryContainer,
+                                            contentColor = if (mapState.loopMode == LoopMode.NONE) colors.onSurfaceVariant else colors.primary)) {
+                                        Icon(modeIcon, null, Modifier.size(18.dp))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(modeLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    }
                                     IconButton(onClick = actions.onStop) { Icon(Icons.Default.Stop, stringResource(R.string.route_stop), tint = colors.error) }
                                     FilledIconButton(onClick = actions.onPlayPause, modifier = Modifier.size(56.dp)) {
                                         Icon(if (mapState.simulationState == SimulationState.PLAYING) Icons.Default.Pause else Icons.Default.PlayArrow,
