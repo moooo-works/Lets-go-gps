@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: SDK來源7fa932facb9289ac5bd14a7880412c68277c8042；交付紀錄見Git歷史.
+Current commit: SDK來源7fa932facb9289ac5bd14a7880412c68277c8042；紀錄交付見Git歷史.
 
-Tests/scenarios: Pixel7Pro：4.21.0初始化成功；4.20.1初始化、Unity測試banner載入顯示與reward載入成功.
+Tests/scenarios: 沿用A-006：4.20.1初始化／banner顯示／reward載入通過；本輪未新增測試.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: 800390974無空白；獨立Unity測試供應通過，Invalid Game ID未再出現.
+Proven: 獨立Unity測試可用；發布就緒證據仍不足.
 
-Open: 正式App經AdMob中介、reward觀看解鎖及生產供應尚待驗證.
+Open: AdMob中介與reward解鎖、main同步後候選版驗證.
 
-Next: 接續單一Unity來源實機中介測試；正式群組維持暫停.
+Next: 先完成App整合測試與候選版必跑驗證，再判定發布.
 
-Artifacts: /private/tmp/letsgps-unity-recheck-20261012；/tmp/unity-recheck-20261012.png；Unity00939092；PR58保留.
+Artifacts: A-006診斷紀錄；PR58保留；Unity00939092.
 
 Archived eras: none.
 
@@ -455,5 +455,35 @@ streams: off」
 ---
 
 # → Ask / A-007 (Takeshi Mori)
+
++ 這可以直接上架嗎？還是需要測試？
+
+# ← Reply / A-007
+
+* _2026-10-12 19:07:24 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 這版仍需App整合與發布候選驗證，尚不具備直接上架並啟用Unity的證據。
+
+## [FINAL REPORT]
+
+1. 「這可以直接上架嗎？還是需要測試？」
+
+   - 還需要測試。A-006證明獨立Unity SDK4.20.1可初始化、測試banner顯示、reward載入；沒有驗證正式App經AdMob中介及reward解鎖，所以尚不能判定Unity整合版可直接上架。
+
+   - 上架前需以真正候選App完成單一Unity來源banner／reward測試，確認完整觀看才解鎖且只給一次獎勵，提前關閉或載入失敗不誤給；並檢查同意拒絕／變更後的廣告流程，以及地圖／mock定位基本流程。
+
+   - 目前branch在A-006查核時與origin/main計數16／28。進入合併／發布前先同步最新main，依AGENTS規範跑./gradlew test、./gradlew lintDebug、./gradlew assembleDebug，候選版再做實機smoke。既有舊版通過紀錄不能替代同步後候選版驗證。先走內部測試，通過後才判定正式發布及Unity群組啟用。
+
+   - 本輪只說明發布就緒程度，沒有開始新測試、上傳商店或啟用群組；PR58保留，Mintegral排除。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-008 (Takeshi Mori)
 
 +
