@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: source沿用既有；本輪僅查核客服回覆並保存紀錄.
+Current commit: 交付紀錄見Git歷史；Unity SDK來源7fa932facb9289ac5bd14a7880412c68277c8042.
 
-Tests/scenarios: Unity工單與Gmail只讀查核；未改App，不重跑測試.
+Tests/scenarios: 核讀使用者提供的Gary回覆截圖；無程式變更，未重跑Gradle.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: 00939092仍Open；可見對話沒有客服留言，Gmail只有10/8自動建單通知.
+Proven: Gary已回覆並表示800390974在Unity demo app測試成功；已更正前次結論.
 
-Open: Unity Game ID800390974支援單與實際Unity供應.
+Open: 本App的Invalid Game ID尚待重現與設定比對；實際廣告供應尚待驗證.
 
-Next: 等待Unity客服回覆；沒有背景監控或催辦.
+Next: 核對Game ID字元並重現；持續失敗則整理診斷資料.
 
-Artifacts: Unity00939092；Gmail工單號搜尋結果；既有開發與測試紀錄.
+Artifacts: Unity工單00939092；使用者回覆截圖；PR #58保留.
 
 Archived eras: none.
 
@@ -383,5 +383,41 @@ streams: off」
 ---
 
 # → Ask / A-005 (Takeshi Mori)
+
++ [Image #1]
+
+---
+
+## [RUN-001] Event — 2026-10-12 14:52:51 +0800 (A-005)
+
+- 依使用者提供的工單00939092回覆截圖確認Gary已有實質回覆；更正A-004查核結論，保留歷史紀錄。此次僅核讀截圖，未發送外部訊息或修改App。
+
+# ← Reply / A-005
+
+* _2026-10-12 14:52:51 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Unity客服Gary已回覆；A-004「尚無實質回覆」的查核結論不完整，依本次截圖更正。
+
+## [FINAL REPORT]
+
+1. 「[Image #1]」
+
+   - 截圖顯示工單00939092收到Gary（Unity Growth Support）的回覆。他已在Unity demo app測試Android Game ID 800390974，表示可正常運作。
+
+   - Gary請我們檢查中介設定中的Game ID是否包含空白；若問題持續，重現並提供完整debug logs，也希望取得可偵錯APK，方便他們設定network_security並擷取Charles紀錄。
+
+   - 這只能證明其demo環境測試成功，尚不能證明本App問題已修復，也不能斷定空白就是原因。建議先核對實際設定與執行時Game ID的字元，再重現原本的獨立Unity SDK診斷；若仍失敗，整理去敏debug logs與最小可偵錯APK。
+
+   - 本次依使用者截圖更正，未重新驗證信箱或portal、未寄送附件或回覆、未變更安全設定或App；PR #58保留，Mintegral維持排除。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-006 (Takeshi Mori)
 
 +
