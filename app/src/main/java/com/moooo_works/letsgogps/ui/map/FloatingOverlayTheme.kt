@@ -32,6 +32,8 @@ internal fun floatingOverlayColors(base: ColorScheme, dark: Boolean): ColorSchem
         onSurfaceVariant = secondaryText,
         primary = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10),
         onPrimary = if (dark) Color(0xFF3C1608) else Color.White,
+        error = if (dark) Color(0xFFFFB4AB) else base.error,
+        onError = if (dark) Color(0xFF690005) else base.onError,
         primaryContainer = selected, onPrimaryContainer = selectedText,
         secondaryContainer = selected, onSecondaryContainer = selectedText,
         outline = if (dark) Color(0xFF9EAFC4) else Color(0xFF6B7280),
