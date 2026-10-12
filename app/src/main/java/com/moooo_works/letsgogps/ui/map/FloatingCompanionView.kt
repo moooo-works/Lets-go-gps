@@ -1,5 +1,6 @@
 package com.moooo_works.letsgogps.ui.map
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
@@ -52,7 +53,9 @@ fun FloatingCompanionView(
         }
     }
     if (!companionState.expanded) {
-        Surface(shape = MaterialTheme.shapes.large, shadowElevation = 4.dp) {
+        Surface(shape = MaterialTheme.shapes.large, shadowElevation = 12.dp,
+            color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface,
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) {
             Text(stringResource(R.string.floating_title), Modifier.then(drag).clickable { actions.onExpandedChange(true) }.padding(16.dp))
         }
         return
@@ -60,7 +63,9 @@ fun FloatingCompanionView(
     val config = LocalConfiguration.current
     val panelHeight = minOf(600, config.screenHeightDp - 100).coerceAtLeast(200).dp
     val compactHeight = config.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-    Surface(shape = MaterialTheme.shapes.large, shadowElevation = 6.dp,
+    Surface(shape = MaterialTheme.shapes.large, shadowElevation = 12.dp,
+        color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier.widthIn(max = 320.dp).width(320.dp).heightIn(max = panelHeight).imePadding()) {
         Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.floating_title), Modifier.fillMaxWidth().then(drag).padding(8.dp), style = MaterialTheme.typography.titleMedium)

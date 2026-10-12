@@ -86,7 +86,7 @@ class JoystickOverlayManager @Inject constructor(
             }
         }
         try {
-            view.setContent { content() }
+            view.setContent { FloatingOverlayTheme(context) { content() } }
             windowManager.addView(view, layoutParams)
         } catch (error: RuntimeException) {
             hide()

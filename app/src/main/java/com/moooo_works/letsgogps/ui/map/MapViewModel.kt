@@ -9,7 +9,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.moooo_works.letsgogps.ui.theme.MockGpsTheme
 import com.moooo_works.letsgogps.domain.repository.SearchRepository
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
@@ -321,7 +320,7 @@ class MapViewModel @Inject constructor(
         joystickController.setOverlayWrapper { joystick ->
             val map by uiState.collectAsState()
             val companion by floatingCompanionController.state.collectAsState()
-            MockGpsTheme { FloatingCompanionView(map, companion, companionActions(), joystick) }
+            FloatingCompanionView(map, companion, companionActions(), joystick)
         }
         viewModelScope.launch {
             settingsRepository.observeLastCenter().collect { center ->

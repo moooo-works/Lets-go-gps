@@ -1,6 +1,7 @@
 package com.moooo_works.letsgogps.ui.map
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import com.moooo_works.letsgogps.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -53,7 +54,7 @@ fun JoystickOverlayView(
             exit = fadeOut() + shrinkVertically()
         ) {
             Surface(
-                color = Color(0xE61F2937),
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(30.dp),
                 shadowElevation = 8.dp,
                 modifier = Modifier.width(200.dp)
@@ -68,7 +69,8 @@ fun JoystickOverlayView(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF374151))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                             .clickable { onToggleSpeed() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -85,11 +87,11 @@ fun JoystickOverlayView(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFEF4444))
+                            .background(MaterialTheme.colorScheme.error)
                             .clickable { onStop() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("⏹", color = Color.White, fontSize = 18.sp)
+                        Text("⏹", color = MaterialTheme.colorScheme.onError, fontSize = 18.sp)
                     }
 
                     // Collapse Button
@@ -97,14 +99,15 @@ fun JoystickOverlayView(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF374151))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                             .clickable { isExpanded = false },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = stringResource(R.string.joystick_collapse),
-                            tint = Color(0xFF9CA3AF),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -125,14 +128,15 @@ fun JoystickOverlayView(
                         .offset(x = (8).dp, y = (-8).dp)
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color(0xE61F2937))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                         .clickable { isExpanded = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Settings,
                         contentDescription = stringResource(R.string.joystick_menu),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -143,7 +147,8 @@ fun JoystickOverlayView(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(Color(0xE61F2937))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = { onWindowDragEnd() },
@@ -161,7 +166,7 @@ fun JoystickOverlayView(
                     .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFF5722))
+                    .background(MaterialTheme.colorScheme.primary)
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = {
