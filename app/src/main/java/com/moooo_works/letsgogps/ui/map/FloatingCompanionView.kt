@@ -77,7 +77,7 @@ fun FloatingCompanionView(
     val success = if (colors.surface.luminance() < .5f) Color(0xFF7DDC9A) else Color(0xFF1E7B3C)
     val blocked = mapState.showStepSyncCreditDialog || mapState.showHealthCheck || mapState.showProUpgrade || mapState.mockError != null
     if (!companionState.expanded) {
-        Surface(shape = RoundedCornerShape(16.dp), shadowElevation = 8.dp, color = colors.surface,
+        Surface(shape = RoundedCornerShape(16.dp), shadowElevation = 8.dp, color = colors.surface.copy(alpha = .90f),
             border = BorderStroke(1.5.dp, colors.primary)) {
             Box(Modifier.size(48.dp).then(drag).clickable { actions.onExpandedChange(true) }, contentAlignment = Alignment.Center) {
                 Icon(Icons.Outlined.NearMe, stringResource(R.string.floating_title), tint = colors.primary, modifier = Modifier.size(24.dp))
@@ -98,7 +98,7 @@ fun FloatingCompanionView(
     val current = currentCompanionCoordinate(mapState)
     var menuOpen by remember { mutableStateOf(false) }
     val select: (GeocodedLocation) -> Unit = { releaseInput(); actions.onSelect(it); actions.onTabChange(CompanionTab.MAP) }
-    Surface(shape = RoundedCornerShape(22.dp), shadowElevation = 12.dp, color = colors.surface, contentColor = colors.onSurface,
+    Surface(shape = RoundedCornerShape(22.dp), shadowElevation = 12.dp, color = colors.surface.copy(alpha = .82f), contentColor = colors.onSurface,
         border = BorderStroke(1.dp, colors.outlineVariant),
         modifier = Modifier.width(panelWidth).heightIn(max = panelHeight).then(if (inputFocused) Modifier.imePadding() else Modifier)) {
         Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -238,7 +238,7 @@ fun FloatingCompanionView(
                 CompanionTab.entries.forEach { tab ->
                     val selectedTab = companionState.tab == tab
                     val tint = if (selectedTab) colors.primary else colors.onSurfaceVariant
-                    Surface(modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp), color = if (selectedTab) colors.secondaryContainer else colors.surface) {
+                    Surface(modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp), color = if (selectedTab) colors.secondaryContainer else Color.Transparent) {
                         Column(Modifier.fillMaxWidth().heightIn(min = 56.dp).selectable(selectedTab, role = Role.Tab, onClick = { releaseInput(); actions.onTabChange(tab) }).padding(vertical = 6.dp),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Icon(tab.icon(), stringResource(tab.label()), Modifier.size(22.dp), tint = tint)
