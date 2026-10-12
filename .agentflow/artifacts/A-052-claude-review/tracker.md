@@ -10,7 +10,7 @@
 
 - **Last update:** 2026-10-12 20:43:45 +0800.
 
-- **Evidence commit:** a7151ee9b94f212502ed6a4757184e4d823cdd7e.
+- **Evidence commit:** 87227ddf3d73ff0be4050a041ea61ef269446ec1.
 
 ## Overall state
 
