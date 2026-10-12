@@ -5,8 +5,8 @@
 - **Work key:** A-050-floating-appearance.
 - **Active Ask:** A-050.
 - **Goal:** Readable floating theme and app language synchronization.
-- **Last update:** 2026-10-12 10:35:30 +0800.
-- **Evidence commit:** 5c9f34f39549b959471a80ecf1af797348d4febc.
+- **Last update:** 2026-10-12 10:45:00 +0800.
+- **Evidence commit:** a6cf172deadfbf4f3bc376d53d48edd7e5417a71.
 
 ## Overall state
 
@@ -32,7 +32,7 @@
 - **Current item:** T-4.
 - **Last proven result:** 280 tests/220 executed/0fail/60skip; four-language AppUID instrumentOK1; live UI and data/settings preserved.
 - **Active blocker or running process:** none.
-- **Next safe action:** Independent bounded review of pinned product5c9f34f and root evidence; no duplicate passing tests.
+- **Next safe action:** Bounded correction review of new palette/test pin; preserve first BLOCKING report.
 - **Expected changed files:** Product7paths in source.diff; root A050 design/tracker/device/evidence/review and devlog only.
 
 ## Completion proof
