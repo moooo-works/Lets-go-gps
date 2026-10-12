@@ -458,8 +458,8 @@
     <string name="floating_explore">Explore selected place</string>
     <string name="floating_selected">Selected place</string>
     <string name="floating_copy_selected">Copy selected coordinates</string>
-    <string name="floating_locate">Locate</string>
-    <string name="floating_save">Save place</string>
+    <string name="floating_locate">Move here</string>
+    <string name="floating_save">Save</string>
     <string name="floating_queue">Add to queue</string>
     <string name="floating_queued">Separate queue: %1$d points</string>
     <string name="floating_apply">Apply queued route</string>
@@ -482,4 +482,11 @@
     <string name="floating_msg_copied">Copied</string>
     <string name="floating_map_hint">Moving or tapping the map only selects a point. Use Locate to move.</string>
     <string name="floating_blocked">Complete permissions or credit setup in the app. Location has not started.</string>
+    <string name="floating_tab_saved">Saved</string>
+    <string name="floating_active">Location active</string>
+    <string name="floating_copy">Copy</string>
+    <string name="floating_zoom_in">Zoom in</string>
+    <string name="floating_zoom_out">Zoom out</string>
+    <string name="floating_slower">Slower</string>
+    <string name="floating_faster">Faster</string>
 </resources>

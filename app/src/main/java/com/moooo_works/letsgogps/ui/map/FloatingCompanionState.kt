@@ -73,7 +73,8 @@ data class FloatingCompanionActions(
     val onOpenApp: () -> Unit,
     val onInputFocus: (Boolean) -> Unit,
     val onWindowDrag: (Float, Float) -> Unit,
-    val onWindowDragEnd: () -> Unit
+    val onWindowDragEnd: () -> Unit,
+    val onCopyLocation: (LatLng) -> Unit = {}
 )
 
 fun formatCompanionCoordinate(location: LatLng): String =

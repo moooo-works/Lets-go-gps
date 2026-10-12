@@ -1,30 +1,31 @@
 package com.moooo_works.letsgogps.ui.map
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.stringResource
-import com.moooo_works.letsgogps.R
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.core.os.ConfigurationCompat
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moooo_works.letsgogps.R
+import java.util.Locale
 import kotlin.math.*
 
 @Composable
@@ -33,168 +34,69 @@ fun JoystickOverlayView(
     onMove: (deltaX: Float, deltaY: Float) -> Unit,
     onWindowDrag: (deltaX: Int, deltaY: Int) -> Unit,
     onWindowDragEnd: () -> Unit = {},
-    onToggleSpeed: () -> Unit,
+    onTransportModeChange: (TransportMode) -> Unit,
     onStop: () -> Unit
 ) {
     DisposableEffect(Unit) { onDispose { onMove(0f, 0f) } }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
-    var isExpanded by remember { mutableStateOf(false) }
-    val radius = 100f // Base radius in pixels for the joystick
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(12.dp)
-    ) {
-        // 1. Controls Capsule (Expanded State)
-        AnimatedVisibility(
-            visible = isExpanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(30.dp),
-                shadowElevation = 8.dp,
-                modifier = Modifier.width(200.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Speed Toggle Button
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                            .clickable { onToggleSpeed() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val icon = when (transportMode) {
-                            TransportMode.WALKING -> "🚶"
-                            TransportMode.CYCLING -> "🚲"
-                            TransportMode.DRIVING -> "🚗"
+    val currentMove by rememberUpdatedState(onMove)
+    val currentWindowDrag by rememberUpdatedState(onWindowDrag)
+    val currentWindowDragEnd by rememberUpdatedState(onWindowDragEnd)
+    val radius = 100f
+    val colors = MaterialTheme.colorScheme
+    val locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.ROOT
+    val modes = TransportMode.entries
+    val modeIndex = modes.indexOf(transportMode)
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.size(140.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(120.dp).background(colors.surfaceVariant, CircleShape).border(1.dp, colors.outline, CircleShape)
+                    .pointerInput(Unit) {
+                        detectDragGestures(onDragEnd = { currentWindowDragEnd() }, onDragCancel = { currentWindowDragEnd() }) { change, delta ->
+                            change.consume(); currentWindowDrag(delta.x.roundToInt(), delta.y.roundToInt())
                         }
-                        Text(icon, fontSize = 18.sp)
+                    })
+                Box(Modifier.offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }.size(60.dp)
+                    .background(colors.secondaryContainer, CircleShape).border(2.dp, colors.primary, CircleShape)
+                    .pointerInput(Unit) {
+                        fun release() { offsetX = 0f; offsetY = 0f; currentMove(0f, 0f) }
+                        detectDragGestures(onDragEnd = { release() }, onDragCancel = { release() }) { change, delta ->
+                            change.consume()
+                            val x = offsetX + delta.x; val y = offsetY + delta.y
+                            val distance = sqrt(x * x + y * y)
+                            if (distance <= radius) { offsetX = x; offsetY = y }
+                            else { val angle = atan2(y, x); offsetX = cos(angle) * radius; offsetY = sin(angle) * radius }
+                            currentMove(offsetX / radius, offsetY / radius)
+                        }
+                    })
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.floating_speed, transportMode.speedKmh), fontSize = 12.sp, color = colors.onSurfaceVariant)
+                Surface(shape = RoundedCornerShape(24.dp), color = colors.surfaceVariant) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { onTransportModeChange(modes[modeIndex - 1]) }, enabled = modeIndex > 0) { Icon(Icons.Default.Remove, stringResource(R.string.floating_slower), Modifier.size(18.dp)) }
+                        Text(String.format(locale, "%.1f", transportMode.speedKmh), Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                        IconButton(onClick = { onTransportModeChange(modes[modeIndex + 1]) }, enabled = modeIndex < modes.lastIndex) { Icon(Icons.Default.Add, stringResource(R.string.floating_faster), Modifier.size(18.dp)) }
                     }
-
-                    // Stop Button
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.error)
-                            .clickable { onStop() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("⏹", color = MaterialTheme.colorScheme.onError, fontSize = 18.sp)
-                    }
-
-                    // Collapse Button
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                            .clickable { isExpanded = false },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.joystick_collapse),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    modes.forEach { mode ->
+                        val label = stringResource(when(mode) { TransportMode.WALKING -> R.string.map_transport_walking; TransportMode.CYCLING -> R.string.map_transport_cycling; TransportMode.DRIVING -> R.string.map_transport_driving })
+                        OutlinedButton(onClick = { onTransportModeChange(mode) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(10.dp), contentPadding = PaddingValues(2.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(containerColor = if (mode == transportMode) colors.secondaryContainer else colors.surfaceVariant,
+                                contentColor = if (mode == transportMode) colors.primary else colors.onSurfaceVariant),
+                            border = BorderStroke(1.dp, if (mode == transportMode) colors.primary else colors.outlineVariant)) {
+                            Text(label, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
                     }
                 }
             }
         }
-
-        // 2. Joystick Base & Handle
-        Box(
-            modifier = Modifier.size(140.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Settings Button (Positioned outside/on edge of the base)
-            if (!isExpanded) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = (8).dp, y = (-8).dp)
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                        .clickable { isExpanded = true },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Settings,
-                        contentDescription = stringResource(R.string.joystick_menu),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            // Base Disk
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragEnd = { onWindowDragEnd() },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
-                            }
-                        )
-                    }
-            )
-
-            // Move Handle
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                    .size(60.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragEnd = {
-                                offsetX = 0f
-                                offsetY = 0f
-                                onMove(0f, 0f)
-                            },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                
-                                val newX = offsetX + dragAmount.x
-                                val newY = offsetY + dragAmount.y
-                                val distance = sqrt(newX * newX + newY * newY)
-                                
-                                if (distance <= radius) {
-                                    offsetX = newX
-                                    offsetY = newY
-                                } else {
-                                    val angle = atan2(newY, newX)
-                                    offsetX = cos(angle) * radius
-                                    offsetY = sin(angle) * radius
-                                }
-                                
-                                onMove(offsetX / radius, offsetY / radius)
-                            }
-                        )
-                    }
-            )
+        OutlinedButton(onClick = { onMove(0f, 0f); onStop() }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, colors.error), colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error)) {
+            Icon(Icons.Default.Stop, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.action_stop), fontWeight = FontWeight.Bold)
         }
     }
 }

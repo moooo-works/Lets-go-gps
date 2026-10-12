@@ -89,12 +89,21 @@ class JoystickOverlayManagerTest {
         manager.show { }
         val screen = context.resources.displayMetrics.widthPixels
         view.captured.layout(0, 0, screen / 2, 200)
+        assertTrue(params.captured.x == 0 || params.captured.x == screen - screen / 2)
         manager.updatePosition(screen, 0)
         manager.snapToEdge()
         view.captured.layout(0, 0, screen / 8, 100)
         assertEquals(screen - screen / 8, params.captured.x)
         view.captured.layout(0, 0, screen / 4, 100)
         assertEquals(screen - screen / 4, params.captured.x)
+        manager.setBottomAligned(true)
+        val screenHeight = context.resources.displayMetrics.heightPixels
+        assertEquals(screenHeight - 100, params.captured.y)
+        view.captured.layout(0, 0, screen / 4, 150)
+        assertEquals(screenHeight - 150, params.captured.y)
+        manager.updatePosition(0, -100)
+        view.captured.layout(0, 0, screen / 4, 100)
+        assertEquals(screenHeight - 250, params.captured.y)
         manager.updatePosition(-screen, 0)
         manager.snapToEdge()
         view.captured.layout(0, 0, screen / 8, 100)

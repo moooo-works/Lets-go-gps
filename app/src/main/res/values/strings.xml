@@ -461,8 +461,8 @@
     <string name="floating_explore">探索選中地點</string>
     <string name="floating_selected">選中地點</string>
     <string name="floating_copy_selected">複製選中座標</string>
-    <string name="floating_locate">定位</string>
-    <string name="floating_save">存收藏</string>
+    <string name="floating_locate">移動到這裡</string>
+    <string name="floating_save">儲存</string>
     <string name="floating_queue">加入待走</string>
     <string name="floating_queued">獨立待走清單：%1$d 個點</string>
     <string name="floating_apply">套用待走路線</string>
@@ -485,4 +485,11 @@
     <string name="floating_msg_copied">已複製</string>
     <string name="floating_map_hint">移動地圖或點擊只會選點；按下「定位」才執行移動。</string>
     <string name="floating_blocked">需要在主程式完成授權或額度處理，定位尚未啟動。</string>
+    <string name="floating_tab_saved">收藏</string>
+    <string name="floating_active">定位中</string>
+    <string name="floating_copy">複製</string>
+    <string name="floating_zoom_in">放大地圖</string>
+    <string name="floating_zoom_out">縮小地圖</string>
+    <string name="floating_slower">降低速度</string>
+    <string name="floating_faster">增加速度</string>
 </resources>

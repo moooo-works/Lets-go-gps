@@ -22,22 +22,22 @@ internal fun overlayConfiguration(base: Configuration, language: String): Config
 
 internal fun floatingOverlayColors(base: ColorScheme, dark: Boolean): ColorScheme {
     val foreground = if (dark) Color(0xFFF8FAFC) else Color(0xFF202124)
-    val secondaryText = if (dark) Color(0xFFCDD6E0) else Color(0xFF4B5563)
-    val selected = if (dark) Color(0xFF573827) else Color(0xFFFFE4D6)
-    val selectedText = if (dark) Color(0xFFFFE8D9) else Color(0xFF57250E)
+    val secondaryText = if (dark) Color(0xFFAAB4C3) else Color(0xFF5F6368)
+    val selected = if (dark) Color(0xFF3B2E2C) else Color(0xFFFBE6DA)
+    val selectedText = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10)
     return base.copy(
         surface = if (dark) Color(0xFF18212C) else Color(0xFFFFF8F2),
         onSurface = foreground,
-        surfaceVariant = if (dark) Color(0xFF263343) else Color(0xFFF3E6DD),
+        surfaceVariant = if (dark) Color(0xFF222D3A) else Color(0xFFF3E8DE),
         onSurfaceVariant = secondaryText,
         primary = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10),
-        onPrimary = if (dark) Color(0xFF3C1608) else Color.White,
-        error = if (dark) Color(0xFFFFB4AB) else base.error,
-        onError = if (dark) Color(0xFF690005) else base.onError,
+        onPrimary = if (dark) Color(0xFF18212C) else Color.White,
+        error = if (dark) Color(0xFFFF8A80) else Color(0xFFB3261E),
+        onError = if (dark) Color(0xFF690005) else Color.White,
         primaryContainer = selected, onPrimaryContainer = selectedText,
         secondaryContainer = selected, onSecondaryContainer = selectedText,
         outline = if (dark) Color(0xFF9EAFC4) else Color(0xFF6B7280),
-        outlineVariant = if (dark) Color(0xFF9EAFC4) else Color(0xFF6B7280)
+        outlineVariant = if (dark) Color(0xFF33404F) else Color(0xFFE6D6C8)
     )
 }
 

@@ -458,8 +458,8 @@
     <string name="floating_explore">選択した場所を探索</string>
     <string name="floating_selected">選択した場所</string>
     <string name="floating_copy_selected">選択した座標をコピー</string>
-    <string name="floating_locate">移動</string>
-    <string name="floating_save">場所を保存</string>
+    <string name="floating_locate">ここへ移動</string>
+    <string name="floating_save">保存</string>
     <string name="floating_queue">待機リストに追加</string>
     <string name="floating_queued">独立した待機リスト：%1$d 地点</string>
     <string name="floating_apply">待機ルートを適用</string>
@@ -482,4 +482,11 @@
     <string name="floating_msg_copied">コピーしました</string>
     <string name="floating_map_hint">地図の移動やタップは地点の選択だけです。「移動」を押すと実行します。</string>
     <string name="floating_blocked">アプリで権限または利用回数の設定を完了してください。位置の変更は開始していません。</string>
+    <string name="floating_tab_saved">保存</string>
+    <string name="floating_active">位置設定中</string>
+    <string name="floating_copy">コピー</string>
+    <string name="floating_zoom_in">地図を拡大</string>
+    <string name="floating_zoom_out">地図を縮小</string>
+    <string name="floating_slower">減速</string>
+    <string name="floating_faster">加速</string>
 </resources>

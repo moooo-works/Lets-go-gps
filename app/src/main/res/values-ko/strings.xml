@@ -458,8 +458,8 @@
     <string name="floating_explore">선택한 장소 탐색</string>
     <string name="floating_selected">선택한 장소</string>
     <string name="floating_copy_selected">선택 좌표 복사</string>
-    <string name="floating_locate">이동</string>
-    <string name="floating_save">장소 저장</string>
+    <string name="floating_locate">여기로 이동</string>
+    <string name="floating_save">저장</string>
     <string name="floating_queue">대기 목록에 추가</string>
     <string name="floating_queued">별도 대기 목록: %1$d개 지점</string>
     <string name="floating_apply">대기 경로 적용</string>
@@ -482,4 +482,11 @@
     <string name="floating_msg_copied">복사했습니다</string>
     <string name="floating_map_hint">지도를 움직이거나 탭하면 지점만 선택됩니다. 이동하려면 이동 버튼을 누르세요.</string>
     <string name="floating_blocked">앱에서 권한 또는 이용 횟수 설정을 완료하세요. 위치 변경은 시작되지 않았습니다.</string>
+    <string name="floating_tab_saved">저장</string>
+    <string name="floating_active">위치 활성화</string>
+    <string name="floating_copy">복사</string>
+    <string name="floating_zoom_in">지도 확대</string>
+    <string name="floating_zoom_out">지도 축소</string>
+    <string name="floating_slower">속도 줄이기</string>
+    <string name="floating_faster">속도 늘리기</string>
 </resources>

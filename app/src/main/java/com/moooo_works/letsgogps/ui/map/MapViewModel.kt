@@ -272,8 +272,13 @@ class MapViewModel @Inject constructor(
             releaseCompanionInput()
             floatingCompanionController.setExpanded(expanded)
             if (!expanded) joystickOverlayManager.snapToEdge()
+            else if (floatingCompanionController.state.value.tab == CompanionTab.CONTROL) joystickOverlayManager.setBottomAligned(true)
         },
-        onTabChange = { releaseCompanionInput(); floatingCompanionController.setTab(it) },
+        onTabChange = { tab ->
+            releaseCompanionInput()
+            floatingCompanionController.setTab(tab)
+            joystickOverlayManager.setBottomAligned(tab == CompanionTab.CONTROL)
+        },
         onQueryChange = floatingCompanionController::setQuery,
         onSearch = floatingCompanionController::search,
         onPaste = { joystickOverlayManager.runWhenFocused {
@@ -302,7 +307,8 @@ class MapViewModel @Inject constructor(
         onClose = ::closeCompanion, onOpenApp = ::openAppFromCompanion,
         onInputFocus = joystickOverlayManager::setInputFocusable,
         onWindowDrag = { x, y -> joystickOverlayManager.updatePosition(x.toInt(), y.toInt()) },
-        onWindowDragEnd = joystickOverlayManager::snapToEdge
+        onWindowDragEnd = joystickOverlayManager::snapToEdge,
+        onCopyLocation = ::copyCompanionCoordinate
     )
 
     private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)

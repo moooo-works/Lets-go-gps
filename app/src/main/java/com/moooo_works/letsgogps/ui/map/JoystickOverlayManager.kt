@@ -9,6 +9,8 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.MainThread
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
@@ -40,6 +42,7 @@ class JoystickOverlayManager @Inject constructor(
     private var pendingInputAction: (() -> Unit)? = null
     private var inputFocusable = false
     private var dockedRight: Boolean? = null
+    private var bottomAligned = false
     private val prefs: SharedPreferences by lazy { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
 
     private var onDismissed: (() -> Unit)? = null
@@ -76,7 +79,11 @@ class JoystickOverlayManager @Inject constructor(
                 if (composeView === v) hide()
             }
         })
-        view.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> clampPosition() }
+        var initialLayout = true
+        view.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            if (initialLayout) { initialLayout = false; snapToEdge() }
+            else clampPosition(forceUpdate = right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop)
+        }
         view.viewTreeObserver.addOnWindowFocusChangeListener { hasFocus ->
             if (hasFocus) {
                 val action = pendingInputAction
@@ -137,6 +144,7 @@ class JoystickOverlayManager @Inject constructor(
         pendingInputAction = null
         inputFocusable = false
         dockedRight = null
+        bottomAligned = false
         if (view != null) {
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
                 ?.hideSoftInputFromWindow(view.windowToken, 0)
@@ -152,6 +160,7 @@ class JoystickOverlayManager @Inject constructor(
     fun updatePosition(deltaX: Int, deltaY: Int) {
         val currentParams = params ?: return
         dockedRight = null
+        bottomAligned = false
         currentParams.x += deltaX
         currentParams.y += deltaY
         clampPosition(forceUpdate = true)
@@ -166,7 +175,10 @@ class JoystickOverlayManager @Inject constructor(
         currentParams.x = dockedRight?.let { right ->
             if (right) (metrics.widthPixels - view.width).coerceAtLeast(0) else 0
         } ?: clampOverlayPosition(currentParams.x, metrics.widthPixels, view.width)
-        currentParams.y = clampOverlayPosition(currentParams.y, metrics.heightPixels, view.height)
+        val bottomInset = ViewCompat.getRootWindowInsets(view)?.getInsets(WindowInsetsCompat.Type.systemBars())?.bottom ?: 0
+        val availableHeight = (metrics.heightPixels - bottomInset).coerceAtLeast(0)
+        currentParams.y = if (bottomAligned) (availableHeight - view.height).coerceAtLeast(0)
+            else clampOverlayPosition(currentParams.y, availableHeight, view.height)
         if (dockedRight != null) {
             prefs.edit().putInt(KEY_X, currentParams.x).putInt(KEY_Y, currentParams.y).apply()
         }
@@ -176,10 +188,17 @@ class JoystickOverlayManager @Inject constructor(
     }
 
     @MainThread
+    fun setBottomAligned(aligned: Boolean) {
+        bottomAligned = aligned
+        if (aligned) clampPosition(forceUpdate = true)
+    }
+
+    @MainThread
     fun snapToEdge() {
         val currentParams = params ?: return
         val view = composeView ?: return
         val metrics = context.resources.displayMetrics
+        bottomAligned = false
         // 保留同側，Compose 收合後重新量測較小尺寸時仍靠邊。
         dockedRight = currentParams.x + view.width / 2 >= metrics.widthPixels / 2
         clampPosition(forceUpdate = true)

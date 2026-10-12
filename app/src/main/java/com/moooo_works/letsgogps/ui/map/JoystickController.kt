@@ -61,7 +61,7 @@ class JoystickController(
                     onMove = { dx, dy -> currentX = dx; currentY = dy },
                     onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
                     onWindowDragEnd = { overlayManager.snapToEdge() },
-                    onToggleSpeed = { cycleTransportMode() },
+                    onTransportModeChange = onSetTransportMode,
                     onStop = { stopMockingFromJoystick() }
                 ) }
                 val wrapper = overlayWrapper
