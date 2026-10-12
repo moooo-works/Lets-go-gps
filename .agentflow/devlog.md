@@ -237,4 +237,26 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 
 # → Ask / A-050 (Takeshi Mori)
 
-+
++ 懸浮鍵盤的UI配色需要跟主題色有調整，現在深色跟淺色會跟原app吃色，不容易分辨，雖然進到pikmin bloom或其他app可以看得到，但整體顏色不好辨識，而且並沒有跟多國語系一起改變語言
+
+---
+
+## [RUN-001] Event — 2026-10-12 09:28:50 +0800 (A-050)
+
+- preflight root docs/floating-delivery（hook devlog dirty），fetch成功，origin/main b1590f0，latest5 b1590f0/72ac0aa/012ec15/932d3be/83ce161；root已回main，未推產品到main。
+- 新獨立worktree fix/floating-theme-locale自最新main建立，再承接未合併PR59 ba2541f，behindmain0；新修正PR以59為base，保留58/59/60。Scope只主題/語系/可辨識邊框，不動engine/資料/廣告。
+- 因果確認：manager用ApplicationContext，MapVM theme預設SYSTEM；App設定theme_pref/language_pref只Activity採用。direct host修小範圍context/presentation，native最後做bounded independent review，無新owner決策或permission gate。
+
+## [RUN-002] Event — 2026-10-12 10:36:21 +0800 (A-050)
+
+- 修前實機主App Japanese/LIGHT但bubble中文/深色已重現；修後LIGHT與DARK切換、Japanese/Korean/繁中/English在同一浮泡即時更新。搖桿圈/齒輪跟隨配色，IME焦點框1132..1307避開keyboard1328..2340，close無殘留window/service。
+- product5c9f34f已push，7paths152add16del；最新三Gradle成功280tests/220實執/0fail/60skip，四語context/不變ConfigurationinstrumentOK1，lint34既有Error/95Warning/3Hint。原English/DARK與DB375/6/591全部rows hash還原/一致。
+- Changed paths符合T1-T4：新FloatingOverlayTheme、View/Joystick colors、Manager包裝/VM去除預設Theme及必要tests；root僅A050計畫/驗證/圖片/source凍結與devlog。無engine/schema/ads/security設定改動，PR58/59/60保留。
+
+## [WIP-001] Checkpoint — 2026-10-12 10:36:22 +0800 (A-050)
+
+- **Finished:** 配色/locale診斷、獨立worktree修正、必要Gradle與四語/主題實機、原資料設定保留。
+- **Running now:** 準備單次bounded independent review，source5c9f34f固定。
+- **Still to do:** 審查、單一主題stacked draft PR、紀錄closeout及push。
+- **Next work action:** 固定root接受證據commit及product commit，review同時查code/保存證據，不重跑通過測試。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
