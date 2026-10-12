@@ -1,0 +1,21 @@
+{
+  "report_bytes": 1709,
+  "report_sha256": "ed643379328f34a8c30399dac1583fcccba15c8c73d1b08a0362782249529e78",
+  "first_model": "claude-opus-5-5",
+  "correction_models": [
+    "claude-opus-5-5"
+  ],
+  "first_stdout_truncated": true,
+  "correction_stdout_truncated": false,
+  "clone_changed": false,
+  "nested_worker": false,
+  "original_report_preserved": true,
+  "scope": "Review only; no app changes.",
+  "warnings": [
+    "Report self-check says under1600bytes; actual1709bytes. Formatting/outcome labels are prose rather than literal PASS, but overall Verdict PASS and substantive conclusions are clear. No cosmetic rerun."
+  ],
+  "confirmed_findings": [
+    "Joystick display transportMode.speedKmh differs from movement state.speedKmh after a custom route speed.",
+    "Traditional Chinese and English map hints use old Locate name."
+  ]
+}
