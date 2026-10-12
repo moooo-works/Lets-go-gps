@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/features/unity-ads/unity-ads.devlog.md — stream.
 
-Current commit: 交付紀錄見Git歷史；Unity SDK來源7fa932facb9289ac5bd14a7880412c68277c8042.
+Current commit: SDK來源7fa932facb9289ac5bd14a7880412c68277c8042；交付紀錄見Git歷史.
 
-Tests/scenarios: 核讀使用者提供的Gary回覆截圖；無程式變更，未重跑Gradle.
+Tests/scenarios: Pixel7Pro：4.21.0初始化成功；4.20.1初始化、Unity測試banner載入顯示與reward載入成功.
 
 Configuration: .agentflow/features/unity-ads/ag.json — schema v8; validated for codex this round.
 
-Proven: Gary已回覆並表示800390974在Unity demo app測試成功；已更正前次結論.
+Proven: 800390974無空白；獨立Unity測試供應通過，Invalid Game ID未再出現.
 
-Open: 本App的Invalid Game ID尚待重現與設定比對；實際廣告供應尚待驗證.
+Open: 正式App經AdMob中介、reward觀看解鎖及生產供應尚待驗證.
 
-Next: 核對Game ID字元並重現；持續失敗則整理診斷資料.
+Next: 接續單一Unity來源實機中介測試；正式群組維持暫停.
 
-Artifacts: Unity工單00939092；使用者回覆截圖；PR #58保留.
+Artifacts: /private/tmp/letsgps-unity-recheck-20261012；/tmp/unity-recheck-20261012.png；Unity00939092；PR58保留.
 
 Archived eras: none.
 
@@ -419,5 +419,41 @@ streams: off」
 ---
 
 # → Ask / A-006 (Takeshi Mori)
+
++ 你看一下是否可以使用了
+
+---
+
+## [RUN-001] Event — 2026-10-12 15:01:31 +0800 (A-006)
+
+- Pixel7Pro實機重測：4.21.0於14:57:18 INIT PASS；獨立測試診斷APK使用App相同4.20.1，GameID=[800390974] length=9，testMode=true，14:59:51 INIT PASS、14:59:52 BANNER LOAD/SHOWN PASS、14:59:53 REWARDED LOAD PASS。已看截圖確認Unity測試banner；診斷APK移除並返回原App，正式群組未啟用。
+
+# ← Reply / A-006
+
+* _2026-10-12 15:01:31 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Unity現在可初始化並供應測試廣告；4.20.1橫幅載入／顯示、獎勵載入均通過，但App的AdMob中介及獎勵解鎖尚未驗證。
+
+## [FINAL REPORT]
+
+1. 「你看一下是否可以使用了」
+
+   - 已完成Pixel7Pro實機重測。4.21.0於2026-10-12 14:57:18初始化成功；再用與App相同的Unity SDK4.20.1獨立診斷，14:59:51初始化成功，14:59:52 BP_Banner_Android載入並顯示成功，14:59:53 BP_Rewarded_Android載入成功。先前Invalid Game ID這次未出現。
+
+   - 診斷直接使用GameID=[800390974]、length=9，無空白；privacy.consent=false、testMode=true。已核讀實機截圖看到Unity測試banner。這證明ID與Unity測試版位目前可用；不能据此宣稱正式App經AdMob已成功供應、reward完整觀看／解鎖已通過或真實付費廣告已可上線。
+
+   - 臨時診斷於/private/tmp/letsgps-unity-recheck-20261012建立並assembleDebug成功；首次編譯因缺onBannerShown回呼失敗，補齊後成功。使用既有4.21.0診斷及此4.20.1診斷，未改repository產品程式、SDK版本或後台。手機诊斷APK已移除、已返回原App；PR58保留、Mintegral排除，正式群組維持暫停。
+
+   - 下一步為App經AdMob的單一Unity來源橫幅／獎勵測試及觀看解鎖。此次不變更生產群組。Git查核：branch unity-ads；status僅本輪notebook變更；origin/main=5b09bde4fe25417288650514bb7eced62d66b3b1；HEAD與main計數16／28，因此不在此branch開始產品coding或要求合併。只寫事實紀錄，未重跑產品test／lint／assemble。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-007 (Takeshi Mori)
 
 +
