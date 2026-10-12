@@ -20,19 +20,19 @@
 
 - **Total:** 5.
 
-- **Completed:** 0.
+- **Completed:** 4.
 
-- **Remaining:** 5.
+- **Remaining:** 1.
 
 ## Accepted task checklist
 
 - [x] **T-1:** Pen協作重新規劃UI，並依使用者「實現未完成項目」實作：48dp圖示、toolbar更多、五個固定入口、內容優先、次要額度、控制鍵可見。保留原actions/gates/多語。Proof: pen .pen/PNG、最終Compose儀器及手機各頁流程. Source: A-051.
 
-- [x] **T-2:** 修正展開後收合停留原地；scope Manager dock anchor與VM收合接線，先紅後綠、required Gradle及手機左右側實測，保留完全close。Source: A-051.
+- [x] **T-2:** 修正展開後收合停留原地；scope Manager dock anchor與VM收合接線，先紅後綠、required Gradle及手機左右側實測，保留完全close。Proof: Manager初始四測試真實紅綠、左右實機位置、最終公開UI實際window bounds與兩種close通過；device-acceptance.md。Source: A-051.
 
 - [ ] **T-3:** 獨立最終審查、single-topic draft PR與資料設定保留、紀錄push，未完成pen則維持open不假稱完成。Source: A-051/AGENTS/Agentflow.
 
-- [x] **T-4:** 收合/換頁後黏著側底層App按鈕可點，先Calculator實機red、最小focus/padding修正、IME與底層綠驗證。Scope: FloatingCompanionView及必要接受紀錄，不改系統安全。Source: A-051 新增觸控回報.
+- [x] **T-4:** 收合/換頁後黏著側底層App按鈕可點，先Calculator實機red、最小focus/padding修正、IME與底層綠驗證。Scope: FloatingCompanionView及必要接受紀錄，不改系統安全。Proof: Calculator同側3→3−、最終真實IME／輸入欄bounds及收合window≤64dp instrument OK1；最新跨App逐鍵重測限制明列device-acceptance.md。Source: A-051 新增觸控回報.
 
 - [x] **T-5:** 分開懸浮工具／搖桿按鍵，依使用者回覆一次顯示一種，沿用訂閱或6h廣告Pro。Scope: MapState/MapScreen/MapOverlays、VM/Controller/View、ProDialog/four locales及必要VM/UI tests。Proof: live repository拒絕免費或已撤销、切換flags互斥／window先移除、Pro撤销清理與公開UI收合／close；既有paid/ad來源不改。Source: A-051.
 

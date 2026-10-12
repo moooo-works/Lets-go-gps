@@ -395,3 +395,7 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 - **Still to do:** 審查／host核對、single-topic stacked draft PR、紀錄closeout／push。
 - **Next work action:** 審查重用最新必要測試與正常旅程，不再碰正在使用的手機；具體限制已在device-acceptance／data-preservation明列。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-006] Event — 2026-10-12 19:49:38 +0800 (A-051)
+
+- tracker首次完成4項的格式驗證因T2/T4缺明確Proof欄失敗；前一WIP勾選早於成功驗證。現補入既有真實證據，validate --refresh通過4/5，沒有重跑產品測試或補造接受結果。
