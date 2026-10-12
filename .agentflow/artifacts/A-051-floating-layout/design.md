@@ -4,13 +4,13 @@ A051兩項原要求：1.重規劃UI並請pen.dev協作；2.展開後關閉文字
 
 ## 範圍與方法
 
-UI先交付設計稿與配置說明，不在尚未看過設計時直接重寫全部Compose。既有五項搜尋／收藏／路線／控制／小地圖與主題／多語保留。主要操作與座標移到頁內，避免常駐資訊把主內容推下；五個入口全部可见；收合入口小型圖示，拖曳可移動，完全關閉獨立在更多選單，不跟收合混淆。
+初期先交付設計稿與配置說明；Pen完成並取得「實現未完成項目」授權後，已依後續採用章節實作Compose。既有五項搜尋／收藏／路線／控制／小地圖與主題／多語保留。主要操作與座標移到頁內，避免常駐資訊把主內容推下；五個入口全部可见；收合入口小型圖示，拖曳可移動，完全關閉獨立在更多選單，不跟收合混淆。
 收合bug獨立修復：Manager維持吸附邊緣狀態，後續真正layout/寬度變化仍計算新邊界；拖曳開始解除吸附。VM收合呼叫snap。既有完全關閉仍hide，不停止背景定位。
-pen.dev本機設定0.6.34路徑失效，已找到0.6.49 MCP，tools/list可讀但get_editor_state連antigravity三次失敗；CUA無該app。等待使用者說明使用入口，先完成獨立bug修復，不宣稱完成pen協作。
+pen.dev本機設定0.6.34路徑失效，已找到0.6.49 MCP，tools/list可讀但get_editor_state連antigravity三次失敗；CUA無該app。以上是初期連線診斷；之後改用使用者指定的Pen桌面內建助理完成設計，原始.pen／PNG已保存。
 
 ## Minimality check
 
-只有在收合按下立即snap一次不夠：此時仍是320dp寬，縮小後會停內側。延遲固定毫秒也無法保證Compose實際重測時間。沿用現有layout listener和snap機制保存anchor，避免timer/新window/新動畫引擎。
+只有在收合按下立即snap一次不夠：此時仍是展開面板的寬度，縮小後會停內側。延遲固定毫秒也無法保證Compose實際重測時間。沿用現有layout listener和snap機制保存anchor，避免timer/新window/新動畫引擎。
 
 ## Invariants
 
@@ -30,7 +30,7 @@ A051新增「懸浮視窗黏著的那一邊，底層app的按鈕都會失效，�
 
 AC4: 未被可見浮窗遮住的左右底層按鈕可點；IME開啟時搜尋欄不被蓋，收起IME／換頁後無透明攔截區。正常安全input/owner不放寬。
 
-pen桌面已signed in，readstate成功但execute/read references逾時；參考桌面已安裝bundle內同版pen-dev schema/execute/mobile指南；使用者明確要求Pen協作，已經CUA送非私密設計brief至Pen內建Claude Opus5.5，目前有Designed/ToolOutput，實際進行中。無App code／裝置／帳號操作授權给Pen worker。
+pen桌面已signed in，readstate成功但execute/read references逾時；參考桌面已安裝bundle內同版pen-dev schema/execute/mobile指南；使用者明確要求Pen協作，已經CUA送非私密設計brief至Pen內建Claude Opus5.5，已完成可編輯設計及四狀態PNG，實際交付檔已保存。無App code／裝置／帳號操作授權给Pen worker。
 
 ## UI實作授權與採用
 
@@ -50,15 +50,21 @@ A051新增背景透出底層的要求，覆蓋原Pen實色面板規格。展開�
 
 ## 分開入口與Pro解鎖
 
-使用者明確要求懸浮視窗與虛擬搖桿的按鍵分開，兩者皆屬Pro，可付費或看廣告解鎖。沿用ProRepository.isProActive（訂閱OR既有6小時廣告解鎖）；不改步數計次、價格、廣告reward或購買實作。已詢問是否同時顯示；合理等待後先採可同時開啟、各自收合／關閉，有新答覆再依較新選擇調整。
+使用者明確要求懸浮視窗與虛擬搖桿的按鍵分開，兩者皆屬Pro，可付費或看廣告解鎖。沿用ProRepository.isProActive（訂閱OR既有6小時廣告解鎖）；不改步數計次、價格、廣告reward或購買實作。已詢問是否同時顯示；先採同時開啟的暫定方案後，使用者回覆「一次顯示一種，開另一種時切換」，最終依較新選擇採互斥切換。
 
-方法：地圖增加獨立懸浮工具FAB，搖桿恢復獨立FAB／控制面板。Companion採獨立Manager instance及位置prefs，Joystick保留既有Manager與ticker。控制頁只提供開啟獨立搖桿的入口，仍保留探索操作。每次新開入口檢查UI及repository當下Pro狀態與overlay permission；Pro狀態撤销時關閉兩窗並清除搖桿移動，不停止既有定位服務。Pro說明四語增加懸浮工具。關閉某一窗只清理該窗pending/focus/state，ViewModel清理時全數清理。
+方法：地圖增加獨立懸浮工具FAB，搖桿恢復獨立FAB／控制面板。沿用單一Manager與既有位置prefs，使用獨立isCompanionEnabled／isJoystickEnabled狀態；開新模式前關舊模式，停止旧ticker。控制頁只提供開啟獨立搖桿的入口，仍保留探索操作。每次新開入口檢查UI及repository當下Pro狀態與overlay permission；Pro狀態撤销時關閉目前浮窗並清除搖桿移動，不停止既有定位服務。Pro說明四語增加懸浮工具。關閉及切換清理舊模式pending/focus/state，ViewModel清理時移除唯一window。
 
-Minimality check：只增加第二個現有Manager實例及分別state；不新建service、權限、付費商品或廣告錢包，不把搖桿移動權限改成免費。沿用既有owner、snap、theme／locale以及public window API。
+Minimality check：只拆開入口與模式state，復用原Manager；不新建service、權限、付費商品或廣告錢包，不把搖桿移動權限改成免費。沿用既有owner、snap、theme／locale以及public window API。
 
 INV-4: 新開任一窗時Pro必須有效；免費或repo已撤销但UI未更新時，顯示既有訂閱／看廣告對話框，無window/ticker啟動。獎勵依原SDK onReward授權，不由UI假造。
-INV-5: 兩窗各自顯示／拖曳／收合／關閉，不互相停用；Pro撤销、VM disposal均清理兩窗和movement，不殘留window／ticker。
-AC5: 免費點兩個入口都進既有Pro對話框；有效Pro兩個不同圖示可各自開啟；關閉一窗另一窗保留。單元覆蓋即時權限與撤销、Manager獨立性，實機UI覆蓋雙入口與close行為。
+INV-5: 同時最多一窗且一種enabled state；切換清理舊模式pending／focus／movement。Pro撤销、VM disposal均移除window並清理ticker，不殘留。
+AC5: 免費點兩個入口都進既有Pro對話框；有效Pro兩個不同圖示可切換開啟；開另一種時舊窗先移除。單元覆蓋即時權限、互斥切換與撤销，實機UI覆蓋工具／搖桿收合及close行為。
 AC6: 四語Pro清單明列懸浮工具和搖桿；既有paid／ad entitlement持續採同一來源。實際購買／正式廣告不在本次測試中觸發。
 
 Source paths: MapState、MapOverlays、MapScreen、MapViewModel、JoystickController/View、JoystickOverlayManager、ProUpgradeDialog、four locale strings及必要platform／VM／UI測試。root只A051設計／tracker／證據；此新增scope由使用者直接授權，away-gates:on提供符合證據後的Design Go／Result Go。
+
+## 半透明文字對比與接受範圍
+
+82%背景在底層黑／白極值下原次要文字與部分accent／error不足4.5；沿用既有局部palette，次要文字dark B4C0D1／light4F545B、lightaccent9D2808、error darkFFA49C／lightA51C16。新增compositeOver黑／白回歸，四語字串保持完整。
+
+實機公開UI已驗證真實IME、輸入欄不被蓋、收合後實際WindowManager bounds小於64dp、模式文字循環與兩種面板收合／關閉。手機持續有人切換前景，最新跨App逐鍵重測略過，保留早先Calculator同側3→3−與左右邊緣實測及最終window geometry證據；不稱所有Pikmin按鍵均已測。mockgps.db全部rows／hash一致；Google傳輸事件庫屬動態SDK記錄。主題備份DARK→最終LIGHT來源無法確定，保留目前LIGHT與語言zh-TW，不能宣稱所有設定完全一致。

@@ -334,6 +334,10 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 
 + 好，懸浮視窗跟虛擬搖桿的按鍵需分開，而且一樣要歸類在pro功能中，付費解鎖或是看廣告解鎖
 
++ <send_user_message_question_reply>
+  [{"answer":"一次顯示一種，開另一種時切換","question":"兩個按鍵拆開後，是否要讓懸浮工具與虛擬搖桿同時顯示？","questionItemId":"[\"request_user_input_async\",\"call_1Edtm34Gne08hzk1Bu2rSH8c\",0]"}]
+  </send_user_message_question_reply>
+
 ---
 
 ## [RUN-001] Event — 2026-10-12 14:13:53 +0800 (A-051)
@@ -375,3 +379,23 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 - **Still to do:** 全A051手機IME／兩側觸控／資料保留，最終獨立審查、draft PR及紀錄交付。
 - **Next work action:** 原穩定手機測試時段問題仍pending；收到可測試答覆後逐步核對實機，未稱整輪完成。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-005] Event — 2026-10-12 19:47:26 +0800 (A-051)
+
+- 使用者較新答覆「一次顯示一種，開另一種時切換」已取代同時顯示假設。最終共用原Manager、分別入口與state，開新模式先清舊模式，沿用訂閱或6h廣告Pro；source85ca564已push，舊prototype未交付。
+- 最終required三Gradle及AndroidTest成功284/0fail/60既有skip，公開UI含真實IME／小window尺寸／模式切換／兩面板close，最新OK1。主App兩個FAB名稱及bounds已實際讀到；新開入口會live檢查repo entitlement，VM測試含免費、UI尚未更新的撤銷及互斥切換。
+- Changed paths共19產品paths，對齊T1-T5。半透明小字合成色原不足4.5，新回歸先失敗4.47再局部修色通過。沒有付款／廣告reward／engine/schema變更；root只設計／接受證據與patch。
+- 收藏375／路線6／路線點591全rows/hash一致，Google傳輸事件SDK庫變動不稱全庫相同。主題DARK→LIGHT差異來源未能確定，保留目前LIGHT與zh-TW，未回写覆蓋。最新跨App逐鍵重測因手機持續換前景未完成；最終IME與實際window尺寸通過，保留先前Calculator實測。
+- 進入固定產品85ca564與root接受證據的最終full native審查，重用適用通過檢查，不重跑廣告／付款／整套測試。
+
+## [WIP-003] Checkpoint — 2026-10-12 19:49:04 +0800 (A-051)
+
+- **Finished:** Pen配置、靠邊／觸控修正、透明度與模式辨識、最新互斥入口與Pro授權，所有產品code已push85ca564；實機公開UI及資料接受證據保存。
+- **Running now:** 固定root證據與產品dual pin，準備full native只讀審查。
+- **Still to do:** 審查／host核對、single-topic stacked draft PR、紀錄closeout／push。
+- **Next work action:** 審查重用最新必要測試與正常旅程，不再碰正在使用的手機；具體限制已在device-acceptance／data-preservation明列。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-006] Event — 2026-10-12 19:49:38 +0800 (A-051)
+
+- tracker首次完成4項的格式驗證因T2/T4缺明確Proof欄失敗；前一WIP勾選早於成功驗證。現補入既有真實證據，validate --refresh通過4/5，沒有重跑產品測試或補造接受結果。
