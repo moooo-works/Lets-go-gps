@@ -1,0 +1,1785 @@
+diff --git a/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt b/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt
+new file mode 100644
+index 0000000..0f9a686
+--- /dev/null
++++ b/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt
+@@ -0,0 +1,200 @@
++package com.moooo_works.letsgogps
++
++import android.content.Context
++import android.content.Intent
++import androidx.activity.ComponentActivity
++import android.accessibilityservice.AccessibilityServiceInfo
++import android.graphics.Rect
++import android.os.SystemClock
++import android.view.accessibility.AccessibilityNodeInfo
++import android.view.accessibility.AccessibilityWindowInfo
++import androidx.compose.runtime.mutableStateOf
++import androidx.test.platform.app.InstrumentationRegistry
++import com.moooo_works.letsgogps.ui.map.*
++import com.google.android.gms.maps.model.LatLng
++import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
++import com.moooo_works.letsgogps.domain.LoopMode
++import org.junit.Assert.*
++import org.junit.Test
++
++class FloatingLayoutTest {
++    @Test fun edgeEntryExposesAllTabsAndSeparatesCollapseFromClose() {
++        val instrument = InstrumentationRegistry.getInstrumentation()
++        val context = instrument.targetContext
++        val activity = instrument.startActivitySync(Intent(context, ComponentActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
++        val locale = context.getSharedPreferences("mockgps_prefs", Context.MODE_PRIVATE).getString("language_pref", "") ?: ""
++        val strings = context.createConfigurationContext(overlayConfiguration(context.resources.configuration, locale))
++        val prefs = context.getSharedPreferences("joystick_overlay_prefs", Context.MODE_PRIVATE)
++        val original = listOf("joystick_x", "joystick_y").associateWith { if (prefs.contains(it)) prefs.getInt(it, 0) else null }
++        val automation = instrument.uiAutomation
++        val originalServiceFlags = automation.serviceInfo.flags
++        automation.serviceInfo = automation.serviceInfo.apply { flags = flags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS }
++        val sample = GeocodedLocation("中央公園（示意）", "示意中山路", LatLng(25.03401, 121.56447))
++        val state = mutableStateOf(FloatingCompanionState(searchResults = listOf(sample)))
++        val mapState = mutableStateOf(MapUiState())
++        var copied: LatLng? = null
++        var selections = 0
++        var closed = false
++        lateinit var manager: JoystickOverlayManager
++        var joystickClosed = false
++        val actions = FloatingCompanionActions(
++            onExpandedChange = { state.value = state.value.copy(expanded = it) },
++            onTabChange = { state.value = state.value.copy(tab = it) },
++            onQueryChange = {}, onSearch = {}, onPaste = {}, onSelect = { selections++ },
++            onFolderChange = {}, onFavoritesChange = {}, onLoadRoute = {},
++            onLocate = {}, onQueue = {}, onApplyQueue = {}, onSave = {},
++            onConfirmReplacement = {}, onCancelReplacement = {}, onPlayPause = {},
++            onStop = {}, onSpeedChange = {}, onLoopChange = {
++                mapState.value = mapState.value.copy(loopMode = when (mapState.value.loopMode) {
++                    LoopMode.NONE -> LoopMode.LOOP
++                    LoopMode.LOOP -> LoopMode.BOUNCE
++                    LoopMode.BOUNCE -> LoopMode.NONE
++                })
++            }, onExplore = {},
++            onCopyCurrent = {}, onCopySelected = {}, onClose = { closed = true; manager.hide() },
++            onOpenApp = {}, onInputFocus = { manager.setInputFocusable(it) }, onWindowDrag = { _, _ -> }, onWindowDragEnd = {}, onCopyLocation = { copied = it }
++        )
++        fun nodes(node: AccessibilityNodeInfo): List<AccessibilityNodeInfo> = buildList {
++            node.refresh()
++            add(node)
++            for (index in 0 until node.childCount) node.getChild(index)?.let { addAll(nodes(it)) }
++        }
++        fun clickableAncestor(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
++            var current: AccessibilityNodeInfo? = node
++            repeat(6) { if (current?.isClickable == true) return current; current = current?.parent }
++            return null
++        }
++        fun find(description: String): AccessibilityNodeInfo {
++            val deadline = SystemClock.uptimeMillis() + 5000
++            while (SystemClock.uptimeMillis() < deadline) {
++                automation.windows.mapNotNull { it.root }.filter { it.packageName?.toString() == context.packageName }.forEach { root ->
++                    nodes(root).filter { it.contentDescription?.toString() == description }.mapNotNull(::clickableAncestor).firstOrNull()?.let { return it }
++                }
++                SystemClock.sleep(100)
++            }
++            throw AssertionError("Missing clickable: $description")
++        }
++        fun click(description: String) { assertTrue(find(description).performAction(AccessibilityNodeInfo.ACTION_CLICK)) }
++        fun assertSmallWindow(description: String, maximum: Int) {
++            val deadline = SystemClock.uptimeMillis() + 5000
++            while (SystemClock.uptimeMillis() < deadline) {
++                for (window in automation.windows) {
++                    val root = window.root ?: continue
++                    if (root.packageName?.toString() != context.packageName ||
++                        nodes(root).none { it.contentDescription?.toString() == description }) continue
++                    val rect = Rect().also(window::getBoundsInScreen)
++                    if (rect.width() in 1..maximum && rect.height() in 1..maximum) return
++                }
++                SystemClock.sleep(100)
++            }
++            fail("Collapsed WindowManager bounds must be small: $description")
++        }
++        try {
++            instrument.runOnMainSync {
++                manager = JoystickOverlayManager(context)
++                manager.show { FloatingCompanionView(mapState.value, state.value, actions) {} }
++                manager.setInputFocusable(true)
++            }
++            val title = strings.getString(R.string.floating_title)
++            val entry = find(title)
++            val bounds = Rect().also(entry::getBoundsInScreen)
++            val maxEntry = (64 * context.resources.displayMetrics.density).toInt()
++            assertTrue(bounds.width() in 1..maxEntry && bounds.height() in 1..maxEntry)
++            assertNotEquals(title, entry.text?.toString())
++            assertSmallWindow(title, maxEntry)
++            click(title)
++            for (label in listOf(R.string.floating_search, R.string.floating_saved, R.string.nav_routes, R.string.floating_control, R.string.floating_map)) {
++                val tab = find(strings.getString(label))
++                val rect = Rect().also(tab::getBoundsInScreen)
++                assertFalse(rect.isEmpty)
++            }
++            val fieldDeadline = SystemClock.uptimeMillis() + 5000
++            var field: AccessibilityNodeInfo? = null
++            while (field == null && SystemClock.uptimeMillis() < fieldDeadline) {
++                field = automation.windows.mapNotNull { it.root }
++                    .filter { it.packageName?.toString() == context.packageName }
++                    .flatMap(::nodes).firstOrNull { it.className?.toString() == "android.widget.EditText" }
++                if (field == null) SystemClock.sleep(100)
++            }
++            assertNotNull(field)
++            assertTrue(field!!.performAction(AccessibilityNodeInfo.ACTION_CLICK))
++            val keyboardDeadline = SystemClock.uptimeMillis() + 5000
++            var keyboard: AccessibilityWindowInfo? = null
++            while (keyboard == null && SystemClock.uptimeMillis() < keyboardDeadline) {
++                keyboard = automation.windows.firstOrNull { it.type == AccessibilityWindowInfo.TYPE_INPUT_METHOD }
++                if (keyboard == null) SystemClock.sleep(100)
++            }
++            assertNotNull("Search must open the keyboard", keyboard)
++            field!!.refresh()
++            val fieldBounds = Rect().also(field!!::getBoundsInScreen)
++            val keyboardBounds = Rect().also(keyboard!!::getBoundsInScreen)
++            assertTrue("Search field must remain above keyboard", fieldBounds.bottom <= keyboardBounds.top)
++            click(strings.getString(R.string.floating_collapse))
++            val collapsedBounds = Rect().also(find(title)::getBoundsInScreen)
++            assertTrue("No transparent full-height window after collapse", collapsedBounds.height() <= maxEntry)
++            assertSmallWindow(title, maxEntry)
++            click(title)
++            click(strings.getString(R.string.floating_copy_selected))
++            instrument.runOnMainSync { assertEquals(sample.latLng, copied); assertEquals(0, selections); assertEquals(CompanionTab.SEARCH, state.value.tab) }
++            click(strings.getString(R.string.nav_routes))
++            val switchMode = strings.getString(R.string.route_loop_cd)
++            for ((index, label) in listOf(R.string.route_loop_none, R.string.route_loop_loop, R.string.route_loop_bounce, R.string.route_loop_none).withIndex()) {
++                val deadline = SystemClock.uptimeMillis() + 5000
++                var visible = false
++                while (!visible && SystemClock.uptimeMillis() < deadline) {
++                    visible = automation.windows.mapNotNull { it.root }
++                        .filter { it.packageName?.toString() == context.packageName }
++                        .flatMap(::nodes).any { it.text?.toString() == strings.getString(label) && it.isVisibleToUser }
++                    if (!visible) SystemClock.sleep(100)
++                }
++                assertTrue("Mode label must be visible: ${strings.getString(label)}; state=${mapState.value.loopMode}", visible)
++                if (index < 3) {
++                    click(switchMode)
++                    instrument.waitForIdleSync()
++                    SystemClock.sleep(300)
++                }
++            }
++            click(strings.getString(R.string.floating_collapse))
++            find(title)
++            instrument.runOnMainSync { assertFalse(state.value.expanded); assertFalse(closed) }
++            click(title)
++            click(strings.getString(R.string.joystick_menu))
++            val deadline = SystemClock.uptimeMillis() + 5000
++            var close: AccessibilityNodeInfo? = null
++            while (close == null && SystemClock.uptimeMillis() < deadline) {
++                automation.windows.mapNotNull { it.root }.filter { it.packageName?.toString() == context.packageName }.forEach { root ->
++                    close = nodes(root).filter { it.text?.toString() == strings.getString(R.string.floating_close) }.mapNotNull(::clickableAncestor).firstOrNull()
++                }
++                if (close == null) SystemClock.sleep(100)
++            }
++            assertNotNull(close)
++            assertTrue(close!!.performAction(AccessibilityNodeInfo.ACTION_CLICK))
++            instrument.waitForIdleSync()
++            instrument.runOnMainSync {
++                assertTrue(closed)
++                manager.show {
++                    StandaloneJoystickOverlay(
++                        onClose = { joystickClosed = true; manager.hide() },
++                        onCollapse = { manager.snapToEdge() },
++                        onWindowDrag = { dx, dy -> manager.updatePosition(dx, dy) },
++                        onWindowDragEnd = { manager.snapToEdge() }
++                    ) {
++                        JoystickOverlayView(TransportMode.WALKING, { _, _ -> }, { _, _ -> }, {}, {}, {})
++                    }
++                }
++            }
++            click(strings.getString(R.string.joystick_collapse))
++            find(strings.getString(R.string.joystick_title))
++            assertSmallWindow(strings.getString(R.string.joystick_title), maxEntry)
++            click(strings.getString(R.string.joystick_title))
++            click(strings.getString(R.string.joystick_close))
++            instrument.runOnMainSync { assertTrue(joystickClosed) }
++        } finally {
++            instrument.runOnMainSync { manager.hide(); activity.finish() }
++            val editor = prefs.edit()
++            original.forEach { (key, value) -> if (value == null) editor.remove(key) else editor.putInt(key, value) }
++            editor.commit()
++            automation.serviceInfo = automation.serviceInfo.apply { flags = originalServiceFlags }
++        }
++    }
++}
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionState.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionState.kt
+index 00d8546..c9cbd31 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionState.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionState.kt
+@@ -73,7 +73,8 @@ data class FloatingCompanionActions(
+     val onOpenApp: () -> Unit,
+     val onInputFocus: (Boolean) -> Unit,
+     val onWindowDrag: (Float, Float) -> Unit,
+-    val onWindowDragEnd: () -> Unit
++    val onWindowDragEnd: () -> Unit,
++    val onCopyLocation: (LatLng) -> Unit = {}
+ )
+ 
+ fun formatCompanionCoordinate(location: LatLng): String =
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt
+index d621048..33a3aaf 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt
+@@ -1,33 +1,54 @@
+ package com.moooo_works.letsgogps.ui.map
+ 
+ import androidx.compose.foundation.BorderStroke
++import androidx.compose.foundation.background
+ import androidx.compose.foundation.clickable
+ import androidx.compose.foundation.gestures.detectDragGestures
+-import androidx.compose.foundation.horizontalScroll
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.foundation.lazy.itemsIndexed
+ import androidx.compose.foundation.rememberScrollState
++import androidx.compose.foundation.selection.selectable
++import androidx.compose.foundation.shape.CircleShape
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.foundation.text.BasicTextField
+ import androidx.compose.foundation.text.KeyboardActions
+ import androidx.compose.foundation.text.KeyboardOptions
+-import androidx.compose.ui.text.input.ImeAction
+ import androidx.compose.foundation.verticalScroll
++import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.filled.*
++import androidx.compose.material.icons.outlined.NearMe
+ import androidx.compose.material3.*
+ import androidx.compose.runtime.*
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.focus.onFocusChanged
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.luminance
++import androidx.compose.ui.graphics.SolidColor
+ import androidx.compose.ui.input.pointer.pointerInput
+ import androidx.compose.ui.platform.LocalConfiguration
+ import androidx.compose.ui.platform.LocalContext
++import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.platform.LocalFocusManager
+ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+ import androidx.compose.ui.res.stringResource
++import androidx.compose.ui.semantics.Role
++import androidx.compose.ui.semantics.semantics
++import androidx.compose.ui.semantics.stateDescription
++import androidx.compose.ui.semantics.contentDescription
++import androidx.compose.ui.text.input.ImeAction
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.text.style.TextOverflow
+ import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
+ import com.google.android.gms.maps.MapsInitializer
++import com.google.android.gms.maps.CameraUpdateFactory
+ import com.google.android.gms.maps.model.CameraPosition
+ import com.google.android.gms.maps.model.LatLng
++import com.google.android.gms.maps.model.BitmapDescriptorFactory
+ import com.google.maps.android.compose.*
+ import com.moooo_works.letsgogps.R
+ import com.moooo_works.letsgogps.domain.LoopMode
+@@ -43,152 +64,270 @@ fun FloatingCompanionView(
+ ) {
+     val focus = LocalFocusManager.current
+     val keyboard = LocalSoftwareKeyboardController.current
+-    fun releaseInput() { focus.clearFocus(force = true); keyboard?.hide(); actions.onInputFocus(false) }
++    var inputFocused by remember { mutableStateOf(false) }
++    fun releaseInput() { inputFocused = false; focus.clearFocus(force = true); keyboard?.hide(); actions.onInputFocus(false) }
+     LaunchedEffect(companionState.expanded, companionState.tab) {
+         if (!companionState.expanded || companionState.tab !in setOf(CompanionTab.SEARCH, CompanionTab.SAVED)) releaseInput()
+     }
+-    val drag = Modifier.pointerInput(actions.onWindowDrag, actions.onWindowDragEnd) {
+-        detectDragGestures(onDragEnd = actions.onWindowDragEnd, onDragCancel = actions.onWindowDragEnd) { change, delta ->
+-            change.consume(); actions.onWindowDrag(delta.x, delta.y)
++    val windowDrag by rememberUpdatedState(actions.onWindowDrag)
++    val windowDragEnd by rememberUpdatedState(actions.onWindowDragEnd)
++    val drag = Modifier.pointerInput(Unit) {
++        detectDragGestures(onDragEnd = { windowDragEnd() }, onDragCancel = { windowDragEnd() }) { change, delta ->
++            change.consume(); windowDrag(delta.x, delta.y)
+         }
+     }
++    val colors = MaterialTheme.colorScheme
++    val success = if (colors.surface.luminance() < .5f) Color(0xFF7DDC9A) else Color(0xFF1E7B3C)
++    val blocked = mapState.showStepSyncCreditDialog || mapState.showHealthCheck || mapState.showProUpgrade || mapState.mockError != null
+     if (!companionState.expanded) {
+-        Surface(shape = MaterialTheme.shapes.large, shadowElevation = 12.dp,
+-            color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface,
+-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) {
+-            Text(stringResource(R.string.floating_title), Modifier.then(drag).clickable { actions.onExpandedChange(true) }.padding(16.dp))
++        Surface(shape = RoundedCornerShape(16.dp), shadowElevation = 8.dp, color = colors.surface.copy(alpha = .90f),
++            border = BorderStroke(1.5.dp, colors.primary)) {
++            Box(Modifier.size(48.dp).then(drag).clickable { actions.onExpandedChange(true) }, contentAlignment = Alignment.Center) {
++                Icon(Icons.Outlined.NearMe, stringResource(R.string.floating_title), tint = colors.primary, modifier = Modifier.size(24.dp))
++                Box(Modifier.align(Alignment.TopStart).padding(6.dp).size(8.dp)
++                    .background(if (blocked) colors.error else if (mapState.isMocking) success else colors.onSurfaceVariant, CircleShape))
++            }
+         }
+         return
+     }
+     val config = LocalConfiguration.current
+-    val panelHeight = minOf(600, config.screenHeightDp - 100).coerceAtLeast(200).dp
+-    val compactHeight = config.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+-    Surface(shape = MaterialTheme.shapes.large, shadowElevation = 12.dp,
+-        color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface,
+-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+-        modifier = Modifier.widthIn(max = 320.dp).width(320.dp).heightIn(max = panelHeight).imePadding()) {
+-        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+-            Text(stringResource(R.string.floating_title), Modifier.fillMaxWidth().then(drag).padding(8.dp), style = MaterialTheme.typography.titleMedium)
+-            Row {
+-                TextButton(onClick = { releaseInput(); actions.onExpandedChange(false) }) { Text(stringResource(R.string.floating_collapse)) }
+-                TextButton(onClick = { releaseInput(); actions.onOpenApp() }) { Text(stringResource(R.string.floating_open_app)) }
+-                TextButton(onClick = { releaseInput(); actions.onClose() }) { Text(stringResource(R.string.floating_close)) }
+-            }
+-            Row(Modifier.horizontalScroll(rememberScrollState())) {
+-                CompanionTab.entries.forEach { tab ->
+-                    FilterChip(selected = companionState.tab == tab, onClick = { releaseInput(); actions.onTabChange(tab) }, label = { Text(stringResource(tab.label())) })
++    val panelWidth = minOf(358, config.screenWidthDp - 32).coerceAtLeast(280).dp
++    val panelHeight = minOf(660, config.screenHeightDp - 80).coerceAtLeast(220).dp
++    val compact = config.screenHeightDp < 460
++    val selected = companionState.selectedLocation.takeIf { companionState.tab == CompanionTab.MAP }
++    val pinnedSelection = selected != null && !compact
++    val keyboardVisible = inputFocused && WindowInsets.ime.getBottom(LocalDensity.current) > 0
++    val bodyHeight = (panelHeight - if (pinnedSelection) 246.dp else if (keyboardVisible) 72.dp else 128.dp).coerceAtLeast(44.dp)
++    val current = currentCompanionCoordinate(mapState)
++    var menuOpen by remember { mutableStateOf(false) }
++    val select: (GeocodedLocation) -> Unit = { releaseInput(); actions.onSelect(it); actions.onTabChange(CompanionTab.MAP) }
++    Surface(shape = RoundedCornerShape(22.dp), shadowElevation = 12.dp, color = colors.surface.copy(alpha = .82f), contentColor = colors.onSurface,
++        border = BorderStroke(1.dp, colors.outlineVariant),
++        modifier = Modifier.width(panelWidth).heightIn(max = panelHeight).then(if (inputFocused) Modifier.imePadding() else Modifier)) {
++        Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
++            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
++                Box(Modifier.width(28.dp).height(48.dp).then(drag), contentAlignment = Alignment.Center) {
++                    Icon(Icons.Default.DragIndicator, stringResource(R.string.floating_title), Modifier.size(18.dp), tint = colors.onSurfaceVariant)
+                 }
+-            }
+-            if (mapState.showStepSyncCreditDialog || mapState.showHealthCheck || mapState.showProUpgrade || mapState.mockError != null) {
+-                Text(stringResource(R.string.floating_blocked), color = MaterialTheme.colorScheme.error)
+-                TextButton(onClick = { releaseInput(); actions.onOpenApp() }) { Text(stringResource(R.string.floating_open_app)) }
+-            }
+-            if (companionState.tab == CompanionTab.MAP && !compactHeight) {
+-                CompanionMap(mapState, companionState, actions)
+-            }
+-            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+-            if (companionState.tab == CompanionTab.MAP && compactHeight) {
+-                CompanionMap(mapState, companionState, actions)
+-            }
+-            val current = currentCompanionCoordinate(mapState)
+-            Text(stringResource(R.string.floating_current, current?.let(::formatCompanionCoordinate) ?: stringResource(R.string.floating_inactive)))
+-            TextButton(onClick = actions.onCopyCurrent, enabled = current != null) { Text(stringResource(R.string.floating_copy_current)) }
+-            Text(stringResource(R.string.floating_usage, companionState.dailySteps, companionState.dailyQuota, mapState.featureCredits))
+-            when (companionState.tab) {
+-                CompanionTab.SEARCH -> {
+-                    OutlinedTextField(value = companionState.query, onValueChange = actions.onQueryChange,
+-                        label = { Text(stringResource(R.string.floating_query)) }, singleLine = true,
+-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+-                        keyboardActions = KeyboardActions(onSearch = { releaseInput(); actions.onSearch() }),
+-                        modifier = Modifier.fillMaxWidth().onFocusChanged { actions.onInputFocus(it.isFocused) })
+-                    Row {
+-                        TextButton(onClick = { releaseInput(); actions.onSearch() }, enabled = !companionState.searching) { Text(stringResource(R.string.floating_search)) }
+-                        TextButton(onClick = { releaseInput(); actions.onPaste() }) { Text(stringResource(R.string.floating_paste)) }
+-                    }
+-                    if (companionState.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
+-                    Text(stringResource(R.string.floating_saved))
+-                    SavedRows(companionState, actions)
+-                    Text(stringResource(R.string.floating_places))
+-                    LazyColumn(Modifier.fillMaxWidth().heightIn(max = 180.dp)) {
+-                        itemsIndexed(companionState.searchResults, key = { index, place -> "${place.latLng.latitude}:${place.latLng.longitude}:$index" }) { _, place -> LocationRow(place, actions.onSelect) }
++                Column(Modifier.weight(1f).then(drag)) {
++                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
++                        Box(Modifier.size(8.dp).background(if (blocked) colors.error else if (mapState.isMocking) success else colors.onSurfaceVariant, CircleShape))
++                        Text(stringResource(if (mapState.isMocking) R.string.floating_active else R.string.floating_inactive), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                     }
++                    Text(current?.let(::formatCompanionCoordinate) ?: stringResource(R.string.floating_title), fontSize = 12.sp,
++                        color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                 }
+-                CompanionTab.SAVED -> {
+-                    OutlinedTextField(value = companionState.query, onValueChange = actions.onQueryChange,
+-                        label = { Text(stringResource(R.string.floating_query)) }, singleLine = true,
+-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+-                        keyboardActions = KeyboardActions(onDone = { releaseInput() }),
+-                        modifier = Modifier.fillMaxWidth().onFocusChanged { actions.onInputFocus(it.isFocused) })
+-                    Row(Modifier.horizontalScroll(rememberScrollState())) {
+-                        FilterChip(selected = companionState.folderId == null, onClick = { actions.onFolderChange(null) }, label = { Text(stringResource(R.string.floating_all)) })
+-                        companionState.folders.forEach { folder -> FilterChip(selected = companionState.folderId == folder.id, onClick = { actions.onFolderChange(folder.id) }, label = { Text(folder.name) }) }
++                IconButton(onClick = { releaseInput(); actions.onExpandedChange(false) }) { Icon(Icons.Default.CloseFullscreen, stringResource(R.string.floating_collapse), Modifier.size(20.dp)) }
++                Box {
++                    IconButton(onClick = { releaseInput(); menuOpen = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.joystick_menu), Modifier.size(20.dp)) }
++                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, containerColor = colors.surface, tonalElevation = 0.dp) {
++                        DropdownMenuItem(text = { Text(stringResource(R.string.floating_copy_current)) }, onClick = { menuOpen = false; actions.onCopyCurrent() }, enabled = current != null)
++                        DropdownMenuItem(text = { Text(stringResource(R.string.floating_open_app)) }, onClick = { menuOpen = false; actions.onOpenApp() })
++                        HorizontalDivider()
++                        DropdownMenuItem(text = { Text(stringResource(R.string.floating_close), color = colors.error) }, onClick = { menuOpen = false; actions.onClose() })
+                     }
+-                    FilterChip(selected = companionState.favoritesOnly, onClick = { actions.onFavoritesChange(!companionState.favoritesOnly) }, label = { Text(stringResource(R.string.floating_favorites)) })
+-                    SavedRows(companionState, actions)
+                 }
+-                CompanionTab.ROUTES -> {
+-                    LazyColumn(Modifier.fillMaxWidth().heightIn(max = 180.dp)) {
+-                        items(companionState.routes, key = { it.id }) { route ->
+-                            TextButton(onClick = { actions.onLoadRoute(route.id) }) { Text(stringResource(R.string.floating_route_item, route.name, route.pointCount)) }
++            }
++            Column(Modifier.fillMaxWidth().heightIn(max = bodyHeight).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
++                if (blocked) {
++                    Text(stringResource(R.string.floating_blocked), color = colors.error, fontSize = 13.sp)
++                    TextButton(onClick = { releaseInput(); actions.onOpenApp() }) { Text(stringResource(R.string.floating_open_app)) }
++                }
++                when (companionState.tab) {
++                    CompanionTab.SEARCH -> {
++                        CompanionSearchField(companionState, actions, onFocus = { inputFocused = it; actions.onInputFocus(it) }, submit = { releaseInput(); actions.onSearch() }, paste = { releaseInput(); actions.onPaste() })
++                        Text(stringResource(R.string.floating_query), Modifier.padding(horizontal = 8.dp), fontSize = 12.sp, color = colors.onSurfaceVariant)
++                        if (companionState.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
++                        if (companionState.savedLocations.isNotEmpty()) {
++                            Text(stringResource(R.string.floating_saved), Modifier.padding(horizontal = 8.dp), fontSize = 12.sp, color = colors.onSurfaceVariant)
++                            SavedRows(companionState, actions, select)
++                        }
++                        if (companionState.searchResults.isNotEmpty()) {
++                            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 224.dp)) {
++                                itemsIndexed(companionState.searchResults, key = { index, place -> "${place.latLng.latitude}:${place.latLng.longitude}:$index" }) { _, place ->
++                                    LocationRow(place, companionState.selectedLocation?.latLng == place.latLng, select, actions.onCopyLocation)
++                                }
++                            }
+                         }
+                     }
+-                    Row {
+-                        TextButton(onClick = actions.onPlayPause) { Text(stringResource(when (mapState.simulationState) { SimulationState.PLAYING -> R.string.route_pause; SimulationState.PAUSED -> R.string.action_resume; else -> R.string.route_play })) }
+-                        TextButton(onClick = actions.onStop) { Text(stringResource(R.string.route_stop)) }
++                    CompanionTab.SAVED -> {
++                        CompanionSearchField(companionState, actions, onFocus = { inputFocused = it; actions.onInputFocus(it) }, submit = { releaseInput() }, paste = { releaseInput(); actions.onPaste() })
++                        var foldersOpen by remember { mutableStateOf(false) }
++                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
++                            Box(Modifier.weight(1f)) {
++                                FilledTonalButton(onClick = { releaseInput(); foldersOpen = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(8.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.surfaceVariant, contentColor = colors.onSurface)) {
++                                    Icon(Icons.Default.Folder, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
++                                    Text(companionState.folders.firstOrNull { it.id == companionState.folderId }?.name ?: stringResource(R.string.floating_all), Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
++                                    Icon(Icons.Default.ExpandMore, null, Modifier.size(18.dp))
++                                }
++                                DropdownMenu(foldersOpen, { foldersOpen = false }, containerColor = colors.surface, tonalElevation = 0.dp) {
++                                    DropdownMenuItem(text = { Text(stringResource(R.string.floating_all)) }, onClick = { foldersOpen = false; actions.onFolderChange(null) })
++                                    companionState.folders.forEach { folder -> DropdownMenuItem(text = { Text(folder.name) }, onClick = { foldersOpen = false; actions.onFolderChange(folder.id) }) }
++                                }
++                            }
++                            FilterChip(selected = companionState.favoritesOnly, onClick = { releaseInput(); actions.onFavoritesChange(!companionState.favoritesOnly) },
++                                leadingIcon = { Icon(Icons.Default.StarBorder, null, Modifier.size(18.dp)) }, label = { Text(stringResource(R.string.floating_favorites), fontSize = 12.sp) })
++                        }
++                        SavedRows(companionState, actions, select)
++                    }
++                    CompanionTab.ROUTES -> {
++                        LazyColumn(Modifier.fillMaxWidth().heightIn(max = 168.dp)) {
++                            items(companionState.routes, key = { it.id }) { route ->
++                                Surface(shape = RoundedCornerShape(12.dp), color = colors.surfaceVariant) {
++                                    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { actions.onLoadRoute(route.id) }.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
++                                        Icon(Icons.Default.Route, null, Modifier.size(20.dp), tint = colors.primary)
++                                        Text(stringResource(R.string.floating_route_item, route.name, route.pointCount), fontSize = 14.sp)
++                                    }
++                                }
++                            }
++                        }
++                        Surface(shape = RoundedCornerShape(16.dp), color = colors.surfaceVariant) {
++                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
++                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
++                                    val (modeIcon, modeLabel) = when (mapState.loopMode) {
++                                        LoopMode.NONE -> Icons.Default.ArrowForward to stringResource(R.string.route_loop_none)
++                                        LoopMode.LOOP -> Icons.Default.Repeat to stringResource(R.string.route_loop_loop)
++                                        LoopMode.BOUNCE -> Icons.Default.SyncAlt to stringResource(R.string.route_loop_bounce)
++                                    }
++                                    val switchMode = stringResource(R.string.route_loop_cd)
++                                    FilledTonalButton(onClick = actions.onLoopChange,
++                                        modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = switchMode; stateDescription = modeLabel },
++                                        shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 10.dp),
++                                        colors = ButtonDefaults.filledTonalButtonColors(
++                                            containerColor = if (mapState.loopMode == LoopMode.NONE) colors.surface else colors.secondaryContainer,
++                                            contentColor = if (mapState.loopMode == LoopMode.NONE) colors.onSurfaceVariant else colors.primary)) {
++                                        Icon(modeIcon, null, Modifier.size(18.dp))
++                                        Spacer(Modifier.width(4.dp))
++                                        Text(modeLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold)
++                                    }
++                                    IconButton(onClick = actions.onStop) { Icon(Icons.Default.Stop, stringResource(R.string.route_stop), tint = colors.error) }
++                                    FilledIconButton(onClick = actions.onPlayPause, modifier = Modifier.size(56.dp)) {
++                                        Icon(if (mapState.simulationState == SimulationState.PLAYING) Icons.Default.Pause else Icons.Default.PlayArrow,
++                                            stringResource(when(mapState.simulationState) { SimulationState.PLAYING -> R.string.route_pause; SimulationState.PAUSED -> R.string.action_resume; else -> R.string.route_play }))
++                                    }
++                                }
++                                Text(stringResource(R.string.floating_speed, mapState.speedKmh), fontSize = 13.sp)
++                                Slider(value = mapState.speedKmh.toFloat().coerceIn(ROUTE_SPEED_MIN_KMH, ROUTE_SPEED_MAX_KMH), onValueChange = { actions.onSpeedChange(it.toDouble()) }, valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH)
++                            }
++                        }
++                    }
++                    CompanionTab.CONTROL -> {
++                        joystickContent()
++                        FilledTonalButton(onClick = actions.onExplore, enabled = companionState.selectedLocation != null, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.surfaceVariant, contentColor = colors.onSurface)) {
++                            Icon(Icons.Default.Explore, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.floating_explore), fontSize = 13.sp)
++                        }
++                    }
++                    CompanionTab.MAP -> {
++                        if (selected != null) {
++                            Row(verticalAlignment = Alignment.CenterVertically) {
++                                IconButton(onClick = { actions.onTabChange(CompanionTab.SEARCH) }) { Icon(Icons.Default.ArrowBack, stringResource(R.string.floating_search)) }
++                                Text(selected.name, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
++                            }
++                        }
++                        CompanionMap(mapState, companionState, actions)
++                        selected?.let {
++                            Column(Modifier.padding(horizontal = 8.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
++                                Text(stringResource(R.string.floating_selected), fontSize = 12.sp, color = colors.onSurfaceVariant)
++                                Text(formatCompanionCoordinate(it.latLng), fontSize = 20.sp, fontWeight = FontWeight.Bold)
++                                if (it.address.isNotBlank()) Text(it.address, fontSize = 12.sp, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
++                            }
++                            if (!pinnedSelection) SelectionActions(actions)
++                        }
+                     }
+-                    Text(stringResource(R.string.floating_speed, mapState.speedKmh))
+-                    Slider(value = mapState.speedKmh.toFloat().coerceIn(ROUTE_SPEED_MIN_KMH, ROUTE_SPEED_MAX_KMH), onValueChange = { actions.onSpeedChange(it.toDouble()) }, valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH)
+-                    TextButton(onClick = actions.onLoopChange) { Text(stringResource(when(mapState.loopMode) { LoopMode.NONE -> R.string.route_loop_none; LoopMode.LOOP -> R.string.route_loop_loop; LoopMode.BOUNCE -> R.string.route_loop_bounce })) }
+                 }
+-                CompanionTab.CONTROL -> {
+-                    joystickContent()
+-                    TextButton(onClick = actions.onExplore, enabled = companionState.selectedLocation != null) { Text(stringResource(R.string.floating_explore)) }
++                if (companionState.queuedLocations.isNotEmpty()) {
++                    Text(stringResource(R.string.floating_queued, companionState.queuedLocations.size), fontSize = 12.sp)
++                    TextButton(onClick = actions.onApplyQueue, enabled = companionState.queuedLocations.size >= 2) { Text(stringResource(R.string.floating_apply)) }
+                 }
+-                CompanionTab.MAP -> Unit
+-            }
+-            companionState.selectedLocation?.let { selected ->
+-                HorizontalDivider()
+-                Text(stringResource(R.string.floating_selected))
+-                Text(selected.name)
+-                if (selected.address.isNotBlank()) Text(selected.address)
+-                Text(formatCompanionCoordinate(selected.latLng))
+-                TextButton(onClick = actions.onCopySelected) { Text(stringResource(R.string.floating_copy_selected)) }
+-                Row(Modifier.horizontalScroll(rememberScrollState())) {
+-                    TextButton(onClick = actions.onLocate) { Text(stringResource(R.string.floating_locate)) }
+-                    TextButton(onClick = actions.onSave) { Text(stringResource(R.string.floating_save)) }
+-                    TextButton(onClick = actions.onQueue) { Text(stringResource(R.string.floating_queue)) }
++                if (companionState.replacement != null) {
++                    Text(stringResource(R.string.floating_replace), color = colors.error)
++                    Row {
++                        TextButton(onClick = actions.onConfirmReplacement) { Text(stringResource(R.string.floating_confirm)) }
++                        TextButton(onClick = actions.onCancelReplacement) { Text(stringResource(R.string.floating_cancel)) }
++                    }
+                 }
++                companionState.message?.let { Text(stringResource(it.label()), color = colors.primary, fontSize = 12.sp) }
++                Text(stringResource(R.string.floating_usage, companionState.dailySteps, companionState.dailyQuota, mapState.featureCredits), Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 12.sp, color = colors.onSurfaceVariant)
+             }
+-            Text(stringResource(R.string.floating_queued, companionState.queuedLocations.size))
+-            TextButton(onClick = actions.onApplyQueue, enabled = companionState.queuedLocations.size >= 2) { Text(stringResource(R.string.floating_apply)) }
+-            if (companionState.replacement != null) {
+-                Text(stringResource(R.string.floating_replace))
+-                Row {
+-                    TextButton(onClick = actions.onConfirmReplacement) { Text(stringResource(R.string.floating_confirm)) }
+-                    TextButton(onClick = actions.onCancelReplacement) { Text(stringResource(R.string.floating_cancel)) }
++            if (pinnedSelection) SelectionActions(actions)
++            if (!keyboardVisible) {
++            HorizontalDivider(color = colors.outlineVariant)
++            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
++                CompanionTab.entries.forEach { tab ->
++                    val selectedTab = companionState.tab == tab
++                    val tint = if (selectedTab) colors.primary else colors.onSurfaceVariant
++                    Surface(modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp), color = if (selectedTab) colors.secondaryContainer else Color.Transparent) {
++                        Column(Modifier.fillMaxWidth().heightIn(min = 56.dp).selectable(selectedTab, role = Role.Tab, onClick = { releaseInput(); actions.onTabChange(tab) }).padding(vertical = 6.dp),
++                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
++                            Icon(tab.icon(), stringResource(tab.label()), Modifier.size(22.dp), tint = tint)
++                            Text(stringResource(tab.shortLabel()), fontSize = 12.sp, color = tint, fontWeight = if (selectedTab) FontWeight.Bold else FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
++                        }
++                    }
+                 }
+             }
+-            companionState.message?.let { Text(stringResource(it.label()), color = MaterialTheme.colorScheme.primary) }
+             }
+         }
+     }
+ }
+ 
+ @Composable
+-private fun SavedRows(state: FloatingCompanionState, actions: FloatingCompanionActions) {
+-    LazyColumn(Modifier.fillMaxWidth().heightIn(max = 180.dp)) {
++private fun CompanionSearchField(state: FloatingCompanionState, actions: FloatingCompanionActions, onFocus: (Boolean) -> Unit, submit: () -> Unit, paste: () -> Unit) {
++    val colors = MaterialTheme.colorScheme
++    Surface(shape = RoundedCornerShape(14.dp), color = colors.surfaceVariant, border = BorderStroke(1.5.dp, colors.primary)) {
++        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
++            IconButton(onClick = submit, enabled = !state.searching) { Icon(Icons.Default.Search, stringResource(R.string.floating_search), Modifier.size(20.dp), tint = colors.onSurfaceVariant) }
++            BasicTextField(state.query, actions.onQueryChange, singleLine = true, cursorBrush = SolidColor(colors.primary), textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface, fontSize = 16.sp),
++                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search), keyboardActions = KeyboardActions(onSearch = { submit() }),
++                modifier = Modifier.weight(1f).onFocusChanged { onFocus(it.isFocused) }, decorationBox = { inner ->
++                    Box {
++                        if (state.query.isEmpty()) Text(stringResource(R.string.floating_query), color = colors.onSurfaceVariant, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
++                        inner()
++                    }
++                })
++            IconButton(onClick = { actions.onQueryChange("") }, enabled = state.query.isNotEmpty()) { Icon(Icons.Default.Close, stringResource(R.string.map_search_clear), Modifier.size(20.dp), tint = colors.onSurfaceVariant) }
++            IconButton(onClick = paste) { Icon(Icons.Default.ContentPaste, stringResource(R.string.floating_paste), Modifier.size(20.dp), tint = colors.primary) }
++        }
++    }
++}
++
++@Composable
++private fun SelectionActions(actions: FloatingCompanionActions) {
++    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
++        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
++            for ((label, icon, click) in listOf(Triple(R.string.floating_copy, Icons.Default.ContentCopy, actions.onCopySelected), Triple(R.string.floating_save, Icons.Default.BookmarkAdd, actions.onSave), Triple(R.string.floating_queue, Icons.Default.PlaylistAdd, actions.onQueue))) {
++                FilledTonalButton(onClick = click, modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(6.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurface)) {
++                    Icon(icon, null, Modifier.size(18.dp)); Spacer(Modifier.width(4.dp)); Text(stringResource(label), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
++                }
++            }
++        }
++        Button(onClick = actions.onLocate, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp)) {
++            Icon(Icons.Outlined.NearMe, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.floating_locate), fontSize = 15.sp, fontWeight = FontWeight.Bold)
++        }
++    }
++}
++
++@Composable
++private fun SavedRows(state: FloatingCompanionState, actions: FloatingCompanionActions, select: (GeocodedLocation) -> Unit) {
++    LazyColumn(Modifier.fillMaxWidth().heightIn(max = 224.dp)) {
+         items(state.savedLocations, key = { it.id }) { saved ->
+-            LocationRow(GeocodedLocation(saved.name, saved.description, LatLng(saved.latitude, saved.longitude)), actions.onSelect)
++            val location = GeocodedLocation(saved.name, saved.description, LatLng(saved.latitude, saved.longitude))
++            LocationRow(location, state.selectedLocation?.latLng == location.latLng, select, actions.onCopyLocation, saved.isFavorite)
+         }
+     }
+ }
+ 
+ @Composable
+-private fun LocationRow(location: GeocodedLocation, select: (GeocodedLocation) -> Unit) {
+-    Column(Modifier.fillMaxWidth().clickable { select(location) }.padding(8.dp)) {
+-        Text(location.name, style = MaterialTheme.typography.titleSmall)
+-        if (location.address.isNotBlank()) Text(location.address, style = MaterialTheme.typography.bodySmall)
+-        Text(formatCompanionCoordinate(location.latLng), style = MaterialTheme.typography.bodySmall)
++private fun LocationRow(location: GeocodedLocation, selected: Boolean, select: (GeocodedLocation) -> Unit, copy: (LatLng) -> Unit, favorite: Boolean = false) {
++    val colors = MaterialTheme.colorScheme
++    Surface(shape = RoundedCornerShape(12.dp), color = if (selected) colors.surfaceVariant else Color.Transparent) {
++        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { select(location) }.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
++            Box(Modifier.size(36.dp).background(colors.secondaryContainer, CircleShape), contentAlignment = Alignment.Center) { Icon(if (favorite) Icons.Default.Star else Icons.Default.LocationOn, null, Modifier.size(18.dp), tint = colors.primary) }
++            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
++                Text(location.name, fontSize = 15.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
++                Text(location.address.ifBlank { formatCompanionCoordinate(location.latLng) }, fontSize = 12.sp, color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
++            }
++            IconButton(onClick = { copy(location.latLng) }) { Icon(Icons.Default.ContentCopy, stringResource(R.string.floating_copy_selected), Modifier.size(20.dp), tint = colors.onSurfaceVariant) }
++        }
+     }
+ }
+ 
+@@ -199,16 +338,32 @@ private fun CompanionMap(map: MapUiState, state: FloatingCompanionState, actions
+     val start = state.selectedLocation?.latLng ?: currentCompanionCoordinate(map) ?: map.centerLocation
+     val camera = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(start, 15f) }
+     val name = stringResource(R.string.floating_map_point)
+-    Text(stringResource(R.string.floating_map_hint), style = MaterialTheme.typography.bodySmall)
+-    Box(Modifier.fillMaxWidth().height(140.dp)) {
++    Box(Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(16.dp))) {
+         GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = camera,
+             properties = MapProperties(isMyLocationEnabled = false, mapType = map.mapType),
+-            uiSettings = MapUiSettings(zoomControlsEnabled = false, rotationGesturesEnabled = false),
+-            onMapClick = { actions.onSelect(GeocodedLocation(name, "", it)) })
+-        MapCrosshair(Modifier.align(Alignment.Center))
++            uiSettings = MapUiSettings(zoomControlsEnabled = false, rotationGesturesEnabled = false), onMapClick = { actions.onSelect(GeocodedLocation(name, "", it)) }) {
++                state.selectedLocation?.let { point ->
++                    val markerState = remember { MarkerState(position = point.latLng) }
++                    SideEffect { markerState.position = point.latLng }
++                    Marker(state = markerState, title = point.name,
++                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
++                }
++            }
++        if (state.selectedLocation == null) MapCrosshair(Modifier.align(Alignment.Center))
++        Surface(Modifier.align(Alignment.TopEnd).padding(8.dp), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface) {
++            Column {
++                IconButton(onClick = { camera.move(CameraUpdateFactory.zoomIn()) }) { Icon(Icons.Default.Add, stringResource(R.string.floating_zoom_in)) }
++                IconButton(onClick = { camera.move(CameraUpdateFactory.zoomOut()) }) { Icon(Icons.Default.Remove, stringResource(R.string.floating_zoom_out)) }
++            }
++        }
++        Surface(Modifier.align(Alignment.BottomEnd).padding(8.dp), shape = CircleShape, color = MaterialTheme.colorScheme.surface) {
++            IconButton(onClick = { camera.move(CameraUpdateFactory.newLatLng(currentCompanionCoordinate(map) ?: map.centerLocation)) }) { Icon(Icons.Default.MyLocation, stringResource(R.string.map_my_location)) }
++        }
++        Surface(Modifier.align(Alignment.BottomStart).padding(8.dp), shape = CircleShape, color = MaterialTheme.colorScheme.surface) {
++            IconButton(onClick = { actions.onSelect(GeocodedLocation(name, "", camera.position.target)) }) { Icon(Icons.Default.Check, stringResource(R.string.floating_use_center)) }
++        }
+     }
+-    Text(formatCompanionCoordinate(camera.position.target), style = MaterialTheme.typography.bodySmall)
+-    TextButton(onClick = { actions.onSelect(GeocodedLocation(name, "", camera.position.target)) }) { Text(stringResource(R.string.floating_use_center)) }
++    if (state.selectedLocation == null) Text(stringResource(R.string.floating_map_hint), Modifier.padding(horizontal = 8.dp), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+ }
+ 
+ private fun CompanionTab.label() = when(this) {
+@@ -231,3 +386,17 @@ private fun CompanionMessage.label() = when(this) {
+     CompanionMessage.UNKNOWN_LOCATION -> R.string.floating_msg_unknown_location
+     CompanionMessage.COPIED -> R.string.floating_msg_copied
+ }
++
++private fun CompanionTab.icon() = when(this) {
++    CompanionTab.SEARCH -> Icons.Default.Search
++    CompanionTab.SAVED -> Icons.Default.StarBorder
++    CompanionTab.ROUTES -> Icons.Default.Route
++    CompanionTab.CONTROL -> Icons.Default.Gamepad
++    CompanionTab.MAP -> Icons.Default.Map
++}
++
++private fun CompanionTab.shortLabel() = when(this) {
++    CompanionTab.SAVED -> R.string.floating_tab_saved
++    CompanionTab.MAP -> R.string.nav_map
++    else -> label()
++}
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayTheme.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayTheme.kt
+index 1e01970..ba201d2 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayTheme.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayTheme.kt
+@@ -22,22 +22,22 @@ internal fun overlayConfiguration(base: Configuration, language: String): Config
+ 
+ internal fun floatingOverlayColors(base: ColorScheme, dark: Boolean): ColorScheme {
+     val foreground = if (dark) Color(0xFFF8FAFC) else Color(0xFF202124)
+-    val secondaryText = if (dark) Color(0xFFCDD6E0) else Color(0xFF4B5563)
+-    val selected = if (dark) Color(0xFF573827) else Color(0xFFFFE4D6)
+-    val selectedText = if (dark) Color(0xFFFFE8D9) else Color(0xFF57250E)
++    val secondaryText = if (dark) Color(0xFFB4C0D1) else Color(0xFF4F545B)
++    val selected = if (dark) Color(0xFF3B2E2C) else Color(0xFFFBE6DA)
++    val selectedText = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10)
+     return base.copy(
+         surface = if (dark) Color(0xFF18212C) else Color(0xFFFFF8F2),
+         onSurface = foreground,
+-        surfaceVariant = if (dark) Color(0xFF263343) else Color(0xFFF3E6DD),
++        surfaceVariant = if (dark) Color(0xFF222D3A) else Color(0xFFF3E8DE),
+         onSurfaceVariant = secondaryText,
+-        primary = if (dark) Color(0xFFFFAB91) else Color(0xFFB83A10),
+-        onPrimary = if (dark) Color(0xFF3C1608) else Color.White,
+-        error = if (dark) Color(0xFFFFB4AB) else base.error,
+-        onError = if (dark) Color(0xFF690005) else base.onError,
++        primary = if (dark) Color(0xFFFFAB91) else Color(0xFF9D2808),
++        onPrimary = if (dark) Color(0xFF18212C) else Color.White,
++        error = if (dark) Color(0xFFFFA49C) else Color(0xFFA51C16),
++        onError = if (dark) Color(0xFF690005) else Color.White,
+         primaryContainer = selected, onPrimaryContainer = selectedText,
+         secondaryContainer = selected, onSecondaryContainer = selectedText,
+         outline = if (dark) Color(0xFF9EAFC4) else Color(0xFF6B7280),
+-        outlineVariant = if (dark) Color(0xFF9EAFC4) else Color(0xFF6B7280)
++        outlineVariant = if (dark) Color(0xFF33404F) else Color(0xFFE6D6C8)
+     )
+ }
+ 
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickController.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickController.kt
+index 239c6c7..6f233ea 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickController.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickController.kt
+@@ -1,9 +1,6 @@
+ package com.moooo_works.letsgogps.ui.map
+ 
+ import android.content.Context
+-import android.os.Build
+-import android.provider.Settings
+-import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.collectAsState
+ import androidx.compose.runtime.getValue
+ import com.google.android.gms.maps.model.LatLng
+@@ -29,7 +26,6 @@ class JoystickController(
+     private var tickerJob: Job? = null
+     private var currentX = 0f
+     private var currentY = 0f
+-    private var overlayWrapper: (@Composable (@Composable () -> Unit) -> Unit)? = null
+ 
+     init {
+         overlayManager.setOnDismissedListener {
+@@ -39,10 +35,6 @@ class JoystickController(
+         }
+     }
+ 
+-    fun setOverlayWrapper(wrapper: @Composable (@Composable () -> Unit) -> Unit) {
+-        overlayWrapper = wrapper
+-    }
+-
+     fun releaseMovement() { currentX = 0f; currentY = 0f }
+ 
+     fun toggle() {
+@@ -56,16 +48,19 @@ class JoystickController(
+             startTicker()
+             try { overlayManager.show {
+                 val s by state.collectAsState()
+-                val joystick: @Composable () -> Unit = { JoystickOverlayView(
++                StandaloneJoystickOverlay(
++                    onClose = ::toggle,
++                    onCollapse = { releaseMovement(); overlayManager.snapToEdge() },
++                    onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
++                    onWindowDragEnd = { overlayManager.snapToEdge() }
++                ) { JoystickOverlayView(
+                     transportMode = s.transportMode,
+                     onMove = { dx, dy -> currentX = dx; currentY = dy },
+                     onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
+                     onWindowDragEnd = { overlayManager.snapToEdge() },
+-                    onToggleSpeed = { cycleTransportMode() },
++                    onTransportModeChange = onSetTransportMode,
+                     onStop = { stopMockingFromJoystick() }
+                 ) }
+-                val wrapper = overlayWrapper
+-                if (wrapper == null) joystick() else wrapper(joystick)
+             }
+             } catch (error: RuntimeException) {
+                 stopTicker()
+@@ -128,7 +123,7 @@ class JoystickController(
+     }
+ 
+     private fun ensureFloatingWindowPermission(): Boolean {
+-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
++        if (!overlayManager.hasPermission()) {
+             state.update { it.copy(mockError = MockError.FloatingWindowPermissionMissing) }
+             return false
+         }
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManager.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManager.kt
+index cbb3a43..f8e2cb4 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManager.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManager.kt
+@@ -4,11 +4,14 @@ import android.content.Context
+ import android.content.SharedPreferences
+ import android.graphics.PixelFormat
+ import android.os.Build
++import android.provider.Settings
+ import android.view.View
+ import android.view.Gravity
+ import android.view.WindowManager
+ import android.view.inputmethod.InputMethodManager
+ import androidx.annotation.MainThread
++import androidx.core.view.ViewCompat
++import androidx.core.view.WindowInsetsCompat
+ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.platform.ComposeView
+ import androidx.lifecycle.Lifecycle
+@@ -33,12 +36,16 @@ internal fun clampOverlayPosition(position: Int, screen: Int, view: Int): Int =
+ class JoystickOverlayManager @Inject constructor(
+     @ApplicationContext private val context: Context
+ ) {
++    fun hasPermission(): Boolean = Settings.canDrawOverlays(context)
++
+     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+     private var composeView: ComposeView? = null
+     private var params: WindowManager.LayoutParams? = null
+     private var owner: OverlayLifecycleOwner? = null
+     private var pendingInputAction: (() -> Unit)? = null
+     private var inputFocusable = false
++    private var dockedRight: Boolean? = null
++    private var bottomAligned = false
+     private val prefs: SharedPreferences by lazy { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
+ 
+     private var onDismissed: (() -> Unit)? = null
+@@ -75,7 +82,11 @@ class JoystickOverlayManager @Inject constructor(
+                 if (composeView === v) hide()
+             }
+         })
+-        view.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> clampPosition() }
++        var initialLayout = true
++        view.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
++            if (initialLayout) { initialLayout = false; snapToEdge() }
++            else clampPosition(forceUpdate = right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop)
++        }
+         view.viewTreeObserver.addOnWindowFocusChangeListener { hasFocus ->
+             if (hasFocus) {
+                 val action = pendingInputAction
+@@ -135,6 +146,8 @@ class JoystickOverlayManager @Inject constructor(
+         owner = null
+         pendingInputAction = null
+         inputFocusable = false
++        dockedRight = null
++        bottomAligned = false
+         if (view != null) {
+             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                 ?.hideSoftInputFromWindow(view.windowToken, 0)
+@@ -149,6 +162,8 @@ class JoystickOverlayManager @Inject constructor(
+     @MainThread
+     fun updatePosition(deltaX: Int, deltaY: Int) {
+         val currentParams = params ?: return
++        dockedRight = null
++        bottomAligned = false
+         currentParams.x += deltaX
+         currentParams.y += deltaY
+         clampPosition(forceUpdate = true)
+@@ -160,22 +175,36 @@ class JoystickOverlayManager @Inject constructor(
+         val metrics = context.resources.displayMetrics
+         val oldX = currentParams.x
+         val oldY = currentParams.y
+-        currentParams.x = clampOverlayPosition(currentParams.x, metrics.widthPixels, view.width)
+-        currentParams.y = clampOverlayPosition(currentParams.y, metrics.heightPixels, view.height)
++        currentParams.x = dockedRight?.let { right ->
++            if (right) (metrics.widthPixels - view.width).coerceAtLeast(0) else 0
++        } ?: clampOverlayPosition(currentParams.x, metrics.widthPixels, view.width)
++        val bottomInset = ViewCompat.getRootWindowInsets(view)?.getInsets(WindowInsetsCompat.Type.systemBars())?.bottom ?: 0
++        val availableHeight = (metrics.heightPixels - bottomInset).coerceAtLeast(0)
++        currentParams.y = if (bottomAligned) (availableHeight - view.height).coerceAtLeast(0)
++            else clampOverlayPosition(currentParams.y, availableHeight, view.height)
++        if (dockedRight != null) {
++            prefs.edit().putInt(KEY_X, currentParams.x).putInt(KEY_Y, currentParams.y).apply()
++        }
+         if (view.isAttachedToWindow && (forceUpdate || oldX != currentParams.x || oldY != currentParams.y)) {
+             try { windowManager.updateViewLayout(view, currentParams) } catch (_: RuntimeException) { hide() }
+         }
+     }
+ 
++    @MainThread
++    fun setBottomAligned(aligned: Boolean) {
++        bottomAligned = aligned
++        if (aligned) clampPosition(forceUpdate = true)
++    }
++
+     @MainThread
+     fun snapToEdge() {
+         val currentParams = params ?: return
+         val view = composeView ?: return
+         val metrics = context.resources.displayMetrics
+-        currentParams.x = if (currentParams.x + view.width / 2 < metrics.widthPixels / 2) 0
+-            else (metrics.widthPixels - view.width).coerceAtLeast(0)
++        bottomAligned = false
++        // 保留同側，Compose 收合後重新量測較小尺寸時仍靠邊。
++        dockedRight = currentParams.x + view.width / 2 >= metrics.widthPixels / 2
+         clampPosition(forceUpdate = true)
+-        prefs.edit().putInt(KEY_X, currentParams.x).putInt(KEY_Y, currentParams.y).apply()
+     }
+ 
+     companion object {
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayView.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayView.kt
+index dcad83c..171712c 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayView.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayView.kt
+@@ -1,30 +1,36 @@
+ package com.moooo_works.letsgogps.ui.map
+ 
+-import androidx.compose.animation.*
+-import androidx.compose.foundation.border
++import androidx.compose.foundation.BorderStroke
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.clickable
++import androidx.compose.foundation.border
+ import androidx.compose.foundation.gestures.detectDragGestures
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.filled.Add
+ import androidx.compose.material.icons.filled.Close
+-import androidx.compose.material.icons.filled.Settings
+-import androidx.compose.material3.MaterialTheme
+-import androidx.compose.material3.Icon
+-import androidx.compose.material3.Surface
+-import androidx.compose.material3.Text
++import androidx.compose.material.icons.filled.CloseFullscreen
++import androidx.compose.material.icons.filled.ControlCamera
++import androidx.compose.material.icons.filled.DragIndicator
++import androidx.compose.material.icons.filled.Remove
++import androidx.compose.material.icons.filled.Stop
++import androidx.compose.material3.*
+ import androidx.compose.runtime.*
+ import androidx.compose.ui.Alignment
+-import androidx.compose.ui.res.stringResource
+-import com.moooo_works.letsgogps.R
+ import androidx.compose.ui.Modifier
+-import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.input.pointer.pointerInput
++import androidx.compose.ui.res.stringResource
++import androidx.compose.ui.platform.LocalConfiguration
++import androidx.core.os.ConfigurationCompat
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.text.style.TextOverflow
+ import androidx.compose.ui.unit.IntOffset
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
++import com.moooo_works.letsgogps.R
++import java.util.Locale
+ import kotlin.math.*
+ 
+ @Composable
+@@ -33,168 +39,112 @@ fun JoystickOverlayView(
+     onMove: (deltaX: Float, deltaY: Float) -> Unit,
+     onWindowDrag: (deltaX: Int, deltaY: Int) -> Unit,
+     onWindowDragEnd: () -> Unit = {},
+-    onToggleSpeed: () -> Unit,
++    onTransportModeChange: (TransportMode) -> Unit,
+     onStop: () -> Unit
+ ) {
+     DisposableEffect(Unit) { onDispose { onMove(0f, 0f) } }
+     var offsetX by remember { mutableStateOf(0f) }
+     var offsetY by remember { mutableStateOf(0f) }
+-    var isExpanded by remember { mutableStateOf(false) }
+-    val radius = 100f // Base radius in pixels for the joystick
+-
+-    Column(
+-        horizontalAlignment = Alignment.CenterHorizontally,
+-        verticalArrangement = Arrangement.spacedBy(12.dp),
+-        modifier = Modifier.padding(12.dp)
+-    ) {
+-        // 1. Controls Capsule (Expanded State)
+-        AnimatedVisibility(
+-            visible = isExpanded,
+-            enter = fadeIn() + expandVertically(),
+-            exit = fadeOut() + shrinkVertically()
+-        ) {
+-            Surface(
+-                color = MaterialTheme.colorScheme.surfaceVariant,
+-                shape = RoundedCornerShape(30.dp),
+-                shadowElevation = 8.dp,
+-                modifier = Modifier.width(200.dp)
+-            ) {
+-                Row(
+-                    modifier = Modifier.padding(8.dp),
+-                    horizontalArrangement = Arrangement.SpaceEvenly,
+-                    verticalAlignment = Alignment.CenterVertically
+-                ) {
+-                    // Speed Toggle Button
+-                    Box(
+-                        modifier = Modifier
+-                            .size(44.dp)
+-                            .clip(CircleShape)
+-                            .background(MaterialTheme.colorScheme.surfaceVariant)
+-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+-                            .clickable { onToggleSpeed() },
+-                        contentAlignment = Alignment.Center
+-                    ) {
+-                        val icon = when (transportMode) {
+-                            TransportMode.WALKING -> "🚶"
+-                            TransportMode.CYCLING -> "🚲"
+-                            TransportMode.DRIVING -> "🚗"
++    val currentMove by rememberUpdatedState(onMove)
++    val currentWindowDrag by rememberUpdatedState(onWindowDrag)
++    val currentWindowDragEnd by rememberUpdatedState(onWindowDragEnd)
++    val radius = 100f
++    val colors = MaterialTheme.colorScheme
++    val locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.ROOT
++    val modes = TransportMode.entries
++    val modeIndex = modes.indexOf(transportMode)
++    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
++        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
++            Box(Modifier.size(140.dp), contentAlignment = Alignment.Center) {
++                Box(Modifier.size(120.dp).background(colors.surfaceVariant, CircleShape).border(1.dp, colors.outline, CircleShape)
++                    .pointerInput(Unit) {
++                        detectDragGestures(onDragEnd = { currentWindowDragEnd() }, onDragCancel = { currentWindowDragEnd() }) { change, delta ->
++                            change.consume(); currentWindowDrag(delta.x.roundToInt(), delta.y.roundToInt())
+                         }
+-                        Text(icon, fontSize = 18.sp)
+-                    }
+-
+-                    // Stop Button
+-                    Box(
+-                        modifier = Modifier
+-                            .size(44.dp)
+-                            .clip(CircleShape)
+-                            .background(MaterialTheme.colorScheme.error)
+-                            .clickable { onStop() },
+-                        contentAlignment = Alignment.Center
+-                    ) {
+-                        Text("⏹", color = MaterialTheme.colorScheme.onError, fontSize = 18.sp)
++                    })
++                Box(Modifier.offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }.size(60.dp)
++                    .background(colors.secondaryContainer, CircleShape).border(2.dp, colors.primary, CircleShape)
++                    .pointerInput(Unit) {
++                        fun release() { offsetX = 0f; offsetY = 0f; currentMove(0f, 0f) }
++                        detectDragGestures(onDragEnd = { release() }, onDragCancel = { release() }) { change, delta ->
++                            change.consume()
++                            val x = offsetX + delta.x; val y = offsetY + delta.y
++                            val distance = sqrt(x * x + y * y)
++                            if (distance <= radius) { offsetX = x; offsetY = y }
++                            else { val angle = atan2(y, x); offsetX = cos(angle) * radius; offsetY = sin(angle) * radius }
++                            currentMove(offsetX / radius, offsetY / radius)
++                        }
++                    })
++            }
++            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
++                Text(stringResource(R.string.floating_speed, transportMode.speedKmh), fontSize = 12.sp, color = colors.onSurfaceVariant)
++                Surface(shape = RoundedCornerShape(24.dp), color = colors.surfaceVariant) {
++                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
++                        IconButton(onClick = { onTransportModeChange(modes[modeIndex - 1]) }, enabled = modeIndex > 0) { Icon(Icons.Default.Remove, stringResource(R.string.floating_slower), Modifier.size(18.dp)) }
++                        Text(String.format(locale, "%.1f", transportMode.speedKmh), Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
++                        IconButton(onClick = { onTransportModeChange(modes[modeIndex + 1]) }, enabled = modeIndex < modes.lastIndex) { Icon(Icons.Default.Add, stringResource(R.string.floating_faster), Modifier.size(18.dp)) }
+                     }
+-
+-                    // Collapse Button
+-                    Box(
+-                        modifier = Modifier
+-                            .size(44.dp)
+-                            .clip(CircleShape)
+-                            .background(MaterialTheme.colorScheme.surfaceVariant)
+-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+-                            .clickable { isExpanded = false },
+-                        contentAlignment = Alignment.Center
+-                    ) {
+-                        Icon(
+-                            Icons.Default.Close,
+-                            contentDescription = stringResource(R.string.joystick_collapse),
+-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+-                            modifier = Modifier.size(18.dp)
+-                        )
++                }
++                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
++                    modes.forEach { mode ->
++                        val label = stringResource(when(mode) { TransportMode.WALKING -> R.string.map_transport_walking; TransportMode.CYCLING -> R.string.map_transport_cycling; TransportMode.DRIVING -> R.string.map_transport_driving })
++                        OutlinedButton(onClick = { onTransportModeChange(mode) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
++                            shape = RoundedCornerShape(10.dp), contentPadding = PaddingValues(2.dp),
++                            colors = ButtonDefaults.outlinedButtonColors(containerColor = if (mode == transportMode) colors.secondaryContainer else colors.surfaceVariant,
++                                contentColor = if (mode == transportMode) colors.primary else colors.onSurfaceVariant),
++                            border = BorderStroke(1.dp, if (mode == transportMode) colors.primary else colors.outlineVariant)) {
++                            Text(label, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
++                        }
+                     }
+                 }
+             }
+         }
++        OutlinedButton(onClick = { onMove(0f, 0f); onStop() }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp),
++            border = BorderStroke(1.dp, colors.error), colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error)) {
++            Icon(Icons.Default.Stop, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.action_stop), fontWeight = FontWeight.Bold)
++        }
++    }
++}
+ 
+-        // 2. Joystick Base & Handle
+-        Box(
+-            modifier = Modifier.size(140.dp),
+-            contentAlignment = Alignment.Center
+-        ) {
+-            // Settings Button (Positioned outside/on edge of the base)
+-            if (!isExpanded) {
+-                Box(
+-                    modifier = Modifier
+-                        .align(Alignment.TopEnd)
+-                        .offset(x = (8).dp, y = (-8).dp)
+-                        .size(36.dp)
+-                        .clip(CircleShape)
+-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+-                        .clickable { isExpanded = true },
+-                    contentAlignment = Alignment.Center
+-                ) {
+-                    Icon(
+-                        Icons.Default.Settings,
+-                        contentDescription = stringResource(R.string.joystick_menu),
+-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+-                        modifier = Modifier.size(20.dp)
+-                    )
++
++@Composable
++internal fun StandaloneJoystickOverlay(
++    onClose: () -> Unit,
++    onCollapse: () -> Unit,
++    onWindowDrag: (Int, Int) -> Unit,
++    onWindowDragEnd: () -> Unit,
++    content: @Composable () -> Unit
++) {
++    var expanded by remember { mutableStateOf(true) }
++    val dragWindow by rememberUpdatedState(onWindowDrag)
++    val finishDrag by rememberUpdatedState(onWindowDragEnd)
++    val drag = Modifier.pointerInput(Unit) {
++        detectDragGestures(onDragEnd = { finishDrag() }, onDragCancel = { finishDrag() }) { change, delta ->
++            change.consume(); dragWindow(delta.x.roundToInt(), delta.y.roundToInt())
++        }
++    }
++    val colors = MaterialTheme.colorScheme
++    if (!expanded) {
++        Surface(color = colors.surface.copy(alpha = .90f), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.5.dp, colors.primary)) {
++            Box(Modifier.size(48.dp).then(drag).clickable { expanded = true; onCollapse() }, contentAlignment = Alignment.Center) {
++                Icon(Icons.Default.ControlCamera, stringResource(R.string.joystick_title), tint = colors.primary)
++            }
++        }
++        return
++    }
++    val config = LocalConfiguration.current
++    Surface(modifier = Modifier.width(minOf(358, config.screenWidthDp - 32).coerceAtLeast(280).dp),
++        color = colors.surface.copy(alpha = .82f), shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, colors.outlineVariant)) {
++        Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
++            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
++                Icon(Icons.Default.DragIndicator, null, Modifier.size(24.dp).then(drag), tint = colors.onSurfaceVariant)
++                Text(stringResource(R.string.joystick_title), Modifier.weight(1f).then(drag), fontWeight = FontWeight.Bold)
++                IconButton(onClick = { expanded = false; onCollapse() }) {
++                    Icon(Icons.Default.CloseFullscreen, stringResource(R.string.joystick_collapse))
+                 }
++                IconButton(onClick = onClose) { Icon(Icons.Default.Close, stringResource(R.string.joystick_close)) }
+             }
+-
+-            // Base Disk
+-            Box(
+-                modifier = Modifier
+-                    .size(120.dp)
+-                    .clip(CircleShape)
+-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+-                    .pointerInput(Unit) {
+-                        detectDragGestures(
+-                            onDragEnd = { onWindowDragEnd() },
+-                            onDrag = { change, dragAmount ->
+-                                change.consume()
+-                                onWindowDrag(dragAmount.x.roundToInt(), dragAmount.y.roundToInt())
+-                            }
+-                        )
+-                    }
+-            )
+-
+-            // Move Handle
+-            Box(
+-                modifier = Modifier
+-                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+-                    .size(60.dp)
+-                    .clip(CircleShape)
+-                    .background(MaterialTheme.colorScheme.primary)
+-                    .pointerInput(Unit) {
+-                        detectDragGestures(
+-                            onDragEnd = {
+-                                offsetX = 0f
+-                                offsetY = 0f
+-                                onMove(0f, 0f)
+-                            },
+-                            onDrag = { change, dragAmount ->
+-                                change.consume()
+-                                
+-                                val newX = offsetX + dragAmount.x
+-                                val newY = offsetY + dragAmount.y
+-                                val distance = sqrt(newX * newX + newY * newY)
+-                                
+-                                if (distance <= radius) {
+-                                    offsetX = newX
+-                                    offsetY = newY
+-                                } else {
+-                                    val angle = atan2(newY, newX)
+-                                    offsetX = cos(angle) * radius
+-                                    offsetY = sin(angle) * radius
+-                                }
+-                                
+-                                onMove(offsetX / radius, offsetY / radius)
+-                            }
+-                        )
+-                    }
+-            )
++            content()
+         }
+     }
+ }
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt
+index c38634f..12ed37a 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt
+@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.outlined.NearMe
+ import androidx.compose.material.icons.filled.Close
+ import androidx.compose.material.icons.filled.ControlCamera
+ import androidx.compose.material.icons.filled.Delete
+@@ -160,12 +161,13 @@ fun MyLocationFab(
+     }
+ }
+ 
+-/** Column of small FABs at the bottom-end of the map: map-type toggle + joystick toggle. */
++/** Column of small FABs at the bottom-end of the map: map-type, companion and joystick toggles. */
+ @Composable
+ fun MapActionFabs(
+     uiState: MapUiState,
+     onToggleMapType: () -> Unit,
+     onToggleJoystick: () -> Unit,
++    onToggleCompanion: () -> Unit,
+     modifier: Modifier = Modifier
+ ) {
+     Column(
+@@ -183,15 +185,26 @@ fun MapActionFabs(
+             Icon(Icons.Default.Layers, contentDescription = stringResource(R.string.map_layer_toggle))
+         }
+ 
++        SmallFloatingActionButton(
++            onClick = onToggleCompanion,
++            containerColor = if (uiState.isCompanionEnabled) Accent500 else MaterialTheme.colorScheme.surfaceVariant,
++            contentColor = if (uiState.isCompanionEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
++        ) {
++            Box {
++                Icon(Icons.Outlined.NearMe, contentDescription = stringResource(R.string.floating_title))
++                if (!uiState.isProActive) Icon(Icons.Default.Lock, null, Modifier.align(Alignment.BottomEnd).size(10.dp))
++            }
++        }
++
+         SmallFloatingActionButton(
+             onClick = onToggleJoystick,
+             containerColor = if (uiState.isJoystickEnabled) Accent500 else MaterialTheme.colorScheme.surfaceVariant,
+             contentColor = if (uiState.isJoystickEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+         ) {
+-            Icon(
+-                if (uiState.isProActive) Icons.Default.ControlCamera else Icons.Default.Lock,
+-                contentDescription = stringResource(R.string.floating_title)
+-            )
++            Box {
++                Icon(Icons.Default.ControlCamera, contentDescription = stringResource(R.string.joystick_title))
++                if (!uiState.isProActive) Icon(Icons.Default.Lock, null, Modifier.align(Alignment.BottomEnd).size(10.dp))
++            }
+         }
+     }
+ }
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt
+index fd72e32..1a3b59d 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt
+@@ -324,6 +324,7 @@ fun MapScreen(
+                     uiState = uiState,
+                     onToggleMapType = { viewModel.toggleMapType() },
+                     onToggleJoystick = { viewModel.toggleJoystick() },
++                    onToggleCompanion = { viewModel.toggleCompanion() },
+                     modifier = Modifier.align(Alignment.BottomEnd)
+                 )
+ 
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt
+index 0ffa32e..4afb2af 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt
+@@ -60,6 +60,7 @@ data class MapUiState(
+     val currentMockLocation: LatLng? = null,
+     val routeFitRequestToken: Long? = null,
+     val isJoystickEnabled: Boolean = false,
++    val isCompanionEnabled: Boolean = false,
+     val isProActive: Boolean = false,
+     val isAdFreeActive: Boolean = false,
+     val adUnlockRemainingMillis: Long = 0L,
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt
+index 367a763..4bf42f5 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt
+@@ -7,6 +7,10 @@ import android.content.Context
+ import android.content.Intent
+ import android.content.ClipData
+ import android.content.ClipboardManager
++import androidx.compose.material3.Text
++import androidx.compose.material3.FilledTonalButton
++import androidx.compose.ui.res.stringResource
++import com.moooo_works.letsgogps.R
+ import androidx.compose.runtime.collectAsState
+ import androidx.compose.runtime.getValue
+ import com.moooo_works.letsgogps.domain.repository.SearchRepository
+@@ -109,6 +113,7 @@ class MapViewModel @Inject constructor(
+         onOverlayDismissed = {
+             cancelCompanionPending()
+             floatingCompanionController.close()
++            _uiState.update { it.copy(isCompanionEnabled = false) }
+         }
+     )
+ 
+@@ -254,10 +259,12 @@ class MapViewModel @Inject constructor(
+     }
+ 
+     private fun closeCompanion() {
++        if (!_uiState.value.isCompanionEnabled) return
+         cancelCompanionPending()
+         floatingCompanionController.close()
+         releaseCompanionInput()
+-        if (_uiState.value.isJoystickEnabled) joystickController.toggle()
++        _uiState.update { it.copy(isCompanionEnabled = false) }
++        joystickOverlayManager.hide()
+     }
+ 
+     private fun openAppFromCompanion() {
+@@ -268,8 +275,17 @@ class MapViewModel @Inject constructor(
+     }
+ 
+     private fun companionActions() = FloatingCompanionActions(
+-        onExpandedChange = { releaseCompanionInput(); floatingCompanionController.setExpanded(it) },
+-        onTabChange = { releaseCompanionInput(); floatingCompanionController.setTab(it) },
++        onExpandedChange = { expanded ->
++            releaseCompanionInput()
++            floatingCompanionController.setExpanded(expanded)
++            if (!expanded) joystickOverlayManager.snapToEdge()
++            else if (floatingCompanionController.state.value.tab == CompanionTab.CONTROL) joystickOverlayManager.setBottomAligned(true)
++        },
++        onTabChange = { tab ->
++            releaseCompanionInput()
++            floatingCompanionController.setTab(tab)
++            joystickOverlayManager.setBottomAligned(tab == CompanionTab.CONTROL)
++        },
+         onQueryChange = floatingCompanionController::setQuery,
+         onSearch = floatingCompanionController::search,
+         onPaste = { joystickOverlayManager.runWhenFocused {
+@@ -298,7 +314,8 @@ class MapViewModel @Inject constructor(
+         onClose = ::closeCompanion, onOpenApp = ::openAppFromCompanion,
+         onInputFocus = joystickOverlayManager::setInputFocusable,
+         onWindowDrag = { x, y -> joystickOverlayManager.updatePosition(x.toInt(), y.toInt()) },
+-        onWindowDragEnd = joystickOverlayManager::snapToEdge
++        onWindowDragEnd = joystickOverlayManager::snapToEdge,
++        onCopyLocation = ::copyCompanionCoordinate
+     )
+ 
+     private val _triggerReview = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+@@ -317,11 +334,6 @@ class MapViewModel @Inject constructor(
+     }
+ 
+     init {
+-        joystickController.setOverlayWrapper { joystick ->
+-            val map by uiState.collectAsState()
+-            val companion by floatingCompanionController.state.collectAsState()
+-            FloatingCompanionView(map, companion, companionActions(), joystick)
+-        }
+         viewModelScope.launch {
+             settingsRepository.observeLastCenter().collect { center ->
+                 if (isFirstLoad && center != null) {
+@@ -409,7 +421,10 @@ class MapViewModel @Inject constructor(
+         viewModelScope.launch {
+             proRepository.isProActive.collect { isPro ->
+                 _uiState.update { it.copy(isProActive = isPro) }
+-                if (!isPro && _uiState.value.isJoystickEnabled) closeCompanion()
++                if (!isPro) {
++                    if (_uiState.value.isCompanionEnabled) closeCompanion()
++                    if (_uiState.value.isJoystickEnabled) joystickController.toggle()
++                }
+             }
+         }
+ 
+@@ -714,7 +729,39 @@ class MapViewModel @Inject constructor(
+     }
+ 
+     fun toggleJoystick() {
+-        if (_uiState.value.isJoystickEnabled) closeCompanion() else joystickController.toggle()
++        if (_uiState.value.isJoystickEnabled) { joystickController.toggle(); return }
++        if (!_uiState.value.isProActive || !proRepository.isProActive.value) { showProUpgradeDialog(); return }
++        if (!joystickOverlayManager.hasPermission()) {
++            _uiState.update { it.copy(mockError = MockError.FloatingWindowPermissionMissing) }
++            return
++        }
++        if (_uiState.value.isCompanionEnabled) closeCompanion()
++        joystickController.toggle()
++    }
++
++    fun toggleCompanion() {
++        if (_uiState.value.isCompanionEnabled) { closeCompanion(); return }
++        if (!_uiState.value.isProActive || !proRepository.isProActive.value) { showProUpgradeDialog(); return }
++        if (!joystickOverlayManager.hasPermission()) {
++            _uiState.update { it.copy(mockError = MockError.FloatingWindowPermissionMissing) }
++            return
++        }
++        if (_uiState.value.isJoystickEnabled) joystickController.toggle()
++        _uiState.update { it.copy(isCompanionEnabled = true) }
++        try {
++            joystickOverlayManager.show {
++                val map by uiState.collectAsState()
++                val companion by floatingCompanionController.state.collectAsState()
++                FloatingCompanionView(map, companion, companionActions()) {
++                    FilledTonalButton(onClick = ::toggleJoystick) {
++                        Text(stringResource(R.string.joystick_open))
++                    }
++                }
++            }
++        } catch (error: RuntimeException) {
++            closeCompanion()
++            _uiState.update { it.copy(mockError = MockError.Unknown(error.message ?: "Unable to open floating window")) }
++        }
+     }
+ 
+     fun selectSearchResult(location: GeocodedLocation) {
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/pro/ProUpgradeDialog.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/pro/ProUpgradeDialog.kt
+index be8e963..1195548 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/pro/ProUpgradeDialog.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/pro/ProUpgradeDialog.kt
+@@ -68,6 +68,7 @@ fun ProUpgradeDialog(
+                 listOf(
+                     stringResource(R.string.pro_dialog_feature_routes),
+                     stringResource(R.string.pro_dialog_feature_joystick),
++                    stringResource(R.string.pro_dialog_feature_floating),
+                     stringResource(R.string.pro_dialog_feature_export),
+                     stringResource(R.string.pro_dialog_feature_ads)
+                 ).forEach { feature ->
+diff --git a/app/src/main/res/values-en/strings.xml b/app/src/main/res/values-en/strings.xml
+index 10297c4..d770843 100644
+--- a/app/src/main/res/values-en/strings.xml
++++ b/app/src/main/res/values-en/strings.xml
+@@ -58,7 +58,7 @@
+     <string name="action_open_about_phone">Open About phone</string>
+     <string name="error_location_permission">Location permission is required for this feature.</string>
+     <string name="error_notification_permission">Notification permission is required for background controls.</string>
+-    <string name="error_floating_window">Floating window permission is required for the joystick. Please enable it in Settings.</string>
++    <string name="error_floating_window">Floating tools and the joystick need permission to display over other apps. Enable it in Settings.</string>
+     <string name="error_provider_setup_failed">Engine setup failed: %1$s</string>
+     <string name="error_set_location_failed">Location push failed: %1$s</string>
+     <string name="error_provider_teardown_failed">Stop failed: %1$s</string>
+@@ -458,8 +458,8 @@
+     <string name="floating_explore">Explore selected place</string>
+     <string name="floating_selected">Selected place</string>
+     <string name="floating_copy_selected">Copy selected coordinates</string>
+-    <string name="floating_locate">Locate</string>
+-    <string name="floating_save">Save place</string>
++    <string name="floating_locate">Move here</string>
++    <string name="floating_save">Save</string>
+     <string name="floating_queue">Add to queue</string>
+     <string name="floating_queued">Separate queue: %1$d points</string>
+     <string name="floating_apply">Apply queued route</string>
+@@ -482,4 +482,15 @@
+     <string name="floating_msg_copied">Copied</string>
+     <string name="floating_map_hint">Moving or tapping the map only selects a point. Use Locate to move.</string>
+     <string name="floating_blocked">Complete permissions or credit setup in the app. Location has not started.</string>
++    <string name="floating_tab_saved">Saved</string>
++    <string name="floating_active">Location active</string>
++    <string name="floating_copy">Copy</string>
++    <string name="floating_zoom_in">Zoom in</string>
++    <string name="floating_zoom_out">Zoom out</string>
++    <string name="floating_slower">Slower</string>
++    <string name="floating_faster">Faster</string>
++    <string name="joystick_title">Virtual joystick</string>
++    <string name="joystick_open">Open joystick</string>
++    <string name="joystick_close">Close joystick</string>
++    <string name="pro_dialog_feature_floating">Floating tools: search, saved places and routes</string>
+ </resources>
+diff --git a/app/src/main/res/values-ja/strings.xml b/app/src/main/res/values-ja/strings.xml
+index 32c8b50..e33bdb2 100644
+--- a/app/src/main/res/values-ja/strings.xml
++++ b/app/src/main/res/values-ja/strings.xml
+@@ -58,7 +58,7 @@
+     <string name="action_open_about_phone">「端末情報」を開く</string>
+     <string name="error_location_permission">この機能には位置情報の権限が必要です。</string>
+     <string name="error_notification_permission">バックグラウンド操作には通知の権限が必要です。</string>
+-    <string name="error_floating_window">ジョイスティック機能には「他のアプリの上に重ねて表示」の権限が必要です。設定で有効にしてください。</string>
++    <string name="error_floating_window">フローティングツールとジョイスティックには他のアプリの上に表示する権限が必要です。設定で有効にしてください。</string>
+     <string name="error_provider_setup_failed">エンジン設定失敗: %1$s</string>
+     <string name="error_set_location_failed">位置情報の送信失敗: %1$s</string>
+     <string name="error_provider_teardown_failed">停止失敗: %1$s</string>
+@@ -458,8 +458,8 @@
+     <string name="floating_explore">選択した場所を探索</string>
+     <string name="floating_selected">選択した場所</string>
+     <string name="floating_copy_selected">選択した座標をコピー</string>
+-    <string name="floating_locate">移動</string>
+-    <string name="floating_save">場所を保存</string>
++    <string name="floating_locate">ここへ移動</string>
++    <string name="floating_save">保存</string>
+     <string name="floating_queue">待機リストに追加</string>
+     <string name="floating_queued">独立した待機リスト：%1$d 地点</string>
+     <string name="floating_apply">待機ルートを適用</string>
+@@ -482,4 +482,15 @@
+     <string name="floating_msg_copied">コピーしました</string>
+     <string name="floating_map_hint">地図の移動やタップは地点の選択だけです。「移動」を押すと実行します。</string>
+     <string name="floating_blocked">アプリで権限または利用回数の設定を完了してください。位置の変更は開始していません。</string>
++    <string name="floating_tab_saved">保存</string>
++    <string name="floating_active">位置設定中</string>
++    <string name="floating_copy">コピー</string>
++    <string name="floating_zoom_in">地図を拡大</string>
++    <string name="floating_zoom_out">地図を縮小</string>
++    <string name="floating_slower">減速</string>
++    <string name="floating_faster">加速</string>
++    <string name="joystick_title">仮想ジョイスティック</string>
++    <string name="joystick_open">ジョイスティックを開く</string>
++    <string name="joystick_close">ジョイスティックを閉じる</string>
++    <string name="pro_dialog_feature_floating">フローティングツール：検索・保存地点・ルート</string>
+ </resources>
+diff --git a/app/src/main/res/values-ko/strings.xml b/app/src/main/res/values-ko/strings.xml
+index 9677334..97eb390 100644
+--- a/app/src/main/res/values-ko/strings.xml
++++ b/app/src/main/res/values-ko/strings.xml
+@@ -58,7 +58,7 @@
+     <string name="action_open_about_phone">휴대전화 정보 열기</string>
+     <string name="error_location_permission">이 기능을 사용하려면 위치 권한이 필요합니다.</string>
+     <string name="error_notification_permission">백그라운드 제어를 위해 알림 권한이 필요합니다.</string>
+-    <string name="error_floating_window">조이스틱 기능을 사용하려면 다른 앱 위에 표시 권한이 필요합니다. 설정에서 활성화해 주세요.</string>
++    <string name="error_floating_window">플로팅 도구와 조이스틱에는 다른 앱 위에 표시 권한이 필요합니다. 설정에서 활성화하세요.</string>
+     <string name="error_provider_setup_failed">엔진 설정 실패: %1$s</string>
+     <string name="error_set_location_failed">위치 전송 실패: %1$s</string>
+     <string name="error_provider_teardown_failed">정지 실패: %1$s</string>
+@@ -458,8 +458,8 @@
+     <string name="floating_explore">선택한 장소 탐색</string>
+     <string name="floating_selected">선택한 장소</string>
+     <string name="floating_copy_selected">선택 좌표 복사</string>
+-    <string name="floating_locate">이동</string>
+-    <string name="floating_save">장소 저장</string>
++    <string name="floating_locate">여기로 이동</string>
++    <string name="floating_save">저장</string>
+     <string name="floating_queue">대기 목록에 추가</string>
+     <string name="floating_queued">별도 대기 목록: %1$d개 지점</string>
+     <string name="floating_apply">대기 경로 적용</string>
+@@ -482,4 +482,15 @@
+     <string name="floating_msg_copied">복사했습니다</string>
+     <string name="floating_map_hint">지도를 움직이거나 탭하면 지점만 선택됩니다. 이동하려면 이동 버튼을 누르세요.</string>
+     <string name="floating_blocked">앱에서 권한 또는 이용 횟수 설정을 완료하세요. 위치 변경은 시작되지 않았습니다.</string>
++    <string name="floating_tab_saved">저장</string>
++    <string name="floating_active">위치 활성화</string>
++    <string name="floating_copy">복사</string>
++    <string name="floating_zoom_in">지도 확대</string>
++    <string name="floating_zoom_out">지도 축소</string>
++    <string name="floating_slower">속도 줄이기</string>
++    <string name="floating_faster">속도 늘리기</string>
++    <string name="joystick_title">가상 조이스틱</string>
++    <string name="joystick_open">조이스틱 열기</string>
++    <string name="joystick_close">조이스틱 닫기</string>
++    <string name="pro_dialog_feature_floating">플로팅 도구: 검색, 저장 장소 및 경로</string>
+ </resources>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index a27c7b1..4a74cca 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -58,7 +58,7 @@
+     <string name="action_open_about_phone">開啟「關於手機」</string>
+     <string name="error_location_permission">此功能需要定位權限才能運作。</string>
+     <string name="error_notification_permission">此功能需要通知權限以顯示背景控制項。</string>
+-    <string name="error_floating_window">搖桿功能需要「顯示在其他應用程式上層」權限。請在設定中開啟。</string>
++    <string name="error_floating_window">懸浮工具及搖桿需要「顯示在其他應用程式上層」權限。請在設定中開啟。</string>
+     <string name="error_provider_setup_failed">模擬引擎設定失敗: %1$s</string>
+     <string name="error_set_location_failed">位置推送失敗: %1$s</string>
+     <string name="error_provider_teardown_failed">停止失敗: %1$s</string>
+@@ -461,8 +461,8 @@
+     <string name="floating_explore">探索選中地點</string>
+     <string name="floating_selected">選中地點</string>
+     <string name="floating_copy_selected">複製選中座標</string>
+-    <string name="floating_locate">定位</string>
+-    <string name="floating_save">存收藏</string>
++    <string name="floating_locate">移動到這裡</string>
++    <string name="floating_save">儲存</string>
+     <string name="floating_queue">加入待走</string>
+     <string name="floating_queued">獨立待走清單：%1$d 個點</string>
+     <string name="floating_apply">套用待走路線</string>
+@@ -485,4 +485,15 @@
+     <string name="floating_msg_copied">已複製</string>
+     <string name="floating_map_hint">移動地圖或點擊只會選點；按下「定位」才執行移動。</string>
+     <string name="floating_blocked">需要在主程式完成授權或額度處理，定位尚未啟動。</string>
++    <string name="floating_tab_saved">收藏</string>
++    <string name="floating_active">定位中</string>
++    <string name="floating_copy">複製</string>
++    <string name="floating_zoom_in">放大地圖</string>
++    <string name="floating_zoom_out">縮小地圖</string>
++    <string name="floating_slower">降低速度</string>
++    <string name="floating_faster">增加速度</string>
++    <string name="joystick_title">虛擬搖桿</string>
++    <string name="joystick_open">開啟獨立搖桿</string>
++    <string name="joystick_close">關閉搖桿</string>
++    <string name="pro_dialog_feature_floating">懸浮工具：搜尋、收藏與路線</string>
+ </resources>
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayColorsTest.kt b/app/src/test/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayColorsTest.kt
+index bc72876..93737a6 100644
+--- a/app/src/test/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayColorsTest.kt
++++ b/app/src/test/java/com/moooo_works/letsgogps/ui/map/FloatingOverlayColorsTest.kt
+@@ -4,6 +4,7 @@ import androidx.compose.material3.darkColorScheme
+ import androidx.compose.material3.lightColorScheme
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.luminance
++import androidx.compose.ui.graphics.compositeOver
+ import com.moooo_works.letsgogps.ui.theme.Red500
+ import com.moooo_works.letsgogps.ui.theme.V2BgLight
+ import com.moooo_works.letsgogps.ui.theme.V2SurfaceLight
+@@ -28,6 +29,13 @@ class FloatingOverlayColorsTest {
+                 colors.error to colors.surface, colors.onError to colors.error)) {
+                 assertTrue("dark=$dark contrast=${contrast(text, background)}", contrast(text, background) >= 4.5f)
+             }
++            for (underlay in listOf(Color.Black, Color.White)) {
++                val translucentBackground = colors.surface.copy(alpha = .82f).compositeOver(underlay)
++                for (text in listOf(colors.onSurface, colors.onSurfaceVariant, colors.primary, colors.error)) {
++                    assertTrue("translucent dark=$dark contrast=${contrast(text, translucentBackground)}",
++                        contrast(text, translucentBackground) >= 4.5f)
++                }
++            }
+             assertTrue(contrast(colors.outline, colors.surface) >= 3f)
+             assertTrue(contrast(colors.outline, colors.surfaceVariant) >= 3f)
+         }
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManagerTest.kt b/app/src/test/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManagerTest.kt
+index 8a1f802..8a55862 100644
+--- a/app/src/test/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManagerTest.kt
++++ b/app/src/test/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManagerTest.kt
+@@ -74,4 +74,43 @@ class JoystickOverlayManagerTest {
+         assertEquals(Lifecycle.State.DESTROYED,view.captured.findViewTreeLifecycleOwner()!!.lifecycle.currentState)
+     }
+ 
++    @Test fun `docked overlay remains on same edge after panel shrinks and grows`() {
++        val windows = mockk<WindowManager>(relaxed = true)
++        val app = RuntimeEnvironment.getApplication()
++        app.getSharedPreferences("joystick_overlay_prefs", Context.MODE_PRIVATE).edit().clear().commit()
++        val context = object : ContextWrapper(app) {
++            override fun getSystemService(name: String): Any? =
++                if (name == Context.WINDOW_SERVICE) windows else super.getSystemService(name)
++        }
++        val view = slot<ComposeView>()
++        val params = slot<WindowManager.LayoutParams>()
++        every { windows.addView(capture(view), capture(params)) } just Runs
++        val manager = JoystickOverlayManager(context)
++        manager.show { }
++        val screen = context.resources.displayMetrics.widthPixels
++        view.captured.layout(0, 0, screen / 2, 200)
++        assertTrue(params.captured.x == 0 || params.captured.x == screen - screen / 2)
++        manager.updatePosition(screen, 0)
++        manager.snapToEdge()
++        view.captured.layout(0, 0, screen / 8, 100)
++        assertEquals(screen - screen / 8, params.captured.x)
++        view.captured.layout(0, 0, screen / 4, 100)
++        assertEquals(screen - screen / 4, params.captured.x)
++        manager.setBottomAligned(true)
++        val screenHeight = context.resources.displayMetrics.heightPixels
++        assertEquals(screenHeight - 100, params.captured.y)
++        view.captured.layout(0, 0, screen / 4, 150)
++        assertEquals(screenHeight - 150, params.captured.y)
++        manager.updatePosition(0, -100)
++        view.captured.layout(0, 0, screen / 4, 100)
++        assertEquals(screenHeight - 250, params.captured.y)
++        manager.updatePosition(-screen, 0)
++        manager.snapToEdge()
++        view.captured.layout(0, 0, screen / 8, 100)
++        assertEquals(0, params.captured.x)
++        manager.updatePosition(screen / 4, 0)
++        assertEquals(screen / 4, params.captured.x)
++        manager.hide()
++    }
++
+ }
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt b/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt
+index 0316066..054cff3 100644
+--- a/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt
++++ b/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt
+@@ -88,6 +88,7 @@ class MapViewModelTest {
+     @Before
+     fun setup() {
+         Dispatchers.setMain(dispatcher)
++        every { joystickOverlayManager.hasPermission() } returns true
+         every { repository.getAllLocations() } returns emptyFlow()
+         every { repository.observeFolders() } returns emptyFlow()
+         every { repository.observeRoutes() } returns emptyFlow()
+@@ -140,6 +141,60 @@ class MapViewModelTest {
+         timezoneRepository, mockk(relaxed = true), context
+     )
+ 
++    @Test
++    fun `both overlay entry points require Pro`() = runTest {
++        val vm = createViewModel()
++        runCurrent()
++        vm.toggleCompanion()
++        assertTrue(vm.uiState.value.showProUpgrade)
++        vm.dismissProUpgrade()
++        vm.toggleJoystick()
++        assertTrue(vm.uiState.value.showProUpgrade)
++        assertFalse(vm.uiState.value.isCompanionEnabled)
++        assertFalse(vm.uiState.value.isJoystickEnabled)
++        verify(exactly = 0) { joystickOverlayManager.show(any()) }
++    }
++
++    @Test
++    fun `revoked repository entitlement rejects both entries before UI collector updates`() = runTest {
++        isProActiveFlow.value = true
++        val vm = createViewModel()
++        runCurrent()
++        assertTrue(vm.uiState.value.isProActive)
++        isProActiveFlow.value = false
++        vm.toggleCompanion()
++        vm.toggleJoystick()
++        assertTrue(vm.uiState.value.showProUpgrade)
++        assertFalse(vm.uiState.value.isCompanionEnabled)
++        assertFalse(vm.uiState.value.isJoystickEnabled)
++        verify(exactly = 0) { joystickOverlayManager.show(any()) }
++        runCurrent()
++    }
++
++    @Test
++    fun `switching overlays stays exclusive and revocation closes the window without stopping simulation`() = runTest {
++        isProActiveFlow.value = true
++        val vm = createViewModel()
++        runCurrent()
++        vm.toggleCompanion()
++        assertTrue(vm.uiState.value.isCompanionEnabled)
++        assertFalse(vm.uiState.value.isJoystickEnabled)
++        vm.toggleJoystick()
++        assertFalse(vm.uiState.value.isCompanionEnabled)
++        assertTrue(vm.uiState.value.isJoystickEnabled)
++        vm.toggleCompanion()
++        assertTrue(vm.uiState.value.isCompanionEnabled)
++        assertFalse(vm.uiState.value.isJoystickEnabled)
++        verify(exactly = 3) { joystickOverlayManager.show(any()) }
++        verify(exactly = 2) { joystickOverlayManager.hide() }
++        isProActiveFlow.value = false
++        runCurrent()
++        assertFalse(vm.uiState.value.isCompanionEnabled)
++        assertFalse(vm.uiState.value.isJoystickEnabled)
++        verify(exactly = 3) { joystickOverlayManager.hide() }
++        verify(exactly = 0) { context.startService(any()) }
++    }
++
+     @Test
+     fun `companion denied Pro never dispatches or stops active simulation`() = runTest {
+         val vm = createViewModel()
+@@ -316,7 +371,7 @@ class MapViewModelTest {
+         io.mockk.coVerify(exactly=0) { proRepository.consumeFeatureCredits(any()) }
+     }
+ 
+-    @Test fun `manager dismissal bridge clears credit pending and prevents late startup`() = runTest {
++    @Test fun `companion manager dismissal bridge clears credit pending and prevents late startup`() = runTest {
+         isProActiveFlow.value=true
+         every { mockEngine.getMockPermissionStatus() } returns MockPermissionStatus.Allowed
+         every { settingsRepository.observeStepSyncEnabled() } returns flowOf(true)

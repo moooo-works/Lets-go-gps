@@ -1,0 +1,147 @@
+{
+  "before": {
+    "com.google.android.datatransport.events": {
+      "android_metadata": {
+        "rows": 1,
+        "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+      },
+      "event_metadata": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "event_payloads": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "events": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "global_log_event_state": {
+        "rows": 1,
+        "sha256": "b54d129597db5451bdf7110e837cd7f2b937c55c76541e45edeadbf6bad4640e"
+      },
+      "log_event_dropped": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "transport_contexts": {
+        "rows": 3,
+        "sha256": "1456a978d7ed6479605d6444610e16f0ff8a121ebabb0111dfe317733233bedc"
+      }
+    },
+    "mockgps.db": {
+      "android_metadata": {
+        "rows": 1,
+        "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+      },
+      "location_folders": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "room_master_table": {
+        "rows": 1,
+        "sha256": "845882c3a54df2a36f553c1fe7fdba8eb794551980840a548f3980623c09c7ba"
+      },
+      "route_points": {
+        "rows": 591,
+        "sha256": "f037a1aa49e6c6d1bdef6832d1a5918611b37b642ca6c8939a72153666ef4199"
+      },
+      "routes": {
+        "rows": 6,
+        "sha256": "36b209f1369776f4dc910d967a2073e6d839827324fddb95e53a039fff26d93c"
+      },
+      "saved_locations": {
+        "rows": 375,
+        "sha256": "62a4f2555e407354e4554ae5b5c7d7caef6133338fd8da05d1f53468b6644f3f"
+      }
+    },
+    "ue3.db": {
+      "android_metadata": {
+        "rows": 1,
+        "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+      },
+      "userevent3_table": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "after": {
+    "com.google.android.datatransport.events": {
+      "android_metadata": {
+        "rows": 1,
+        "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+      },
+      "event_metadata": {
+        "rows": 30,
+        "sha256": "5798166181ad913a3b60991e1554149c82acc7a2630e0d954da9f9f6436e1f57"
+      },
+      "event_payloads": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "events": {
+        "rows": 2,
+        "sha256": "ed2742ddeb81842b4b023b65c1ab092a1644b8541e29b9905ec1df8878a24a85"
+      },
+      "global_log_event_state": {
+        "rows": 1,
+        "sha256": "5303e03e6c97c2a67b92af345314038c0beb24f5c75dbfdd2f5c46569e8938f3"
+      },
+      "log_event_dropped": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "transport_contexts": {
+        "rows": 3,
+        "sha256": "a74a0c24914f09ea204fad9554f76c1afbd25c43a273ab2bacfcd37e4d565485"
+      }
+    },
+    "mockgps.db": {
+      "android_metadata": {
+        "rows": 1,
+        "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+      },
+      "location_folders": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "room_master_table": {
+        "rows": 1,
+        "sha256": "845882c3a54df2a36f553c1fe7fdba8eb794551980840a548f3980623c09c7ba"
+      },
+      "route_points": {
+        "rows": 591,
+        "sha256": "f037a1aa49e6c6d1bdef6832d1a5918611b37b642ca6c8939a72153666ef4199"
+      },
+      "routes": {
+        "rows": 6,
+        "sha256": "36b209f1369776f4dc910d967a2073e6d839827324fddb95e53a039fff26d93c"
+      },
+      "saved_locations": {
+        "rows": 375,
+        "sha256": "62a4f2555e407354e4554ae5b5c7d7caef6133338fd8da05d1f53468b6644f3f"
+      }
+    },
+    "ue3.db": {
+      "android_metadata": {
+        "rows": 1,
+        "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+      },
+      "userevent3_table": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "identical_database_rows": false,
+  "identical_app_database_rows": true,
+  "scope_note": "使用者位置／路線資料比較以mockgps.db為準；Google傳輸事件資料庫屬SDK動態記錄，不宣称全資料庫一致。原始備份僅保留private/tmp，報告不含地點內容。",
+  "appearance_settings_unchanged": false,
+  "appearance_note": "語言仍為zh-TW；初始主題DARK、最後主題LIGHT，有差異。保留目前LIGHT，不回寫覆蓋，也不宣稱全設定一致。此輪主持者未透過App設定切換主題；無法單靠備份確定變更來源。",
+  "appearance_settings_checked": [
+    "theme_pref",
+    "language_pref"
+  ]
+}
