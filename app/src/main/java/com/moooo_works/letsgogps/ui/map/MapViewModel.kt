@@ -268,7 +268,11 @@ class MapViewModel @Inject constructor(
     }
 
     private fun companionActions() = FloatingCompanionActions(
-        onExpandedChange = { releaseCompanionInput(); floatingCompanionController.setExpanded(it) },
+        onExpandedChange = { expanded ->
+            releaseCompanionInput()
+            floatingCompanionController.setExpanded(expanded)
+            if (!expanded) joystickOverlayManager.snapToEdge()
+        },
         onTabChange = { releaseCompanionInput(); floatingCompanionController.setTab(it) },
         onQueryChange = floatingCompanionController::setQuery,
         onSearch = floatingCompanionController::search,

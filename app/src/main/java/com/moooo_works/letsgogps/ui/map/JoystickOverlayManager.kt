@@ -39,6 +39,7 @@ class JoystickOverlayManager @Inject constructor(
     private var owner: OverlayLifecycleOwner? = null
     private var pendingInputAction: (() -> Unit)? = null
     private var inputFocusable = false
+    private var dockedRight: Boolean? = null
     private val prefs: SharedPreferences by lazy { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
 
     private var onDismissed: (() -> Unit)? = null
@@ -135,6 +136,7 @@ class JoystickOverlayManager @Inject constructor(
         owner = null
         pendingInputAction = null
         inputFocusable = false
+        dockedRight = null
         if (view != null) {
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
                 ?.hideSoftInputFromWindow(view.windowToken, 0)
@@ -149,6 +151,7 @@ class JoystickOverlayManager @Inject constructor(
     @MainThread
     fun updatePosition(deltaX: Int, deltaY: Int) {
         val currentParams = params ?: return
+        dockedRight = null
         currentParams.x += deltaX
         currentParams.y += deltaY
         clampPosition(forceUpdate = true)
@@ -160,8 +163,13 @@ class JoystickOverlayManager @Inject constructor(
         val metrics = context.resources.displayMetrics
         val oldX = currentParams.x
         val oldY = currentParams.y
-        currentParams.x = clampOverlayPosition(currentParams.x, metrics.widthPixels, view.width)
+        currentParams.x = dockedRight?.let { right ->
+            if (right) (metrics.widthPixels - view.width).coerceAtLeast(0) else 0
+        } ?: clampOverlayPosition(currentParams.x, metrics.widthPixels, view.width)
         currentParams.y = clampOverlayPosition(currentParams.y, metrics.heightPixels, view.height)
+        if (dockedRight != null) {
+            prefs.edit().putInt(KEY_X, currentParams.x).putInt(KEY_Y, currentParams.y).apply()
+        }
         if (view.isAttachedToWindow && (forceUpdate || oldX != currentParams.x || oldY != currentParams.y)) {
             try { windowManager.updateViewLayout(view, currentParams) } catch (_: RuntimeException) { hide() }
         }
@@ -172,10 +180,9 @@ class JoystickOverlayManager @Inject constructor(
         val currentParams = params ?: return
         val view = composeView ?: return
         val metrics = context.resources.displayMetrics
-        currentParams.x = if (currentParams.x + view.width / 2 < metrics.widthPixels / 2) 0
-            else (metrics.widthPixels - view.width).coerceAtLeast(0)
+        // 保留同側，Compose 收合後重新量測較小尺寸時仍靠邊。
+        dockedRight = currentParams.x + view.width / 2 >= metrics.widthPixels / 2
         clampPosition(forceUpdate = true)
-        prefs.edit().putInt(KEY_X, currentParams.x).putInt(KEY_Y, currentParams.y).apply()
     }
 
     companion object {

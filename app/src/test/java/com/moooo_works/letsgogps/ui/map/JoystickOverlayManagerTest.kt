@@ -74,4 +74,34 @@ class JoystickOverlayManagerTest {
         assertEquals(Lifecycle.State.DESTROYED,view.captured.findViewTreeLifecycleOwner()!!.lifecycle.currentState)
     }
 
+    @Test fun `docked overlay remains on same edge after panel shrinks and grows`() {
+        val windows = mockk<WindowManager>(relaxed = true)
+        val app = RuntimeEnvironment.getApplication()
+        app.getSharedPreferences("joystick_overlay_prefs", Context.MODE_PRIVATE).edit().clear().commit()
+        val context = object : ContextWrapper(app) {
+            override fun getSystemService(name: String): Any? =
+                if (name == Context.WINDOW_SERVICE) windows else super.getSystemService(name)
+        }
+        val view = slot<ComposeView>()
+        val params = slot<WindowManager.LayoutParams>()
+        every { windows.addView(capture(view), capture(params)) } just Runs
+        val manager = JoystickOverlayManager(context)
+        manager.show { }
+        val screen = context.resources.displayMetrics.widthPixels
+        view.captured.layout(0, 0, screen / 2, 200)
+        manager.updatePosition(screen, 0)
+        manager.snapToEdge()
+        view.captured.layout(0, 0, screen / 8, 100)
+        assertEquals(screen - screen / 8, params.captured.x)
+        view.captured.layout(0, 0, screen / 4, 100)
+        assertEquals(screen - screen / 4, params.captured.x)
+        manager.updatePosition(-screen, 0)
+        manager.snapToEdge()
+        view.captured.layout(0, 0, screen / 8, 100)
+        assertEquals(0, params.captured.x)
+        manager.updatePosition(screen / 4, 0)
+        assertEquals(screen / 4, params.captured.x)
+        manager.hide()
+    }
+
 }
