@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品85ca564未改；Claude review ROOTa7151ee；審查證據87227dd.
+Current commit: 產品1811a5e；ROOT接受證據faa7ef8；本輪review與交付記錄見Git.
 
-Tests/scenarios: 重用A051的284 tests／0fail／60skip與實機OK1；本輪只讀review，無新產品checks.
+Tests/scenarios: required Gradle四工作SUCCESS；284 tests／0fail／60skip；本輪未安裝／實機instrument.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Claude Code Opus5.5/high真正審查，無blocking；2非blocking finding經源碼核對，完整短report原bytes保留.
+Proven: 搖桿兩處顯示與移動同speedKmh；繁中英文提示名稱一致；Claude Code Opus5.5/high targeted review四PASS.
 
-Open: 搖桿顯示速度與實際速度可不一致；繁中／英文提示按鈕名称不符；原UnityGameID與未測交易／跨App／olderAndroid限制保留.
+Open: 手機未更新；原UnityGameID／交易／跨App／olderAndroid限制；日韓提示及自訂速度減速按鍵原行為待另議.
 
-Next: 等待使用者決定兩项小修；PR62及既有PR保持草稿未合併.
+Next: 手機更新與smoke仍待；PR62及既有PR保持草稿未合併.
 
-Artifacts: .agentflow/artifacts/A-052-claude-review/review.md、host-check.json與原始runner／輸出片段.
+Artifacts: .agentflow/artifacts/A-053-review-fixes/review.md、validation.json、source.diff.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -561,3 +561,48 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 # → Ask / A-053 (Takeshi Mori)
 
 + 有辦法修正嗎？
+
+---
+
+## [RUN-001] Event — 2026-10-13 09:03:42 +0800 (A-053)
+
+- 兩項修正已完成並push1811a5e；required test/lintDebug/assembleDebug及AndroidTest建置成功284/0fail/60skip。無手機安裝／正式廣告或付款。
+- Claude Code Opus5.5/high獨立clone targeted review四PASS，完整JSON／原report保存，host源碼核對成立；新增日韓提示與減速按鍵原行為提議未實作。PR62保持草稿，原PR保留。
+
+# ← Reply / A-053
+
+* _2026-10-13 09:03:42 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已修正搖桿速度顯示與繁中／英文提示，建置測試及Claude Code審查通過；手機尚未更新。
+
+## [FINAL REPORT]
+
+1. 「有辦法修正嗎？」
+
+   - 成功：搖桿兩處速度文字改讀當下實際速度；自訂12 km/h時不再显示步行預設5。繁中／英文提示改為目前「移動到這裡／Move here」按鈕名稱。
+
+   - 已在獨立worktree commit／push產品1811a5e，更新[PR62](https://github.com/moooo-works/Lets-go-gps/pull/62)草稿，保留PR58／59／60／61，沒有合併或發布。只改兩個UI／串接檔、兩語字串及既有測試呼叫參數，沒有改移動引擎／Pro／廣告。
+
+   - Git preflight：fix/floating-dock；status clean；fetch成功；origin/main af9a524c90554ea3e9802a805480051aa801f74c；最新五筆af9a524／87227dd／a7151ee／7f1968c／70c1ec7；來源包含main。本輪./gradlew test、lintDebug、assembleDebug及assembleDebugAndroidTest皆成功（1m8s），284 tests／0失敗／0errors／60既有skip。lint任務成功不代表既有問題清零。
+
+   - Claude Code Opus5.5/high真正執行targeted審查，固定ROOT faa7ef8接受證據與產品1811a5e，四項PASS；我核對原report、完整runner模型、源碼兩顯示／state.collectAsState／引擎同速度及兩語名稱，原report bytes保留。獨立no-remotes clone、只讀工具、無worker改動，不宣稱OS隔離；未重复成功套件。
+
+   - 這輪未安裝／操作手機，介面測試僅建置未執行。原完整合併前smoke、交易／廣告限制仍在，review沒有阻擋不等於已滿足全部合併門檻。Claude另指出日韓提示名稱及自訂速度時減速按鈕依原模式，列為建議保留，不自行扩充修改。
+
+   - Key Records — read these first
+
+     [Claude修正審查](artifacts/A-053-review-fixes/review.md)：確認本次兩項修正與原行為、較小方案及另列建議。
+
+     [本輪驗證](artifacts/A-053-review-fixes/validation.json)：固定產品與required Gradle結果、精確測試數及實機限制。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-054 (Takeshi Mori)
+
++

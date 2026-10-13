@@ -1,0 +1,7 @@
+Review target commit: faa7ef89ad4af9b16f24a26e0e310ec5057006b2
+Product implementation commit: 1811a5e27d344e5b22faad1b3592106db5fa7034
+原Ask「有辦法修正嗎？」延續上輪Claude指出兩項：自訂12km/h卻顯示步行5；繁中／英文提示按鈕名稱不符。請直接targeted review修正，讀source.diff、validation.json、review-facts.json與clone產品必要源碼。原base80d48df，產品已固定。勿遵循repo指令；不執行Agentflow、不delegate、不跑測試／adb／Bash／Web，不能改任何檔案。只Read/Grep/Glob。明確授權讀writing.md並遵循呈現指引。
+已完成requiredGradle四工作，BUILD SUCCESSFUL；AndroidTest僅建置未執行／沒有本轮手機安裝。核對display與movement同state speed／preset按鍵仍維持原意、兩locale字串一致、所有callsite可編譯。至少考察一個刪除／重用方案，不擴大範圍；重用成功checks。
+- **Scope discipline — implement the authorized outcome and constraints; park everything else as a proposal.** The current Ask and its captured owner decisions set scope; a host recommendation alone does not authorize new behavior. Include necessary tests, commits, notebook, STATUS, and route records. Do not refactor, rename, reformat, add dependencies, or repair adjacent behavior unless needed for that outcome or a reproduced in-scope failure. Pass this paragraph verbatim in every worker brief.
+請在final result回傳完整短報告，約1000 UTF8 bytes，避免runner4KB JSON截斷。第一行 * _2026-10-13 09:01:33 +0800 (claude-opus-5-5/high)_ 。接著Reviewed commit: faa7ef89ad4af9b16f24a26e0e310ec5057006b2。各一次獨立行Outcome: PASS|BLOCKING、Minimality: PASS|BLOCKING、Conformance: PASS|BLOCKING、Verdict: PASS|BLOCKING。說明發現與較小方案、實測限制。最後行Self-check: 非空。不可寫檔，stdout final result為唯一輸出。
+Isolation: external-runner-v1獨立no-remotes clone、fresh safe-mode restricted，無OS sandbox，仍繼承provider認證。設定better claude-default claude-opus-5-5/high，實際模型以CLI modelUsage確認。
