@@ -674,4 +674,4 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 
 # → Ask / A-055 (Takeshi Mori)
 
-+
++ 懸浮視窗中，路線速度設定不需要出現小數點，以整數呈現為主

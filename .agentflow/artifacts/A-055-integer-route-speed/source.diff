@@ -1,0 +1,85 @@
+diff --git a/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt b/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt
+index e1413b8..84156b8 100644
+--- a/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt
++++ b/app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt
+@@ -137,6 +137,19 @@ class FloatingLayoutTest {
+             click(strings.getString(R.string.floating_copy_selected))
+             instrument.runOnMainSync { assertEquals(sample.latLng, copied); assertEquals(0, selections); assertEquals(CompanionTab.SEARCH, state.value.tab) }
+             click(strings.getString(R.string.nav_routes))
++            instrument.runOnMainSync { mapState.value = mapState.value.copy(speedKmh = 12.4) }
++            val speedLabel = strings.getString(R.string.floating_route_speed, 12.4)
++            val speedDeadline = SystemClock.uptimeMillis() + 5000
++            var speedVisible = false
++            while (!speedVisible && SystemClock.uptimeMillis() < speedDeadline) {
++                speedVisible = automation.windows.mapNotNull { it.root }
++                    .filter { it.packageName?.toString() == context.packageName }
++                    .flatMap(::nodes).any { it.text?.toString() == speedLabel && it.isVisibleToUser }
++                if (!speedVisible) SystemClock.sleep(100)
++            }
++            assertFalse(speedLabel.contains("12.4"))
++            assertTrue("Fractional speed must be displayed as an integer: $speedLabel", speedVisible)
++            instrument.runOnMainSync { assertEquals(12.4, mapState.value.speedKmh, 0.0) }
+             val switchMode = strings.getString(R.string.route_loop_cd)
+             for ((index, label) in listOf(R.string.route_loop_none, R.string.route_loop_loop, R.string.route_loop_bounce, R.string.route_loop_none).withIndex()) {
+                 val deadline = SystemClock.uptimeMillis() + 5000
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt
+index 33a3aaf..54e91bf 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt
+@@ -206,7 +206,7 @@ fun FloatingCompanionView(
+                                             stringResource(when(mapState.simulationState) { SimulationState.PLAYING -> R.string.route_pause; SimulationState.PAUSED -> R.string.action_resume; else -> R.string.route_play }))
+                                     }
+                                 }
+-                                Text(stringResource(R.string.floating_speed, mapState.speedKmh), fontSize = 13.sp)
++                                Text(stringResource(R.string.floating_route_speed, mapState.speedKmh), fontSize = 13.sp)
+                                 Slider(value = mapState.speedKmh.toFloat().coerceIn(ROUTE_SPEED_MIN_KMH, ROUTE_SPEED_MAX_KMH), onValueChange = { actions.onSpeedChange(it.toDouble()) }, valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH)
+                             }
+                         }
+diff --git a/app/src/main/res/values-en/strings.xml b/app/src/main/res/values-en/strings.xml
+index 1c2cc9c..d99043c 100644
+--- a/app/src/main/res/values-en/strings.xml
++++ b/app/src/main/res/values-en/strings.xml
+@@ -455,6 +455,7 @@
+     <string name="floating_favorites">Favorites only</string>
+     <string name="floating_route_item">%1$s · %2$d points</string>
+     <string name="floating_speed">Speed: %1$.1f km/h</string>
++    <string name="floating_route_speed">Speed: %1$.0f km/h</string>
+     <string name="floating_explore">Explore selected place</string>
+     <string name="floating_selected">Selected place</string>
+     <string name="floating_copy_selected">Copy selected coordinates</string>
+diff --git a/app/src/main/res/values-ja/strings.xml b/app/src/main/res/values-ja/strings.xml
+index 8ae24d9..e3fdf3f 100644
+--- a/app/src/main/res/values-ja/strings.xml
++++ b/app/src/main/res/values-ja/strings.xml
+@@ -455,6 +455,7 @@
+     <string name="floating_favorites">お気に入りのみ</string>
+     <string name="floating_route_item">%1$s · %2$d 地点</string>
+     <string name="floating_speed">速度：%1$.1f km/h</string>
++    <string name="floating_route_speed">速度：%1$.0f km/h</string>
+     <string name="floating_explore">選択した場所を探索</string>
+     <string name="floating_selected">選択した場所</string>
+     <string name="floating_copy_selected">選択した座標をコピー</string>
+diff --git a/app/src/main/res/values-ko/strings.xml b/app/src/main/res/values-ko/strings.xml
+index 739bd0d..ab43f00 100644
+--- a/app/src/main/res/values-ko/strings.xml
++++ b/app/src/main/res/values-ko/strings.xml
+@@ -455,6 +455,7 @@
+     <string name="floating_favorites">즐겨찾기만</string>
+     <string name="floating_route_item">%1$s · %2$d개 지점</string>
+     <string name="floating_speed">속도: %1$.1f km/h</string>
++    <string name="floating_route_speed">속도: %1$.0f km/h</string>
+     <string name="floating_explore">선택한 장소 탐색</string>
+     <string name="floating_selected">선택한 장소</string>
+     <string name="floating_copy_selected">선택 좌표 복사</string>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 9bad232..35e7e36 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -458,6 +458,7 @@
+     <string name="floating_favorites">只看最愛</string>
+     <string name="floating_route_item">%1$s · %2$d 個點</string>
+     <string name="floating_speed">速度：%1$.1f km/h</string>
++    <string name="floating_route_speed">速度：%1$.0f km/h</string>
+     <string name="floating_explore">探索選中地點</string>
+     <string name="floating_selected">選中地點</string>
+     <string name="floating_copy_selected">複製選中座標</string>
