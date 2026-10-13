@@ -1,0 +1,1436 @@
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index ef6a8bf..79c4d66 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
+ 
+ val versionMajor = 1
+ val versionMinor = 4
+-val versionPatch = 0
++val versionPatch = 1
+ 
+ android {
+     namespace = "com.moooo_works.letsgogps"
+@@ -110,21 +110,27 @@ android {
+ 
+ androidComponents {
+     onVariants { variant ->
++        val adMobAppId = if (variant.buildType == "debug") {
++            "ca-app-pub-3940256099942544~3347511713"
++        } else {
++            "ca-app-pub-7328056144057376~2219581212"
++        }
+         val fields = if (variant.buildType == "debug") {
+             mapOf(
+                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "true", "Debug Pro override"),
+-                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544~3347511713\"", "Google sample App ID"),
+-                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/6300978111\"", "Google sample Banner unit"),
++                "ADMOB_APP_ID" to BuildConfigField("String", "\"$adMobAppId\"", "Google sample App ID"),
++                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/9214589741\"", "Google sample adaptive Banner unit"),
+                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/5224354917\"", "Google sample Rewarded unit")
+             )
+         } else {
+             mapOf(
+                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "false", "Release Pro behavior"),
+-                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376~2219581212\"", "Production App ID"),
++                "ADMOB_APP_ID" to BuildConfigField("String", "\"$adMobAppId\"", "Production App ID"),
+                 "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/1824598031\"", "Production Banner unit"),
+                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/6473078035\"", "Production Rewarded unit")
+             )
+         }
++        variant.manifestPlaceholders.put("ADMOB_APP_ID", adMobAppId)
+         variant.buildConfigFields?.putAll(fields)
+     }
+ }
+@@ -144,6 +150,12 @@ tasks.whenTaskAdded {
+     }
+ }
+ 
++// Unity adapter 會帶入舊版 Google Ads；Next-Gen 不可同時載入兩套 SDK。
++configurations.configureEach {
++    exclude(group = "com.google.android.gms", module = "play-services-ads")
++    exclude(group = "com.google.android.gms", module = "play-services-ads-lite")
++}
++
+ dependencies {
+     testImplementation(libs.robolectric)
+     implementation(libs.hilt.navigation.compose)
+@@ -177,6 +189,8 @@ dependencies {
+ 
+     // AdMob
+     implementation(libs.admob.next.gen)
++    implementation(libs.unity.ads)
++    implementation(libs.unity.adapter)
+ 
+     // Billing
+     implementation(libs.billing)
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 5371bd6..6f39119 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -45,6 +45,10 @@
+             android:name="com.google.android.geo.API_KEY"
+             android:value="${MAPS_API_KEY}" />
+ 
++        <meta-data
++            android:name="com.google.android.gms.ads.APPLICATION_ID"
++            android:value="${ADMOB_APP_ID}" />
++
+         <activity
+             android:name=".MainActivity"
+             android:exported="true"
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt b/app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt
+index d1fa4f9..add68eb 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt
+@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
+ import androidx.activity.enableEdgeToEdge
+ import android.content.Context
+ import com.moooo_works.letsgogps.data.imports.GpxImportBus
++import com.moooo_works.letsgogps.data.billing.AdConsentManager
+ import javax.inject.Inject
+ import androidx.compose.foundation.layout.fillMaxSize
+ import androidx.compose.material3.MaterialTheme
+@@ -80,6 +81,7 @@ fun applyLocale(base: Context): Context {
+ class MainActivity : ComponentActivity() {
+ 
+     @Inject lateinit var gpxImportBus: GpxImportBus
++    @Inject lateinit var adConsentManager: AdConsentManager
+ 
+     override fun attachBaseContext(newBase: Context) {
+         super.attachBaseContext(applyLocale(newBase))
+@@ -120,6 +122,7 @@ class MainActivity : ComponentActivity() {
+                 }
+             }
+         }
++        adConsentManager.gatherConsent(this)
+     }
+ 
+     override fun onNewIntent(intent: Intent) {
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/MainApplication.kt b/app/src/main/java/com/moooo_works/letsgogps/MainApplication.kt
+index 1e5aed4..e653729 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/MainApplication.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/MainApplication.kt
+@@ -1,21 +1,16 @@
+ package com.moooo_works.letsgogps
+ 
+ import android.app.Application
+-import com.moooo_works.letsgogps.data.billing.AdMobInitializer
+ import com.moooo_works.letsgogps.service.MockSessionRestorer
+ import dagger.hilt.EntryPoint
+ import dagger.hilt.InstallIn
+ import dagger.hilt.android.EntryPointAccessors
+ import dagger.hilt.android.HiltAndroidApp
+ import dagger.hilt.components.SingletonComponent
+-import javax.inject.Inject
+ 
+ @HiltAndroidApp
+ class MainApplication : Application() {
+ 
+-    @Inject
+-    lateinit var adMobInitializer: AdMobInitializer
+-
+     @EntryPoint
+     @InstallIn(SingletonComponent::class)
+     interface RestorerEntryPoint {
+@@ -24,8 +19,6 @@ class MainApplication : Application() {
+ 
+     override fun onCreate() {
+         super.onCreate()
+-        adMobInitializer.initialize()
+-
+         // Recover an interrupted mock session if the process was killed mid-use.
+         EntryPointAccessors.fromApplication(this, RestorerEntryPoint::class.java)
+             .mockSessionRestorer()
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdConsentManager.kt b/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdConsentManager.kt
+new file mode 100644
+index 0000000..18c50fd
+--- /dev/null
++++ b/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdConsentManager.kt
+@@ -0,0 +1,163 @@
++package com.moooo_works.letsgogps.data.billing
++
++import android.app.Activity
++import android.content.Context
++import androidx.annotation.MainThread
++import com.google.android.ump.ConsentInformation
++import com.google.android.ump.ConsentRequestParameters
++import com.google.android.ump.UserMessagingPlatform
++import com.unity3d.ads.metadata.MetaData
++import dagger.hilt.android.qualifiers.ApplicationContext
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.StateFlow
++import kotlinx.coroutines.flow.asStateFlow
++import java.lang.ref.WeakReference
++import javax.inject.Inject
++import javax.inject.Singleton
++
++data class AdConsentState(
++    val canRequestAds: Boolean = false,
++    val privacyOptionsRequired: Boolean = false,
++    val revision: Long = 0,
++    val busy: Boolean = false,
++    val error: String? = null
++)
++
++interface AdConsentGate {
++    val state: StateFlow<AdConsentState>
++    fun prepareAdRequest(): Boolean
++}
++
++internal interface ConsentBackend {
++    val canRequestAds: Boolean
++    val privacyOptionsRequired: Boolean
++    fun update(activity: Activity, onSuccess: () -> Unit, onFailure: (String) -> Unit)
++    fun showRequiredForm(activity: Activity, onDismiss: (String?) -> Unit)
++    fun showPrivacyOptions(activity: Activity, onDismiss: (String?) -> Unit)
++    fun applyMediationPrivacy(): Boolean
++}
++
++@Singleton
++class AdConsentManager internal constructor(private val backend: ConsentBackend) : AdConsentGate {
++    @Inject constructor(@ApplicationContext context: Context) : this(UmpConsentBackend(context))
++
++    private val mutableState = MutableStateFlow(AdConsentState())
++    override val state = mutableState.asStateFlow()
++    private var operation = 0L
++    private var updatedThisLaunch = false
++    private var owner = WeakReference<Activity>(null)
++    private enum class Phase { Idle, Updating, Form }
++    private var phase = Phase.Idle
++
++    @MainThread
++    override fun prepareAdRequest(): Boolean {
++        if (!state.value.canRequestAds) return false
++        if (backend.canRequestAds && backend.applyMediationPrivacy()) return true
++        mutableState.value = state.value.copy(
++            canRequestAds = false, revision = state.value.revision + 1,
++            error = "Mediation privacy configuration failed"
++        )
++        return false
++    }
++
++    @MainThread
++    fun gatherConsent(activity: Activity) {
++        if (activity.isFinishing || activity.isDestroyed) return
++        if (phase == Phase.Idle && updatedThisLaunch) return
++        if (phase != Phase.Idle && owner.get() === activity) return
++        val token = begin(activity, Phase.Updating)
++        backend.update(activity, onSuccess = {
++            if (token != operation || phase != Phase.Updating) return@update
++            val currentActivity = owner.get()
++            if (currentActivity == null || currentActivity.isFinishing || currentActivity.isDestroyed) {
++                cancel()
++                return@update
++            }
++            phase = Phase.Form
++            backend.showRequiredForm(currentActivity) { error -> finish(token, error) }
++        }, onFailure = { error ->
++            if (phase == Phase.Updating) finish(token, error)
++        })
++    }
++
++    @MainThread
++    fun showPrivacyOptions(activity: Activity) {
++        if (phase != Phase.Idle || !state.value.privacyOptionsRequired ||
++            activity.isFinishing || activity.isDestroyed) return
++        val token = begin(activity, Phase.Form)
++        backend.showPrivacyOptions(activity) { error -> finish(token, error) }
++    }
++
++    private fun begin(activity: Activity, nextPhase: Phase): Long {
++        operation++
++        owner = WeakReference(activity)
++        phase = nextPhase
++        mutableState.value = state.value.copy(
++            canRequestAds = false, revision = state.value.revision + 1, busy = true, error = null
++        )
++        return operation
++    }
++
++    private fun cancel() {
++        phase = Phase.Idle
++        updatedThisLaunch = false
++        owner.clear()
++        mutableState.value = state.value.copy(canRequestAds = false, busy = false)
++    }
++
++    private fun finish(token: Long, error: String?) {
++        if (token != operation || phase == Phase.Idle) return
++        val currentActivity = owner.get()
++        if (currentActivity == null || currentActivity.isFinishing || currentActivity.isDestroyed) {
++            cancel()
++            return
++        }
++        phase = Phase.Idle
++        updatedThisLaunch = true
++        owner.clear()
++        // canRequestAds 只代表可請求廣告，不代表同意個人化。
++        val allowed = backend.canRequestAds
++        val privacyApplied = !allowed || backend.applyMediationPrivacy()
++        mutableState.value = AdConsentState(
++            canRequestAds = allowed && privacyApplied,
++            privacyOptionsRequired = backend.privacyOptionsRequired,
++            revision = state.value.revision + 1,
++            error = if (privacyApplied) error else "Mediation privacy configuration failed"
++        )
++    }
++}
++
++private class UmpConsentBackend(context: Context) : ConsentBackend {
++    private val context = context.applicationContext
++    private val information = UserMessagingPlatform.getConsentInformation(this.context)
++    override val canRequestAds get() = information.canRequestAds()
++    override val privacyOptionsRequired get() = information.privacyOptionsRequirementStatus ==
++        ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
++
++    override fun update(activity: Activity, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
++        information.requestConsentInfoUpdate(
++            activity, ConsentRequestParameters.Builder().build(), onSuccess,
++            { error -> onFailure(error.message) }
++        )
++    }
++
++    override fun showRequiredForm(activity: Activity, onDismiss: (String?) -> Unit) {
++        UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) { onDismiss(it?.message) }
++    }
++
++    override fun showPrivacyOptions(activity: Activity, onDismiss: (String?) -> Unit) {
++        UserMessagingPlatform.showPrivacyOptionsForm(activity) { onDismiss(it?.message) }
++    }
++
++    override fun applyMediationPrivacy(): Boolean = try {
++        // GPP 自動傳遞尚未驗證；暫時對 Unity 一律限制個人化，不假定使用者 opt-in。
++        MetaData(context).let { metadata ->
++            if (metadata.set("privacy.consent", false)) {
++                metadata.commit()
++                true // commit 無成功回傳；實機仍須驗證 SDK 訊號。
++            } else false
++        }
++    } catch (_: RuntimeException) {
++        false
++    }
++}
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdMobInitializer.kt b/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdMobInitializer.kt
+index cef76cd..2b33fa6 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdMobInitializer.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdMobInitializer.kt
+@@ -36,10 +36,11 @@ interface AdMobInitializationGate {
+ 
+ @Singleton
+ class AdMobInitializer @Inject constructor(
+-    @ApplicationContext private val context: Context
++    @ApplicationContext private val context: Context,
++    private val consent: AdConsentManager
+ ) : AdMobInitializationGate {
+ 
+-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
++    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+     private val mainHandler = Handler(Looper.getMainLooper())
+     private val started = AtomicBoolean(false)
+     private val callbackLock = Any()
+@@ -48,11 +49,21 @@ class AdMobInitializer @Inject constructor(
+ 
+     val state: StateFlow<AdMobInitializationState> = mutableState.asStateFlow()
+ 
+-    override fun initialize() {
+-        if (!started.compareAndSet(false, true)) return
++    init {
++        scope.launch {
++            consent.state.collect { if (it.canRequestAds) initialize() }
++        }
++    }
+ 
+-        mutableState.value = AdMobInitializationState.Initializing
++    override fun initialize() {
+         scope.launch {
++            if (started.get()) return@launch
++            if (!consent.prepareAdRequest()) {
++                drainCallbacks(success = false)
++                return@launch
++            }
++            if (!started.compareAndSet(false, true)) return@launch
++            mutableState.value = AdMobInitializationState.Initializing
+             try {
+                 val requestConfiguration = RequestConfiguration.Builder()
+                     .apply {
+@@ -75,6 +86,10 @@ class AdMobInitializer @Inject constructor(
+     }
+ 
+     override fun whenReady(callback: (Boolean) -> Unit) {
++        if (!consent.state.value.canRequestAds) {
++            dispatchToMain { callback(false) }
++            return
++        }
+         val completedState = synchronized(callbackLock) {
+             when (mutableState.value) {
+                 AdMobInitializationState.Ready -> true
+@@ -88,23 +103,23 @@ class AdMobInitializer @Inject constructor(
+         }
+ 
+         if (completedState != null) {
+-            dispatchToMain { callback(completedState) }
++            dispatchToMain { callback(completedState && consent.state.value.canRequestAds) }
+         } else {
+             initialize()
+         }
+     }
+ 
+     private fun complete(success: Boolean) {
++        mutableState.value = if (success) AdMobInitializationState.Ready else AdMobInitializationState.Failed
++        drainCallbacks(success)
++    }
++
++    private fun drainCallbacks(success: Boolean) {
+         val callbacks = synchronized(callbackLock) {
+-            mutableState.value = if (success) {
+-                AdMobInitializationState.Ready
+-            } else {
+-                AdMobInitializationState.Failed
+-            }
+             pendingCallbacks.toList().also { pendingCallbacks.clear() }
+         }
+         dispatchToMain {
+-            callbacks.forEach { callback -> callback(success) }
++            callbacks.forEach { callback -> callback(success && consent.state.value.canRequestAds) }
+         }
+     }
+ 
+@@ -125,4 +140,5 @@ class AdMobInitializer @Inject constructor(
+ @InstallIn(SingletonComponent::class)
+ interface AdMobInitializerEntryPoint {
+     fun adMobInitializer(): AdMobInitializer
++    fun adConsentManager(): AdConsentManager
+ }
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt b/app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt
+index 9776b38..4ab6f60 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt
+@@ -3,6 +3,7 @@ package com.moooo_works.letsgogps.data.billing
+ import android.app.Activity
+ import android.os.Handler
+ import android.os.Looper
++import android.util.Log
+ import com.google.android.libraries.ads.mobile.sdk.common.AdLoadCallback
+ import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
+ import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
+@@ -10,6 +11,12 @@ import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
+ import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
+ import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAdEventCallback
+ import com.moooo_works.letsgogps.BuildConfig
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.SupervisorJob
++import kotlinx.coroutines.Job
++import kotlinx.coroutines.delay
++import kotlinx.coroutines.launch
+ import java.util.concurrent.atomic.AtomicBoolean
+ import javax.inject.Inject
+ import javax.inject.Singleton
+@@ -18,56 +25,137 @@ import javax.inject.Singleton
+ class RewardedAdManager(
+     private val loader: RewardedAdLoader,
+     private val unitId: String,
+-    private val initializationGate: AdMobInitializationGate
++    private val initializationGate: AdMobInitializationGate,
++    private val consent: AdConsentGate,
++    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+ ) {
+ 
+     @Inject
+     constructor(
+-        adMobInitializer: AdMobInitializer
++        adMobInitializer: AdMobInitializer,
++        adConsentManager: AdConsentManager
+     ) : this(
+         loader = AdMobRewardedAdLoader(),
+         unitId = BuildConfig.REWARDED_AD_UNIT_ID,
+-        initializationGate = adMobInitializer
++        initializationGate = adMobInitializer,
++        consent = adConsentManager
+     )
+ 
+     private var loadedAd: LoadedAd? = null
+     private var isLoading = false
++    private var retryJob: Job? = null
++    private var retryAttempt = 0
++    private var generation = 0L
++    private var consentRevision = consent.state.value.revision
++
++    init {
++        scope.launch {
++            consent.state.collect { state ->
++                if (!state.canRequestAds || state.revision != consentRevision) {
++                    invalidate()
++                }
++                consentRevision = state.revision
++            }
++        }
++    }
++
++    private fun invalidate() {
++        retryJob?.cancel()
++        retryJob = null
++        retryAttempt = 0
++        generation++
++        loadedAd?.destroy()
++        loadedAd = null
++        isLoading = false
++    }
+ 
+     fun preload() {
++        refreshConsent()
++        if (!consent.state.value.canRequestAds) return
+         if (isLoading || loadedAd != null) return
++        retryJob?.cancel()
++        retryJob = null
++        retryAttempt = 0
++        loadAd()
++    }
++
++    private fun loadAd() {
++        refreshConsent()
++        if (!consent.state.value.canRequestAds || isLoading || loadedAd != null) return
+         isLoading = true
++        val token = generation
++        val revision = consent.state.value.revision
++        fun current() = token == generation && revision == consent.state.value.revision &&
++            consent.state.value.canRequestAds
+         initializationGate.whenReady { ready ->
++            if (!current()) return@whenReady
+             if (!ready) {
+                 isLoading = false
+                 return@whenReady
+             }
++            if (!consent.prepareAdRequest() || !current()) {
++                isLoading = false
++                return@whenReady
++            }
+             loader.load(
+                 unitId = unitId,
+                 onLoaded = { ad ->
+-                    loadedAd = ad
+-                    isLoading = false
++                    if (current()) {
++                        loadedAd = ad
++                        isLoading = false
++                        retryAttempt = 0
++                    } else ad.destroy()
+                 },
+                 onFailed = {
+-                    loadedAd = null
+-                    isLoading = false
++                    if (current()) {
++                        loadedAd = null
++                        isLoading = false
++                        if (retryAttempt < RETRY_DELAYS_MS.size) {
++                            val delayMs = RETRY_DELAYS_MS[retryAttempt++]
++                            retryJob = scope.launch {
++                                delay(delayMs)
++                                retryJob = null
++                                if (current()) loadAd()
++                            }
++                        }
++                    }
+                 }
+             )
+         }
+     }
+ 
++    private fun refreshConsent() {
++        val state = consent.state.value
++        if (!state.canRequestAds || state.revision != consentRevision) invalidate()
++        consentRevision = state.revision
++    }
++
+     fun showAd(activity: Activity, onReward: () -> Unit, onUnavailable: () -> Unit) {
++        refreshConsent()
++        if (!consent.state.value.canRequestAds) {
++            onUnavailable()
++            return
++        }
+         val ad = loadedAd
+         if (ad == null) {
+             onUnavailable()
+             preload()
+             return
+         }
++        val revision = consent.state.value.revision
++        if (!consent.prepareAdRequest() || !consent.state.value.canRequestAds ||
++            consent.state.value.revision != revision) {
++            invalidate()
++            onUnavailable()
++            return
++        }
+         loadedAd = null
+         val rewardDelivered = AtomicBoolean(false)
+         ad.show(
+             activity = activity,
+             onReward = {
+-                if (rewardDelivered.compareAndSet(false, true)) {
++                if (consent.state.value.canRequestAds && consent.state.value.revision == revision &&
++                    rewardDelivered.compareAndSet(false, true)) {
+                     onReward()
+                 }
+             },
+@@ -83,6 +171,7 @@ class RewardedAdManager(
+ 
+     interface LoadedAd {
+         fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit)
++        fun destroy()
+     }
+ 
+     private class AdMobRewardedAdLoader : RewardedAdLoader {
+@@ -92,10 +181,12 @@ class RewardedAdManager(
+             val request = AdRequest.Builder(unitId).build()
+             RewardedAd.load(request, object : AdLoadCallback<RewardedAd> {
+                 override fun onAdLoaded(ad: RewardedAd) {
++                    Log.d(TAG, "Rewarded ad loaded")
+                     mainHandler.post { onLoaded(AdMobLoadedAd(ad, mainHandler)) }
+                 }
+ 
+                 override fun onAdFailedToLoad(error: LoadAdError) {
++                    Log.w(TAG, "Rewarded ad load failed: ${error.code}")
+                     mainHandler.post(onFailed)
+                 }
+             })
+@@ -106,18 +197,25 @@ class RewardedAdManager(
+         private val ad: RewardedAd,
+         private val mainHandler: Handler
+     ) : LoadedAd {
++        override fun destroy() { ad.destroy() }
++
+         override fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit) {
+             val completed = AtomicBoolean(false)
+             ad.adEventCallback = object : RewardedAdEventCallback {
++                override fun onAdImpression() { Log.d(TAG, "Rewarded ad impression") }
++
+                 override fun onAdDismissedFullScreenContent() {
++                    Log.d(TAG, "Rewarded ad dismissed")
+                     completeOnce(completed, onDismiss)
+                 }
+ 
+                 override fun onAdFailedToShowFullScreenContent(error: FullScreenContentError) {
++                    Log.w(TAG, "Rewarded ad show failed: ${error.code}")
+                     completeOnce(completed, onDismiss)
+                 }
+             }
+             ad.show(activity) {
++                Log.d(TAG, "Rewarded ad reward earned")
+                 mainHandler.post(onReward)
+             }
+         }
+@@ -130,4 +228,9 @@ class RewardedAdManager(
+             }
+         }
+     }
++    companion object {
++        private const val TAG = "RewardedAdManager"
++        private val RETRY_DELAYS_MS = longArrayOf(5_000, 15_000, 30_000)
++    }
++
+ }
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt
+index b901808..f751390 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt
+@@ -1,11 +1,20 @@
+ package com.moooo_works.letsgogps.ui.components
+ 
++import android.util.Log
++import androidx.compose.foundation.layout.BoxWithConstraints
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.platform.LocalConfiguration
++import com.google.android.libraries.ads.mobile.sdk.banner.BannerAdEventCallback
+ import androidx.compose.foundation.layout.Box
+ import androidx.compose.foundation.layout.fillMaxWidth
+ import androidx.compose.foundation.layout.height
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.remember
++import androidx.compose.runtime.key
++import android.app.Activity
++import android.content.Context
++import android.content.ContextWrapper
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.platform.LocalContext
+ import androidx.compose.ui.unit.dp
+@@ -25,40 +34,64 @@ import dagger.hilt.android.EntryPointAccessors
+ @Composable
+ fun BannerAdView(modifier: Modifier = Modifier) {
+     val context = LocalContext.current
+-    val initializer = remember(context.applicationContext) {
++    val entryPoint = remember(context.applicationContext) {
+         EntryPointAccessors.fromApplication(
+             context.applicationContext,
+             AdMobInitializerEntryPoint::class.java
+-        ).adMobInitializer()
++        )
+     }
++    val initializer = entryPoint.adMobInitializer()
++    val consentManager = entryPoint.adConsentManager()
++    val consentState by consentManager.state.collectAsStateWithLifecycle()
+     val initializationState by initializer.state.collectAsStateWithLifecycle()
++    val activity = remember(context) { context.findAdActivity() }
+ 
+-    Box(
+-        modifier = modifier
+-            .fillMaxWidth()
+-            .height(50.dp)
+-    ) {
+-        if (initializationState == AdMobInitializationState.Ready) {
+-            AndroidView(
+-                modifier = Modifier.fillMaxWidth(),
+-                factory = { viewContext ->
+-                    AdView(viewContext).apply {
+-                        val request = BannerAdRequest.Builder(
+-                            BuildConfig.BANNER_AD_UNIT_ID,
+-                            AdSize.BANNER
+-                        ).build()
+-                        loadAd(request, object : AdLoadCallback<BannerAd> {
+-                            override fun onAdLoaded(ad: BannerAd) = Unit
+-
+-                            override fun onAdFailedToLoad(error: LoadAdError) = Unit
+-                        })
+-                    }
+-                },
+-                // Every tab switch / ad-free toggle disposes this composable and creates a
+-                // fresh AdView; without destroy() AdMob keeps the old WebView-backed view
+-                // registered (refresh timers), leaking ~MBs per switch until OOM.
+-                onRelease = { it.destroy() }
+-            )
++    val orientation = LocalConfiguration.current.orientation
++    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
++        val widthDp = maxWidth.value.takeIf { it.isFinite() }?.toInt() ?: 0
++        val adSize = remember(context, widthDp, orientation) {
++            if (widthDp > 0) AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp) else null
++        }
++        Box(
++            modifier = Modifier.fillMaxWidth().height(adSize?.height?.dp ?: 50.dp),
++            contentAlignment = Alignment.Center
++        ) {
++            if (initializationState == AdMobInitializationState.Ready && consentState.canRequestAds &&
++                activity != null && adSize != null) {
++                key(consentState.revision, widthDp, orientation) {
++                    AndroidView(
++                        modifier = Modifier.fillMaxWidth(),
++                        factory = {
++                            AdView(activity).apply {
++                                val request = BannerAdRequest.Builder(BuildConfig.BANNER_AD_UNIT_ID, adSize).build()
++                                if (consentManager.prepareAdRequest() &&
++                                    consentManager.state.value.revision == consentState.revision &&
++                                    !activity.isFinishing && !activity.isDestroyed) {
++                                    loadAd(request, object : AdLoadCallback<BannerAd> {
++                                        override fun onAdLoaded(ad: BannerAd) {
++                                            Log.d("BannerAdView", "Banner ad loaded")
++                                            ad.adEventCallback = object : BannerAdEventCallback {
++                                                override fun onAdImpression() { Log.d("BannerAdView", "Banner ad impression") }
++                                            }
++                                        }
++                                        override fun onAdFailedToLoad(error: LoadAdError) {
++                                            Log.w("BannerAdView", "Banner ad load failed: ${error.code}")
++                                        }
++                                    })
++                                }
++                            }
++                        },
++                        // 寬度、方向或同意變更時，釋放 SDK 視窗。
++                        onRelease = { it.destroy() }
++                    )
++                }
++            }
+         }
+     }
+ }
++
++internal fun Context.findAdActivity(): Activity? = when (this) {
++    is Activity -> this
++    is ContextWrapper -> if (baseContext !== this) baseContext.findAdActivity() else null
++    else -> null
++}
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt
+index 57a86a8..3e539d3 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt
+@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import androidx.compose.ui.res.stringResource
+ import com.moooo_works.letsgogps.R
++import com.moooo_works.letsgogps.ui.components.findAdActivity
++import com.moooo_works.letsgogps.data.billing.AdMobInitializerEntryPoint
++import dagger.hilt.android.EntryPointAccessors
+ 
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
+@@ -58,6 +61,23 @@ fun SettingsScreen(
+ ) {
+     val context = LocalContext.current
+     val activity = context as? android.app.Activity
++    val adEntryPoint = remember(context.applicationContext) {
++        EntryPointAccessors.fromApplication(
++            context.applicationContext,
++            AdMobInitializerEntryPoint::class.java
++        )
++    }
++    val adConsentManager = adEntryPoint.adConsentManager()
++    val adConsentState by adConsentManager.state.collectAsState()
++    val adActivity = remember(context) {
++        context.findAdActivity()
++    }
++    val adPrivacyErrorText = stringResource(R.string.ad_privacy_error)
++    LaunchedEffect(adConsentState.error) {
++        if (adConsentState.error != null) {
++            Toast.makeText(context, adPrivacyErrorText, Toast.LENGTH_SHORT).show()
++        }
++    }
+     val lifecycleOwner = LocalLifecycleOwner.current
+     val mockPermissionStatus by viewModel.mockPermissionStatus.collectAsState()
+     val healthCheckState by viewModel.healthCheckState.collectAsState()
+@@ -776,6 +796,16 @@ fun SettingsScreen(
+                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                     }
+                 )
++                if (adConsentState.privacyOptionsRequired && adActivity != null) {
++                    Divider(
++                        modifier = Modifier.padding(horizontal = 16.dp),
++                        color = MaterialTheme.colorScheme.outlineVariant
++                    )
++                    SettingsMenuItem(
++                        label = stringResource(R.string.ad_privacy_options),
++                        onClick = { adConsentManager.showPrivacyOptions(adActivity) }
++                    )
++                }
+             }
+ 
+             // 版本號
+@@ -975,4 +1005,3 @@ private fun ExportOptionsDialog(
+         }
+     )
+ }
+-
+diff --git a/app/src/main/res/values-en/strings.xml b/app/src/main/res/values-en/strings.xml
+index d99043c..36129b3 100644
+--- a/app/src/main/res/values-en/strings.xml
++++ b/app/src/main/res/values-en/strings.xml
+@@ -496,4 +496,6 @@
+     <string name="pro_dialog_feature_floating">Floating tools: search, saved places and routes</string>
+     <string name="tip_floating_tools_title">Floating tools and a separate joystick are here!</string>
+     <string name="tip_floating_tools_body">Two separate buttons on the map open floating tools or the virtual joystick above other apps.\n\nFloating tools offer search, saved places, routes, and coordinate copying. Selecting a point only previews it; tap Move here to move. The background is translucent, and collapsing docks the tool at the screen edge.\n\nUse the joystick to control movement direction and speed. Only one tool is shown at a time; opening the other switches tools.\n\nBoth are Pro features: unlock with a subscription or a rewarded ad for 6 hours. First use requires permission to display over other apps.</string>
++    <string name="ad_privacy_options">Ad privacy options</string>
++    <string name="ad_privacy_error">Ad privacy options could not be opened or updated. Please try again later.</string>
+ </resources>
+diff --git a/app/src/main/res/values-ja/strings.xml b/app/src/main/res/values-ja/strings.xml
+index e3fdf3f..499d07d 100644
+--- a/app/src/main/res/values-ja/strings.xml
++++ b/app/src/main/res/values-ja/strings.xml
+@@ -496,4 +496,6 @@
+     <string name="pro_dialog_feature_floating">フローティングツール：検索・保存地点・ルート</string>
+     <string name="tip_floating_tools_title">フローティングツールと独立ジョイスティック登場！</string>
+     <string name="tip_floating_tools_body">地図の2つのボタンから、他のアプリの上にツールまたはジョイスティックを表示できます。\n\nツールでは検索、保存済みの場所、ルート、座標のコピーが使えます。地点の選択はプレビューのみで、「ここへ移動」を押すと移動します。背景は半透明で、折りたたむと画面の端に戻ります。\n\nジョイスティックで移動方向と速度を操作できます。表示は一度に1種類で、もう一方を開くと切り替わります。\n\nどちらもPro機能です。サブスクリプション、またはリワード広告で6時間解除できます。初回は他のアプリの上に表示する権限が必要です。</string>
++    <string name="ad_privacy_options">広告のプライバシー設定</string>
++    <string name="ad_privacy_error">広告のプライバシー設定を開くか更新できませんでした。後でもう一度お試しください。</string>
+ </resources>
+diff --git a/app/src/main/res/values-ko/strings.xml b/app/src/main/res/values-ko/strings.xml
+index ab43f00..f0ed640 100644
+--- a/app/src/main/res/values-ko/strings.xml
++++ b/app/src/main/res/values-ko/strings.xml
+@@ -496,4 +496,6 @@
+     <string name="pro_dialog_feature_floating">플로팅 도구: 검색, 저장 장소 및 경로</string>
+     <string name="tip_floating_tools_title">플로팅 도구와 독립 조이스틱 추가!</string>
+     <string name="tip_floating_tools_body">지도의 두 버튼으로 다른 앱 위에 플로팅 도구 또는 가상 조이스틱을 열 수 있어요.\n\n도구에서 검색, 저장한 장소, 경로, 좌표 복사를 사용할 수 있어요. 지점을 선택하면 미리보기만 표시되며, 여기로 이동을 눌러야 이동해요. 배경은 반투명이며 접으면 화면 가장자리로 돌아가요.\n\n조이스틱으로 이동 방향과 속도를 조절해요. 한 번에 한 종류만 표시되며, 다른 도구를 열면 전환돼요.\n\n둘 다 Pro 기능으로 구독 또는 보상형 광고를 통해 6시간 잠금 해제할 수 있어요. 처음 사용할 때는 다른 앱 위에 표시 권한이 필요해요.</string>
++    <string name="ad_privacy_options">광고 개인정보 보호 옵션</string>
++    <string name="ad_privacy_error">광고 개인정보 보호 옵션을 열거나 업데이트할 수 없습니다. 나중에 다시 시도해 주세요.</string>
+ </resources>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 35e7e36..4d7762e 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -499,4 +499,6 @@
+     <string name="pro_dialog_feature_floating">懸浮工具：搜尋、收藏與路線</string>
+     <string name="tip_floating_tools_title">新增懸浮工具與獨立搖桿！</string>
+     <string name="tip_floating_tools_body">地圖右側新增兩個獨立按鈕：懸浮工具與虛擬搖桿，可在其他 App 上方操作。\n\n懸浮工具提供搜尋、收藏、路線與座標複製。選點只會預覽，按「移動到這裡」才移動；背景半透明，收合後會回到螢幕邊緣。\n\n虛擬搖桿用來調整移動方向與速度。一次只顯示一種工具，開啟另一種時會切換。\n\n兩者皆為 Pro 功能，可透過訂閱或觀看獎勵廣告解鎖 6 小時；首次使用需允許顯示在其他 App 上層。</string>
++    <string name="ad_privacy_options">廣告隱私選項</string>
++    <string name="ad_privacy_error">目前無法開啟或更新廣告隱私選項，請稍後再試。</string>
+ </resources>
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/data/billing/AdConsentManagerTest.kt b/app/src/test/java/com/moooo_works/letsgogps/data/billing/AdConsentManagerTest.kt
+new file mode 100644
+index 0000000..6eb18f0
+--- /dev/null
++++ b/app/src/test/java/com/moooo_works/letsgogps/data/billing/AdConsentManagerTest.kt
+@@ -0,0 +1,191 @@
++package com.moooo_works.letsgogps.data.billing
++
++import android.app.Activity
++import io.mockk.every
++import io.mockk.mockk
++import org.junit.Assert.*
++import org.junit.Test
++
++class AdConsentManagerTest {
++    private val activity = mockk<Activity>(relaxed = true)
++
++    private class FakeBackend : ConsentBackend {
++        override var canRequestAds = false
++        override var privacyOptionsRequired = false
++        var updateCalls = 0
++        var formCalls = 0
++        var privacyCalls = 0
++        var privacyApplied = true
++        var privacyApplyCalls = 0
++        lateinit var success: () -> Unit
++        lateinit var failure: (String) -> Unit
++        lateinit var dismissed: (String?) -> Unit
++        override fun update(activity: Activity, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
++            updateCalls++
++            success = onSuccess
++            failure = onFailure
++        }
++        override fun showRequiredForm(activity: Activity, onDismiss: (String?) -> Unit) {
++            formCalls++
++            dismissed = onDismiss
++        }
++        override fun showPrivacyOptions(activity: Activity, onDismiss: (String?) -> Unit) {
++            privacyCalls++
++            dismissed = onDismiss
++        }
++        override fun applyMediationPrivacy(): Boolean {
++            privacyApplyCalls++
++            return privacyApplied
++        }
++    }
++
++    @Test fun `first launch blocks ads until UMP finishes`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        assertFalse(manager.state.value.canRequestAds)
++        manager.gatherConsent(activity)
++        backend.canRequestAds = true
++        backend.success()
++        assertFalse(manager.state.value.canRequestAds)
++        backend.dismissed(null)
++        assertTrue(manager.state.value.canRequestAds)
++        assertEquals(1, backend.privacyApplyCalls)
++    }
++
++    @Test fun `update failure uses UMP previous decision without assuming consent`() {
++        for (allowed in listOf(false, true)) {
++            val backend = FakeBackend()
++            val manager = AdConsentManager(backend)
++            manager.gatherConsent(activity)
++            backend.canRequestAds = allowed
++            backend.failure("offline")
++            assertEquals(allowed, manager.state.value.canRequestAds)
++            assertEquals("offline", manager.state.value.error)
++            assertEquals(0, backend.formCalls)
++        }
++    }
++
++    @Test fun `form error checks UMP instead of granting consent`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        backend.success()
++        backend.dismissed("form failed")
++        assertFalse(manager.state.value.canRequestAds)
++        assertFalse(manager.state.value.busy)
++    }
++
++    @Test fun `duplicate callbacks and activity recreation do not show duplicate forms`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        manager.gatherConsent(activity)
++        assertEquals(1, backend.updateCalls)
++        backend.success()
++        backend.success()
++        assertEquals(1, backend.formCalls)
++        backend.canRequestAds = true
++        backend.dismissed(null)
++        backend.failure("late failure")
++        manager.gatherConsent(mockk(relaxed = true))
++        assertEquals(1, backend.updateCalls)
++        assertTrue(manager.state.value.canRequestAds)
++        assertNull(manager.state.value.error)
++    }
++
++    @Test fun `privacy options pause requests and invalidate previous ads even if still allowed`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        backend.canRequestAds = true
++        backend.privacyOptionsRequired = true
++        backend.success()
++        backend.dismissed(null)
++        val previousRevision = manager.state.value.revision
++        assertTrue(manager.state.value.privacyOptionsRequired)
++        manager.showPrivacyOptions(activity)
++        assertFalse(manager.state.value.canRequestAds)
++        assertTrue(manager.state.value.revision > previousRevision)
++        manager.showPrivacyOptions(activity)
++        assertEquals(1, backend.privacyCalls)
++        backend.dismissed(null)
++        assertTrue(manager.state.value.canRequestAds)
++    }
++
++    @Test fun `privacy entry is not usable unless UMP requires it`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.showPrivacyOptions(activity)
++        assertEquals(0, backend.privacyCalls)
++    }
++
++    @Test fun `new activity supersedes unfinished old request`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        val oldSuccess = backend.success
++        val replacement = mockk<Activity>(relaxed = true)
++        manager.gatherConsent(replacement)
++        oldSuccess()
++        assertEquals(0, backend.formCalls)
++        backend.success()
++        assertEquals(1, backend.formCalls)
++    }
++
++    @Test fun `destroyed activity cannot launch a form`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        every { activity.isDestroyed } returns true
++        backend.canRequestAds = true
++        backend.success()
++        assertEquals(0, backend.formCalls)
++        assertFalse(manager.state.value.canRequestAds)
++    }
++
++    @Test fun `mediation privacy failure never permits ads even when UMP allows them`() {
++        val backend = FakeBackend().apply { privacyApplied = false }
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        backend.canRequestAds = true
++        backend.success()
++        backend.dismissed(null)
++        assertFalse(manager.state.value.canRequestAds)
++        assertNotNull(manager.state.value.error)
++    }
++
++    @Test fun `destroyed privacy form owner allows replacement activity to recover`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        manager.gatherConsent(activity)
++        backend.canRequestAds = true
++        backend.privacyOptionsRequired = true
++        backend.success()
++        backend.dismissed(null)
++        manager.showPrivacyOptions(activity)
++        every { activity.isDestroyed } returns true
++        backend.dismissed(null)
++        assertFalse(manager.state.value.canRequestAds)
++        manager.gatherConsent(mockk(relaxed = true))
++        assertEquals(2, backend.updateCalls)
++    }
++
++    @Test fun `each request reasserts privacy restriction and failure revokes current revision`() {
++        val backend = FakeBackend()
++        val manager = AdConsentManager(backend)
++        assertFalse(manager.prepareAdRequest())
++        assertEquals(0, backend.privacyApplyCalls)
++        manager.gatherConsent(activity)
++        backend.canRequestAds = true
++        backend.success()
++        backend.dismissed(null)
++        assertTrue(manager.prepareAdRequest())
++        assertTrue(manager.prepareAdRequest())
++        assertEquals(3, backend.privacyApplyCalls)
++        val previousRevision = manager.state.value.revision
++        backend.privacyApplied = false
++        assertFalse(manager.prepareAdRequest())
++        assertFalse(manager.state.value.canRequestAds)
++        assertTrue(manager.state.value.revision > previousRevision)
++    }
++}
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/data/billing/AdMobInitializerTest.kt b/app/src/test/java/com/moooo_works/letsgogps/data/billing/AdMobInitializerTest.kt
+new file mode 100644
+index 0000000..21a3651
+--- /dev/null
++++ b/app/src/test/java/com/moooo_works/letsgogps/data/billing/AdMobInitializerTest.kt
+@@ -0,0 +1,92 @@
++package com.moooo_works.letsgogps.data.billing
++
++import android.app.Application
++import android.content.Context
++import android.os.Looper
++import com.google.android.libraries.ads.mobile.sdk.MobileAds
++import com.google.android.libraries.ads.mobile.sdk.initialization.OnAdapterInitializationCompleteListener
++import io.mockk.*
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.test.UnconfinedTestDispatcher
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.setMain
++import org.junit.After
++import org.junit.Assert.*
++import org.junit.Before
++import org.junit.Test
++import org.junit.runner.RunWith
++import org.robolectric.RobolectricTestRunner
++import org.robolectric.Shadows.shadowOf
++import org.robolectric.annotation.Config
++import java.util.concurrent.CountDownLatch
++import java.util.concurrent.TimeUnit
++
++@OptIn(ExperimentalCoroutinesApi::class)
++@RunWith(RobolectricTestRunner::class)
++@Config(sdk = [28], manifest = Config.NONE, application = Application::class)
++class AdMobInitializerTest {
++    private val consentState = MutableStateFlow(AdConsentState())
++    private val consent = mockk<AdConsentManager>()
++    private val listener = slot<OnAdapterInitializationCompleteListener>()
++    private val initialized = CountDownLatch(1)
++    private lateinit var initializer: AdMobInitializer
++
++    @Before fun setup() {
++        Dispatchers.setMain(UnconfinedTestDispatcher())
++        every { consent.state } returns consentState
++        every { consent.prepareAdRequest() } answers { consentState.value.canRequestAds }
++        mockkObject(MobileAds.Companion)
++        every { MobileAds.initialize(any(), any(), capture(listener)) } answers { initialized.countDown() }
++        initializer = AdMobInitializer(mockk<Context>(relaxed = true), consent)
++    }
++
++    @After fun teardown() {
++        unmockkObject(MobileAds.Companion)
++        Dispatchers.resetMain()
++    }
++
++    @Test fun `unknown consent cannot initialize through any entry point`() {
++        initializer.initialize()
++        var ready: Boolean? = null
++        initializer.whenReady { ready = it }
++        shadowOf(Looper.getMainLooper()).idle()
++        assertEquals(false, ready)
++        verify(exactly = 0) { MobileAds.initialize(any(), any(), any()) }
++    }
++
++    @Test fun `repeated allows initialize only once`() {
++        consentState.value = AdConsentState(canRequestAds = true, revision = 1)
++        assertTrue(initialized.await(3, TimeUnit.SECONDS))
++        initializer.initialize()
++        consentState.value = AdConsentState(canRequestAds = true, revision = 2)
++        listener.captured.onAdapterInitializationComplete(mockk(relaxed = true))
++        verify(exactly = 1) { MobileAds.initialize(any(), any(), any()) }
++        assertEquals(AdMobInitializationState.Ready, initializer.state.value)
++    }
++
++    @Test fun `initialization completion after revocation cannot permit waiting requests`() {
++        consentState.value = AdConsentState(canRequestAds = true, revision = 1)
++        assertTrue(initialized.await(3, TimeUnit.SECONDS))
++        var ready: Boolean? = null
++        initializer.whenReady { ready = it }
++        consentState.value = AdConsentState(canRequestAds = false, revision = 2)
++        listener.captured.onAdapterInitializationComplete(mockk(relaxed = true))
++        shadowOf(Looper.getMainLooper()).idle()
++        assertEquals(false, ready)
++        initializer.whenReady { ready = it }
++        shadowOf(Looper.getMainLooper()).idle()
++        assertEquals(false, ready)
++    }
++
++    @Test fun `privacy preparation failure never initializes and releases waiting caller`() {
++        every { consent.prepareAdRequest() } returns false
++        consentState.value = AdConsentState(canRequestAds = true, revision = 1)
++        var ready: Boolean? = null
++        initializer.whenReady { ready = it }
++        shadowOf(Looper.getMainLooper()).idle()
++        assertEquals(false, ready)
++        verify(exactly = 0) { MobileAds.initialize(any(), any(), any()) }
++    }
++}
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/data/billing/RewardedAdManagerTest.kt b/app/src/test/java/com/moooo_works/letsgogps/data/billing/RewardedAdManagerTest.kt
+index 473494d..29662c7 100644
+--- a/app/src/test/java/com/moooo_works/letsgogps/data/billing/RewardedAdManagerTest.kt
++++ b/app/src/test/java/com/moooo_works/letsgogps/data/billing/RewardedAdManagerTest.kt
+@@ -2,10 +2,18 @@ package com.moooo_works.letsgogps.data.billing
+ 
+ import android.app.Activity
+ import io.mockk.mockk
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.test.advanceTimeBy
++import kotlinx.coroutines.test.runCurrent
++import kotlinx.coroutines.test.runTest
+ import org.junit.Assert.assertEquals
+ import org.junit.Assert.assertTrue
+ import org.junit.Test
+ 
++@OptIn(ExperimentalCoroutinesApi::class)
+ class RewardedAdManagerTest {
+ 
+     private val activity = mockk<Activity>(relaxed = true)
+@@ -15,24 +23,45 @@ class RewardedAdManagerTest {
+         var nextOutcome: Outcome = Outcome.LoadFails
+         var pendingReward: (() -> Unit)? = null
+         var pendingDismiss: (() -> Unit)? = null
++        var destroyCalls = 0
++        val loadCallbacks = mutableListOf<(RewardedAdManager.LoadedAd) -> Unit>()
++        val failureCallbacks = mutableListOf<() -> Unit>()
++
++        fun ad() = object : RewardedAdManager.LoadedAd {
++            override fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit) {
++                pendingReward = onReward
++                pendingDismiss = onDismiss
++            }
++            override fun destroy() { destroyCalls++ }
++        }
+ 
+         enum class Outcome { LoadFails, LoadOk, InFlight }
+ 
+         override fun load(unitId: String, onLoaded: (RewardedAdManager.LoadedAd) -> Unit, onFailed: () -> Unit) {
+             loadCalls++
++            loadCallbacks += onLoaded
++            failureCallbacks += onFailed
+             when (nextOutcome) {
+                 Outcome.LoadFails -> onFailed()
+-                Outcome.LoadOk -> onLoaded(object : RewardedAdManager.LoadedAd {
+-                    override fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit) {
+-                        pendingReward = onReward
+-                        pendingDismiss = onDismiss
+-                    }
+-                })
++                Outcome.LoadOk -> onLoaded(ad())
+                 Outcome.InFlight -> { /* never resolves — models a real async load in progress */ }
+             }
+         }
+     }
+ 
++    private class FakeConsent : AdConsentGate {
++        override val state = MutableStateFlow(AdConsentState(canRequestAds = true))
++        var privacyReady = true
++        var preparations = 0
++        override fun prepareAdRequest(): Boolean {
++            preparations++
++            return state.value.canRequestAds && privacyReady
++        }
++        fun update(allowed: Boolean) {
++            state.value = state.value.copy(canRequestAds = allowed, revision = state.value.revision + 1)
++        }
++    }
++
+     private class FakeInitializationGate(
+         private var result: Boolean? = true
+     ) : AdMobInitializationGate {
+@@ -60,8 +89,11 @@ class RewardedAdManagerTest {
+ 
+     private fun manager(
+         loader: FakeLoader,
+-        gate: FakeInitializationGate = FakeInitializationGate()
+-    ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate)
++        gate: FakeInitializationGate = FakeInitializationGate(),
++        consent: FakeConsent = FakeConsent(),
++        retryScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
++    ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate,
++        consent = consent, scope = retryScope)
+ 
+     @Test
+     fun `preload calls loader once`() {
+@@ -173,5 +205,173 @@ class RewardedAdManagerTest {
+         assertEquals(1, rewardCount)
+     }
+ 
++    @Test fun `denied consent never loads or shows`() {
++        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
++        val consent = FakeConsent().apply { update(false) }
++        val mgr = manager(loader, consent = consent)
++        mgr.preload()
++        var unavailable = false
++        mgr.showAd(activity, { fail("must not reward") }, { unavailable = true })
++        assertEquals(0, loader.loadCalls)
++        assertTrue(unavailable)
++    }
++
++    @Test fun `privacy change destroys loaded ad and requires fresh load even if allowed`() {
++        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
++        val consent = FakeConsent()
++        val mgr = manager(loader, consent = consent)
++        mgr.preload()
++        consent.update(true)
++        assertEquals(1, loader.destroyCalls)
++        var unavailable = false
++        mgr.showAd(activity, { fail("old ad must not show") }, { unavailable = true })
++        assertTrue(unavailable)
++        assertEquals(2, loader.loadCalls)
++    }
++
++    @Test fun `late load across consent revision is destroyed without replacing new ad`() {
++        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.InFlight }
++        val consent = FakeConsent()
++        val mgr = manager(loader, consent = consent)
++        mgr.preload()
++        consent.update(false)
++        consent.update(true)
++        mgr.preload()
++        loader.loadCallbacks[0](loader.ad())
++        loader.failureCallbacks[0]()
++        mgr.preload()
++        assertEquals(2, loader.loadCalls)
++        assertEquals(1, loader.destroyCalls)
++        loader.loadCallbacks[1](loader.ad())
++        mgr.showAd(activity, {}, { fail("new ad should be ready") })
++    }
++
++    @Test fun `revocation during initialization prevents subsequent load`() {
++        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
++        val consent = FakeConsent()
++        val gate = FakeInitializationGate(null)
++        val mgr = manager(loader, gate, consent)
++        mgr.preload()
++        consent.update(false)
++        gate.complete(true)
++        assertEquals(0, loader.loadCalls)
++    }
++
++    @Test fun `stale reward callback after a privacy change cannot grant reward`() {
++        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
++        val consent = FakeConsent()
++        val mgr = manager(loader, consent = consent)
++        mgr.preload()
++        var rewards = 0
++        mgr.showAd(activity, { rewards++ }, { fail("ad should be ready") })
++        consent.update(false)
++        loader.pendingReward?.invoke()
++        loader.pendingDismiss?.invoke()
++        assertEquals(0, rewards)
++        assertEquals(1, loader.loadCalls)
++    }
++
++    @Test fun `privacy preparation failure blocks real load and cached ad show`() {
++        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
++        val consent = FakeConsent().apply { privacyReady = false }
++        val mgr = manager(loader, consent = consent)
++        mgr.preload()
++        assertEquals(0, loader.loadCalls)
++        consent.privacyReady = true
++        mgr.preload()
++        assertEquals(1, loader.loadCalls)
++        consent.privacyReady = false
++        var unavailable = false
++        mgr.showAd(activity, { fail("must not reward") }, { unavailable = true })
++        assertTrue(unavailable)
++        assertEquals(1, loader.destroyCalls)
++        assertEquals(3, consent.preparations)
++    }
++
++    @Test
++    fun `failed load retries automatically and stops after three retries`() = runTest {
++        val loader = FakeLoader()
++        val mgr = manager(loader, retryScope = backgroundScope)
++        mgr.preload()
++        runCurrent()
++
++        advanceTimeBy(4_999)
++        runCurrent()
++        assertEquals(1, loader.loadCalls)
++        advanceTimeBy(1)
++        runCurrent()
++        assertEquals(2, loader.loadCalls)
++        advanceTimeBy(15_000)
++        runCurrent()
++        assertEquals(3, loader.loadCalls)
++        advanceTimeBy(30_000)
++        runCurrent()
++        assertEquals(4, loader.loadCalls)
++        advanceTimeBy(120_000)
++        runCurrent()
++        assertEquals(4, loader.loadCalls)
++    }
++
++    @Test
++    fun `manual preload cancels scheduled retry and does not load a second cached ad`() = runTest {
++        val loader = FakeLoader()
++        val mgr = manager(loader, retryScope = backgroundScope)
++        mgr.preload()
++        runCurrent()
++        loader.nextOutcome = FakeLoader.Outcome.LoadOk
++        mgr.preload()
++        advanceTimeBy(60_000)
++        runCurrent()
++        assertEquals(2, loader.loadCalls)
++    }
++
++    @Test
++    fun `successful retry resets backoff for the next ad`() = runTest {
++        val loader = FakeLoader()
++        val mgr = manager(loader, retryScope = backgroundScope)
++        mgr.preload()
++        runCurrent()
++        loader.nextOutcome = FakeLoader.Outcome.LoadOk
++        advanceTimeBy(5_000)
++        runCurrent()
++        assertEquals(2, loader.loadCalls)
++
++        mgr.showAd(activity, onReward = {}, onUnavailable = { fail("ad should be ready") })
++        loader.nextOutcome = FakeLoader.Outcome.LoadFails
++        loader.pendingDismiss?.invoke()
++        runCurrent()
++        assertEquals(3, loader.loadCalls)
++        advanceTimeBy(5_000)
++        runCurrent()
++        assertEquals(4, loader.loadCalls)
++    }
++
++    @Test fun `retry rechecks mediation privacy before loading`() = runTest {
++        val loader = FakeLoader()
++        val consent = FakeConsent()
++        val mgr = manager(loader, consent = consent, retryScope = backgroundScope)
++        mgr.preload()
++        runCurrent()
++        consent.privacyReady = false
++        advanceTimeBy(5_000)
++        runCurrent()
++        assertEquals(1, loader.loadCalls)
++        assertEquals(2, consent.preparations)
++    }
++
++    @Test fun `consent withdrawal cancels pending retry`() = runTest {
++        val loader = FakeLoader()
++        val consent = FakeConsent()
++        val mgr = manager(loader, consent = consent, retryScope = backgroundScope)
++        mgr.preload()
++        runCurrent()
++        consent.update(false)
++        runCurrent()
++        advanceTimeBy(60_000)
++        runCurrent()
++        assertEquals(1, loader.loadCalls)
++        assertEquals(1, consent.preparations)
++    }
++
+     private fun fail(msg: String): Nothing = throw AssertionError(msg)
+ }
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+index 6a09c05..2fff52e 100644
+--- a/gradle/libs.versions.toml
++++ b/gradle/libs.versions.toml
+@@ -20,7 +20,9 @@ hilt-navigation-compose = "1.2.0"
+ robolectric = "4.10.3"
+ datastore = "1.0.0"
+ openlocationcode = "1.0.4"
+-admob-next-gen = "1.2.1"
++admob-next-gen = "1.5.0"
++unity-ads = "4.20.1"
++unity-adapter = "4.20.1.0"
+ billing = "8.0.0"
+ google-services = "4.4.2"
+ firebase-crashlytics-plugin = "3.0.2"
+@@ -63,6 +65,8 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
+ datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+ openlocationcode = { group = "com.google.openlocationcode", name = "openlocationcode", version.ref = "openlocationcode" }
+ admob-next-gen = { group = "com.google.android.libraries.ads.mobile.sdk", name = "ads-mobile-sdk", version.ref = "admob-next-gen" }
++unity-ads = { group = "com.unity3d.ads", name = "unity-ads", version.ref = "unity-ads" }
++unity-adapter = { group = "com.google.ads.mediation", name = "unity", version.ref = "unity-adapter" }
+ billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+ play-review = { group = "com.google.android.play", name = "review-ktx", version.ref = "play-review" }
+ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
