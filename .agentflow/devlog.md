@@ -473,6 +473,8 @@ Still to do
 
 + 完成後將測試版升級為正式版，更版說明記得寫
 
++ 已解鎖
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -628,3 +630,29 @@ Still to do
 - **Still to do:** Pixel真Play10403更新／smoke；正式送審／發布與Unity正式群組啟用，最後接受／紀錄。
 - **Next work action:** 解鎖後Play更新10403並確認資料/圖資；依既有正式授權繼續rollout。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-019] Event — 2026-10-14 07:50:26 +0800 (A-061)
+
+- Owner解鎖後Pixel真Play更新10403／1.4.3，installer com.android.vending，無uninstall。地圖真圖資正常（private screenshot僅tmp）；GoogleTestAd reward明示已發放獎勵，返回Pro5h59m。新匯出375／6／591及各section對10402相等，仅exportedAt異；淺色／繁中／MockAllowed保留。production-phone-smoke.json保存，通知/定位設定2項仍需使用者設定，沒有擅自給新權限。
+- 正式release42／10403四語notes與100%全面推出已保存，再點送審1項變更／將變更送審；Play顯示審查中的變更，快速檢查進行中，managedpublishing off，通過會自動發布。不能稱已正式上線。
+- 正式Unity Rewarded group核對正式6473078035、Game800390974、BP_Rewarded_Android與GoogleAdMob fallback，sourceUnity就緒/有效；已切啟用並儲存。switchcall回報timeout但readback已checked，僅續Save不重切；待列表確認，banner正式群組尚待核對啟用。
+
+## [RUN-020] Event — 2026-10-14 07:55:32 +0800 (A-061)
+
+- FormalUnityBanner核對1824598031／Game800390974／BP_Banner_Android，Googlefallback仍在；啟用/Save後DisabledSave確認，再Cancel離開已存編輯，列表兩正式groups皆就緒。group proof裁切只含兩列status/name，不留帳戶收益/AAID。
+- 10403正常force-stop/restart後Unity4.20.1與adapter成功初始化、正常TestAdbannerload/impression，無本次觀察到crash；不能稱正式非測試Unityfill，Pixel仍兩邊測試裝置。
+- Play formal審查中且managedoff，100%全推；快速檢查剩最多10分鐘。正式已提交但尚未live，production-rollout.json保存時點事實與limits。
+- Scope check: ROOT僅A061devlog/tracker／phone/rollout證據／公開Console圖；App/gradle未再改，acceptedsource31b528c與AAB不變，tracker4/5。僅新授權formalgroups啟用、Playrelease42送審；原PR58與Mintegral限制維持。
+
+## [WIP-006] Checkpoint — 2026-10-14 07:55:32 +0800 (A-061)
+
+- **Finished:** Pixel10403更新、地圖/資料/Googlereward驗證；formal42/10403四語notes/100%送審；Unity兩正式groupsReady/googlefallback。
+- **Running now:** Google快速檢查；目前無本機build或reviewworker。
+- **Still to do:** 核對檢查/審查實際狀態、最後deployment證據review與收尾。Google未核准前不稱live。
+- **Next work action:** 固定審查狀態及當前receipts，Claude核對真實送審/限制後交付；通過Google後自動推出。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-021] Event — 2026-10-14 07:56:16 +0800 (A-061)
+
+- Play快速檢查進度條及倒數已消失，實際顯示「變更項目正在審查中」，沒有可見阻擋；formal10403/100%與managedoff維持。當前operator工作已完成，Googlereviewpending後將自動發佈，仍不宣稱已live。
+- production-rollout.json更新新時點，Console screenshot重新保存；準備對固定ROOT部署證據最後cross-check，與先前readiness915bd58分開。所有成功build/tests沿用，產品source及AAB未變。

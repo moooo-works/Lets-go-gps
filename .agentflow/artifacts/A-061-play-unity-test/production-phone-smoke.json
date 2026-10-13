@@ -1,0 +1,37 @@
+{
+  "observedAt": "2026-10-14T07:48:25.477115+08:00",
+  "versionCode": 10403,
+  "versionName": "1.4.3",
+  "installer": "com.android.vending",
+  "updatedWithoutUninstall": true,
+  "mapTilesVisuallyVerified": true,
+  "mapScreenshotPrivateOnly": true,
+  "settings": {
+    "theme": "light",
+    "language": "zh-TW",
+    "mockPermission": "Allowed",
+    "healthCheckItemsPending": 2
+  },
+  "data": {
+    "savedLocations": 375,
+    "routes": 6,
+    "points": 591,
+    "allSectionsEqualTo10402ExceptExportTimestamp": true
+  },
+  "normalReward": {
+    "creative": "Google Test Ad; 已發放獎勵",
+    "earned": true,
+    "afterDismiss": "Pro解鎖中 剩5h59m",
+    "logs": [
+      "D/RewardedAdManager(25078): Rewarded ad reward earned",
+      "D/RewardedAdManager(25078): Rewarded ad dismissed",
+      "D/RewardedAdManager(25078): Rewarded ad loaded"
+    ]
+  },
+  "crashObserved": false,
+  "limitations": [
+    "Positive reward only; no earlycancel/exactlyonce acceptance",
+    "Phone notification/location setup2items remain; no newpermissionsautogranted",
+    "OriginalImporterroutecreatedAt limitation unchanged; rawprivatebackups kept"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "observedAt": "2026-10-14T07:56:15.937563+08:00",
+  "productionVersionCode": 10403,
+  "productionVersionName": "1.4.3",
+  "productionTrack": 4698113845943788408,
+  "productionRelease": 42,
+  "rolloutPercent": 100,
+  "releaseNoteLanguages": [
+    "zh-TW",
+    "en-US",
+    "ja-JP",
+    "ko-KR"
+  ],
+  "submittedForReview": true,
+  "consoleState": "審查中的變更；變更項目正在審查中",
+  "managedPublishing": false,
+  "automaticPublicationAfterApproval": true,
+  "publicLiveVersionNotYetVerified": true,
+  "formalUnityGroups": {
+    "banner": {
+      "id": 8708929545,
+      "state": "ready",
+      "adUnit": "ca-app-pub-7328056144057376/1824598031",
+      "gameId": 800390974,
+      "placement": "BP_Banner_Android",
+      "googleFallback": true
+    },
+    "reward": {
+      "id": 8676901314,
+      "state": "ready",
+      "adUnit": "ca-app-pub-7328056144057376/6473078035",
+      "gameId": 800390974,
+      "placement": "BP_Rewarded_Android",
+      "googleFallback": true
+    }
+  },
+  "isolatedGroups": "keptready; separateSMOKEadunits;10402notpromoted",
+  "phoneSmoke": "production-phone-smoke.json",
+  "afterFormalEnableRestartLogs": [
+    "I/UnityAds(26869): Initializing SDK 4.20.1 42001 with game id 800390974 in production mode, session [instanceIDredacted]",
+    "I/UnityAds(26869): Initialized successfully",
+    "D/UnityMediationAdapter(26869): Unity Ads initialized successfully.",
+    "D/BannerAdView(26869): Banner ad loaded",
+    "D/BannerAdView(26869): Banner ad impression"
+  ],
+  "crashObserved": false,
+  "limits": [
+    "Google review pending; no visiblequickcheckprogress/blockers; do notclaimpubliclive",
+    "Productionrealfill/earningsnotverified; Pixelremainstestdevice",
+    "Unitypositivebanner/rewardverifiedon10402sameproductsource; earlycancel/exactlyonce/Europeunverified",
+    "PrivateGPS/AAID/signingcredentialsnotcommitted; originalroutecreatedAtimportlimitretained",
+    "NoPRmerge; originalPR58preserved; noMintegral"
+  ],
+  "quickCheckUiNoLongerPresent": true,
+  "visibleBlockingItems": false
+}

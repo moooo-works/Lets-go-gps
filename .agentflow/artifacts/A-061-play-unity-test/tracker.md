@@ -5,13 +5,13 @@
 - **Work key:** A-061-play-unity-test.
 - **Active Ask:** A-061.
 - **Goal:** 發布內部測試、實測Unity，完成正式10403發布及更新說明。
-- **Last update:** 2026-10-13 23:35:48 +0800.
+- **Last update:** 2026-10-14 07:55:32 +0800.
 - **Evidence commit:** uncommitted.
 
 ## Overall state
 
 - **State:** active.
-- **Reason:** 正式候選建置與Claude審查完成，internal10403已發布；手機鎖定待owner解鎖驗證，formal仍草稿。
+- **Reason:** Pixel10403smoke與資料通過，formal10403已送審100%自動推出，Unity正式群組就緒；Google快速檢查進行中。
 - **Total:** 5.
 - **Completed:** 4.
 - **Remaining:** 1.
@@ -36,9 +36,9 @@
 ## Current recovery
 
 - **Current item:** T-5.
-- **Last proven result:** Actual Unity banner loaded/shown; Unity rewarded earned and App+6h;10402export375/6/591 unchangedexcepttimestamp.
-- **Active blocker or running process:** Pixel locked; ownerunlockpending. NoGradle/reviewerprocess running.
-- **Next safe action:** PlayupdatePixel10403 and smoke; thenformalsubmit/rollout andenableformalUnitygroups; no10402promotion.
+- **Last proven result:** production-phone-smoke.json; formal審查中/managedoff;formalUnitybanner及rewardready/googlefallback;10402未promote.
+- **Active blocker or running process:** Googleautomatedcheckinprogress; noGradle/reviewerprocess.
+- **Next safe action:** ObserveGooglecheckstatus, finalacceptancereview of currentdeploymentreceipts; nofurtherownerpermissionneeded.
 - **Expected changed files:** .agentflow/devlog.md; .agentflow/artifacts/A-061-play-unity-test/tracker.md; 必要測試證據。
 
 ## Completion proof
