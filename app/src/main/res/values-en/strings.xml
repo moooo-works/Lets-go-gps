@@ -455,6 +455,7 @@
     <string name="floating_favorites">Favorites only</string>
     <string name="floating_route_item">%1$s · %2$d points</string>
     <string name="floating_speed">Speed: %1$.1f km/h</string>
+    <string name="floating_route_speed">Speed: %1$.0f km/h</string>
     <string name="floating_explore">Explore selected place</string>
     <string name="floating_selected">Selected place</string>
     <string name="floating_copy_selected">Copy selected coordinates</string>

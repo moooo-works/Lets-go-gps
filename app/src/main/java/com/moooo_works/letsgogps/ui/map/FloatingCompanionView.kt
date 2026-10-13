@@ -206,7 +206,7 @@ fun FloatingCompanionView(
                                             stringResource(when(mapState.simulationState) { SimulationState.PLAYING -> R.string.route_pause; SimulationState.PAUSED -> R.string.action_resume; else -> R.string.route_play }))
                                     }
                                 }
-                                Text(stringResource(R.string.floating_speed, mapState.speedKmh), fontSize = 13.sp)
+                                Text(stringResource(R.string.floating_route_speed, mapState.speedKmh), fontSize = 13.sp)
                                 Slider(value = mapState.speedKmh.toFloat().coerceIn(ROUTE_SPEED_MIN_KMH, ROUTE_SPEED_MAX_KMH), onValueChange = { actions.onSpeedChange(it.toDouble()) }, valueRange = ROUTE_SPEED_MIN_KMH..ROUTE_SPEED_MAX_KMH)
                             }
                         }

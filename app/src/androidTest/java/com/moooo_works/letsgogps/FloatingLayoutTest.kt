@@ -137,6 +137,19 @@ class FloatingLayoutTest {
             click(strings.getString(R.string.floating_copy_selected))
             instrument.runOnMainSync { assertEquals(sample.latLng, copied); assertEquals(0, selections); assertEquals(CompanionTab.SEARCH, state.value.tab) }
             click(strings.getString(R.string.nav_routes))
+            instrument.runOnMainSync { mapState.value = mapState.value.copy(speedKmh = 12.4) }
+            val speedLabel = strings.getString(R.string.floating_route_speed, 12.4)
+            val speedDeadline = SystemClock.uptimeMillis() + 5000
+            var speedVisible = false
+            while (!speedVisible && SystemClock.uptimeMillis() < speedDeadline) {
+                speedVisible = automation.windows.mapNotNull { it.root }
+                    .filter { it.packageName?.toString() == context.packageName }
+                    .flatMap(::nodes).any { it.text?.toString() == speedLabel && it.isVisibleToUser }
+                if (!speedVisible) SystemClock.sleep(100)
+            }
+            assertFalse(speedLabel.contains("12.4"))
+            assertTrue("Fractional speed must be displayed as an integer: $speedLabel", speedVisible)
+            instrument.runOnMainSync { assertEquals(12.4, mapState.value.speedKmh, 0.0) }
             val switchMode = strings.getString(R.string.route_loop_cd)
             for ((index, label) in listOf(R.string.route_loop_none, R.string.route_loop_loop, R.string.route_loop_bounce, R.string.route_loop_none).withIndex()) {
                 val deadline = SystemClock.uptimeMillis() + 5000

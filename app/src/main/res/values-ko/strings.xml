@@ -455,6 +455,7 @@
     <string name="floating_favorites">즐겨찾기만</string>
     <string name="floating_route_item">%1$s · %2$d개 지점</string>
     <string name="floating_speed">속도: %1$.1f km/h</string>
+    <string name="floating_route_speed">속도: %1$.0f km/h</string>
     <string name="floating_explore">선택한 장소 탐색</string>
     <string name="floating_selected">선택한 장소</string>
     <string name="floating_copy_selected">선택 좌표 복사</string>

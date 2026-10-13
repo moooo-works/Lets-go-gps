@@ -458,6 +458,7 @@
     <string name="floating_favorites">只看最愛</string>
     <string name="floating_route_item">%1$s · %2$d 個點</string>
     <string name="floating_speed">速度：%1$.1f km/h</string>
+    <string name="floating_route_speed">速度：%1$.0f km/h</string>
     <string name="floating_explore">探索選中地點</string>
     <string name="floating_selected">選中地點</string>
     <string name="floating_copy_selected">複製選中座標</string>

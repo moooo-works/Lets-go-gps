@@ -455,6 +455,7 @@
     <string name="floating_favorites">お気に入りのみ</string>
     <string name="floating_route_item">%1$s · %2$d 地点</string>
     <string name="floating_speed">速度：%1$.1f km/h</string>
+    <string name="floating_route_speed">速度：%1$.0f km/h</string>
     <string name="floating_explore">選択した場所を探索</string>
     <string name="floating_selected">選択した場所</string>
     <string name="floating_copy_selected">選択した座標をコピー</string>
