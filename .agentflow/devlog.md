@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品1811a5e；ROOT接受證據faa7ef8；本輪review與交付記錄見Git.
+Current commit: 產品0f8f2bc；ROOT接受證據7fb573e；完成交付見Git.
 
-Tests/scenarios: required Gradle四工作SUCCESS；284 tests／0fail／60skip；本輪未安裝／實機instrument.
+Tests/scenarios: required Gradle PASS285/0fail/60skip；PixelDialog首次／outside／ack／coldstart PASS；FloatingLayoutTest OK1 6.926s.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 搖桿兩處顯示與移動同speedKmh；繁中英文提示名稱一致；Claude Code Opus5.5/high targeted review四PASS.
+Proven: 四語一次性新功能說明已安裝Pixel7Pro；主題LIGHT zh-TW正常；資料rows/hash一致；Claude Opus5.5/high四PASS.
 
-Open: 手機未更新；原UnityGameID／交易／跨App／olderAndroid限制；日韓提示及自訂速度減速按鍵原行為待另議.
+Open: 原UnityGameID／交易／完整merge smoke限制；未實機逐測四語dark橫向大字；日韓舊map hint／減速按鍵原行為待另議.
 
-Next: 手機更新與smoke仍待；PR62及既有PR保持草稿未合併.
+Next: 等待使用者實測；PR62與既有PR保持草稿未合併.
 
-Artifacts: .agentflow/artifacts/A-053-review-fixes/review.md、validation.json、source.diff.
+Artifacts: .agentflow/artifacts/A-054-floating-tip/review.md、validation.json、data-preservation.json、tracker.md.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -606,3 +606,72 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 # → Ask / A-054 (Takeshi Mori)
 
 + 這次依舊要添加新功能說明的dialog，參考之前新增功能的範例，新增完後安裝到手機上測試
+
+---
+
+## [RUN-001] Event — 2026-10-13 09:18:06 +0800 (A-054)
+
+- 已完成四語Dialog／持久已讀与舊tip依序顯示，產品0f8f2bc已push；required Gradle通過285/0fail/60skip，首次測試缺import失敗已補正、韓文名稱修正後重建資源成功。
+- Pixel7Pro Android17/API37安裝兩APK Success，完整可讀／outside不dismiss／確認／coldstart不重複PASS；公開浮窗IME／小window／模式與兩面板close OK1 6.926s。mockgps全部rows/hash一致，備份與含地點圖片僅private/tmp。
+- Tracker T1完成、T2實際Claude Code Opus5.5/high獨立no-remotes clone審查中；root變更只tracker與原產品patch／接受證據／dispatch等紀錄，product11paths與review-facts吻合。沒有付款／廣告／發布或範圍擴充。[tracker](artifacts/A-054-floating-tip/tracker.md)
+
+## [WIP-001] Checkpoint — 2026-10-13 09:18:06 +0800 (A-054)
+
+- **Finished:** 四語一次性說明、完整Gradle、Pixel安裝與Dialog／浮窗儀器、資料保留。
+- **Running now:** Claude Code fixed-root／product審查。
+- **Still to do:** 原report核對、PR62草稿與closeout／同步main紀錄。
+- **Next work action:** 等實際runner完成；不重跑成功套件，不再操作手機。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-002] Event — 2026-10-13 09:21:29 +0800 (A-054)
+
+- Claude Code full review已完成：實際Opus5.5/high、exit0、完整report、clone無worker變更，四PASS，host核對原文與實際產品／phone／DataStore證據；原report舊卡片外側關閉說法已在Reply作host區別、不改作者bytes。tracker完成狀態一度用非canonical completed／PASS被mechanical拒絕，現complete／complete、no-next及complete evidence通過2/2，僅缺Update meaning advisory警告，不重跑產品checks。
+- PR62描述補入四語Dialog與最新安裝接受證據，保持草稿；產品0f8f2bc與上一輪小修均已在Pixel實際APK內。正式付款／廣告／發布未做，手機測完回App且新tip已讀。
+
+## [RUN-003] Event — 2026-10-13 09:21:29 +0800 (A-054)
+
+- 首次closeout因tracker Last update早於WIP1秒而checkpoint freshness檢查失敗；已更新為目前真正驗收時間。原WIP／歷史內容未改，scope由host實際核對，格式警告保留，沒有重跑產品檢查。
+
+# ← Reply / A-054
+
+* _2026-10-13 09:21:29 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已新增四語新功能說明並安裝Pixel7Pro，實機顯示、確認與重啟不重複通過，資料保留；Claude Code審查通過。
+
+## [FINAL REPORT]
+
+1. 「這次依舊要添加新功能說明的dialog，參考之前新增功能的範例，新增完後安裝到手機上測試」
+
+   - 成功：參考原新功能卡片的置中、圓角、主題色、按鈕風格，新增四語真正Dialog。說明搜尋／收藏／路線／複製座標、預覽與「移動到這裡」、半透明與靠邊、獨立搖桿及兩工具互斥、既有Pro訂閱OR觀看廣告解鎖6h與首次浮窗權限。
+
+   - 排在既有onboarding／新功能tip之後；長文可捲，確認按鈕固定可見，外側不誤關。按「好，我知道了」或返回可確認已讀，寫入原DataStore，不會每次開App重複；不自動索權限、開付款或觸發廣告。
+
+   - 已備份原APK／資料至private/tmp後使用install -r保留資料更新Pixel7Pro Android17/API37。實測繁中LIGHT完整說明、外側不關、確認關閉、force-stop冷啟動不重複PASS；測完回到App，說明已讀。浮窗公開UI儀器OK1 6.926s（真IME／小window尺寸／模式／兩面板close，test host與fakeactions）。收藏375／路線6／路線點591全部rows/hash一致；不宣稱SDK庫或已讀旗標未變。包含上一輪速度與提示修正版。
+
+   - ./gradlew test、lintDebug、assembleDebug及assembleDebugAndroidTest成功：285tests／0fail／0errors／60既有skip。首次新增測試少coVerify import造成編譯失敗，補正後完整成功；韓文名稱核對修正後資源lint及兩APK重建成功。lint仍有既有問題，未稱零問題。
+
+   - 真正Claude Code Opus5.5/high在獨立no-remotes clone審查，固定ROOT7fb573e／產品0f8f2bc，Outcome／Minimality／Conformance／Verdict全PASS，原report未改。我已讀完整原報告與CLI模型／exit／clone無變更證據，核對UImodal、tip排程與持久化、四語、電話接受紀錄及資料hash。
+
+   - 原report「舊卡片點外會關」不是舊Box源碼支持的說法；我採用新Dialog的modal／返回／外側一致性及只改新功能的較小邊界接受。舊jump註解位置錯置為非阻擋小瑕疵，未為此改程式或重跑成功檢查。其他語言／深色／橫向／大字尚未逐一實機驗證；原完整合併前smoke與正式廣告／付款限制保留。
+
+   - 獨立worktree產品0f8f2bc已commit／push，[PR62](https://github.com/moooo-works/Lets-go-gps/pull/62)已更新保持草稿；保留58／59／60／61、沒有合併發布。Git preflight fix/floating-dock clean，fetch成功，origin/main 0d26af83b115a8e602d81489df46f547cb0f1ec6，包含main；最新5筆0d26af8／faa7ef8／af9a524／87227dd／a7151ee。
+
+   - Key Records — read these first
+
+     [Claude Dialog審查](artifacts/A-054-floating-tip/review.md)：功能、最小邊界與一致性結果、保留實測限制。
+
+     [實機與建置驗證](artifacts/A-054-floating-tip/validation.json)：安裝與首次顯示／確認／重啟、完整Gradle與儀器結果。
+
+     [資料保留](artifacts/A-054-floating-tip/data-preservation.json)：只含筆數與hash，不保存私密地點。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-055 (Takeshi Mori)
+
++
