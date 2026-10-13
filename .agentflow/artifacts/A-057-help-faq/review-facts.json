@@ -1,0 +1,20 @@
+{
+  "changed_files": [
+    "app/src/androidTest/java/com/moooo_works/letsgogps/HelpGuideTest.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/help/HelpContent.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/help/HelpScreen.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingToolsTipDialog.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt",
+    "app/src/main/res/values-en/help_strings.xml",
+    "app/src/main/res/values-ja/help_strings.xml",
+    "app/src/main/res/values-ko/help_strings.xml",
+    "app/src/main/res/values/help_strings.xml"
+  ],
+  "changed_lines": 414,
+  "behavior_change": true,
+  "trust_boundary": false,
+  "broad_change": false,
+  "consequential_change": false
+}
