@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品7d93b76；ROOT接受證據70a1590；完成審查交付見Git.
+Current commit: 產品7d93b76未變；來源分支64ff603同步紀錄；本輪FAQ建議見Git.
 
-Tests/scenarios: required Gradle四工作SUCCESS285/0fail/60skip；Pixel updated；FloatingLayoutTest OK1 7.453s.
+Tests/scenarios: 本輪只讀Settings／Onboarding／tip flow；重用A055建置285/0fail/60skip与Pixel OK1，不新增測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 四語懸浮route整數速度呈現；12.4→12但state未變；Claude Code Opus5.5/high四PASS.
+Proven: 現有提示為首次／一次性、步數局部說明；統一可回看的FAQ／功能教學入口尚未實作.
 
-Open: 原UnityGameID／完整merge smoke／正式交易廣告／多語dark大字橫向限制；日韓舊hint與減速按鍵原行為待另議.
+Open: FAQ功能為建議尚未開發；原UnityGameID／merge smoke／交易及多語dark橫向限制保留.
 
-Next: 等待使用者實測；PR62及既有PR保持草稿未合併.
+Next: 等待使用者對App內使用說明與FAQ範圍的決定；PR62及既有PR保持草稿.
 
-Artifacts: .agentflow/artifacts/A-055-integer-route-speed/review.md、validation.json、source.diff.
+Artifacts: .agentflow/artifacts/A-055-integer-route-speed/review.md、validation.json；本輪回答在Reply A-056.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -718,5 +718,37 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-056 (Takeshi Mori)
+
++ 有沒有需要製作一份faq或功能說明，上次有人說有功能不知道怎麼用
+
+# ← Reply / A-056
+
+* _2026-10-13 09:39:10 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 有必要：現有教學以首次設定與一次性功能提示為主，缺少可隨時回看的完整操作說明；建議在設定頁新增使用說明與FAQ。
+
+## [FINAL REPORT]
+
+1. 「有沒有需要製作一份faq或功能說明，上次有人說有功能不知道怎麼用」
+
+   - 有必要。已核對現行產品分支：首次教學主要介紹開發者選項與模擬位置App；各功能有一次性tip、步數同步有局部設定說明，但設定頁沒有統一FAQ／功能操作教學入口。新浮窗Dialog確認後保存已讀，目前沒有重開教學的入口，因此忘記內容後找不到回看方式。
+
+   - 建議做App內「使用說明與FAQ」，固定放設定頁，可離線閱讀、沿用四語與主題。新功能Dialog保留作更新通知，內容以簡短重點並連到對應教學；使用者遇到問題時再看完整操作，不增加一連串強制彈窗。
+
+   - 第一版分三類：快速上手（設定、搜尋／選點、開始／停止）；功能教學（收藏與資料夾、建立／匯入路線、一次／循環／折返與跳點、懸浮工具與搖桿、步數同步、Pro解鎖）；FAQ（不能定位、浮窗不出現、選點為何未移動、兩種工具為何不能同時顯示、廣告解鎖時效等）。每篇用入口位置、3–5操作步驟、預期結果，加少量對照圖；不要只寫功能名稱。
+
+   - 優先整理最容易不懂的懸浮工具、路線模式與Pro解鎖，並用遊戲中搜尋地点→預覽→複製座標或明確移動的實際情境串接教學。說明應對應真正按鈕名稱與行為，與功能修改一起維護。
+
+   - 這輪只檢查現況並提供建議，尚未新增FAQ檔案或App頁面，沒有改程式／安裝手機／觸發廣告付款／合併PR；原草稿與worktree保持現況。這是設計討論，不把建議自動當成新功能開發指令。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-057 (Takeshi Mori)
 
 +
