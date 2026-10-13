@@ -5,7 +5,7 @@
 - **Work key:** A-057-help-faq.
 - **Active Ask:** A-057.
 - **Goal:** 製作可回看／搜尋的四語App說明與FAQ，接設定與浮窗tip教學，安裝驗證。
-- **Last update:** 2026-10-13 10:34:02 +0800.
+- **Last update:** 2026-10-13 10:34:57 +0800.
 - **Evidence commit:** 2647e185b506a00910033cf03017d124a940ad20.
 
 ## Overall state
@@ -28,8 +28,8 @@
 
 ## Accepted scope changes
 
-- A-057追加「ui有點醜」，加入T4視覺改善。
-- 首輪Claude提出三語主地圖開始與單點名稱不符，對應原「操作說明」正確性要求修正文案；原report-01 bytes保留。
+- 使用者追加「ui有點醜」，加入T4視覺改善。Effect: Help列表／文章／原主題色及Help底bar顯示範圍重整。Source: A-057.
+- 首輪三語主地圖Start/SinglePoint名稱不符，依原操作教學正確性要求修正文案。Effect: 只對齊四語help內容，不改App功能；原report-01 bytes保留。Source: A-057及A-056已接受方案.
 
 ## Current recovery
 
