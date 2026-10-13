@@ -40,4 +40,6 @@
     <string name="help_faq_preview_body">1. 懸浮工具中點地點、點地圖或移動地圖，只會選點預覽。\n2. 若只是需要座標，按複製即可；複製不會移動。\n3. 要實際移動，確認座標後按「移動到這裡」，並處理顯示的權限或額度提示。\n\n這能避免在搜尋或查看收藏時誤移動。主地圖的單點定位則需按「開始模擬」。</string>
     <string name="help_faq_rewards_title">看完廣告，為什麼仍未解鎖？</string>
     <string name="help_faq_rewards_body">1. 確認看的入口：Pro 廣告給有時效的 Pro；步數同步廣告補的是次數。\n2. 確認廣告完成且收到成功獎勵，不只是在畫面出現後關掉。\n3. 回設定查看剩餘時間或次數；廣告未載入時可稍後再試。\n\nPro 時間會到期。若已看到成功獎勵但狀態仍未更新，記下時間與訊息回報；不要假設每次播放廣告都會解鎖。</string>
+    <string name="help_intro">選擇主題，或搜尋你想使用的功能。</string>
+    <string name="help_count">%1$d 篇說明</string>
 </resources>

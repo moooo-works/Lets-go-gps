@@ -167,7 +167,7 @@ fun AppNavigation(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            if (currentRoute != "folder_management") {
+            if (currentRoute != "folder_management" && currentRoute?.substringBefore("?") != "help") {
                 val navItemColors = NavigationBarItemDefaults.colors(
                     selectedIconColor   = MaterialTheme.colorScheme.primary,
                     selectedTextColor   = MaterialTheme.colorScheme.primary,

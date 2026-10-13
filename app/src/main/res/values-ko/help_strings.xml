@@ -14,8 +14,8 @@
     <string name="help_diagram_preview">좌표 미리보기</string>
     <string name="help_setup_title">처음 사용: 위치 설정</string>
     <string name="help_setup_body">1. 휴대전화 설정에서 개발자 옵션을 켜세요. 보통 휴대전화 정보의 빌드 번호를 7번 누르면 돼요.\n2. 개발자 옵션의 모의 위치 앱에서 이 앱을 선택하세요. 메뉴 이름은 기기마다 다를 수 있어요.\n3. 이 앱의 설정에서 권한 상태를 확인하고 안내에 따라 위치 및 알림 권한을 허용하세요.\n\n그다음 지도에서 위치를 선택하고 모의를 시작하세요. 개발자 옵션만 켜는 것으로 모의 위치 앱이 선택되지는 않아요.</string>
-    <string name="help_start_title">단일 위치: 시작과 중지</string>
-    <string name="help_start_body">1. 지도에서 단일 위치 모드를 선택하세요.\n2. 검색하거나 지도를 움직여 중심 좌표를 확인하세요.\n3. 모의 시작을 누르고 권한 또는 이용 횟수 안내를 완료하세요.\n4. 사용을 마치면 중지를 누르세요. 플로팅 도구를 닫아도 모의는 중지되지 않아요.\n\n지점 선택은 준비 단계이며 시작 버튼을 눌러야 해요.</string>
+    <string name="help_start_title">단일 지점: 시작과 중지</string>
+    <string name="help_start_body">1. 지도에서 단일 지점를 선택하세요.\n2. 검색하거나 지도를 움직여 중심 좌표를 확인하세요.\n3. 위장 시작을 누르고 권한 또는 이용 횟수 안내를 완료하세요.\n4. 사용을 마치면 위장 중지를 누르세요. 플로팅 도구를 닫아도 모의는 중지되지 않아요.\n\n지점 선택은 준비 단계이며 시작 버튼을 눌러야 해요.</string>
     <string name="help_search_title">장소, 좌표, Plus Code 검색</string>
     <string name="help_search_body">1. 지도 위 검색창을 누르세요.\n2. 장소 이름, 좌표(예: 25.0330, 121.5654), Plus Code를 입력하세요.\n3. 결과를 선택하고 지도를 확인한 뒤 시작하거나 저장하세요.\n\n좌표를 복사하고 앱으로 돌아와 클립보드 안내를 사용할 수도 있어요. 설정에서 끌 수 있어요. 장소 검색에는 인터넷이 필요하지만 이 안내는 오프라인으로 볼 수 있어요.</string>
     <string name="help_floating_title">게임 위에서 플로팅 도구 사용</string>
@@ -37,7 +37,9 @@
     <string name="help_faq_overlay_title">플로팅 창이 없거나 다른 도구가 사라짐</string>
     <string name="help_faq_overlay_body">1. Pro가 유효하고 다른 앱 위에 표시 권한이 있는지 확인하세요.\n2. 화면 양쪽 가장자리의 작은 버튼을 찾아 펼치세요.\n3. 다른 도구를 열면 원래 도구가 교체돼요. 한 번에 한 종류만 표시하는 동작이에요.\n\nPro가 만료되면 도구가 닫혀요. 닫기 후에는 메인 지도에서 다시 열어야 해요. 일부 앱이나 시스템 화면은 플로팅 창 위를 덮을 수 있어요.</string>
     <string name="help_faq_preview_title">지점을 선택했는데 이동하지 않는 이유</string>
-    <string name="help_faq_preview_body">1. 플로팅 도구에서 지점을 고르거나 지도를 움직이는 것은 미리보기예요.\n2. 좌표만 필요하면 복사를 누르세요. 복사로 이동하지는 않아요.\n3. 이동하려면 좌표를 확인하고 여기로 이동을 누른 뒤 권한 또는 이용 횟수 안내를 완료하세요.\n\n검색 중 실수로 이동하지 않게 하기 위한 동작이에요. 메인 지도의 단일 위치 모드에서는 모의 시작이 필요해요.</string>
+    <string name="help_faq_preview_body">1. 플로팅 도구에서 지점을 고르거나 지도를 움직이는 것은 미리보기예요.\n2. 좌표만 필요하면 복사를 누르세요. 복사로 이동하지는 않아요.\n3. 이동하려면 좌표를 확인하고 여기로 이동을 누른 뒤 권한 또는 이용 횟수 안내를 완료하세요.\n\n검색 중 실수로 이동하지 않게 하기 위한 동작이에요. 메인 지도의 단일 지점에서는 위장 시작이 필요해요.</string>
     <string name="help_faq_rewards_title">광고를 봤는데 잠금이 풀리지 않은 이유</string>
     <string name="help_faq_rewards_body">1. 광고 진입 위치를 확인하세요. Pro 광고는 시간제 Pro이고 동기화 광고는 이용 횟수예요.\n2. 광고를 완료하고 성공 보상을 받아야 해요. 광고가 보인 뒤 바로 닫는 것만으로는 충분하지 않아요.\n3. 설정에서 남은 시간이나 횟수를 확인하세요. 광고가 없으면 나중에 다시 시도하세요.\n\nPro 시간은 만료돼요. 성공 보상이 표시됐는데 갱신되지 않으면 시간과 메시지를 기록해 알려주세요.</string>
+    <string name="help_intro">주제를 선택하거나 사용할 기능을 검색하세요.</string>
+    <string name="help_count">안내 %1$d개</string>
 </resources>
