@@ -1,0 +1,27 @@
+{
+  "artifact": "/Users/mori/side-project/Lets-go-gps/.worktrees/unity-play-smoke/app/build/outputs/bundle/release/letsgo-10402-unity-test-only.aab",
+  "version_code": 10402,
+  "version_name": "1.4.1-unity-test",
+  "size": 15540433,
+  "sha256": "8587b8e3099f32447479d03112e559c94347980443c55592d816751404e536b9",
+  "source_commit": "3d39a7d56d85457d54b184be5230ed6ed8cc79f3",
+  "app_gradle_identical_to_b9868ee": true,
+  "build_result": "BUILD SUCCESSFUL in 2m 45s",
+  "release_force_pro": false,
+  "test_only": true,
+  "init_script_sha256": "5f6f2707eb1c3ac81001e64dd183dd0729fcaaac11648cc2dc2b5aa49ece11c0",
+  "dex_checks": {
+    "ca-app-pub-7328056144057376/8648995174": true,
+    "ca-app-pub-7328056144057376/8563391382": true,
+    "com/google/ads/mediation/unity/UnityMediationAdapter": true,
+    "com/unity3d/ads/UnityAds": true
+  },
+  "jar_signature_verified": true,
+  "zip_crc_pass": true,
+  "original_10401_sha256_unchanged": "913f6e526766e6deccdf9a9f8ba79f3585074e617507e3a37c3d311863bf799c",
+  "limitations": [
+    "Unity serving not verified yet",
+    "Do not promote this test-only artifact to production",
+    "Future production versionCode must be greater than 10402"
+  ]
+}

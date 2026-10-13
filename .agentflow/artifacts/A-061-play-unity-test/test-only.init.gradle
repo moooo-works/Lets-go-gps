@@ -13,9 +13,8 @@ gradle.beforeProject { p ->
                     REWARDED_AD_UNIT_ID: 'ca-app-pub-7328056144057376/8563391382'
                 ]
                 replacements.each { name, value ->
-                    def original = variant.buildConfigFields.get().get(name)
-                    assert original != null : "Missing existing BuildConfig field: ${name}"
-                    def ctor = original.class.declaredConstructors.find { it.parameterCount == 3 }
+                    def fieldType = android.class.classLoader.loadClass('com.android.build.api.variant.BuildConfigField')
+                    def ctor = fieldType.declaredConstructors.find { it.parameterCount == 3 }
                     variant.buildConfigFields.put(name, ctor.newInstance('String', '"' + value + '"', 'A-061 isolated test ad unit; not for production'))
                 }
             }

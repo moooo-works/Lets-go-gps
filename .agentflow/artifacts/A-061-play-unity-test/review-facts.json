@@ -1,0 +1,13 @@
+{
+  "changed_files": [
+    ".agentflow/artifacts/A-061-play-unity-test/test-only.init.gradle",
+    ".agentflow/artifacts/A-061-play-unity-test/design.md",
+    ".agentflow/artifacts/A-061-play-unity-test/test-build.json",
+    ".agentflow/artifacts/A-061-play-unity-test/data-restore.json"
+  ],
+  "changed_lines": 115,
+  "behavior_change": true,
+  "trust_boundary": true,
+  "broad_change": false,
+  "consequential_change": true
+}
