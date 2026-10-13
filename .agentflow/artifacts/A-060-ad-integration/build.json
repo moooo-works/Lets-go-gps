@@ -1,0 +1,57 @@
+{
+  "version": "1.4.1 / 10401",
+  "source_branch": "fix/release-ad-integration",
+  "built_app_commit": "fbd8a84887c12ef4e12c4dcfb3f6f10ae1c26942",
+  "base_product_commit": "00bf3fa",
+  "post_build_reuse": "0804c8b只移除cherry帶入的舊stream設計副本，對fbd8a84的app/gradle差異為空，App與已built artifact相同。",
+  "included": "Unity SDK／UMP／請求前privacy與init修正，PR58adaptive與bounded retry；原浮窗FAQ保留。",
+  "source_cherry_picks": [
+    "2eecf57",
+    "ab2c75f",
+    "88bc790",
+    "bb58f9a"
+  ],
+  "ad_branches_tree_equal": "Unity與consent-verification app／gradle同tree，取一組功能。",
+  "checks": "test lintDebug assembleDebug assembleDebugAndroidTest bundleRelease SUCCESS2m55s；311/0fail/0error/60existingSkip。",
+  "focused_red_green": "20tests/3fail red34s；20/0 green15s，retry重新privacy與withdraw取消兩測保留。",
+  "dependency_runtime": "NextGen1.5.0、Unity4.20.1、adapter4.20.1.0、UMP4.0.0；legacy full/lite排除，ads-identifier為正常NGA依賴；無Mintegral。",
+  "pro_guard": "Generated Debug Boolean true／Release false；APK manifest debuggable；Settings真顯示Pro訂閱中。",
+  "phone": "Pixel7Pro Android17先backup，再install-r app/test Success；public Help＋Floating OK2 16.485s，正式Main Settings→FAQ→Pro搜尋→article→index→Settings→Map PASS；手機新版DebugPro。",
+  "data": "375地點/6路線/591路點各tablehash同；App-owned settings.preferences_pb同；4個Google／Firebase SDK cache更新，不冒稱所有prefs不變。",
+  "failures": "查到PR58缺漏後取消首build；cherry本次版本dirty先commit；四語／ads conflicts手工保留雙邊；red→green證明整合。依賴先誤用root task，改:app成功。資料比對先混SDK cache，改明確App-owned source file證明不變。首次metadata長Unicode stdin parser失敗未寫檔，改ASCII-safe字串保存，不重跑產品。",
+  "limits": "未正式支付／reward廣告供應／真AdMob Unity single-source；不啟用後台／不Play upload／不mergePR。新實機是DebugPro，Release未安裝，全部Map merge smoke與全面layout未補。最新Unity stream先前獨立SDK已成功，不以舊GameID描述當最新後台現況。",
+  "product_commit": "0804c8bccfb125cf7e3dc96e36de902b6f443685",
+  "scope": {
+    "files": 17,
+    "changed_lines": 991,
+    "vm_owner_engine_schema_unchanged": true
+  },
+  "artifacts": [
+    {
+      "kind": "release_aab",
+      "path": "/Users/mori/side-project/Lets-go-gps/.worktrees/release-ad-integration/app/build/outputs/bundle/release/letsgo-1.4.1-release.aab",
+      "bytes": 15540534,
+      "sha256": "913f6e526766e6deccdf9a9f8ba79f3585074e617507e3a37c3d311863bf799c",
+      "version_name": "1.4.1",
+      "version_code": 10401,
+      "unity_sdk_adapter_consent_in_actual_dex": true,
+      "mintegral_in_dex": false,
+      "zip_crc": "PASS",
+      "signature": "JAR verified",
+      "dev_force_pro": false
+    },
+    {
+      "kind": "debug_pro_apk",
+      "path": "/Users/mori/side-project/Lets-go-gps/.worktrees/release-ad-integration/app/build/outputs/apk/debug/letsgo-1.4.1-debug-pro.apk",
+      "bytes": 35570257,
+      "sha256": "5d4949f6ef0940d7dd32adcf4975800d3ecd14face23899ce76cca388106beb5",
+      "version_name": "1.4.1",
+      "version_code": 10401,
+      "unity_sdk_adapter_consent_in_actual_dex": true,
+      "mintegral_in_dex": false,
+      "zip_crc": "PASS",
+      "signature": "apksigner verify exit0",
+      "dev_force_pro": true
+    }
+  ]
+}

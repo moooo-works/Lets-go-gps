@@ -350,4 +350,43 @@ Still to do
 
 # → Ask / A-060 (Takeshi Mori)
 
-+
++ 把廣告分支整合起來後再build一版aab，另外需產生一份有pro權限的debug版apk
+
+---
+
+## [RUN-001] Event — 2026-10-13 12:08:42 +0800 (A-060)
+
+- Git preflight：main；status main...origin/main僅hook devlog dirty；fetch成功；origin/main325a3ba2308480a011edd742cd5c544e98d0c28f，最新5筆325a3ba／ca817ca／064e43a／0afeda8／c08b33d。新fix/release-ad-integration worktree自最新main開出，承接release00bf3fa既有浮窗／FAQ。
+- Unity／consent-verification產品tree相同，帶2eecf57、ab2c75f、88bc790功能，再整合PR58 bb58f9a廣告优化；原PR不merge。四語衝突保留雙方、Main與Settings保留Help接線。版本1.4.1／10401，Debug既有DEV_FORCE_PRO true、Release false。
+- 首次構建在查到PR58尚缺後停止（SIGTERM該task wrapper40041，session58263退出143），未當最新接受。初cherry-pick因本次版號localdirty拒絕，先commit34724ac再續。廣告conflicts在reward／banner／tests／BuildConfig，沒有選邊覆蓋同意保護。
+- 缺重試的原同意版先red：Rewarded20tests/3fail；合併有界重試、privacy每次重檢、撤回取消／revision淘汰後focused20tests PASS15s。新兩測驗證retry與privacy交界，原reward duplicate／舊廣告失效保留。最新產品fbd8a84，完整五Gradle正在跑。
+- Scope check: product限廣告SDK／UMP／adaptive/retry與版本及必要原測試；無engine／schema／Pro產品變更，Mintegral排除。ROOT仅A060 design/tracker與devlog，ignored簽章／MAPS安全沿用。原Unity stream A006已驗独立SDK成功，正式AdMob Unity仍未驗／不啟用後台；本次不沿用過時GameID阻塞當最新狀態。
+
+## [RUN-002] Event — 2026-10-13 12:20:44 +0800 (A-060)
+
+- 完整五Gradle SUCCESS2m55s，311tests/0fail/0error/60existingSkip；AAB15540534bytes／APK35570257bytes，兩包實際DEX含UnityAds／GoogleUnityadapter／AdConsentManager，無Mintegral；AABprotobuf1.4.1／10401、JAR簽章／CRC與APK apksigner／debuggable通過。generatedFlags Debug=true Release=false，originaloutputs保留。
+- Pixel先備份APK/data，再install-r新DebugPro及testAPK兩份Success；HelpGuideTest＋FloatingLayoutTest OK2 16.485s，正式Main Settings→FAQ→Pro文章→index→Settings→Map PASS、Settings真顯示Pro訂閱中。資料庫375/6/591各tablehash同；App-owned settings file同；4Google/Firebase cache更新分開記錄。
+- 依賴報告改用:app task後成功，NextGen1.5／Unity4.20.1／adapter4.20.1.0／UMP4；legacy full/lite排除，identifier非legacySDK；Mintegral無依賴。未觸發正式獎勵／支付／後台啟用，Unity實際AdMob供應仍未驗。
+- Scope check: 17app/gradle廣告整合路徑及版本；保持Help／浮窗／VM owner／engine／schema。cherry帶入的舊stream設計副本移除（0804c8b），App diff對built fbd8a84為空，不重跑有效build。ROOT仅A060設計／接受／hash／tracker／原review證據，private phone data不Git。tracker3/4，凍結facts full review。
+
+## [WIP-001] Checkpoint — 2026-10-13 12:22:55 +0800 (A-060)
+
+- **Finished:**
+
+  1. Unity／同意／PR58廣告優化完整整合，retry與privacy交界red→green。
+
+  2. 1.4.1 signed Release AAB及Pro Debug APK已產出，actualDEX／簽章／版本／Pro分流驗證通過。
+
+  3. Pixel公開Help／浮窗及正式Main／Pro狀態通過，DB與App-owned設定保留；SDK cache更新分開記錄。
+
+- **Running now:**
+
+  1. 固定目前原code／產物證據，準備Claude完整獨立審查。
+
+- **Still to do:**
+
+  1. 最終review、host核對、單主題草稿PR及分支／紀錄交付。
+
+- **Next work action:** review固定ROOT與產品，保留原verdict，不重跑成功checks。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
