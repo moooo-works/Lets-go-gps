@@ -12,7 +12,7 @@
     "app/src/main/res/values-ko/help_strings.xml",
     "app/src/main/res/values/help_strings.xml"
   ],
-  "changed_lines": 486,
+  "changed_lines": 617,
   "behavior_change": true,
   "trust_boundary": false,
   "broad_change": false,

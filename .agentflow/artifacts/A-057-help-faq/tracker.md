@@ -5,15 +5,15 @@
 - **Work key:** A-057-help-faq.
 - **Active Ask:** A-057.
 - **Goal:** 製作可回看／搜尋的四語App說明與FAQ，接設定與浮窗tip教學，安裝驗證。
-- **Last update:** 2026-10-13 10:34:57 +0800.
+- **Last update:** 2026-10-13 11:13:22 +0800.
 - **Evidence commit:** 2647e185b506a00910033cf03017d124a940ad20.
 
 ## Overall state
 
 - **State:** active.
-- **Reason:** 最新UI與三語名稱已修，四語／正式Main流程通過；需第二輪審查與交付。
-- **Total:** 4.
-- **Completed:** 3.
+- **Reason:** 最新UI與三語名稱已修，四語／正式Main流程通過；第二輪Claude四項PASS；使用者追加Pen設計後再整合。
+- **Total:** 5.
+- **Completed:** 4.
 - **Remaining:** 1.
 
 ## Accepted task checklist
@@ -26,17 +26,21 @@
 
 - [x] **T-4:** 依「ui有點醜」重整Help視覺：去除預設紫色大卡片、原主題中性色＋橘色圖示、分組輕列表、選取高亮與清楚圖解、Help期間隱藏底部分頁。Scope: 同HelpScreen／Main／Settings／四語helperstrings，不改其他頁或引擎。Proof: 新版Screenshot視覺核對、四語／正式回程／原浮窗必要重驗與最終Claude審查。失敗限定scope修正。Source: A-057「ui有點醜」。
 
+- [x] **T-5:** 依「使用說明也請pen.dev設計後再一起改，也要跟主題搭配」由Pen桌面Claude Opus 5.5設計淺深目錄／文章四態，保存原稿／PNG／規格後實作並重驗。Scope: 新Pen frames與匯出、Help視覺及必要四語文案；保留原浮窗稿與App功能。Proof: 真實設計／匯出、Compose對照、主題與長文QA、必要Gradle／手機流程與最終審查。Source: A-057.
+
 ## Accepted scope changes
 
 - 使用者追加「ui有點醜」，加入T4視覺改善。Effect: Help列表／文章／原主題色及Help底bar顯示範圍重整。Source: A-057.
 - 首輪三語主地圖Start/SinglePoint名稱不符，依原操作教學正確性要求修正文案。Effect: 只對齊四語help內容，不改App功能；原report-01 bytes保留。Source: A-057及A-056已接受方案.
 
+- 使用者追加Pen桌面協作。Effect: 新增T5，完成設計後才整合最終UI並重新驗證交付。Source: A-057.
+
 ## Current recovery
 
 - **Current item:** T-3.
 - **Last proven result:** 新獨立help-faq分支自最新main建立後承接floating-dock依賴；新UI與四語已寫。
-- **Active blocker or running process:** none; 準備第二輪審查。
-- **Next safe action:** 固定ROOT與產品派Claude審查。
+- **Active blocker or running process:** 產品e89697c與Pen最終接受成功；第三次Claude審查準備。
+- **Next safe action:** 第三次Claude只讀凍結產品與Pen稿，完成草稿PR和交付。
 - **Expected changed files:** MainActivity.kt、SettingsScreen.kt、MapScreen.kt、FloatingToolsTipDialog.kt、ui/help兩檔、四語help_strings.xml、HelpGuideTest.kt；root只devlog／hook archive與本tracker／接受證據／review紀錄。
 
 ## Completion proof
