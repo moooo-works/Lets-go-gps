@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品e5580b6；最後AAB接受與審查ROOT064e43a；交付見Git.
+Current commit: 产品0804c8b（App tree與built fbd8a84同）；review ROOT5fe28fb；交付見Git.
 
-Tests/scenarios: test/lintDebug/assembleDebug成功285/0fail/60skip；bundleRelease成功6m22s；實際AAB版本10400／1.4.0、zipCRC與jar簽章通過.
+Tests/scenarios: 五GradleSUCCESS2m55s；311/0fail/60skip；retry red20/3→green20/0；兩包DEX／簽章／版本／Pro分流；Pixel publicUI OK2與正式Main／Pro狀態、DB與App設定保留.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 1.4.0簽章Release AAB產出並本機交付，版本分支push與Claude targeted四PASS.
+Proven: 完整Unity／同意／PR58廣告整合，1.4.1 AAB與ProDebugAPK產出，Pixel更新與Claude四PASS，草稿PR64.
 
-Open: Play未上傳；Release未另安裝；UnityGameID待回覆，既有PR58–63未合併／原合併煙測待補.
+Open: 真AdMob Unity single-source／正式reward／付款未驗證，後台未啟用／Play未上傳；原PR58–64未合併，全Map煙測／全面layout未完成.
 
-Next: 同步release分支docs-only紀錄後由使用者取用AAB；UnityAds依原stream待回覆.
+Next: docs-only同步base/head後取用雙產物；正式廣告供應另循原Unity stream驗證.
 
-Artifacts: dist/letsgo-1.4.0-release.aab；A-058-release-aab build／version.diff／tracker／原review與runner.
+Artifacts: release-ad-integration工作樹outputs/bundle/release與outputs/apk/debug雙產物；A060 design/build/data/tracker/review及runner.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -311,5 +311,132 @@ Still to do
 ---
 
 # → Ask / A-059 (Takeshi Mori)
+
++ 為什麼會在dist資料夾？之前是產到這邊嗎？unity ads的程式有在這一版嗎？
+
+---
+
+## [RUN-001] Event — 2026-10-13 11:55:10 +0800 (A-059)
+
+- Read-only查核：A058原Gradle設定及舊1.3.5 commit209cf18皆輸出app/build/outputs/bundle/release，再依既有規則改名；dist是這次host额外交付複本。原worktree AAB與dist SHA相同5d6b285b34680bec9fe04f91a6ff55fe4250137133c4459b079b1b207df22bef，原檔仍存在。
+
+## [RUN-002] Event — 2026-10-13 11:55:10 +0800 (A-059)
+
+- 發現發布基底缺漏：release1.4.0的Gradle/version catalog沒有Unity SDK或adapter，AdConsentManager.kt亦不存在；unity-ads分支有com.unity3d.ads4.20.1／GoogleUnityadapter4.20.1.0及UMP mediation gating。consent-verification亦另分支。A058承接help-faq未整合廣告分支，host承認打包基底疏漏；既有構建／簽章PASS不代表含所有未合併功能。此輪為問句查核，不擅自merge／重打包／搬移檔案，PR58保留，Mintegral排除不變。
+
+# ← Reply / A-059
+
+* _2026-10-13 11:55:10 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- dist是此次額外的交付複本，原Gradle AAB仍在outputs/bundle/release；這份1.4.0未含Unity Ads接入與新版廣告同意流程，打包基底漏接廣告分支。
+
+## [FINAL REPORT]
+
+1. 「為什麼會在dist資料夾？之前是產到這邊嗎？unity ads的程式有在這一版嗎？」
+
+   - **dist來源：** 我這次為方便取用，把worktree的AAB複製到專案根目錄dist；沒有改Gradle輸出設定。專案既有設定（亦查舊1.3.5 commit209cf18）原本輸出到`app/build/outputs/bundle/release/`，再改名成`letsgo-版本-release.aab`。這次dist是額外複本，原檔仍在[原始輸出](../.worktrees/release-1.4.0/app/build/outputs/bundle/release/letsgo-1.4.0-release.aab)，兩檔SHA256完全相同。
+   - **Unity Ads沒有在這份1.4.0：** 發布分支的依賴沒有Unity SDK／Google Unity adapter，亦缺先前新增的AdConsentManager。Unity接入與廣告同意改動仍在`unity-ads`／`consent-verification`；這次從`help-faq`承接浮窗與教學，沒有帶入廣告分支。這是我選擇打包基底時的疏漏，不能把此AAB視為已整合所有先前開發成果的上架版。
+   - **需要處理：** 要交付包含Unity及已完成同意流程的版本，需整合該廣告分支、驗證整體流程後重打包。依目前保存的紀錄，Unity另有GameID拒絕／客服工單待處理，含SDK不代表供應已啟用。本輪未查客服最新回覆，不把紀錄當即時後台狀態。
+   - 本輪只核對與說明，沒有改App、合併PR、搬移AAB或再次建置。A058的版本／簽章／CRC驗證結果仍成立，涵蓋的是那份實際打包來源；廣告分支缺漏已記錄供後續處理。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-060 (Takeshi Mori)
+
++ 把廣告分支整合起來後再build一版aab，另外需產生一份有pro權限的debug版apk
+
+---
+
+## [RUN-001] Event — 2026-10-13 12:08:42 +0800 (A-060)
+
+- Git preflight：main；status main...origin/main僅hook devlog dirty；fetch成功；origin/main325a3ba2308480a011edd742cd5c544e98d0c28f，最新5筆325a3ba／ca817ca／064e43a／0afeda8／c08b33d。新fix/release-ad-integration worktree自最新main開出，承接release00bf3fa既有浮窗／FAQ。
+- Unity／consent-verification產品tree相同，帶2eecf57、ab2c75f、88bc790功能，再整合PR58 bb58f9a廣告优化；原PR不merge。四語衝突保留雙方、Main與Settings保留Help接線。版本1.4.1／10401，Debug既有DEV_FORCE_PRO true、Release false。
+- 首次構建在查到PR58尚缺後停止（SIGTERM該task wrapper40041，session58263退出143），未當最新接受。初cherry-pick因本次版號localdirty拒絕，先commit34724ac再續。廣告conflicts在reward／banner／tests／BuildConfig，沒有選邊覆蓋同意保護。
+- 缺重試的原同意版先red：Rewarded20tests/3fail；合併有界重試、privacy每次重檢、撤回取消／revision淘汰後focused20tests PASS15s。新兩測驗證retry與privacy交界，原reward duplicate／舊廣告失效保留。最新產品fbd8a84，完整五Gradle正在跑。
+- Scope check: product限廣告SDK／UMP／adaptive/retry與版本及必要原測試；無engine／schema／Pro產品變更，Mintegral排除。ROOT仅A060 design/tracker與devlog，ignored簽章／MAPS安全沿用。原Unity stream A006已驗独立SDK成功，正式AdMob Unity仍未驗／不啟用後台；本次不沿用過時GameID阻塞當最新狀態。
+
+## [RUN-002] Event — 2026-10-13 12:20:44 +0800 (A-060)
+
+- 完整五Gradle SUCCESS2m55s，311tests/0fail/0error/60existingSkip；AAB15540534bytes／APK35570257bytes，兩包實際DEX含UnityAds／GoogleUnityadapter／AdConsentManager，無Mintegral；AABprotobuf1.4.1／10401、JAR簽章／CRC與APK apksigner／debuggable通過。generatedFlags Debug=true Release=false，originaloutputs保留。
+- Pixel先備份APK/data，再install-r新DebugPro及testAPK兩份Success；HelpGuideTest＋FloatingLayoutTest OK2 16.485s，正式Main Settings→FAQ→Pro文章→index→Settings→Map PASS、Settings真顯示Pro訂閱中。資料庫375/6/591各tablehash同；App-owned settings file同；4Google/Firebase cache更新分開記錄。
+- 依賴報告改用:app task後成功，NextGen1.5／Unity4.20.1／adapter4.20.1.0／UMP4；legacy full/lite排除，identifier非legacySDK；Mintegral無依賴。未觸發正式獎勵／支付／後台啟用，Unity實際AdMob供應仍未驗。
+- Scope check: 17app/gradle廣告整合路徑及版本；保持Help／浮窗／VM owner／engine／schema。cherry帶入的舊stream設計副本移除（0804c8b），App diff對built fbd8a84為空，不重跑有效build。ROOT仅A060設計／接受／hash／tracker／原review證據，private phone data不Git。tracker3/4，凍結facts full review。
+
+## [WIP-001] Checkpoint — 2026-10-13 12:22:55 +0800 (A-060)
+
+- **Finished:**
+
+  1. Unity／同意／PR58廣告優化完整整合，retry與privacy交界red→green。
+
+  2. 1.4.1 signed Release AAB及Pro Debug APK已產出，actualDEX／簽章／版本／Pro分流驗證通過。
+
+  3. Pixel公開Help／浮窗及正式Main／Pro狀態通過，DB與App-owned設定保留；SDK cache更新分開記錄。
+
+- **Running now:**
+
+  1. 固定目前原code／產物證據，準備Claude完整獨立審查。
+
+- **Still to do:**
+
+  1. 最終review、host核對、單主題草稿PR及分支／紀錄交付。
+
+- **Next work action:** review固定ROOT與產品，保留原verdict，不重跑成功checks。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-13 12:31:03 +0800 (A-060)
+
+- 最後Claude full獨立審查stage1/3：actualclaude-opus-5-5/high request，固定ROOT5fe28fb／source0804c8b，exit0／未截斷／clone.changed=false；四項PASS。host核對原report與實包／測試證據，無必修；非阻擋初始化效能建議僅作提案。
+
+## [RUN-004] Event — 2026-10-13 12:31:03 +0800 (A-060)
+
+- 成功交付1.4.1 signed AAB及ProDebugAPK，實際兩包Unity／adapter／consent在DEX中，ReleaseProfalse、Debugtrue；Pixel更新、DB及App-owned設定保留，SDK cache更新分開記錄。產品已push、草稿PR64 base chore/release-1.4.0已建立，原PR58–63不merge。Scope check:17app/gradle同授權，ROOTpostreview仅原dispatch/clone/runner/report及tracker/devlog保存，不更改code／判定；tracker4/4，close後docs-only同步保持branchbehind0。
+
+## [RUN-005] Event — 2026-10-13 12:31:03 +0800 (A-060)
+
+- 第一次close未寫入：檢查器不接受原report Minimality／Conformance判定後接說明文字。保留原report bytes，與runner.result相等；新增host-attributed formatting wrapper保存原hash／target／同四PASS與原全文。此為機械呈現修正，沒有新code／判定，不重跑build、tests或模型。
+
+# ← Reply / A-060
+
+* _2026-10-13 12:31:03 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已完整整合Unity、同意流程與PR58廣告優化，完成1.4.1簽章AAB及Pro Debug APK，Pixel／資料保留與Claude審查通過；正式Unity供應尚未驗證。
+
+## [FINAL REPORT]
+
+1. 「把廣告分支整合起來後再build一版aab，另外需產生一份有pro權限的debug版apk」
+
+   - 成功：新獨立worktree／分支 `fix/release-ad-integration` 從最新main建立，承接原浮窗與FAQ，整合Unity SDK、Google Unity adapter、UMP同意、每次request privacy／初始化修正，並保留PR58adaptive banner與bounded reward retry。四語與Main／Settings衝突保留雙方；17個app／gradle路徑991行，無engine／schema／VM owner或付費商品改動，Mintegral排除。
+   - **1.4.1／10401 Release AAB：** [letsgo-1.4.1-release.aab](../.worktrees/release-ad-integration/app/build/outputs/bundle/release/letsgo-1.4.1-release.aab)，15,540,534bytes，原金鑰簽章、真AAB版本／zipCRC／JAR簽章通過。Release `DEV_FORCE_PRO=false`，使用正式AdMob IDs，維持原付費／廣告解鎖。
+   - **Debug Pro APK：** [letsgo-1.4.1-debug-pro.apk](../.worktrees/release-ad-integration/app/build/outputs/apk/debug/letsgo-1.4.1-debug-pro.apk)，35,570,257bytes，1.4.1／10401、debuggable、apksigner通過。Debug既有 `DEV_FORCE_PRO=true` 與Google sample IDs，沒有建立真訂閱或永久Pro授權。檔案保留在這次worktree的Gradle原始輸出目錄，APK同目錄用明確檔名保存複本。
+   - **這次直接驗真正兩包：** 兩者DEX皆含UnityAds、GoogleUnityMediationAdapter與AdConsentManager，無Mintegral；resolved NextGen1.5.0／Unity4.20.1／adapter4.20.1.0／UMP4，legacy full/lite排除（ads-identifier為正常依賴）。包SHA256分別為AAB `913f6e526766e6deccdf9a9f8ba79f3585074e617507e3a37c3d311863bf799c`、APK `5d4949f6ef0940d7dd32adcf4975800d3ecd14face23899ce76cca388106beb5`。
+   - **驗證與實機：** five Gradle SUCCESS2m55s，311tests／0fail／error／60既有skip；retry/privacy交界合併前20/3fail、後20/0green。Pixel7Pro／Android17先備份APK/data，再install-r新DebugPro與testAPK；Help＋Floating公開UI OK2 16.485s，正式Main設定→教學→Pro文章→目錄→設定→地圖PASS，設定真顯示Pro訂閱中。手機已更新DebugPro。
+   - **資料與限制：** 原375地點／6路線／591路點各DBtable hash同，App-owned settings file同；4個Google/Firebase SDK cache更新另外記錄。我已核對source diff、實包內容／簽章與公開UI；真AdMob Unity供應／reward解鎖、正式付款、全部Map合併煙測與全面layout未測，不把含SDK當已啟用後台。最新Unity stream先前已有獨立SDK成功記錄，此次未查後台最新狀態，也未啟用群組／上傳Play。
+   - **審查與Git：** 真Claude Code對固定ROOT5fe28fb／產品0804c8b完整獨立審查，四項PASS，原report保全；僅有非阻擋初始化效能提案。產品已push，[草稿PR64](https://github.com/moooo-works/Lets-go-gps/pull/64) base為上版release分支，單一廣告整合主題，原PR58–63保留。GitHub初查behind main0；close紀錄push後docs-only同步base／head再查，App相對built fbd8a84不變，不重跑成功驗證。
+   - Key Records — read these first
+
+     [雙產物與實機驗證](artifacts/A-060-ad-integration/build.json) — 檔案、SHA、SDK／Pro分流、實測及限制。
+
+     [最後Claude審查](artifacts/A-060-ad-integration/review.md) — 原始獨立判定與非阻擋提案。
+
+     [資料保留](artifacts/A-060-ad-integration/data-preservation.json) — DB各表hash／App-owned設定保留與SDK cache差異。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-061 (Takeshi Mori)
 
 +

@@ -1,0 +1,26 @@
+{
+  "changed_files": [
+    "app/build.gradle.kts",
+    "app/src/main/AndroidManifest.xml",
+    "app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/MainApplication.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/data/billing/AdConsentManager.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/data/billing/AdMobInitializer.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt",
+    "app/src/main/res/values-en/strings.xml",
+    "app/src/main/res/values-ja/strings.xml",
+    "app/src/main/res/values-ko/strings.xml",
+    "app/src/main/res/values/strings.xml",
+    "app/src/test/java/com/moooo_works/letsgogps/data/billing/AdConsentManagerTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/data/billing/AdMobInitializerTest.kt",
+    "app/src/test/java/com/moooo_works/letsgogps/data/billing/RewardedAdManagerTest.kt",
+    "gradle/libs.versions.toml"
+  ],
+  "changed_lines": 991,
+  "behavior_change": true,
+  "trust_boundary": true,
+  "broad_change": false,
+  "consequential_change": false
+}

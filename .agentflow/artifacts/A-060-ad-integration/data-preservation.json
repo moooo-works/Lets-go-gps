@@ -1,0 +1,34 @@
+{
+  "database_all_tables_identical": true,
+  "tables": {
+    "android_metadata": {
+      "count": 1,
+      "sha256": "f6b912332bb50af2b1a726bf35ad7327c96b87b853187893db97fd7462058f9a"
+    },
+    "location_folders": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "room_master_table": {
+      "count": 1,
+      "sha256": "5c82d85b894cf2b1de19b3d9bd0258fd6454d8154d44a01cb678747f97873257"
+    },
+    "route_points": {
+      "count": 591,
+      "sha256": "081472b19d55c65ee2723a16a8d2204c15b794eb69084dfce1b8f75c6c2c8897"
+    },
+    "routes": {
+      "count": 6,
+      "sha256": "754e7cac68f31a48fc6e6f63a3a22afde3e1f134665978c7e6c8a8498b0fc3cf"
+    },
+    "saved_locations": {
+      "count": 375,
+      "sha256": "fb05aee46a8b2f3f387c229c139cfe1ed5c1e6fed614803ec06b3fc280f8605b"
+    }
+  },
+  "privacy_storage_note": "SDK共享偏好設定新增同意資料屬本次接入，不要求所有SDK prefs相同；原tar含私人資料僅private/tmp。",
+  "all_datastore_identical": false,
+  "app_owned_datastore_file": "files/datastore/settings.preferences_pb",
+  "app_owned_datastore_identical": true,
+  "changed_sdk_datastore_files": 4
+}
