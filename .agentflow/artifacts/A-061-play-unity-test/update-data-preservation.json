@@ -1,0 +1,18 @@
+{
+  "observedAt": "2026-10-13T23:06:50.001285+08:00",
+  "versionCode": 10402,
+  "counts": {
+    "savedLocations": 375,
+    "routes": 6,
+    "points": 591
+  },
+  "equalToRestored10401ExceptExportTimestamp": true,
+  "sectionEquality": {
+    "folders": true,
+    "routes": true,
+    "savedLocations": true,
+    "schemaVersion": true,
+    "settings": true
+  },
+  "originalImportLimit": "Original importer regenerated route createdAt; original private backups retained."
+}

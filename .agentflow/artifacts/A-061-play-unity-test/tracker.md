@@ -5,7 +5,7 @@
 - **Work key:** A-061-play-unity-test.
 - **Active Ask:** A-061.
 - **Goal:** 發布內部測試AAB並實測Unity廣告。
-- **Last update:** 2026-10-13 21:12:34 +0800.
+- **Last update:** 2026-10-13 23:09:05 +0800.
 - **Evidence commit:** uncommitted.
 
 ## Overall state
@@ -30,9 +30,9 @@
 ## Current recovery
 
 - **Current item:** T-3.
-- **Last proven result:** Play-installed 10401 verified; AdMob Test Ad banner and rewarded +6h observed; JSON import of 375 locations and 6 routes performed.
-- **Active blocker or running process:** Pixel10402 Play-installed; UnitySDKinit/token success; waiting physicalshake forInspector source proof.
-- **Next safe action:** Inspect Unity mediation source and test banner/reward with testdevice; retain all private data.
+- **Last proven result:** Actual Unity banner loaded/shown; Unity rewarded earned and App+6h;10402export375/6/591 unchangedexcepttimestamp.
+- **Active blocker or running process:** Await physicalshake to reopenInspector and stop Unity single-source test; earlycancel remainsunverified.
+- **Next safe action:** Inspector source/privacycheck, stop single-source, restart normally and final evidence review.
 - **Expected changed files:** .agentflow/devlog.md; .agentflow/artifacts/A-061-play-unity-test/tracker.md; 必要測試證據。
 
 ## Completion proof

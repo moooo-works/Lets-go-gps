@@ -467,6 +467,8 @@ Still to do
 
 + 已選取
 
++ 已開啟
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -562,3 +564,24 @@ Still to do
 - Pixel已完成真正Play更新10402／1.4.1-unity-test，installer com.android.vending；無uninstall。actualAppPID篩選log確認Unity4.20.1／Game800390974 initialized successfully、adapter成功、valid token，banner loaded/impression；尚不知fill來源，不把banner載入當Unity供應。
 - 廣告檢查器需要新版重新實體搖動，已請owner開啟；既有Google／Unity測試装置同意有效，不重問。UnitySDKlog production mode表示客戶端初始化參數，後台device testoverride另保存；不能只據此斷言非測試廣告。
 - Scope check: root僅devlog／tracker／readiness報告與runtimejson／Play發布圖，產品source與正式groups仍原狀，PR58保留、Mintegral排除；tracker2/3。Unitybanner/reward來源／取消／exactlyonce未驗。
+
+## [RUN-012] Event — 2026-10-13 23:03:02 +0800 (A-061)
+
+- Owner開Inspector後，Unity Ads Adapter4.20.1.0 initialized3612ms／SDK4.20.1已顯示；10402實際兩SMOKEadunits。正常banner Fill仍AdMob，並非Unity供應成功。
+- Inspector選Unity Ads(Bidding) Start test，UI明示Single source Unity／Test active；依頁面指示force-stop再啟動。App banner loaded但畫面仍GMA Test Ad，PID只Unityinit/token log，無Unitybannerload證據；尚需再開Inspector確認setting與實際來源。沒有下結論或改source。
+- 已請owner再實體搖動，下一步在Inspector直接Unity banner／reward並核對源與錯誤，避免無證據宣稱成功。
+
+## [RUN-013] Event — 2026-10-13 23:07:46 +0800 (A-061)
+
+- 真App Unity banner test／UnityLogo出現，adapter BP_Banner_Android successfullyload／shown印象log成立。先前重啟初始GMA TestAd不計Unity通過；後續refresh實際Unity來源明確。
+- Settings正常watch載入UnityTest game android／UnityAds，BP_Rewarded_Android load/show與rewardearned／dismiss回呼，App返回Pro剩6h0m；沒有購買訂閱。Back／Close經多步endcards可能已達reward閾值，只記正向reward，不稱提前取消／exactlyonce PASS。
+- 10402更新後再次公開匯出核對375位置／6路線／591路點；所有section對已還原10401相等，仅exportedAt異，update-data-preservation.json保存統計不含GPS資料。root新增必要runtime證據與已去識別logs，無Appcode改動。
+- 尚待再開Inspector停SingleSource並查看privacy；先前實體搖動請求仍待owner，正式Unitygroups仍paused，原10401AAB／PR58保留，Mintegral排除。
+
+## [WIP-004] Checkpoint — 2026-10-13 23:09:22 +0800 (A-061)
+
+- **Finished:** Play10402安裝；Unityadapter成功，真Unitybanner載入顯示；真reward＋6h；更新375／6／591資料核對。
+- **Running now:** 等待實體搖動重開Inspector，測試證據已保存並去識別。
+- **Still to do:** 關閉single-source、privacy／來源紀錄與正常restart確認、最後review；提前取消仍未證實。
+- **Next work action:** Inspector開啟後核對診斷並stop test，不開正式Unitygroup。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker

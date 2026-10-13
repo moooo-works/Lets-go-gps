@@ -1,0 +1,45 @@
+{
+  "observedAt": "2026-10-13T23:07:46.144667+08:00",
+  "versionCode": 10402,
+  "singleSourceUiObserved": "Unity Ads (Bidding); Test is active before force restart",
+  "unityAdapter": "4.20.1.0 initialized in3612ms",
+  "unitySdk": "4.20.1",
+  "banner": {
+    "placement": "BP_Banner_Android",
+    "displayObserved": "test; Unity Ads Logo Icon",
+    "loadAndShowLogObserved": true
+  },
+  "rewarded": {
+    "placement": "BP_Rewarded_Android",
+    "displayObserved": "Unity Ads; Test game android",
+    "rewardEarnedObserved": true,
+    "appStateAfterDismiss": "Pro解鎖中 剩6h0m",
+    "subscriptionPurchased": false
+  },
+  "logs": [
+    "D/UnityMediationAdapter(31213): Unity Ads is initialized for game ID '800390974' and can now load banner ad with placement ID: BP_Banner_Android",
+    "I/UnityAds(31213): Successfully loaded ad for placement BP_Banner_Android with instance id [instance ID redacted]",
+    "D/UnityMediationAdapter(31213): Unity Ads finished loading banner ad for placement ID: BP_Banner_Android",
+    "I/UnityAds(31213): Finished showing ad for placement BP_Banner_Android with instance id [instance ID redacted]",
+    "D/UnityMediationAdapter(31213): Unity Ads is initialized for game ID '800390974' and can now load rewarded ad with placement ID: BP_Rewarded_Android",
+    "I/UnityAds(31213): Successfully loaded ad for placement BP_Rewarded_Android with instance id [instance ID redacted]",
+    "D/UnityMediationAdapter(31213): Unity Ads rewarded ad successfully loaded placement ID: BP_Rewarded_Android",
+    "D/RewardedAdManager(31213): Rewarded ad loaded",
+    "I/UnityAds(31213): Started showing ad for placement BP_Rewarded_Android with instance id [instance ID redacted]",
+    "D/RewardedAdManager(31213): Rewarded ad impression",
+    "I/UnityAds(31213): Finished showing ad for placement BP_Rewarded_Android with instance id [instance ID redacted]",
+    "D/RewardedAdManager(31213): Rewarded ad reward earned",
+    "D/RewardedAdManager(31213): Rewarded ad dismissed",
+    "D/UnityMediationAdapter(31213): Unity Ads is initialized for game ID '800390974' and can now load rewarded ad with placement ID: BP_Rewarded_Android",
+    "I/UnityAds(31213): Successfully loaded ad for placement BP_Rewarded_Android with instance id [instance ID redacted]",
+    "D/UnityMediationAdapter(31213): Unity Ads rewarded ad successfully loaded placement ID: BP_Rewarded_Android",
+    "D/RewardedAdManager(31213): Rewarded ad loaded"
+  ],
+  "runtimeCrashObserved": false,
+  "limits": [
+    "Only this Pixel/Android17 test-device journey; production fill not verified",
+    "Early cancellation/exactly-once not yet verified; first Back may occur after reward threshold",
+    "Initial post-restart cached AdMob Test Ad was not counted as Unity success",
+    "Single-source test must be stopped before final handoff; waiting physical shake"
+  ]
+}
