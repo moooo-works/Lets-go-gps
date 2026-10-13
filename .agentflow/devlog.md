@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品0f8f2bc；ROOT接受證據7fb573e；完成交付見Git.
+Current commit: 產品7d93b76；ROOT接受證據70a1590；完成審查交付見Git.
 
-Tests/scenarios: required Gradle PASS285/0fail/60skip；PixelDialog首次／outside／ack／coldstart PASS；FloatingLayoutTest OK1 6.926s.
+Tests/scenarios: required Gradle四工作SUCCESS285/0fail/60skip；Pixel updated；FloatingLayoutTest OK1 7.453s.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 四語一次性新功能說明已安裝Pixel7Pro；主題LIGHT zh-TW正常；資料rows/hash一致；Claude Opus5.5/high四PASS.
+Proven: 四語懸浮route整數速度呈現；12.4→12但state未變；Claude Code Opus5.5/high四PASS.
 
-Open: 原UnityGameID／交易／完整merge smoke限制；未實機逐測四語dark橫向大字；日韓舊map hint／減速按鍵原行為待另議.
+Open: 原UnityGameID／完整merge smoke／正式交易廣告／多語dark大字橫向限制；日韓舊hint與減速按鍵原行為待另議.
 
-Next: 等待使用者實測；PR62與既有PR保持草稿未合併.
+Next: 等待使用者實測；PR62及既有PR保持草稿未合併.
 
-Artifacts: .agentflow/artifacts/A-054-floating-tip/review.md、validation.json、data-preservation.json、tracker.md.
+Artifacts: .agentflow/artifacts/A-055-integer-route-speed/review.md、validation.json、source.diff.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -673,5 +673,50 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-055 (Takeshi Mori)
+
++ 懸浮視窗中，路線速度設定不需要出現小數點，以整數呈現為主
+
+---
+
+## [RUN-001] Event — 2026-10-13 09:30:19 +0800 (A-055)
+
+- 懸浮路線速度改独立四語%.0f只改呈現，state／slider／engine／joystick不變。required Gradle全成功285/0fail/60skip；Pixel两APK更新成功，FloatingLayoutTest OK1 7.453s檢查12.4呈現整數且state仍12.4。
+- Claude Code Opus5.5/high独立clone targeted review四PASS、完整JSON／exit0／無clone改動，host源碼與report／模型證據核對；原report前置英文為呈現警告保留，沒有重跑成功suite或模型。PR62最終描述已更新草稿，原PR保留、無合併或發布。
+
+# ← Reply / A-055
+
+* _2026-10-13 09:30:19 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 懸浮路線速度已改整數顯示並更新Pixel7Pro，實際速度不變；建置、實機與Claude Code審查通過。
+
+## [FINAL REPORT]
+
+1. 「懸浮視窗中，路線速度設定不需要出現小數點，以整數呈現為主」
+
+   - 成功：只將懸浮「路線」頁速度改整數呈現，四語用%.0f四捨五入，如12.4顯示12 km/h。實際Double速度、滑桿輸出與移動引擎不變；搖桿繼續原格式。獨立字串避免改到兩者共用的舊速度字串，沒有引入整數步進或更改預設速度。
+
+   - 產品7d93b76已在獨立worktree commit／push，更新Pixel7Pro Android17/API37兩APK install -r Success，未清除資料。最新FloatingLayoutTest OK1 7.453s，實際可見整數速度文字且state12.4未變；沿用該旅程驗證真IME、小window、模式與兩面板close。測試使用test host及fakeactions，不宣稱真人遊戲或正式Pro付款／廣告測試；測完回到App。
+
+   - ./gradlew test、lintDebug、assembleDebug及assembleDebugAndroidTest成功1m5s，285tests／0fail／0errors／60既有skip；lint任務成功，不是既有問題清零。四語資源通過編譯，實機顯示只測繁中。
+
+   - 真正Claude Code Opus5.5/high targeted review，固定ROOT70a1590／產品7d93b76，四項PASS；完整JSON／實際modelUsage、exit0及clone無改動已核對。我已讀原報告、兩速度資源所有引用與源碼、測試證據，確認無滑桿或引擎改動。原稿stamp前多英文進度行，保留原bytes，不為呈現警告重跑。
+
+   - [PR62](https://github.com/moooo-works/Lets-go-gps/pull/62)草稿描述已整理成最終功能與驗證，保留58／59／60／61、排除Mintegral，沒有合併／發布。Git preflight fix/floating-dock clean、fetch成功、origin/main fe4d28e841e7b804bca41b41efcb40103ff3e54f、包含main；最近5筆fe4d28e／7fb573e／0d26af8／faa7ef8／af9a524；GH behindmain0。原完整合併前smoke及多語／深色／大字／橫向限制保持未宣稱完成。
+
+   - Key Records — read these first
+
+     [Claude整數速度審查](artifacts/A-055-integer-route-speed/review.md)：功能與最小修改PASS，以及實測限制。
+
+     [最新實機與建置驗證](artifacts/A-055-integer-route-speed/validation.json)：精確測試數、安裝及實際速度保留結果。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-056 (Takeshi Mori)
 
 +

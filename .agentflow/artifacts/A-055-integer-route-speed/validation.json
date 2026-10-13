@@ -1,0 +1,16 @@
+{
+  "product_commit": "7d93b76ecae5d8e3fa83e24cbfc16254125c9331",
+  "base_commit": "6b6b43c",
+  "preflight": "fix/floating-dock clean; fetch成功; main fe4d28e841e7b804bca41b41efcb40103ff3e54f; contains main; 最近5筆fe4d28e/7fb573e/0d26af8/faa7ef8/af9a524",
+  "gradle": "./gradlew test lintDebug assembleDebug assembleDebugAndroidTest SUCCESS1m5s",
+  "unit_tests": {
+    "tests": 285,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "phone": "Pixel7Pro Android17/API37，install -r兩APK Success；原資料未清除",
+  "instrument": "FloatingLayoutTest OK1 7.453s；routes實際可見整數速度文字／state12.4未變；含IME、小window、mode／close；使用測試host與fakeactions，不是真人跨遊戲逐鍵或正式Pro交易",
+  "host_check": "獨立floating_route_speed %.0f，四語同格式；只有routeText換id，slider及onSpeedChange/engine/joystick不變",
+  "limits": "實機只zh-TW；四語資源編譯；不重新宣稱全部merge smoke／正式廣告付款通過"
+}
