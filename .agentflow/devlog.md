@@ -471,6 +471,8 @@ Still to do
 
 + 已開啟
 
++ 完成後將測試版升級為正式版，更版說明記得寫
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -594,3 +596,8 @@ Still to do
 - 已Stop single source，UI顯示Inactive／Test stopped，截圖保存；force-stop/restart正常App後mixedsource TestAd載入，無本次觀察到crash。
 - Live AdMob正式banner8708929545及reward8676901314仍paused，兩隔離SMOKE就緒。保持測試版可用，不發布正式、不mergePR58、不加Mintegral。
 - 驗收限定已完成內部發布／Pixel實際Unity正向banner與reward；取消／exactlyonce及Europe／production供應未驗，10401首次無可用廣告現象記錄不臆測修復。即將固定runtime證據給Claude最後核對，不重跑未變產品source的成功Gradle檢查。
+
+## [RUN-015] Event — 2026-10-13 23:18:14 +0800 (A-061)
+
+- Owner新增正式發布與更新說明授權，A061範圍擴充；10402隔離包不能直接升正式，另建production1.4.3/10403，只升已審產品patch並使用正式IDs。production-design.md已保存，away-gates提供其plancommit Design Go後開始。
+- 前一runtime-only最後review尚未啟動，無pendingworker；final-review-facts/plan保留為先前草稿，最後審查改涵蓋新正式候選及已驗runtime。原測試正向結果、未驗取消等限制不改。

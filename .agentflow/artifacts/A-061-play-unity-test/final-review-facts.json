@@ -1,0 +1,24 @@
+{
+  "changed_files": [
+    ".agentflow/artifacts/A-061-play-unity-test/test-only.init.gradle",
+    ".agentflow/artifacts/A-061-play-unity-test/design.md",
+    ".agentflow/artifacts/A-061-play-unity-test/test-build.json",
+    ".agentflow/artifacts/A-061-play-unity-test/data-restore.json",
+    ".agentflow/artifacts/A-061-play-unity-test/play-10402-runtime.json",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-runtime-results.json",
+    ".agentflow/artifacts/A-061-play-unity-test/update-data-preservation.json",
+    ".agentflow/artifacts/A-061-play-unity-test/final-acceptance.json",
+    ".agentflow/artifacts/A-061-play-unity-test/play-10402-published.png",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-inspector-fill.png",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-single-source-stopped.png",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-reward-test.png",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-pro-earned.png"
+  ],
+  "changed_lines": 205,
+  "behavior_change": true,
+  "trust_boundary": true,
+  "broad_change": false,
+  "consequential_change": true,
+  "original_ask_path": ".agentflow/devlog.md",
+  "normal_journey_path": ".agentflow/artifacts/A-061-play-unity-test/design.md"
+}
