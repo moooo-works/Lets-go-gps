@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品7d93b76未變；來源分支64ff603同步紀錄；本輪FAQ建議見Git.
+Current commit: 產品e89697c；最後審查ROOT c08b33d；本輪交付紀錄見Git.
 
-Tests/scenarios: 本輪只讀Settings／Onboarding／tip flow；重用A055建置285/0fail/60skip与Pixel OK1，不新增測試.
+Tests/scenarios: Gradle required＋TestAPK成功，285/0fail/60skip；Pixel四語主題／130%字體與浮窗OK2 17.102s、正式Main導航PASS.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 現有提示為首次／一次性、步數局部說明；統一可回看的FAQ／功能教學入口尚未實作.
+Proven: 四語離線FAQ、Pen主題設計實作、Pixel更新及最終Claude四PASS、草稿PR63.
 
-Open: FAQ功能為建議尚未開發；原UnityGameID／merge smoke／交易及多語dark橫向限制保留.
+Open: Unity GameID待回覆；PR63未合併，全Map煙測／正式交易廣告／全面橫向未測.
 
-Next: 等待使用者對App內使用說明與FAQ範圍的決定；PR62及既有PR保持草稿.
+Next: docs-only同步分支後待使用者查看教學；Unity Ads依原stream接續.
 
-Artifacts: .agentflow/artifacts/A-055-integer-route-speed/review.md、validation.json；本輪回答在Reply A-056.
+Artifacts: A-057-help-faq tracker／design／Pen原稿PNG規格／validation／原review及runner.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -151,3 +151,79 @@ Still to do
 - Pen最終整合產品e89697c：46keys×4locales，11file／617changedlines（FAQ全diff base3c568fd）。latest required四Gradle SUCCESS6s；新App／test install-r；公開HelpGuideTest+FloatingLayoutTest OK2 17.102s（實際MockGpsTheme交替淺深、日韓130%fontScale），正式Main Settings→FAQ→Pro搜尋→文章→目錄→Settings→Map PASS，無Nav/VM crash。
 - Host已直接看正式Main最新DARK目錄與懸浮文章PNG：分組清單、時間軸、橘色contrast、收合展開原生示意與Pen稿對應；四語內容保留正確操作，不照抄推測稿。手機目前停Help目錄，未觸發支付／廣告或寫phone theme/lang prefs。
 - Scope check: 原11paths授權範圍，無engine／DB／permissions變動；Pen完整原稿／spec／PNG保全。tracker4/5，剩最終Claude stage3/3與草稿PR交付；planner full（11paths／617lines），保留原兩次report作者判定，不修旁支非阻擋文案建議。
+
+## [WIP-003] Checkpoint — 2026-10-13 11:19:53 +0800 (A-057)
+
+- **Finished:**
+
+  1. Pen四態設計與FAQ實作、四語130%測試／正式Pixel流程及Claude最終四PASS。
+  2. 獨立產品分支已push，草稿PR63已建立，舊PR保留。
+
+- **Running now:**
+
+  1. 紀錄收尾，第一次close未寫入因checkpoint欄位判讀；只補齊本次真實進度欄位，不重跑產品或review。
+
+- **Still to do:**
+
+  1. 完成close/push與docs-only分支同步，確認behind main0。
+
+- **Next work action:** 重試同交付manifest，再同步Git紀錄。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-009] Event — 2026-10-13 11:21:00 +0800 (A-057)
+
+- 最後Claude Code第三輪真正完成：actual claude-opus-5-5/high request，ROOT c08b33d／產品e89697c，四項PASS；完整JSON／exit0／clone.changed=false。host已核對原report／source範圍／Pen稿與實機公开教學圖，不改作者判定或重跑模型。
+
+## [RUN-010] Event — 2026-10-13 11:21:00 +0800 (A-057)
+
+- 產品push與草稿PR63已完成；GHcompare main...feat/help-faq behind0；tracker5/5。初close因progress欄位檢查未寫入，追加真實WIP欄位與最新tracker stamp，僅機械修正。Scope check: 11Apppaths同授權，ROOT post-review僅原dispatch／clone／runner／report及tracker／devlog；收尾push後docs-only同步，無產品或接受判定變更。
+
+# ← Reply / A-057
+
+* _2026-10-13 11:21:00 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已完成14篇四語離線使用說明與FAQ，並接上設定與新功能提示。
+- 已重整目錄與文章，搜尋、分類和返回流程皆通過。
+- 已由pen.dev設計淺深四態再實作，Pixel更新與Claude審查通過，PR63維持草稿。
+
+## [FINAL REPORT]
+
+1. 「好，開始製作」
+
+   - 成功：設定 → 使用說明與 FAQ 可隨時回看14篇中／英／日／韓教學，可搜尋標題及內文、分類篩選。新功能提示「查看操作教學」先保存已讀，再直達懸浮文章。
+   - 獨立worktree help-faq／分支feat/help-faq，產品e89697c已push並更新安裝Pixel7Pro／Android17。備份保留，無DB變更；原375地點／6路線／591路點hash保留證據持續適用。
+
+2. 「ui有點醜」
+
+   - 成功：改為三組清單、內縮分隔線、序號／圖示與橫向chips；文章有編號步驟、原生圖解及結果提醒。Help隱藏底tab、返回恢復。我已核對實際source範圍、圖稿與手機公開教學截圖。
+   - required Gradle與TestAPK成功，285 tests、0fail／error、60既有skip；最新HelpGuideTest＋FloatingLayoutTest OK2，17.102s。四語真App主題交替淺深、日韓130%testhost字級；正式Main設定→FAQ→搜尋Pro→文章→目錄→設定→地圖通過。
+   - 限制：未全面橫向、正式交易／獎勵廣告或全部Map合併煙測；lint task成功不代表原專案無lint問題。最終Claude仍有非阻擋的英韓停止鍵文案／韓語助詞與未用intro資源建議，已保留，不擴大本次修正。
+
+3. 「使用說明也請pen.dev設計後再一起改，也要跟主題搭配」
+
+   - 成功：Pen桌面Claude Opus5.5實際先完成目錄／文章淺深四態、PNG與Compose規格，再整合橘色、淺暖白／深藍底及高對比次文字。舊浮窗稿保留；圖中文字為推測，App沿用已核對的四語內容。
+   - 真Claude Code在fresh no-remotes clone審查最終產品e89697c與ROOT c08b33d，Outcome／Minimality／Conformance／Verdict均PASS；完整原報告與runner保留。CLI只讀工具限制不是OS sandbox，實機證據由host提供。
+   - [FAQ草稿PR #63](https://github.com/moooo-works/Lets-go-gps/pull/63)已建立，base PR62浮窗分支；產品已push，GitHub初查behind main0。收尾main紀錄push後docs-only同步再確認；PR58–62保留，未合併／發版。手機停在教學目錄。
+   - Key Records — read these first
+
+     [四態設計稿](artifacts/A-057-help-faq/pen/lets-go-gps-help-faq-four-states.png) — 目錄與文章的淺深設計。
+
+     [Pen規格](artifacts/A-057-help-faq/pen/lets-go-gps-help-faq-spec.md) — 色彩、字級、間距及適配規則，推測文案不當作App事實。
+
+     [最終Claude審查](artifacts/A-057-help-faq/review.md) — 最後版本判定及非阻擋建議。
+
+     [驗證紀錄](artifacts/A-057-help-faq/validation.json) — 真實測試、手機接受與限制。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-058 (Takeshi Mori)
+
++

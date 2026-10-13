@@ -5,16 +5,16 @@
 - **Work key:** A-057-help-faq.
 - **Active Ask:** A-057.
 - **Goal:** 製作可回看／搜尋的四語App說明與FAQ，接設定與浮窗tip教學，安裝驗證。
-- **Last update:** 2026-10-13 11:13:22 +0800.
-- **Evidence commit:** 2647e185b506a00910033cf03017d124a940ad20.
+- **Last update:** 2026-10-13 11:19:53 +0800.
+- **Evidence commit:** c08b33d3b830c27d193dab345acfad926d8f18c9.
 
 ## Overall state
 
-- **State:** active.
-- **Reason:** 最新UI與三語名稱已修，四語／正式Main流程通過；第二輪Claude四項PASS；使用者追加Pen設計後再整合。
+- **State:** complete.
+- **Reason:** Pen四態設計與實作、Pixel接受、最後Claude四PASS與草稿PR63完成。
 - **Total:** 5.
-- **Completed:** 4.
-- **Remaining:** 1.
+- **Completed:** 5.
+- **Remaining:** 0.
 
 ## Accepted task checklist
 
@@ -22,7 +22,7 @@
 
 - [x] **T-2:** Pixel保留資料更新并測正式Settings導航、四語tip／search／empty／FAQ／back與既有浮窗回歸。Scope: 新HelpGuideTest.kt＋公開UI操作／備份，不觸發付款廣告，不改user locale prefs。Proof: adb install -r、公開UI／instrument log與DB筆數/hash。失敗先區分裝置／測試／產品，記錄真實限制。Source: A-057與既有手機授權.
 
-- [ ] **T-3:** 固定產品與ROOT接受證據由Claude Code獨立審查，host核對後建立FAQ單主題草稿PR（base PR62），保存紀錄並push。Scope: root .agentflow紀錄與Git／PR；不合併、不改原PR58-62／不修範圍外發現。Proof: 真CLI模型／report／clone無變更、host範圍核對、tracker3/3、GHbehind0。未過保留active。Source: A-057與原Claude review選擇.
+- [x] **T-3:** 固定產品與ROOT接受證據由Claude Code獨立審查，host核對後建立FAQ單主題草稿PR（base PR62），保存紀錄並push。Scope: root .agentflow紀錄與Git／PR；不合併、不改原PR58-62／不修範圍外發現。Proof: 真CLI模型／report／clone無變更、host範圍核對、tracker3/3、GHbehind0。未過保留active。Source: A-057與原Claude review選擇.
 
 - [x] **T-4:** 依「ui有點醜」重整Help視覺：去除預設紫色大卡片、原主題中性色＋橘色圖示、分組輕列表、選取高亮與清楚圖解、Help期間隱藏底部分頁。Scope: 同HelpScreen／Main／Settings／四語helperstrings，不改其他頁或引擎。Proof: 新版Screenshot視覺核對、四語／正式回程／原浮窗必要重驗與最終Claude審查。失敗限定scope修正。Source: A-057「ui有點醜」。
 
@@ -37,20 +37,20 @@
 
 ## Current recovery
 
-- **Current item:** T-3.
+- **Current item:** none.
 - **Last proven result:** 新獨立help-faq分支自最新main建立後承接floating-dock依賴；新UI與四語已寫。
-- **Active blocker or running process:** 產品e89697c與Pen最終接受成功；第三次Claude審查準備。
-- **Next safe action:** 第三次Claude只讀凍結產品與Pen稿，完成草稿PR和交付。
+- **Active blocker or running process:** none.
+- **Next safe action:** none.
 - **Expected changed files:** MainActivity.kt、SettingsScreen.kt、MapScreen.kt、FloatingToolsTipDialog.kt、ui/help兩檔、四語help_strings.xml、HelpGuideTest.kt；root只devlog／hook archive與本tracker／接受證據／review紀錄。
 
 ## Completion proof
 
-- **All accepted tasks checked:** no.
+- **All accepted tasks checked:** yes.
 - **Blocking accepted decision:** none.
 - **Operation running:** no.
-- **Next action remaining:** T-3.
-- **Evidence status:** current.
-- **Judgment:** active.
+- **Next action remaining:** none.
+- **Evidence status:** complete.
+- **Judgment:** complete.
 
 ## Update meaning
 
