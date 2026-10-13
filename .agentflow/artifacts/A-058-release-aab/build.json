@@ -1,0 +1,35 @@
+{
+  "version_name": "1.4.0",
+  "version_code": 10400,
+  "product_commit": "e5580b6c754222bd4ad36924c2a45bbcedf8e680",
+  "base_product_commit": "2e7b99b",
+  "output_path": "/Users/mori/side-project/Lets-go-gps/dist/letsgo-1.4.0-release.aab",
+  "bytes": 12407797,
+  "sha256": "5d6b285b34680bec9fe04f91a6ff55fe4250137133c4459b079b1b207df22bef",
+  "build": "bundleRelease BUILD SUCCESSFUL in 6m22s after existing signing input recovery",
+  "required_checks": "test, lintDebug, assembleDebug tasks successful in first build; overall first command failed only signReleaseBundle",
+  "unit_tests": {
+    "tests": 285,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "artifact_checks": {
+    "zip_crc": "PASS",
+    "manifest_version": "1.4.0 / 10400 verified from actual AAB protobuf",
+    "jar_signature": "jarsigner jar verified",
+    "embedded_obfuscation_mapping": true
+  },
+  "source_delta": "only versionMinor3->4 and versionPatch4->0, product runtime unchanged from A057 accepted source",
+  "credentials": "existing root release signing keys safely merged into ignored worktree config; map config retained; no credentials in Git/output",
+  "failures": [
+    "Initial invocation wrong cwd ended failed1s; reran correct worktree",
+    "First worktree run failed signReleaseBundle NPE after8m4s, incomplete signing config; existing root keys reused, corrected bundleRelease rerun succeeded"
+  ],
+  "delivery": "dist AAB local ignored file, version branch pushed; existing PR58-63 not merged, no Play upload",
+  "limitations": [
+    "No new release-device install; prior A057 public smoke applies to unchanged runtime",
+    "Release build executes existing Crashlytics mapping-upload task; Play Console untouched",
+    "Jar verification uses existing signing cert; actual Play upload not performed"
+  ]
+}
