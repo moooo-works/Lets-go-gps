@@ -1,0 +1,18 @@
+{
+  "changed_files": [
+    ".worktrees/release-ad-production/app/build.gradle.kts",
+    ".agentflow/artifacts/A-061-play-unity-test/production-design.md",
+    ".agentflow/artifacts/A-061-play-unity-test/production-build.json",
+    ".agentflow/artifacts/A-061-play-unity-test/production-release-notes.txt",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-runtime-results.json",
+    ".agentflow/artifacts/A-061-play-unity-test/final-acceptance.json",
+    ".agentflow/artifacts/A-061-play-unity-test/update-data-preservation.json"
+  ],
+  "changed_lines": 245,
+  "behavior_change": true,
+  "trust_boundary": true,
+  "broad_change": false,
+  "consequential_change": true,
+  "original_ask_path": ".agentflow/devlog.md",
+  "normal_journey_path": ".agentflow/artifacts/A-061-play-unity-test/production-design.md"
+}

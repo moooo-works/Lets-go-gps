@@ -608,3 +608,9 @@ Still to do
 - ./gradlew test lintDebug assembleDebug bundleRelease BUILD SUCCESS2m52s，311tests/0failure/0error/60既有skip。lintDebugexit0但既有abortOnError=false，34errorseverity、100warning，Error ID counts與A060相同；不把task成功稱零lint問題。
 - 真signedAAB1.4.3/10403、15,540,418bytes、SHA76f938ba511440e021677192df2225421fb9b560a479f2843409c5a5ea318c48；proto manifest／CRC／JAR簽章／DEX正式兩ID及Unityadapter通過，隔離IDs與Mintegral無，ReleaseProfalse。production-build.json保存。
 - 更新說明zhTW/en/ja/ko已寫，忠實涵蓋浮窗／FAQ／Android17／privacy／Unity。正式草稿42仍empty未混測試包；準備內部10403候選並Claude最後release-readiness審查後才publish。
+
+## [RUN-017] Event — 2026-10-13 23:29:34 +0800 (A-061)
+
+- Claude production-readiness stage1/3完成exit0／未截斷／clone無改動；ROOT915bd588、實product31b528c，四PASS。Host核對report／production-build與runtime，接受release readiness，away-gates對固定target提供Result Go。不把readiness當已正式上線，後续Console/Pixel須親驗。
+- 上傳10403至internalrelease5。瀏覽器filechooser因fileURL權限拒絕；改原生picker已在Downloads，直接選實際1.4.3AAB並Open成功，不再進GoTo、不需owner介入或擴張權限。Play最佳化中，尚未publish。
+- 前一runtime-only草稿planner被新正式任務取代，沒有啟動第三方process；其文件保留historicalplan。產品已push fix/release-ad-production；未merge原PR58或其他PR。
