@@ -226,4 +226,44 @@ Still to do
 
 # → Ask / A-058 (Takeshi Mori)
 
-+
++ 升版號後build aab
+
+---
+
+## [RUN-001] Event — 2026-10-13 11:27:19 +0800 (A-058)
+
+- 接受「升版號後build aab」：原1.3.4，本次新增功能採minor升為1.4.0／versionCode10400。新chore/release-1.4.0 worktree自origin/main0afeda8建立，再FF承接最新FAQ head2e7b99b；既有PR58–63不合併、不上傳Play。
+- Git preflight：main；status main...origin/main僅hook devlog dirty；fetch成功；origin/main0afeda8932927d1d1a0ebfecf1b1360a6bfaa9ca；最新5筆0afeda8／c08b33d／4205464／2c42b51／2647e18。release只改app/build.gradle.kts版本常數兩行，忽略的原local.properties安全複製，不輸出密鑰。
+- 初次build误在root cwd執行，1秒失敗、無AAB，已確認該process結束，改正到release worktree執行required test／lintDebug／assembleDebug＋bundleRelease；目前release編譯中。保留原log，不冒稱成功，不修改建置配置掩蓋。
+- 本次為版本metadata與本機打包，重用A057原產品Claude四PASS／實機接受；host將核對AAB版本／簽章／完整性。無新runtime行為，不新增功能測試或為2行版本metadata派付費review。
+
+## [RUN-002] Event — 2026-10-13 11:37:40 +0800 (A-058)
+
+- 版本commit e5580b6，只改兩行常數；required test／lintDebug／assembleDebug tasks成功，XML285tests/0fail/0error/60existingSkip。首次release構建8m4s後signReleaseBundle NPE失敗，因複製的help ignored config沒有KEY設定；root已有原四個KEY，已合入release config保留MAPS設定，秘密不打印／不Git，不產新key。
+- 必要重跑僅bundleRelease，簽章輸入已改，validateSigningRelease成功、R8重新執行中；未重跑成功測試。tracker2/3。Scope check: product僅app/build.gradle.kts metadata；root僅A058 tracker/version.diff及devlog；既有PR與手機資料不變。
+
+## [WIP-001] Checkpoint — 2026-10-13 11:37:40 +0800 (A-058)
+
+- **Finished:**
+
+  1. 版本1.4.0／10400已在獨立worktree保存。
+
+  2. required test／lintDebug／assembleDebug成功，原簽章設定已安全合入。
+
+- **Running now:**
+
+  1. 正式Release AAB重新打包，R8執行中。
+
+- **Still to do:**
+
+  1. AAB簽章／版本／完整性驗證、交付檔案與版本分支push／closeout。
+
+- **Next work action:** 當前打包完成後檢查真正AAB。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-13 11:43:32 +0800 (A-058)
+
+- AAB成功：補齊原簽章設定後bundleRelease BUILD SUCCESSFUL6m22s。dist/letsgo-1.4.0-release.aab 12,407,797bytes，SHA256 5d6b285b34680bec9fe04f91a6ff55fe4250137133c4459b079b1b207df22bef；直接解析AAB protobuf確認1.4.0／10400，zip.testzip通過，jarsigner jar verified，內含R8 mapping。原失敗與修正保留build.json，不宣稱第一次整批成功。
+- 版本branch chore/release-1.4.0已push，產品e5580b6；既有PR58–63不合併，Play未上傳。Gradle既有uploadCrashlyticsMappingFileRelease task執行，非Play發佈。
+- Scope check: runtime相對A057產品未變，仅build.gradle兩行版本metadata；ROOT A058原始版本diff／build接受事實／tracker／devlog，AAB與原credentials ignored。完成交付前保存當前包證據，host核對輸出；不再重跑成功產品checks。
