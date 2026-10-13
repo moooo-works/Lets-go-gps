@@ -17,7 +17,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.moooo_works.letsgogps.R
 
 @Composable
-internal fun FloatingToolsTipDialog(onDismiss: () -> Unit) {
+internal fun FloatingToolsTipDialog(onDismiss: () -> Unit, onReadGuide: () -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(dismissOnClickOutside = false)) {
         Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -26,6 +26,9 @@ internal fun FloatingToolsTipDialog(onDismiss: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
                     Text(stringResource(R.string.tip_floating_tools_body), style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                }
+                TextButton(onClick = { onDismiss(); onReadGuide() }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.help_read_guide))
                 }
                 Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.tip_dismiss), fontWeight = FontWeight.SemiBold)

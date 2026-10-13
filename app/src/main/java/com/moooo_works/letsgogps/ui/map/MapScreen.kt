@@ -77,7 +77,8 @@ fun MapScreen(
     onSelectedLocationConsumed: () -> Unit = {},
     onNavigateToSavedLocations: () -> Unit = {},
     onNavigateToRoutes: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateHelp: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchUiState by searchViewModel.uiState.collectAsState()
@@ -524,7 +525,7 @@ fun MapScreen(
     if (uiState.showFloatingToolsTip && !uiState.showOnboarding && !uiState.showLoopBounceTip &&
         !uiState.showClipboardHintTip && !uiState.showGpxTip && !uiState.showJumpModeTip
     ) {
-        FloatingToolsTipDialog(onDismiss = viewModel::dismissFloatingToolsTip)
+        FloatingToolsTipDialog(onDismiss = viewModel::dismissFloatingToolsTip, onReadGuide = { onNavigateHelp("floating") })
     }
 }
 

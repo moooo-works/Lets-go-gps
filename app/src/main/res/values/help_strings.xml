@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="help_title">使用說明與 FAQ</string>
+    <string name="help_search">搜尋功能或問題</string>
+    <string name="help_all">全部</string>
+    <string name="help_start">快速上手</string>
+    <string name="help_features">功能教學</string>
+    <string name="help_faq">常見問題</string>
+    <string name="help_empty">沒有符合的說明，請換個關鍵字或選「全部」。</string>
+    <string name="help_back">返回</string>
+    <string name="help_index">說明目錄</string>
+    <string name="help_read_guide">查看操作教學</string>
+    <string name="help_diagram_select">選擇地點</string>
+    <string name="help_diagram_preview">預覽座標</string>
+    <string name="help_setup_title">第一次使用：完成定位設定</string>
+    <string name="help_setup_body">1. 在手機設定啟用開發者選項：通常到「關於手機」，連按版本號 7 次。\n2. 到開發者選項的「選擇模擬位置應用程式」，選擇本 App。各手機選單名稱可能不同。\n3. 返回本 App，在設定頁確認權限狀態；需要時依提示授權位置與通知。\n\n完成後再到地圖選點、開始模擬。只開啟開發者選項，仍不等於已選好模擬位置 App。</string>
+    <string name="help_start_title">單點定位：開始與停止</string>
+    <string name="help_start_body">1. 在「地圖」選擇「單點定位」。\n2. 搜尋地點或移動地圖，確認中心座標。\n3. 按「開始模擬」，完成畫面要求的權限或額度處理。\n4. 不需要模擬時按停止；不要把關閉懸浮工具當成停止模擬。\n\n選點只是準備位置，真正開始需要按啟動按鈕。</string>
+    <string name="help_search_title">搜尋地名、座標與 Plus Code</string>
+    <string name="help_search_body">1. 點地圖上方搜尋列。\n2. 輸入地名、經緯度（例如 25.0330, 121.5654）或 Plus Code。\n3. 點搜尋結果，確認地圖與座標，再開始模擬或儲存。\n\n也可複製座標後回到 App，使用剪貼簿提示；此提示可在設定關閉。地名搜尋需要網路，離線教學本身不需要。</string>
+    <string name="help_floating_title">遊戲中使用懸浮工具</string>
+    <string name="help_floating_body">1. 在地圖右側按「懸浮工具」，依提示完成 Pro 解鎖與顯示在其他 App 上層的權限。\n2. 切回遊戲或其他 App，展開邊緣入口。用搜尋、收藏或路線找到地點。\n3. 搜尋結果旁的複製鍵會複製座標；點地點則顯示預覽，不會立刻移動。\n4. 確認預覽後按「移動到這裡」；若顯示尚缺權限或額度，先回主 App 完成。\n\n收合會回到邊緣；關閉只移除工具，若要停止模擬請按停止。開啟搖桿時會切換，不能同時顯示兩種。</string>
+    <string name="help_joystick_title">虛擬搖桿：方向與速度</string>
+    <string name="help_joystick_body">1. 在地圖右側按「虛擬搖桿」，完成 Pro 與浮窗權限。\n2. 拖曳內側圓形控制方向，放開就停止搖桿持續移動。\n3. 用步行、單車、開車或 + / − 切換預設速度；它們是交通模式，不是每次加減 1 km/h。\n4. 收合入口後可再展開；按停止才停止整個模擬。\n\n開啟懸浮工具會替換搖桿；關閉視窗不會自動停止定位服務。</string>
+    <string name="help_routes_title">建立、儲存與匯入路線</string>
+    <string name="help_routes_body">1. 地圖切到「路線模擬」，按「新增路線」，依序選路點，再按完成。\n2. 使用儲存路線操作保存名稱；可到「路線」頁選取已儲存的路線。\n3. 如有 GPX，前往「設定 → 資料管理 → 匯入」，選擇從 GPX 匯入。\n4. 回地圖確認路點、速度與模式，再按開始；可以暫停或停止。\n\n匯入或載入只準備路線，不代表立即開始播放。</string>
+    <string name="help_modes_title">一次、循環、折返與跳點</string>
+    <string name="help_modes_body">1. 載入或建立路線。\n2. 按播放模式按鈕，依序切換「一次 → 循環 → 折返」。\n3. 一次走到終點；循環重回起點播放；折返沿原路反向返回。\n4. 在主地圖路線模式開啟「跳點」，會依秒數間隔直接跳至下一個路點，而非沿路行走。\n\n速度控制沿路移動快慢；跳點控制秒數／點。懸浮路線速度以整數顯示，不改變已設定的實際速度。</string>
+    <string name="help_saved_title">收藏、資料夾與手動排序</string>
+    <string name="help_saved_body">1. 在地圖儲存地點，填名稱與說明。\n2. 到「位置」頁搜尋已儲存地點，或切資料夾篩選。\n3. 長按位置進入多選，可批次移到資料夾；「管理」可整理資料夾。\n4. 在自訂排序模式，長按右側把手拖曳排序。\n\n從位置清單選取會回到地圖置中；之後仍需按開始模擬才啟動定位。</string>
+    <string name="help_steps_title">步數同步與 Health Connect</string>
+    <string name="help_steps_body">1. 到「設定 → 步數同步 → 查看設定說明」，依目前狀態準備 Health Connect 與寫入步數權限。\n2. 在目標 App 及 Health Connect 設定讀取步數與必要的背景讀取權限；本 App 無法替目標 App 授權。\n3. 開啟步數同步，再開始符合計步速度的模擬，觀察「今日已寫入」。\n\n目標 App 是否讀到步數，取決於它的支援與同步。訂閱與步數次數額度、6 小時 Pro 解鎖不同；沒有步數次數時仍可選這次不用步數同步。跳點／過高速度不會換算步數。</string>
+    <string name="help_pro_title">Pro 訂閱與廣告解鎖</string>
+    <string name="help_pro_body">1. 在設定的 Pro 區查看目前狀態與剩餘時間。\n2. 可訂閱，或觀看該區獎勵廣告取得 6 小時 Pro；需收到成功獎勵才解鎖。\n3. 懸浮工具與搖桿共用 Pro 授權，開另一種會切換視窗。\n\n廣告解鎖有時效，累積上限依 Pro 區顯示（目前 24 小時）；不是永久訂閱或永久去廣告，也不等於步數同步的次數額度。</string>
+    <string name="help_faq_location_title">為什麼無法開始定位？</string>
+    <string name="help_faq_location_body">1. 到設定查看權限狀態與健康檢查。\n2. 若提示未選模擬位置 App，到開發者選項選本 App。\n3. 若顯示檢查失敗／未知或引擎錯誤，依錯誤訊息處理；不要把每種錯誤都當成未開開發者選項。\n\n如果地圖空白，先確認網路，這和模擬位置權限是不同問題。記下錯誤訊息、手機與 Android 版本，方便回報。</string>
+    <string name="help_faq_overlay_title">浮窗不見，或另一種工具消失？</string>
+    <string name="help_faq_overlay_body">1. 確認 Pro 尚有效，以及手機允許本 App 顯示在其他 App 上層。\n2. 查看螢幕左右邊緣的小入口，點開即可展開。\n3. 開啟另一種工具會取代原工具；這是一次只顯示一種的設計。\n\nPro 到期會關閉工具。使用「關閉」後要回主地圖重新開啟；部分 App 或系統畫面可能遮住浮窗。</string>
+    <string name="help_faq_preview_title">選了地點，為什麼沒有移動？</string>
+    <string name="help_faq_preview_body">1. 懸浮工具中點地點、點地圖或移動地圖，只會選點預覽。\n2. 若只是需要座標，按複製即可；複製不會移動。\n3. 要實際移動，確認座標後按「移動到這裡」，並處理顯示的權限或額度提示。\n\n這能避免在搜尋或查看收藏時誤移動。主地圖的單點定位則需按「開始模擬」。</string>
+    <string name="help_faq_rewards_title">看完廣告，為什麼仍未解鎖？</string>
+    <string name="help_faq_rewards_body">1. 確認看的入口：Pro 廣告給有時效的 Pro；步數同步廣告補的是次數。\n2. 確認廣告完成且收到成功獎勵，不只是在畫面出現後關掉。\n3. 回設定查看剩餘時間或次數；廣告未載入時可稍後再試。\n\nPro 時間會到期。若已看到成功獎勵但狀態仍未更新，記下時間與訊息回報；不要假設每次播放廣告都會解鎖。</string>
+</resources>

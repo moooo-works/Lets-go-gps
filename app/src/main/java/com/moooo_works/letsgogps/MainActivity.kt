@@ -44,6 +44,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.moooo_works.letsgogps.ui.help.HelpScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -285,7 +288,8 @@ fun AppNavigation(
                     },
                     onNavigateToSavedLocations = { },
                     onNavigateToRoutes = { },
-                    onNavigateToSettings = { }
+                    onNavigateToSettings = { },
+                    onNavigateHelp = { topic -> navController.navigate("help?topic=$topic") }
                 )
             }
             composable("saved_locations") { backStackEntry ->
@@ -334,7 +338,12 @@ fun AppNavigation(
                     themePreference = themePreference,
                     onThemeChange = onThemeChange,
                     gpxImportBus = gpxImportBus,
+                    onNavigateHelp = { navController.navigate("help") },
                 )
+            }
+
+            composable("help?topic={topic}", arguments = listOf(navArgument("topic") { type = NavType.StringType; defaultValue = "" })) { entry ->
+                HelpScreen(initialTopic = entry.arguments?.getString("topic").orEmpty(), onBack = { navController.popBackStack() })
             }
 
             composable("folder_management") {

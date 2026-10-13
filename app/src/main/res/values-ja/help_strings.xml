@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="help_title">使い方・よくある質問</string>
+    <string name="help_search">機能や質問を検索</string>
+    <string name="help_all">すべて</string>
+    <string name="help_start">はじめに</string>
+    <string name="help_features">機能の使い方</string>
+    <string name="help_faq">よくある質問</string>
+    <string name="help_empty">一致する説明がありません。別の言葉か「すべて」をお試しください。</string>
+    <string name="help_back">戻る</string>
+    <string name="help_index">説明の一覧</string>
+    <string name="help_read_guide">操作ガイドを見る</string>
+    <string name="help_diagram_select">場所を選択</string>
+    <string name="help_diagram_preview">座標をプレビュー</string>
+    <string name="help_setup_title">初回：位置情報の設定</string>
+    <string name="help_setup_body">1. 端末の設定で開発者向けオプションを有効にします。通常は「端末情報」のビルド番号を7回タップします。\n2. 開発者向けオプションの模擬位置アプリに本アプリを選びます。項目名は端末によって異なります。\n3. 本アプリの設定で権限状態を確認し、表示された位置情報・通知の許可を行います。\n\nその後、地図で地点を選び模擬を開始します。開発者向けオプションを有効にするだけでは、模擬位置アプリは選択されません。</string>
+    <string name="help_start_title">単一地点：開始と停止</string>
+    <string name="help_start_body">1. 地図で単一地点モードを選びます。\n2. 検索または地図移動で中心の座標を確認します。\n3. 模擬開始を押し、権限や利用回数の案内に従います。\n4. 終了するときは停止を押します。フローティングツールを閉じるだけでは模擬は止まりません。\n\n地点の選択は準備です。実際の開始には開始ボタンが必要です。</string>
+    <string name="help_search_title">地名・座標・Plus Codeを検索</string>
+    <string name="help_search_body">1. 地図の上の検索欄をタップします。\n2. 地名、座標（例：25.0330, 121.5654）、Plus Codeを入力します。\n3. 結果を選び、地図を確認してから開始または保存します。\n\n座標をコピーしてアプリに戻ると、クリップボードの案内も使えます。設定で無効にできます。地名検索には通信が必要ですが、このガイドはオフラインで読めます。</string>
+    <string name="help_floating_title">ゲーム上でツールを使う</string>
+    <string name="help_floating_body">1. 地図右側のフローティングツールを押し、Proと他のアプリの上に表示する権限を準備します。\n2. ゲームに戻り、画面の端の入口を開きます。検索・保存場所・ルートで地点を探します。\n3. 結果横のコピーは座標をコピーします。地点を選んでもプレビューだけで移動しません。\n4. 確認して「ここへ移動」を押します。権限や利用回数が不足している場合は本アプリで設定します。\n\n折りたたむと端に戻ります。閉じる操作はツールのみを消します。模擬の終了は停止を使用します。ジョイスティックを開くと切り替わります。</string>
+    <string name="help_joystick_title">ジョイスティック：方向と速度</string>
+    <string name="help_joystick_body">1. 地図右側で仮想ジョイスティックを開き、Proと表示権限を準備します。\n2. 内側の円をドラッグして方向を操作します。離すと連続移動が止まります。\n3. 歩行・自転車・車、または + / − で速度プリセットを切り替えます。1 km/hずつの変更ではありません。\n4. 折りたたみ後は再び開けます。模擬の終了は停止を押します。\n\nツールを開くとジョイスティックが置き換わります。ウィンドウを閉じても位置サービスは止まりません。</string>
+    <string name="help_routes_title">ルートの作成・保存・インポート</string>
+    <string name="help_routes_body">1. 地図のルートモードでルート追加を押し、地点を順に選んで完了します。\n2. 名前を付けて保存します。保存ルートはルート画面から選べます。\n3. GPXファイルは設定 → データ管理 → インポートでGPXを選びます。\n4. 地点・速度・モードを確認して開始します。必要に応じて一時停止や停止ができます。\n\nインポートや読み込みだけでは自動再生しません。</string>
+    <string name="help_modes_title">1回・ループ・折り返し・ジャンプ</string>
+    <string name="help_modes_body">1. ルートを作成または読み込みます。\n2. 再生モードボタンで1回 → ループ → 折り返しを切り替えます。\n3. 1回は終点で終了、ループは始点から再開、折り返しは逆順で同じ道を戻ります。\n4. メイン地図のルート画面でジャンプを有効にすると、設定した間隔で次の地点へ直接移動します。\n\n通常の速度とジャンプの秒数／地点は別です。ツールのルート速度は整数表示ですが、実際の速度は変わりません。</string>
+    <string name="help_saved_title">保存場所・フォルダ・並べ替え</string>
+    <string name="help_saved_body">1. 地図の地点を名前と説明付きで保存します。\n2. 場所画面で検索やフォルダの絞り込みを使います。\n3. 長押しで複数選択し、フォルダへ移動できます。管理からフォルダを整理します。\n4. カスタム順では右側のハンドルを長押しして並べ替えます。\n\n場所を選ぶと地図が中央に移動します。模擬の開始は別に行います。</string>
+    <string name="help_steps_title">歩数同期とHealth Connect</string>
+    <string name="help_steps_body">1. 設定 → 歩数同期 → 設定ガイドでHealth Connectと歩数書き込み権限を確認します。\n2. 対象アプリとHealth Connectで歩数の読み取りや必要なバックグラウンド権限を許可します。本アプリは代わりに許可できません。\n3. 同期を有効にし、計歩対象の速度で模擬を開始して今日の書き込みを確認します。\n\n対象アプリの対応と同期が必要です。歩数利用回数と時間制Proは別で、回数不足なら今回は歩数同期なしで開始できます。ジャンプや速すぎる移動は歩数になりません。</string>
+    <string name="help_pro_title">Proサブスクリプションと広告解除</string>
+    <string name="help_pro_body">1. 設定のPro欄で状態と残り時間を確認します。\n2. 購読、またはその欄のリワード広告で6時間のProを解除します。成功報酬の受領が必要です。\n3. ツールとジョイスティックは同じPro権限で、一方を開くと切り替わります。\n\n広告解除には期限があります。蓄積上限はPro欄を確認してください（現在24時間）。永久購読・永久広告非表示ではなく、歩数同期の利用回数とも異なります。</string>
+    <string name="help_faq_location_title">位置模擬が開始できないとき</string>
+    <string name="help_faq_location_body">1. 設定の権限状態とチェック結果を確認します。\n2. 模擬位置アプリ未選択なら開発者向けオプションで本アプリを選びます。\n3. 確認失敗・不明・エンジンエラーなら個別のメッセージに従います。すべてが開発者設定の未有効を意味するわけではありません。\n\n地図が空白なら通信を別に確認します。不具合報告にはメッセージ、端末、Androidバージョンを添えてください。</string>
+    <string name="help_faq_overlay_title">表示されない・別のツールが消えた</string>
+    <string name="help_faq_overlay_body">1. Proの有効期限と他のアプリの上に表示する権限を確認します。\n2. 画面左右の小さい入口を探して展開します。\n3. 別のツールを開くと元のツールは置き換わります。同時に1種類のみ表示します。\n\nProの期限切れで閉じます。閉じた後はメイン地図から再度開きます。一部のアプリやシステム画面が上に重なる場合があります。</string>
+    <string name="help_faq_preview_title">地点を選んでも移動しない理由</string>
+    <string name="help_faq_preview_body">1. ツール内の地点選択や地図移動はプレビューだけです。\n2. 座標だけ必要ならコピーを使います。コピーでは移動しません。\n3. 移動するには座標を確認して「ここへ移動」を押し、権限や利用回数の案内を処理します。\n\n検索中の誤移動を防ぐためです。メイン地図の単一地点モードでは模擬開始が必要です。</string>
+    <string name="help_faq_rewards_title">広告を見たのに解除されない理由</string>
+    <string name="help_faq_rewards_body">1. Pro広告は時間制Pro、歩数同期広告は利用回数です。入口を確認します。\n2. 広告を完了して成功報酬を受け取ります。表示直後に閉じるだけでは解除されません。\n3. 設定で残り時間や回数を確認します。広告がない場合は後で試してください。\n\nPro時間は経過すると終了します。成功したのに更新されない場合は時間とメッセージを記録して報告してください。</string>
+</resources>
