@@ -1,0 +1,14 @@
+{
+  "changed_files": [
+    "app/src/androidTest/java/com/moooo_works/letsgogps/FloatingLayoutTest.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickController.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayView.kt",
+    "app/src/main/res/values-en/strings.xml",
+    "app/src/main/res/values/strings.xml"
+  ],
+  "changed_lines": 12,
+  "behavior_change": true,
+  "trust_boundary": false,
+  "broad_change": false,
+  "consequential_change": false
+}

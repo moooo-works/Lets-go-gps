@@ -1,0 +1,15 @@
+{
+  "product_commit": "1811a5e27d344e5b22faad1b3592106db5fa7034",
+  "base_commit": "80d48df",
+  "gradle": "./gradlew test lintDebug assembleDebug assembleDebugAndroidTest",
+  "result": "BUILD SUCCESSFUL in 1m 8s",
+  "unit_tests": {
+    "tests": 284,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "device": "本輪未操作或安裝手機，AndroidTest僅建置；正式廣告／付款未測",
+  "preflight": "fix/floating-dock; clean; origin/main af9a524c90554ea3e9802a805480051aa801f74c; contains origin/main; fetch successful",
+  "host_check": "兩處顯示及引擎皆使用當下state.speedKmh；兩語提示與floating_locate相同；其他模式／Pro／引擎行為未改"
+}
