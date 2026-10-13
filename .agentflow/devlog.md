@@ -601,3 +601,10 @@ Still to do
 
 - Owner新增正式發布與更新說明授權，A061範圍擴充；10402隔離包不能直接升正式，另建production1.4.3/10403，只升已審產品patch並使用正式IDs。production-design.md已保存，away-gates提供其plancommit Design Go後開始。
 - 前一runtime-only最後review尚未啟動，無pendingworker；final-review-facts/plan保留為先前草稿，最後審查改涵蓋新正式候選及已驗runtime。原測試正向結果、未驗取消等限制不改。
+
+## [RUN-016] Event — 2026-10-13 23:25:00 +0800 (A-061)
+
+- 新worktree fix/release-ad-production從origin/main b34d684開出，preflightmain/statusclean、remote同hash，AGENTS存在。合併已審A060source後對b9868ee僅versionPatch1→3；source31b528c固定，無SDK／privacy／UI改動。
+- ./gradlew test lintDebug assembleDebug bundleRelease BUILD SUCCESS2m52s，311tests/0failure/0error/60既有skip。lintDebugexit0但既有abortOnError=false，34errorseverity、100warning，Error ID counts與A060相同；不把task成功稱零lint問題。
+- 真signedAAB1.4.3/10403、15,540,418bytes、SHA76f938ba511440e021677192df2225421fb9b560a479f2843409c5a5ea318c48；proto manifest／CRC／JAR簽章／DEX正式兩ID及Unityadapter通過，隔離IDs與Mintegral無，ReleaseProfalse。production-build.json保存。
+- 更新說明zhTW/en/ja/ko已寫，忠實涵蓋浮窗／FAQ／Android17／privacy／Unity。正式草稿42仍empty未混測試包；準備內部10403候選並Claude最後release-readiness審查後才publish。

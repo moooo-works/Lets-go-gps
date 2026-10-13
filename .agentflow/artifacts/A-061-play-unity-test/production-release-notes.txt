@@ -1,0 +1,28 @@
+<zh-TW>
+新增懸浮工具，可在其他 App 中搜尋位置、選取儲存點及操作路線。
+懸浮工具與虛擬搖桿分開，支援 Pro 訂閱或觀看廣告解鎖。
+新增使用說明與 FAQ，配合主題與多語言介面。
+改善 Android 17 開發者設定偵測、浮窗收合與觸控操作。
+整合 Unity Ads，改善廣告隱私同意與載入流程。
+</zh-TW>
+<en-US>
+New floating tools for finding locations, choosing saved places, and controlling routes while using other apps.
+Separate floating tools and virtual joystick; unlock with Pro or rewarded ads.
+New themed, multilingual user guide and FAQ.
+Improved Android 17 developer settings detection and overlay collapse/touch handling.
+Added Unity Ads and improved ad privacy consent and loading.
+</en-US>
+<ja-JP>
+他のアプリを開いたまま地点検索、保存地点の選択、ルート操作ができるフローティングツールを追加。
+フローティングツールと仮想ジョイスティックを分離。Pro または広告視聴で利用可能。
+テーマと多言語に対応した使い方・FAQ を追加。
+Android 17 の開発者設定検出、ツールの折りたたみとタッチ操作を改善。
+Unity Ads を追加し、広告のプライバシー同意と読み込みを改善。
+</ja-JP>
+<ko-KR>
+다른 앱을 사용하면서 위치 검색, 저장 위치 선택 및 경로 제어가 가능한 플로팅 도구를 추가했습니다.
+플로팅 도구와 가상 조이스틱을 분리했습니다. Pro 또는 광고 시청으로 잠금을 해제할 수 있습니다.
+테마와 다국어를 지원하는 사용 설명 및 FAQ를 추가했습니다.
+Android 17 개발자 설정 감지와 플로팅 도구 접기 및 터치 동작을 개선했습니다.
+Unity Ads를 추가하고 광고 개인정보 동의 및 로딩을 개선했습니다.
+</ko-KR>

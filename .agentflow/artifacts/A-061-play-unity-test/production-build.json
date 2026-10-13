@@ -1,0 +1,61 @@
+{
+  "observedAt": "2026-10-13T23:25:00.269197+08:00",
+  "planCommit": "b34d684718f0b0cb52d622c8bd0e7dc9507575fb",
+  "productCommit": "31b528cea7278fb54650dbfab3d1711dd2d62446",
+  "previousReviewedProduct": "b9868ee",
+  "productDiff": "only versionPatch1→3 inapp/build.gradle.kts; sourceotherwisebyteidentical",
+  "worktree": ".worktrees/release-ad-production",
+  "branch": "fix/release-ad-production",
+  "aabPath": ".worktrees/release-ad-production/app/build/outputs/bundle/release/letsgo-1.4.3-release.aab",
+  "bytes": 15540418,
+  "sha256": "76f938ba511440e021677192df2225421fb9b560a479f2843409c5a5ea318c48",
+  "actualAabManifest": {
+    "versionCode": 10403,
+    "versionName": "1.4.3"
+  },
+  "signature": "jarsigner verified originaluploadkey; selfsignedAndroidcertificate normal",
+  "zipCRC": "pass",
+  "realDex": {
+    "unitySdk": true,
+    "googleUnityAdapter": true,
+    "productionBanner": "ca-app-pub-7328056144057376/1824598031",
+    "productionReward": "ca-app-pub-7328056144057376/6473078035",
+    "isolatedTestIdsAbsent": true,
+    "mintegralAbsent": true
+  },
+  "generatedRelease": {
+    "DEBUG": false,
+    "DEV_FORCE_PRO": false,
+    "ADMOB_APP_ID": "ca-app-pub-7328056144057376~2219581212"
+  },
+  "gradleCommand": "./gradlew test lintDebug assembleDebug bundleRelease",
+  "gradleResult": "BUILD SUCCESSFUL in2m52s;116tasks executed",
+  "tests": {
+    "tests": 311,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "lint": {
+    "taskExit": 0,
+    "abortOnError": false,
+    "errorSeverityIssues": 34,
+    "fatal": 0,
+    "warnings": 100,
+    "sameErrorIdCountsAsPreviousA060": true,
+    "counts": {
+      "MissingPermission": 4,
+      "NewApi": 16,
+      "LocalContextGetResourceValueCall": 9,
+      "UnrememberedGetBackStackEntry": 1,
+      "UnusedMaterial3ScaffoldPaddingParameter": 1,
+      "MissingTranslation": 3
+    }
+  },
+  "releaseNotes": "production-release-notes.txt",
+  "limits": [
+    "311includes60existing skippedtests; no newlyrepairedlintissues",
+    "Production candidate notyetPlayinstalled/published",
+    "Original10401 andtestonly10402retained; neverpromote10402"
+  ]
+}
