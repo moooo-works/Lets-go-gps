@@ -1,0 +1,8 @@
+{
+  "root": "/private/var/folders/96/qq54zf9s18xch_9s0fbj3l880000gn/T/agentflow-external-runner-AII06t/clone",
+  "cleanup_root": "/var/folders/96/qq54zf9s18xch_9s0fbj3l880000gn/T/agentflow-external-runner-AII06t",
+  "created": true,
+  "independent": true,
+  "remotes": [],
+  "git_directory": "/private/var/folders/96/qq54zf9s18xch_9s0fbj3l880000gn/T/agentflow-external-runner-AII06t/clone/.git"
+}
