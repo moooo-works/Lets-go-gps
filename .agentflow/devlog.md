@@ -614,3 +614,17 @@ Still to do
 - Claude production-readiness stage1/3完成exit0／未截斷／clone無改動；ROOT915bd588、實product31b528c，四PASS。Host核對report／production-build與runtime，接受release readiness，away-gates對固定target提供Result Go。不把readiness當已正式上線，後续Console/Pixel須親驗。
 - 上傳10403至internalrelease5。瀏覽器filechooser因fileURL權限拒絕；改原生picker已在Downloads，直接選實際1.4.3AAB並Open成功，不再進GoTo、不需owner介入或擴張權限。Play最佳化中，尚未publish。
 - 前一runtime-only草稿planner被新正式任務取代，沒有啟動第三方process；其文件保留historicalplan。產品已push fix/release-ad-production；未merge原PR58或其他PR。
+
+## [RUN-018] Event — 2026-10-13 23:35:48 +0800 (A-061)
+
+- Play internalrelease5／10403／1.4.3 production candidate已發布23:31，提供內部測試人員；僅原native symbols警告。正式草稿42從filelibrary僅選10403，排除10402，四語notes及名稱1.4.3保存，UI明示已儲存變更；尚未正式送審或publish。
+- Pixel在建置期间自動鎖定，WakeUp後顯示指紋lockscreen。已請owner解鎖，不改鎖定／stayawake安全設定，不輸入PIN或繞過認證。原10402資料／測試Pro保留，10403更新與smoke待解鎖。
+- Scope check: ROOT只有A061產品build/審查/操作證據與devlog/tracker；獨立production只versionPatch，產品branch已同步最新origin/main dcbd2e3（docs-onlymerge2f329d7，App/gradle對built31b528c無diff）。tracker4/5；正式Unitygroups仍paused，原PR58保留，Mintegral排除。
+
+## [WIP-005] Checkpoint — 2026-10-13 23:35:49 +0800 (A-061)
+
+- **Finished:** Unity內部實測；正式10403 AAB、Gradle檢查／Claude審查、四語notes完成；internal10403已發布，formal草稿保存。
+- **Running now:** 等Pixel解鎖，沒有背景build/reviewer process。
+- **Still to do:** Pixel真Play10403更新／smoke；正式送審／發布與Unity正式群組啟用，最後接受／紀錄。
+- **Next work action:** 解鎖後Play更新10403並確認資料/圖資；依既有正式授權繼續rollout。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker

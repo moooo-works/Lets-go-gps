@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-13T23:35:48.567208+08:00",
+  "internal": {
+    "version": 10403,
+    "name": "1.4.3 (10403) production candidate",
+    "release": 5,
+    "availableToInternalTesters": true,
+    "publishedAt": "2026-10-13 23:31 +0800"
+  },
+  "productionDraft": {
+    "release": 42,
+    "name": "1.4.3 (10403)",
+    "onlyAabVersionCode": 10403,
+    "releaseNoteLanguages": [
+      "zh-TW",
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "savedChangesToast": true,
+    "submittedForReview": false
+  },
+  "phone": {
+    "currentVersionCode": 10402,
+    "locked": true,
+    "update10403Pending": true
+  },
+  "unityFormalGroups": "stillpaused pendingcandidatephoneverify andformalrollout",
+  "review": "production-review.md PASS forreadiness only",
+  "next": "Ownerunlock→phonePlay10403smoke→formalpublish→formalUnityenable→verifyactualstatus"
+}
