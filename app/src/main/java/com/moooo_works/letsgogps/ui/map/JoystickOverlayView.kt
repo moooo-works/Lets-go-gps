@@ -36,6 +36,7 @@ import kotlin.math.*
 @Composable
 fun JoystickOverlayView(
     transportMode: TransportMode,
+    speedKmh: Double,
     onMove: (deltaX: Float, deltaY: Float) -> Unit,
     onWindowDrag: (deltaX: Int, deltaY: Int) -> Unit,
     onWindowDragEnd: () -> Unit = {},
@@ -77,11 +78,11 @@ fun JoystickOverlayView(
                     })
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.floating_speed, transportMode.speedKmh), fontSize = 12.sp, color = colors.onSurfaceVariant)
+                Text(stringResource(R.string.floating_speed, speedKmh), fontSize = 12.sp, color = colors.onSurfaceVariant)
                 Surface(shape = RoundedCornerShape(24.dp), color = colors.surfaceVariant) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { onTransportModeChange(modes[modeIndex - 1]) }, enabled = modeIndex > 0) { Icon(Icons.Default.Remove, stringResource(R.string.floating_slower), Modifier.size(18.dp)) }
-                        Text(String.format(locale, "%.1f", transportMode.speedKmh), Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                        Text(String.format(locale, "%.1f", speedKmh), Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                         IconButton(onClick = { onTransportModeChange(modes[modeIndex + 1]) }, enabled = modeIndex < modes.lastIndex) { Icon(Icons.Default.Add, stringResource(R.string.floating_faster), Modifier.size(18.dp)) }
                     }
                 }

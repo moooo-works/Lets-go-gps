@@ -480,7 +480,7 @@
     <string name="floating_msg_need_pro">Pro required. Open the App</string>
     <string name="floating_msg_unknown_location">Current coordinates unknown</string>
     <string name="floating_msg_copied">Copied</string>
-    <string name="floating_map_hint">Moving or tapping the map only selects a point. Use Locate to move.</string>
+    <string name="floating_map_hint">Moving or tapping the map only selects a point. Use Move here to move.</string>
     <string name="floating_blocked">Complete permissions or credit setup in the app. Location has not started.</string>
     <string name="floating_tab_saved">Saved</string>
     <string name="floating_active">Location active</string>

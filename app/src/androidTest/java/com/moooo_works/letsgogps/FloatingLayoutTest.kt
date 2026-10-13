@@ -179,7 +179,7 @@ class FloatingLayoutTest {
                         onWindowDrag = { dx, dy -> manager.updatePosition(dx, dy) },
                         onWindowDragEnd = { manager.snapToEdge() }
                     ) {
-                        JoystickOverlayView(TransportMode.WALKING, { _, _ -> }, { _, _ -> }, {}, {}, {})
+                        JoystickOverlayView(TransportMode.WALKING, 12.0, { _, _ -> }, { _, _ -> }, {}, {}, {})
                     }
                 }
             }

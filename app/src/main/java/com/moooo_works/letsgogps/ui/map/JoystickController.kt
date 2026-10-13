@@ -55,6 +55,7 @@ class JoystickController(
                     onWindowDragEnd = { overlayManager.snapToEdge() }
                 ) { JoystickOverlayView(
                     transportMode = s.transportMode,
+                    speedKmh = s.speedKmh,
                     onMove = { dx, dy -> currentX = dx; currentY = dy },
                     onWindowDrag = { dx, dy -> overlayManager.updatePosition(dx, dy) },
                     onWindowDragEnd = { overlayManager.snapToEdge() },

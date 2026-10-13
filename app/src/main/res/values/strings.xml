@@ -483,7 +483,7 @@
     <string name="floating_msg_need_pro">需要 Pro，請回 App</string>
     <string name="floating_msg_unknown_location">目前座標未知</string>
     <string name="floating_msg_copied">已複製</string>
-    <string name="floating_map_hint">移動地圖或點擊只會選點；按下「定位」才執行移動。</string>
+    <string name="floating_map_hint">移動地圖或點擊只會選點；按下「移動到這裡」才執行移動。</string>
     <string name="floating_blocked">需要在主程式完成授權或額度處理，定位尚未啟動。</string>
     <string name="floating_tab_saved">收藏</string>
     <string name="floating_active">定位中</string>
