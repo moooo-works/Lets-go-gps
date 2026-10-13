@@ -132,4 +132,23 @@ class SystemHealthCheckImplTest {
         // Fail-open: don't block users on weird ROMs; AppOps still gates real misuse.
         assertEquals(ItemStatus.Passed, state.statusOf(HealthCheckItem.DeveloperMode))
     }
+    @Test
+    fun `android 17 hidden developer state does not block allowed mock app`() {
+        every { Settings.Global.getInt(any<ContentResolver>(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) } returns 0
+        val state=SystemHealthCheckImpl(context,sdkInt=37).refresh()
+        assertEquals(ItemStatus.NotApplicable,state.statusOf(HealthCheckItem.DeveloperMode))
+        assertEquals(ItemStatus.Passed,state.statusOf(HealthCheckItem.MockAppSelected))
+        assertFalse(state.hasBlockingFailure)
+    }
+
+    @Test
+    fun `android 17 still blocks when mock AppOps denies`() {
+        every { Settings.Global.getInt(any<ContentResolver>(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) } returns 0
+        every { appOpsManager.unsafeCheckOpNoThrow(any<String>(),any<Int>(),any<String>()) } returns AppOpsManager.MODE_ERRORED
+        val state=SystemHealthCheckImpl(context,sdkInt=37).refresh()
+        assertEquals(ItemStatus.NotApplicable,state.statusOf(HealthCheckItem.DeveloperMode))
+        assertEquals(ItemStatus.Failed,state.statusOf(HealthCheckItem.MockAppSelected))
+        assertTrue(state.hasBlockingFailure)
+    }
+
 }

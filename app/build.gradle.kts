@@ -17,8 +17,8 @@ val localProperties = Properties().apply {
 }
 
 val versionMajor = 1
-val versionMinor = 3
-val versionPatch = 4
+val versionMinor = 4
+val versionPatch = 1
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -110,21 +110,27 @@ android {
 
 androidComponents {
     onVariants { variant ->
+        val adMobAppId = if (variant.buildType == "debug") {
+            "ca-app-pub-3940256099942544~3347511713"
+        } else {
+            "ca-app-pub-7328056144057376~2219581212"
+        }
         val fields = if (variant.buildType == "debug") {
             mapOf(
                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "true", "Debug Pro override"),
-                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544~3347511713\"", "Google sample App ID"),
-                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/6300978111\"", "Google sample Banner unit"),
+                "ADMOB_APP_ID" to BuildConfigField("String", "\"$adMobAppId\"", "Google sample App ID"),
+                "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/9214589741\"", "Google sample adaptive Banner unit"),
                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-3940256099942544/5224354917\"", "Google sample Rewarded unit")
             )
         } else {
             mapOf(
                 "DEV_FORCE_PRO" to BuildConfigField("Boolean", "false", "Release Pro behavior"),
-                "ADMOB_APP_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376~2219581212\"", "Production App ID"),
+                "ADMOB_APP_ID" to BuildConfigField("String", "\"$adMobAppId\"", "Production App ID"),
                 "BANNER_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/1824598031\"", "Production Banner unit"),
                 "REWARDED_AD_UNIT_ID" to BuildConfigField("String", "\"ca-app-pub-7328056144057376/6473078035\"", "Production Rewarded unit")
             )
         }
+        variant.manifestPlaceholders.put("ADMOB_APP_ID", adMobAppId)
         variant.buildConfigFields?.putAll(fields)
     }
 }
@@ -142,6 +148,12 @@ tasks.whenTaskAdded {
                 }
         }
     }
+}
+
+// Unity adapter 會帶入舊版 Google Ads；Next-Gen 不可同時載入兩套 SDK。
+configurations.configureEach {
+    exclude(group = "com.google.android.gms", module = "play-services-ads")
+    exclude(group = "com.google.android.gms", module = "play-services-ads-lite")
 }
 
 dependencies {
@@ -177,6 +189,8 @@ dependencies {
 
     // AdMob
     implementation(libs.admob.next.gen)
+    implementation(libs.unity.ads)
+    implementation(libs.unity.adapter)
 
     // Billing
     implementation(libs.billing)
