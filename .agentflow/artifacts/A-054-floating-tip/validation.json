@@ -1,0 +1,19 @@
+{
+  "product_commit": "0f8f2bc22e56deaa951c830f79e4120721350ff5",
+  "base_commit": "e86a766",
+  "preflight": "fix/floating-dock clean; fetch成功; origin/main 0d26af83b115a8e602d81489df46f547cb0f1ec6; 5筆0d26af8/faa7ef8/af9a524/87227dd/a7151ee; contains main",
+  "required_gradle": "test lintDebug assembleDebug assembleDebugAndroidTest BUILD SUCCESSFUL in27s; 韓文按鈕名稱文字修正後lintDebug assembleDebug assembleDebugAndroidTest SUCCESS58s；test邏輯不變沿用有效結果",
+  "unit_tests": {
+    "tests": 285,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "first_failure": "新增測試coVerify少import，compile失敗；已補正後完整成功",
+  "apk_sha256": "685f3504b3287a95e6f0e2de9d37a737a806e0a94c2cd44d3e89a1e8da2611b0",
+  "device": "Pixel7Pro Android17/API37; adb install -r兩APK Success",
+  "dialog": "首次完整顯示／outside不dismiss／確認dismiss／force-stop cold-start不重複，四語resource編譯通過；實機語言zh-TW，主題LIGHT",
+  "instrument": "FloatingLayoutTest OK1 6.926s；真實IME、window尺寸、模式、collapse/close，用test host及fakeactions，不是正式廣告／付款／真人跨遊戲逐鍵測試",
+  "private_evidence": "/private/tmp/a054-dialog.png、a054-ui.xml、a054-outside.xml、a054-dismiss.xml、a054-restart.xml、a054-floating-instrument.log；不提交地點畫面",
+  "limits": "未實機切換四語／深色／大字／橫向；既有完整合併前Map smoke限制保留"
+}

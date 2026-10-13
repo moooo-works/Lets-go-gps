@@ -1,0 +1,227 @@
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/data/repository/SettingsRepositoryImpl.kt b/app/src/main/java/com/moooo_works/letsgogps/data/repository/SettingsRepositoryImpl.kt
+index 4413074..3674776 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/data/repository/SettingsRepositoryImpl.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/data/repository/SettingsRepositoryImpl.kt
+@@ -46,6 +46,7 @@ class SettingsRepositoryImpl @Inject constructor(
+         val HAS_SEEN_CLIPBOARD_HINT_TIP = booleanPreferencesKey("has_seen_clipboard_hint_tip")
+         val HAS_SEEN_FOLDER_TIP = booleanPreferencesKey("has_seen_folder_tip")
+         val HAS_SEEN_GPX_TIP = booleanPreferencesKey("has_seen_gpx_tip")
++        val HAS_SEEN_FLOATING_TOOLS_TIP = booleanPreferencesKey("has_seen_floating_tools_tip")
+         val HAS_SEEN_JUMP_MODE_TIP = booleanPreferencesKey("has_seen_jump_mode_tip")
+         val ENABLE_TIMEZONE_CHECK = booleanPreferencesKey("enable_timezone_check")
+         val STEP_SYNC_ENABLED = booleanPreferencesKey("step_sync_enabled")
+@@ -195,6 +196,13 @@ class SettingsRepositoryImpl @Inject constructor(
+         dataStore.edit { it[HAS_SEEN_GPX_TIP] = true }
+     }
+ 
++    override fun hasSeenFloatingToolsTip(): Flow<Boolean> =
++        dataStore.data.map { it[HAS_SEEN_FLOATING_TOOLS_TIP] ?: false }
++
++    override suspend fun setFloatingToolsTipSeen() {
++        dataStore.edit { it[HAS_SEEN_FLOATING_TOOLS_TIP] = true }
++    }
++
+     override fun hasSeenJumpModeTip(): Flow<Boolean> =
+         dataStore.data.map { it[HAS_SEEN_JUMP_MODE_TIP] ?: false }
+ 
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/domain/repository/SettingsRepository.kt b/app/src/main/java/com/moooo_works/letsgogps/domain/repository/SettingsRepository.kt
+index 7332a7a..21463d8 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/domain/repository/SettingsRepository.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/domain/repository/SettingsRepository.kt
+@@ -52,6 +52,9 @@ interface SettingsRepository {
+ 
+     fun hasSeenGpxTip(): Flow<Boolean>
+     suspend fun setGpxTipSeen()
++    fun hasSeenFloatingToolsTip(): Flow<Boolean>
++    suspend fun setFloatingToolsTipSeen()
++
+     fun hasSeenJumpModeTip(): Flow<Boolean>
+     suspend fun setJumpModeTipSeen()
+ 
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingToolsTipDialog.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingToolsTipDialog.kt
+new file mode 100644
+index 0000000..0ab80ee
+--- /dev/null
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingToolsTipDialog.kt
+@@ -0,0 +1,36 @@
++package com.moooo_works.letsgogps.ui.map
++
++import androidx.compose.foundation.layout.*
++import androidx.compose.foundation.rememberScrollState
++import androidx.compose.foundation.verticalScroll
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material3.*
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.res.stringResource
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.text.style.TextAlign
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.window.Dialog
++import androidx.compose.ui.window.DialogProperties
++import com.moooo_works.letsgogps.R
++
++@Composable
++internal fun FloatingToolsTipDialog(onDismiss: () -> Unit) {
++    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(dismissOnClickOutside = false)) {
++        Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
++            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
++                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
++                    Text(stringResource(R.string.tip_floating_tools_title), Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleLarge,
++                        color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
++                    Text(stringResource(R.string.tip_floating_tools_body), style = MaterialTheme.typography.bodyMedium,
++                        color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
++                }
++                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
++                    Text(stringResource(R.string.tip_dismiss), fontWeight = FontWeight.SemiBold)
++                }
++            }
++        }
++    }
++}
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt
+index 1a3b59d..a583f63 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt
+@@ -521,6 +521,11 @@ fun MapScreen(
+     ) {
+         JumpModeTipCard(onDismiss = { viewModel.dismissJumpModeTip() })
+     }
++    if (uiState.showFloatingToolsTip && !uiState.showOnboarding && !uiState.showLoopBounceTip &&
++        !uiState.showClipboardHintTip && !uiState.showGpxTip && !uiState.showJumpModeTip
++    ) {
++        FloatingToolsTipDialog(onDismiss = viewModel::dismissFloatingToolsTip)
++    }
+ }
+ 
+ @Composable
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt
+index 4afb2af..0218fe3 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt
+@@ -101,6 +101,7 @@ data class MapUiState(
+     val showGpxTip: Boolean = false,
+     /** Show a "what's new" tip card about jump playback mode. */
+     val showJumpModeTip: Boolean = false,
++    val showFloatingToolsTip: Boolean = false,
+     /** Show the system health-check ModalBottomSheet (driven by startMocking blocking failure or settings entry). */
+     val showHealthCheck: Boolean = false,
+     /** Latest health-check snapshot; null until first refresh. */
+diff --git a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt
+index 4bf42f5..d13e3c2 100644
+--- a/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt
++++ b/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt
+@@ -517,6 +517,12 @@ class MapViewModel @Inject constructor(
+                 }
+             }
+         }
++
++        viewModelScope.launch {
++            settingsRepository.hasSeenFloatingToolsTip().collect { seen ->
++                _uiState.update { it.copy(showFloatingToolsTip = !seen) }
++            }
++        }
+     }
+ 
+     fun dismissOnboarding() {
+@@ -545,6 +551,11 @@ class MapViewModel @Inject constructor(
+     }
+ 
+     /** Dismiss the "jump playback mode" new-feature tip and persist the ack. */
++    fun dismissFloatingToolsTip() {
++        _uiState.update { it.copy(showFloatingToolsTip = false) }
++        viewModelScope.launch { settingsRepository.setFloatingToolsTipSeen() }
++    }
++
+     fun dismissJumpModeTip() {
+         _uiState.update { it.copy(showJumpModeTip = false) }
+         viewModelScope.launch { settingsRepository.setJumpModeTipSeen() }
+diff --git a/app/src/main/res/values-en/strings.xml b/app/src/main/res/values-en/strings.xml
+index 32d68b2..1c2cc9c 100644
+--- a/app/src/main/res/values-en/strings.xml
++++ b/app/src/main/res/values-en/strings.xml
+@@ -493,4 +493,6 @@
+     <string name="joystick_open">Open joystick</string>
+     <string name="joystick_close">Close joystick</string>
+     <string name="pro_dialog_feature_floating">Floating tools: search, saved places and routes</string>
++    <string name="tip_floating_tools_title">Floating tools and a separate joystick are here!</string>
++    <string name="tip_floating_tools_body">Two separate buttons on the map open floating tools or the virtual joystick above other apps.\n\nFloating tools offer search, saved places, routes, and coordinate copying. Selecting a point only previews it; tap Move here to move. The background is translucent, and collapsing docks the tool at the screen edge.\n\nUse the joystick to control movement direction and speed. Only one tool is shown at a time; opening the other switches tools.\n\nBoth are Pro features: unlock with a subscription or a rewarded ad for 6 hours. First use requires permission to display over other apps.</string>
+ </resources>
+diff --git a/app/src/main/res/values-ja/strings.xml b/app/src/main/res/values-ja/strings.xml
+index e33bdb2..8ae24d9 100644
+--- a/app/src/main/res/values-ja/strings.xml
++++ b/app/src/main/res/values-ja/strings.xml
+@@ -493,4 +493,6 @@
+     <string name="joystick_open">ジョイスティックを開く</string>
+     <string name="joystick_close">ジョイスティックを閉じる</string>
+     <string name="pro_dialog_feature_floating">フローティングツール：検索・保存地点・ルート</string>
++    <string name="tip_floating_tools_title">フローティングツールと独立ジョイスティック登場！</string>
++    <string name="tip_floating_tools_body">地図の2つのボタンから、他のアプリの上にツールまたはジョイスティックを表示できます。\n\nツールでは検索、保存済みの場所、ルート、座標のコピーが使えます。地点の選択はプレビューのみで、「ここへ移動」を押すと移動します。背景は半透明で、折りたたむと画面の端に戻ります。\n\nジョイスティックで移動方向と速度を操作できます。表示は一度に1種類で、もう一方を開くと切り替わります。\n\nどちらもPro機能です。サブスクリプション、またはリワード広告で6時間解除できます。初回は他のアプリの上に表示する権限が必要です。</string>
+ </resources>
+diff --git a/app/src/main/res/values-ko/strings.xml b/app/src/main/res/values-ko/strings.xml
+index 97eb390..739bd0d 100644
+--- a/app/src/main/res/values-ko/strings.xml
++++ b/app/src/main/res/values-ko/strings.xml
+@@ -493,4 +493,6 @@
+     <string name="joystick_open">조이스틱 열기</string>
+     <string name="joystick_close">조이스틱 닫기</string>
+     <string name="pro_dialog_feature_floating">플로팅 도구: 검색, 저장 장소 및 경로</string>
++    <string name="tip_floating_tools_title">플로팅 도구와 독립 조이스틱 추가!</string>
++    <string name="tip_floating_tools_body">지도의 두 버튼으로 다른 앱 위에 플로팅 도구 또는 가상 조이스틱을 열 수 있어요.\n\n도구에서 검색, 저장한 장소, 경로, 좌표 복사를 사용할 수 있어요. 지점을 선택하면 미리보기만 표시되며, 여기로 이동을 눌러야 이동해요. 배경은 반투명이며 접으면 화면 가장자리로 돌아가요.\n\n조이스틱으로 이동 방향과 속도를 조절해요. 한 번에 한 종류만 표시되며, 다른 도구를 열면 전환돼요.\n\n둘 다 Pro 기능으로 구독 또는 보상형 광고를 통해 6시간 잠금 해제할 수 있어요. 처음 사용할 때는 다른 앱 위에 표시 권한이 필요해요.</string>
+ </resources>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index d5185ea..9bad232 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -496,4 +496,6 @@
+     <string name="joystick_open">開啟獨立搖桿</string>
+     <string name="joystick_close">關閉搖桿</string>
+     <string name="pro_dialog_feature_floating">懸浮工具：搜尋、收藏與路線</string>
++    <string name="tip_floating_tools_title">新增懸浮工具與獨立搖桿！</string>
++    <string name="tip_floating_tools_body">地圖右側新增兩個獨立按鈕：懸浮工具與虛擬搖桿，可在其他 App 上方操作。\n\n懸浮工具提供搜尋、收藏、路線與座標複製。選點只會預覽，按「移動到這裡」才移動；背景半透明，收合後會回到螢幕邊緣。\n\n虛擬搖桿用來調整移動方向與速度。一次只顯示一種工具，開啟另一種時會切換。\n\n兩者皆為 Pro 功能，可透過訂閱或觀看獎勵廣告解鎖 6 小時；首次使用需允許顯示在其他 App 上層。</string>
+ </resources>
+diff --git a/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt b/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt
+index 054cff3..16fa97f 100644
+--- a/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt
++++ b/app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt
+@@ -20,6 +20,7 @@ import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
+ import com.moooo_works.letsgogps.domain.repository.MockStatus
+ import com.moooo_works.letsgogps.domain.repository.TimezoneRepository
+ import com.moooo_works.letsgogps.service.MockLocationService
++import io.mockk.coVerify
+ import io.mockk.coEvery
+ import io.mockk.every
+ import io.mockk.just
+@@ -122,6 +123,7 @@ class MapViewModelTest {
+         every { settingsRepository.hasSeenClipboardHintTip() } returns flowOf(true)
+         every { settingsRepository.hasSeenGpxTip() } returns flowOf(true)
+         every { settingsRepository.hasSeenJumpModeTip() } returns flowOf(true)
++        every { settingsRepository.hasSeenFloatingToolsTip() } returns flowOf(true)
+ 
+         // Default: every health-check item passes — individual tests override
+         // when they want to exercise the blocking-failure path.
+@@ -141,6 +143,23 @@ class MapViewModelTest {
+         timezoneRepository, mockk(relaxed = true), context
+     )
+ 
++    @Test
++    fun `floating tools tip acknowledgement survives a new view model`() = runTest {
++        val seen = MutableStateFlow(false)
++        every { settingsRepository.hasSeenFloatingToolsTip() } returns seen
++        coEvery { settingsRepository.setFloatingToolsTipSeen() } coAnswers { seen.value = true }
++        val vm = createViewModel()
++        runCurrent()
++        assertTrue(vm.uiState.value.showFloatingToolsTip)
++        vm.dismissFloatingToolsTip()
++        runCurrent()
++        assertFalse(vm.uiState.value.showFloatingToolsTip)
++        val reopened = createViewModel()
++        runCurrent()
++        assertFalse(reopened.uiState.value.showFloatingToolsTip)
++        coVerify(exactly = 1) { settingsRepository.setFloatingToolsTipSeen() }
++    }
++
+     @Test
+     fun `both overlay entry points require Pro`() = runTest {
+         val vm = createViewModel()

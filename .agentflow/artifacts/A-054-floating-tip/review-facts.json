@@ -1,0 +1,20 @@
+{
+  "changed_files": [
+    "app/src/main/java/com/moooo_works/letsgogps/data/repository/SettingsRepositoryImpl.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/domain/repository/SettingsRepository.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingToolsTipDialog.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapState.kt",
+    "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt",
+    "app/src/main/res/values-en/strings.xml",
+    "app/src/main/res/values-ja/strings.xml",
+    "app/src/main/res/values-ko/strings.xml",
+    "app/src/main/res/values/strings.xml",
+    "app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt"
+  ],
+  "changed_lines": 91,
+  "behavior_change": true,
+  "trust_boundary": false,
+  "broad_change": false,
+  "consequential_change": false
+}
