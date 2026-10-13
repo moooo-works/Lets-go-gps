@@ -42,4 +42,8 @@
     <string name="help_faq_rewards_body">1. 광고 진입 위치를 확인하세요. Pro 광고는 시간제 Pro이고 동기화 광고는 이용 횟수예요.\n2. 광고를 완료하고 성공 보상을 받아야 해요. 광고가 보인 뒤 바로 닫는 것만으로는 충분하지 않아요.\n3. 설정에서 남은 시간이나 횟수를 확인하세요. 광고가 없으면 나중에 다시 시도하세요.\n\nPro 시간은 만료돼요. 성공 보상이 표시됐는데 갱신되지 않으면 시간과 메시지를 기록해 알려주세요.</string>
     <string name="help_intro">주제를 선택하거나 사용할 기능을 검색하세요.</string>
     <string name="help_count">안내 %1$d개</string>
+    <string name="help_steps_heading">사용 단계</string>
+    <string name="help_result_heading">예상 결과 및 참고</string>
+    <string name="help_step_count">%1$d단계</string>
+    <string name="help_diagram_expand">펼침</string>
 </resources>

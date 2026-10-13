@@ -8,9 +8,8 @@ import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import com.moooo_works.letsgogps.ui.theme.MockGpsTheme
+import com.moooo_works.letsgogps.ui.theme.ThemePreference
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalConfiguration
@@ -51,7 +50,7 @@ class HelpGuideTest {
         try {
             listOf("zh-TW", "en", "ja", "ko").forEachIndexed { index, tag ->
                 language = tag
-                val localized = context.createConfigurationContext(Configuration(context.resources.configuration).apply { setLocales(LocaleList.forLanguageTags(tag)) })
+                val localized = context.createConfigurationContext(Configuration(context.resources.configuration).apply { setLocales(LocaleList.forLanguageTags(tag)); if (index >= 2) fontScale = 1.3f })
                 val strings = localized.resources
                 val showTip = mutableStateOf(true)
                 var dismissed = false
@@ -59,7 +58,7 @@ class HelpGuideTest {
                 instrument.runOnMainSync {
                     activity.setContent {
                         CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration, LocalResources provides localized.resources) {
-                            MaterialTheme(colorScheme = if (index % 2 == 0) lightColorScheme() else darkColorScheme()) {
+                            MockGpsTheme(themePreference = if (index % 2 == 0) ThemePreference.LIGHT else ThemePreference.DARK) {
                                 if (showTip.value) FloatingToolsTipDialog(
                                     onDismiss = { dismissed = true }, onReadGuide = { showTip.value = false }
                                 ) else HelpScreen(initialTopic = "floating", onBack = { exited = true })
@@ -77,7 +76,7 @@ class HelpGuideTest {
                     putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, search)
                 }))
                 click(search)
-                find { it.text?.toString() == strings.getString(R.string.help_pro_body) }
+                find { it.text?.toString() == strings.getString(R.string.help_pro_body).substringBefore("\n").replaceFirst(Regex("^\\d+\\.\\s*"), "") }
                 click(strings.getString(R.string.help_back))
                 val field = find { it.isEditable }
                 assertTrue(field.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, Bundle().apply {

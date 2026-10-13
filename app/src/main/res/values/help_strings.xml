@@ -42,4 +42,8 @@
     <string name="help_faq_rewards_body">1. 確認看的入口：Pro 廣告給有時效的 Pro；步數同步廣告補的是次數。\n2. 確認廣告完成且收到成功獎勵，不只是在畫面出現後關掉。\n3. 回設定查看剩餘時間或次數；廣告未載入時可稍後再試。\n\nPro 時間會到期。若已看到成功獎勵但狀態仍未更新，記下時間與訊息回報；不要假設每次播放廣告都會解鎖。</string>
     <string name="help_intro">選擇主題，或搜尋你想使用的功能。</string>
     <string name="help_count">%1$d 篇說明</string>
+    <string name="help_steps_heading">操作步驟</string>
+    <string name="help_result_heading">預期結果與提醒</string>
+    <string name="help_step_count">%1$d 個步驟</string>
+    <string name="help_diagram_expand">展開</string>
 </resources>

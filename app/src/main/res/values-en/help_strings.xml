@@ -42,4 +42,8 @@
     <string name="help_faq_rewards_body">1. Check which ad you watched: Pro ads grant timed Pro access; step-sync ads grant credits.\n2. Finish the ad and receive a successful reward. Closing after it appears is not enough.\n3. Check remaining time or credits in Settings. If an ad is unavailable, try later.\n\nTimed Pro expires. If a successful reward was shown but status did not update, report the time and message; do not assume every ad playback grants access.</string>
     <string name="help_intro">Choose a topic or search for a feature.</string>
     <string name="help_count">%1$d guides</string>
+    <string name="help_steps_heading">Steps</string>
+    <string name="help_result_heading">Expected result and notes</string>
+    <string name="help_step_count">%1$d steps</string>
+    <string name="help_diagram_expand">Expanded</string>
 </resources>

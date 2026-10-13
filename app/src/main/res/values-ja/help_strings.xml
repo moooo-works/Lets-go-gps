@@ -42,4 +42,8 @@
     <string name="help_faq_rewards_body">1. Pro広告は時間制Pro、歩数同期広告は利用回数です。入口を確認します。\n2. 広告を完了して成功報酬を受け取ります。表示直後に閉じるだけでは解除されません。\n3. 設定で残り時間や回数を確認します。広告がない場合は後で試してください。\n\nPro時間は経過すると終了します。成功したのに更新されない場合は時間とメッセージを記録して報告してください。</string>
     <string name="help_intro">トピックを選ぶか、使いたい機能を検索。</string>
     <string name="help_count">%1$d 件のガイド</string>
+    <string name="help_steps_heading">操作手順</string>
+    <string name="help_result_heading">結果と注意事項</string>
+    <string name="help_step_count">%1$d ステップ</string>
+    <string name="help_diagram_expand">展開</string>
 </resources>
