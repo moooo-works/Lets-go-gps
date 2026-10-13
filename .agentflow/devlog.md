@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品e5580b6；最後AAB接受與審查ROOT064e43a；交付見Git.
+Current commit: A058交付ROOT ca817ca；release branch00bf3fa，App來源e5580b6.
 
-Tests/scenarios: test/lintDebug/assembleDebug成功285/0fail/60skip；bundleRelease成功6m22s；實際AAB版本10400／1.4.0、zipCRC與jar簽章通過.
+Tests/scenarios: 本輪read-only查Gradle新舊輸出規則、兩AAB相同SHA與release／Unity廣告依賴和同意程式；未重跑產品測試.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 1.4.0簽章Release AAB產出並本機交付，版本分支push與Claude targeted四PASS.
+Proven: dist為複本原AAB仍在；1.4.0浮窗FAQ發布基底沒有Unity接入／AdConsentManager.
 
-Open: Play未上傳；Release未另安裝；UnityGameID待回覆，既有PR58–63未合併／原合併煙測待補.
+Open: 1.4.0發佈基底漏廣告分支，需整合重驗後重包；UnityGameID工單待處理；PR58–63未合併，Play未發布.
 
-Next: 同步release分支docs-only紀錄後由使用者取用AAB；UnityAds依原stream待回覆.
+Next: 回答確認後依owner下一步處理整合；Unity原stream保留，Mintegral排除.
 
-Artifacts: dist/letsgo-1.4.0-release.aab；A-058-release-aab build／version.diff／tracker／原review與runner.
+Artifacts: dist及release worktree同一1.4.0 AAB；A058建置／審查證據；unity-ads與consent-verification分支.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -311,5 +311,43 @@ Still to do
 ---
 
 # → Ask / A-059 (Takeshi Mori)
+
++ 為什麼會在dist資料夾？之前是產到這邊嗎？unity ads的程式有在這一版嗎？
+
+---
+
+## [RUN-001] Event — 2026-10-13 11:55:10 +0800 (A-059)
+
+- Read-only查核：A058原Gradle設定及舊1.3.5 commit209cf18皆輸出app/build/outputs/bundle/release，再依既有規則改名；dist是這次host额外交付複本。原worktree AAB與dist SHA相同5d6b285b34680bec9fe04f91a6ff55fe4250137133c4459b079b1b207df22bef，原檔仍存在。
+
+## [RUN-002] Event — 2026-10-13 11:55:10 +0800 (A-059)
+
+- 發現發布基底缺漏：release1.4.0的Gradle/version catalog沒有Unity SDK或adapter，AdConsentManager.kt亦不存在；unity-ads分支有com.unity3d.ads4.20.1／GoogleUnityadapter4.20.1.0及UMP mediation gating。consent-verification亦另分支。A058承接help-faq未整合廣告分支，host承認打包基底疏漏；既有構建／簽章PASS不代表含所有未合併功能。此輪為問句查核，不擅自merge／重打包／搬移檔案，PR58保留，Mintegral排除不變。
+
+# ← Reply / A-059
+
+* _2026-10-13 11:55:10 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- dist是此次額外的交付複本，原Gradle AAB仍在outputs/bundle/release；這份1.4.0未含Unity Ads接入與新版廣告同意流程，打包基底漏接廣告分支。
+
+## [FINAL REPORT]
+
+1. 「為什麼會在dist資料夾？之前是產到這邊嗎？unity ads的程式有在這一版嗎？」
+
+   - **dist來源：** 我這次為方便取用，把worktree的AAB複製到專案根目錄dist；沒有改Gradle輸出設定。專案既有設定（亦查舊1.3.5 commit209cf18）原本輸出到`app/build/outputs/bundle/release/`，再改名成`letsgo-版本-release.aab`。這次dist是額外複本，原檔仍在[原始輸出](../.worktrees/release-1.4.0/app/build/outputs/bundle/release/letsgo-1.4.0-release.aab)，兩檔SHA256完全相同。
+   - **Unity Ads沒有在這份1.4.0：** 發布分支的依賴沒有Unity SDK／Google Unity adapter，亦缺先前新增的AdConsentManager。Unity接入與廣告同意改動仍在`unity-ads`／`consent-verification`；這次從`help-faq`承接浮窗與教學，沒有帶入廣告分支。這是我選擇打包基底時的疏漏，不能把此AAB視為已整合所有先前開發成果的上架版。
+   - **需要處理：** 要交付包含Unity及已完成同意流程的版本，需整合該廣告分支、驗證整體流程後重打包。依目前保存的紀錄，Unity另有GameID拒絕／客服工單待處理，含SDK不代表供應已啟用。本輪未查客服最新回覆，不把紀錄當即時後台狀態。
+   - 本輪只核對與說明，沒有改App、合併PR、搬移AAB或再次建置。A058的版本／簽章／CRC驗證結果仍成立，涵蓋的是那份實際打包來源；廣告分支缺漏已記錄供後續處理。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-060 (Takeshi Mori)
 
 +
