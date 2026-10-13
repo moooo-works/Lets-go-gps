@@ -68,6 +68,7 @@ fun ProUpgradeDialog(
                 listOf(
                     stringResource(R.string.pro_dialog_feature_routes),
                     stringResource(R.string.pro_dialog_feature_joystick),
+                    stringResource(R.string.pro_dialog_feature_floating),
                     stringResource(R.string.pro_dialog_feature_export),
                     stringResource(R.string.pro_dialog_feature_ads)
                 ).forEach { feature ->

@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.content.Context
 import com.moooo_works.letsgogps.data.imports.GpxImportBus
+import com.moooo_works.letsgogps.data.billing.AdConsentManager
 import javax.inject.Inject
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +45,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.moooo_works.letsgogps.ui.help.HelpScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -77,6 +81,7 @@ fun applyLocale(base: Context): Context {
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var gpxImportBus: GpxImportBus
+    @Inject lateinit var adConsentManager: AdConsentManager
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(applyLocale(newBase))
@@ -117,6 +122,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        adConsentManager.gatherConsent(this)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -164,7 +170,7 @@ fun AppNavigation(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            if (currentRoute != "folder_management") {
+            if (currentRoute != "folder_management" && currentRoute?.substringBefore("?") != "help") {
                 val navItemColors = NavigationBarItemDefaults.colors(
                     selectedIconColor   = MaterialTheme.colorScheme.primary,
                     selectedTextColor   = MaterialTheme.colorScheme.primary,
@@ -285,7 +291,8 @@ fun AppNavigation(
                     },
                     onNavigateToSavedLocations = { },
                     onNavigateToRoutes = { },
-                    onNavigateToSettings = { }
+                    onNavigateToSettings = { },
+                    onNavigateHelp = { topic -> navController.navigate("help?topic=$topic") }
                 )
             }
             composable("saved_locations") { backStackEntry ->
@@ -334,7 +341,12 @@ fun AppNavigation(
                     themePreference = themePreference,
                     onThemeChange = onThemeChange,
                     gpxImportBus = gpxImportBus,
+                    onNavigateHelp = { navController.navigate("help") },
                 )
+            }
+
+            composable("help?topic={topic}", arguments = listOf(navArgument("topic") { type = NavType.StringType; defaultValue = "" })) { entry ->
+                HelpScreen(initialTopic = entry.arguments?.getString("topic").orEmpty(), onBack = { navController.popBackStack() })
             }
 
             composable("folder_management") {
