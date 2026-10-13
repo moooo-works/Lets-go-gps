@@ -61,6 +61,8 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 
 + 好，開始製作
 
++ ui有點醜
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 09:51:43 +0800 (A-057)
@@ -96,3 +98,14 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 - **Next work action:** 派固定root／product，只讀獨立clone審查，不再重跑成功套件。
 
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-003] Event — 2026-10-13 10:25:25 +0800 (A-057)
+
+- 首輪真正Claude review完成但Outcome/Verdict BLOCKING：三語教學Start/SinglePoint名稱不符實際map_mock_start/map_mode_single；host查源碼確認，其他功能Minimality／Conformance PASS。原report／dispatch／clone／runner移為*-01保存原bytes，沒有改作者判定。已依原操作教學需求修文案，非範圍外修正。
+- 新owner「ui有點醜」同A057追加，採原主題neutral surfaces與橘色圖示、分組輕列表、明確chip選取／文章圖解，Help期間循既有folder模式隱藏底部tab。T4加入tracker，相關T1/T2接受改為待新版驗證；不重跑未變引擎等旁支，現在required Gradle執行中。
+
+## [RUN-004] Event — 2026-10-13 10:34:02 +0800 (A-057)
+
+- 追加UI要求已完成e16275b並push／安裝：原主題neutral／橘色圖示、輕列表與分組、filter選取check、圖解／文章排版；Help期間隱藏底部分頁，退出恢復。英日韓main Start/SinglePoint名稱已源碼對齊。
+- 最新required四Gradle SUCCESS53s，285/0fail/60skip；最新combined公開UI OK2 16.251s，正式Main完整閱讀／返回PASS。host已看新版手機目錄PNG，原資料與prefs保留證據沿用，native新UI無DB／prefs寫入。原不佳UI與BLOCKINGreport保留，尚未稱owner審美批准或全merge gates通過。
+- **Scope check:** 新版11個App路徑均在T1/T2/T4：無其他頁改版，Main只Help底bar條件／route串接，無VM owner／engine／schema改動；root僅同接受證據更新與原report-01保存。tracker3/4，準備第二輪真Claude審查。

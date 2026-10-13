@@ -5,15 +5,15 @@
 - **Work key:** A-057-help-faq.
 - **Active Ask:** A-057.
 - **Goal:** 製作可回看／搜尋的四語App說明與FAQ，接設定與浮窗tip教學，安裝驗證。
-- **Last update:** 2026-10-13 10:12:01 +0800.
-- **Evidence commit:** uncommitted.
+- **Last update:** 2026-10-13 10:34:02 +0800.
+- **Evidence commit:** 2647e185b506a00910033cf03017d124a940ad20.
 
 ## Overall state
 
 - **State:** active.
-- **Reason:** 功能、四語測試、正式導航與資料已通過，審查與交付待完成。
-- **Total:** 3.
-- **Completed:** 2.
+- **Reason:** 最新UI與三語名稱已修，四語／正式Main流程通過；需第二輪審查與交付。
+- **Total:** 4.
+- **Completed:** 3.
 - **Remaining:** 1.
 
 ## Accepted task checklist
@@ -24,15 +24,18 @@
 
 - [ ] **T-3:** 固定產品與ROOT接受證據由Claude Code獨立審查，host核對後建立FAQ單主題草稿PR（base PR62），保存紀錄並push。Scope: root .agentflow紀錄與Git／PR；不合併、不改原PR58-62／不修範圍外發現。Proof: 真CLI模型／report／clone無變更、host範圍核對、tracker3/3、GHbehind0。未過保留active。Source: A-057與原Claude review選擇.
 
+- [x] **T-4:** 依「ui有點醜」重整Help視覺：去除預設紫色大卡片、原主題中性色＋橘色圖示、分組輕列表、選取高亮與清楚圖解、Help期間隱藏底部分頁。Scope: 同HelpScreen／Main／Settings／四語helperstrings，不改其他頁或引擎。Proof: 新版Screenshot視覺核對、四語／正式回程／原浮窗必要重驗與最終Claude審查。失敗限定scope修正。Source: A-057「ui有點醜」。
+
 ## Accepted scope changes
 
-- None.
+- A-057追加「ui有點醜」，加入T4視覺改善。
+- 首輪Claude提出三語主地圖開始與單點名稱不符，對應原「操作說明」正確性要求修正文案；原report-01 bytes保留。
 
 ## Current recovery
 
 - **Current item:** T-3.
 - **Last proven result:** 新獨立help-faq分支自最新main建立後承接floating-dock依賴；新UI與四語已寫。
-- **Active blocker or running process:** none; 固定審查前接受證據已齊。
+- **Active blocker or running process:** none; 準備第二輪審查。
 - **Next safe action:** 固定ROOT與產品派Claude審查。
 - **Expected changed files:** MainActivity.kt、SettingsScreen.kt、MapScreen.kt、FloatingToolsTipDialog.kt、ui/help兩檔、四語help_strings.xml、HelpGuideTest.kt；root只devlog／hook archive與本tracker／接受證據／review紀錄。
 
