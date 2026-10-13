@@ -441,6 +441,26 @@ Still to do
 
 + 你來處理上架，使用aab上到測試版測試看看新增的unity ads有沒有異常
 
++ 同意
+
++ <send_user_message_question_reply>
+  [{"answer":"已接上","question":"已收到同意；目前 ADB 偵測不到 Pixel 7 Pro。請重新接上 USB、解鎖手機，若出現 USB 偵錯提示請允許，完成後回覆「已接上」。","questionItemId":"[\"request_user_input_async\",\"call_87111d6372274d35a74aa694751b0637\",0]"}]
+  </send_user_message_question_reply>
+
++ <send_user_message_question_reply>
+  [{"answer":"同意加入 AdMob 測試裝置","question":"已確認 Play 安裝的是 1.4.1／10401。AdMob 目前沒有測試裝置；要安全驗證廣告，需要把 Pixel 的廣告識別碼加入你的 Google AdMob 測試裝置清單，讓它使用測試廣告。是否同意這項設定？","questionItemId":"[\"request_user_input_async\",\"call_15ef424013a44977b143999b88da7fe7\",0]"}]
+  </send_user_message_question_reply>
+
++ <send_user_message_question_reply>
+  [{"answer":"已開啟","question":"測試橫幅已顯示「Test Ad」。請在目前 App 地圖畫面輕搖手機數次，直到出現「Ad inspector／廣告檢查器」，然後回覆「已開啟」。這是 SDK 的實體感測器手勢，我無法透過 USB 代做。","questionItemId":"[\"request_user_input_async\",\"call_78d8d05d49b7475cb67693a9e48609fd\",0]"}]
+  </send_user_message_question_reply>
+
++ <send_user_message_question_reply>
+  [{"answer":"已開啟","question":"隔離 Unity 測試群組已保存，App 已重啟重新讀取設定。請再輕搖手機開啟 Ad Inspector，回覆「已開啟」；我會確認 Unity 是否已出現並接續載入測試。","questionItemId":"[\"request_user_input_async\",\"call_10abf6d856504bdfa431920b7bca8bd6\",0]"}]
+  </send_user_message_question_reply>
+
++ 繼續
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -467,3 +487,38 @@ Still to do
 - **Still to do:** 安裝真Play測試版，驗證Unity單來源banner／reward及同意／崩潰；目前不能宣稱廣告實測通過。
 - **Next work action:** 同意到達後接受內部邀請，保全資料再處理簽章替換；恢復AdMob後確認測試裝置與來源。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-004] Event — 2026-10-13 13:58:08 +0800 (A-061)
+
+- Owner「同意」已接續接受內部測試邀請的授權，不重問既有同意。磁碟目前8.6Gi可用，未清除中間檔，清理已無必要。
+- 管理式sandbox阻止ADB啟動listener／USB；按規則升權同一ADB命令後daemon成功啟動，但Pixel serial2A151FDH300HUZ未連接。已請owner重接／解鎖，不改USB安全設定。
+- Edge已用CUA重新開啟，AdMob帳戶登入需本機TouchID通行密鑰驗證；停在官方Google提示並請owner完成。未輸入／讀取密碼或通行密鑰，未更動mediation。已發布內部10401保持原狀，手機安裝及Unity實測尚未完成。
+
+## [RUN-005] Event — 2026-10-13 14:24:36 +0800 (A-061)
+
+- Pixel重新連上後接受已授權internal invite，頁面真顯示You’re a tester。完整private tar與schema3 JSON核對後移除Debug；Play初裝10305／1.3.5，直接market路徑仍舊；改邀請頁Download test app出現更新後成功取得10401／1.4.1，installer/initiator均com.android.vending，非debug。
+- Owner已另授權Pixel AAID提供給Google AdMob作測試裝置；按Google服務→所有服務→廣告读取（未reset/delete/debuglogging），AdMob保存Pixel 7 Pro Unity internal test／Android／搖動手勢。私有AAID不Git；測試清單一列保存成功。
+- AdMob真實後台四個Unity群組皆paused，沒有擅啟用。正式Play App啟動／既有新功能dialog可關閉，重啟後真banner顯示Test Ad；尚未Unity單來源與reward。已請owner用實體搖動開Ad Inspector；不simulate／繞過非exported activity。
+- App資料尚在private完整備份與Download JSON中，Release匯入需要Pro；先驗reward取得正常限時Pro，再匯回，若驗證受阻必須恢復原Debug與private資料後交付，不能留下空白App。
+
+## [RUN-006] Event — 2026-10-13 14:34:33 +0800 (A-061)
+
+- AdInspector真顯示GMA1.5.0／正式AppID，map-ad-2 Fill AdMob Network；Adapters No adapters found，Single source僅AdMob，此時Unity未註冊為可用來源。保存private diagnostic截圖，不把它當Unity成功。
+- 逐一核對隔離SMOKE banner／rewarded group只含各unity-smoke單元，完整ID尾8648995174／8563391382、Game800390974、Placement BP_Banner_Android／BP_Rewarded_Android，sourceUnityReady。只切兩個隔離群組on並save；正式groups未動。
+- 真Release首次點watch出暫無廣告且保持ProDialog；再次測試Test Ad rewarded可顯示，返回後Pro 解鎖中／剩5h59m。因等待時間可能已達reward條件，本次不能宣稱提前取消未給獎勵，只算正向reward，重複／提前取消尚待。
+- 已用App公開JSON importer還原375位置／6路線及backup設定，完整private tar保留。還原後export驗證尚待；不用run-as非debug，不傳原GPS備份。
+- Scope check: product／AAB未改，root僅devlog／A061tracker；外部新增已授權AdMob測試裝置、兩隔離SMOKE群組啟用、Play內部10401安裝／測試。正式群組、PR58及其他PR維持原狀，Mintegral排除。
+
+## [WIP-002] Checkpoint — 2026-10-13 14:34:33 +0800 (A-061)
+
+- **Finished:** Play內部10401發布並真Play安裝；Pixel測試裝置保存，AdMob Test Ad banner與+6h獎勵觀察；原JSON資料已匯回。
+- **Running now:** 驗證還原資料與Unity隔離設定傳播。
+- **Still to do:** Unity單一來源banner／reward、取消／privacy診斷，恢復原App顯示與mock設定、資料數量核對，收尾記錄。
+- **Next work action:** export核對後重啟SDK，請owner再次實體搖動開Inspector看Unity是否出現。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-007] Event — 2026-10-13 15:30:04 +0800 (A-061)
+
+- 後續Inspector已列兩SMOKE單元，但Adapters仍No adapters found／Single source只有AdMob；設定custom banner320×50後test button可用，兩次Fill皆AdMob，不能據此說Unity通過。先前default button停用與尺寸有關，不宣稱ApplicationContext為已證實原因；官方SDK版本／exclude配對與本版相同，R8保留UnityAdapter／UnityMediationAdapter名稱。
+- Restore export核對375／6／591、saved locations（扣id）及設定相等；route names／points全部相等，既有importer只重建六route createdAt，原完整tar保留。Map圖資已視覺核對正常，private截圖不Git。
+- 新測試方法限定同source＋兩隔離adunits＋10402 test metadata，不改產品behavior；原AAB與正式groups保留。design與可追溯init script已保存，NextGen候選code消耗10402須明確禁止promote正式版，後續prod code需更大。授權來源為A061上傳測試版並驗Unity及「繼續」，只送內部軌道。

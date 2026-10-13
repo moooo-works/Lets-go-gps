@@ -1,0 +1,24 @@
+// A-061: internal testing only. Never promote the resulting bundle to production.
+// No product source change; override only isolated ad units and test version metadata.
+gradle.beforeProject { p ->
+    if (p.path == ':app') {
+        p.afterEvaluate {
+            def android = p.extensions.getByName('android')
+            android.defaultConfig.versionCode = 10402
+            android.defaultConfig.versionName = '1.4.1-unity-test'
+            def components = p.extensions.getByName('androidComponents')
+            components.onVariants(components.selector().withBuildType('release')) { variant ->
+                def replacements = [
+                    BANNER_AD_UNIT_ID: 'ca-app-pub-7328056144057376/8648995174',
+                    REWARDED_AD_UNIT_ID: 'ca-app-pub-7328056144057376/8563391382'
+                ]
+                replacements.each { name, value ->
+                    def original = variant.buildConfigFields.get().get(name)
+                    assert original != null : "Missing existing BuildConfig field: ${name}"
+                    def ctor = original.class.declaredConstructors.find { it.parameterCount == 3 }
+                    variant.buildConfigFields.put(name, ctor.newInstance('String', '"' + value + '"', 'A-061 isolated test ad unit; not for production'))
+                }
+            }
+        }
+    }
+}

@@ -5,7 +5,7 @@
 - **Work key:** A-061-play-unity-test.
 - **Active Ask:** A-061.
 - **Goal:** 發布內部測試AAB並實測Unity廣告。
-- **Last update:** 2026-10-13 12:52:00 +0800.
+- **Last update:** 2026-10-13 14:42:00 +0800.
 - **Evidence commit:** uncommitted.
 
 ## Overall state
@@ -30,9 +30,9 @@
 ## Current recovery
 
 - **Current item:** T-2.
-- **Last proven result:** Play internal testing published 1.4.1; phone backup verified 375 locations, 6 routes, 591 points.
-- **Active blocker or running process:** Await owner acceptance of internal test invite; Edge unavailable.
-- **Next safe action:** Accept invite after owner consent, then install Play testing build with verified backups.
+- **Last proven result:** Play-installed 10401 verified; AdMob Test Ad banner and rewarded +6h observed; JSON import of 375 locations and 6 routes performed.
+- **Active blocker or running process:** Unity test configuration propagation and re-opening Ad Inspector pending.
+- **Next safe action:** Verify restored export; re-initialize App and inspect Unity-only source after isolated test groups activation.
 - **Expected changed files:** .agentflow/devlog.md; .agentflow/artifacts/A-061-play-unity-test/tracker.md; 必要測試證據。
 
 ## Completion proof

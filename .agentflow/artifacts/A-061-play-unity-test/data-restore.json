@@ -1,0 +1,11 @@
+{
+  "saved_locations": 375,
+  "routes": 6,
+  "route_points": 591,
+  "locations_equal_except_ids": true,
+  "routes_equal_except_ids": false,
+  "settings_equal": true,
+  "route_names_and_points_equal": true,
+  "route_created_at_reset_by_existing_importer": true,
+  "raw_backup_preserved_locally": true
+}
