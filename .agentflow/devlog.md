@@ -465,6 +465,8 @@ Still to do
   [{"answer":"同意加入 Unity 測試裝置","question":"Unity 新版後台目前沒有測試裝置；Google 官方要求 Unity 也啟用測試模式。是否同意把同一個 Pixel 廣告識別碼加入你的 Unity Ads 測試裝置清單？只用於此 App 的廣告測試。","questionItemId":"[\"request_user_input_async\",\"call_bc16d44146de4e92a3634f261a3a707f\",0]"}]
   </send_user_message_question_reply>
 
++ 已選取
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -548,3 +550,15 @@ Still to do
 - Play internal release4空草稿已建立；上傳原生GoTo面板Enter／Esc反覆回到/，重綁定及reset仍重現。瀏覽器filechooser因file URL權限拒絕，不擴張權限；將相同測試AAB複製Downloads，請owner手動選取已授權檔案。尚未上傳／publish10402。
 - 手機淺色／繁中恢復，原mock AppOps授權補回，前景refresh後App顯示已授權。10401與有限時廣告Pro仍保留。私有JSON／tar未傳出。
 - Git preflight main；main...origin/main ahead1，無behind；origin/main75091c7283589a226d8b8226c4a663b8b2b3306e，最近75091c7／4b1c676／9e231e6／3c4e18e／5fe28fb；本段沒有coding，feature產品source仍在獨立worktree。
+
+## [RUN-010] Event — 2026-10-13 21:11:33 +0800 (A-061)
+
+- Owner手動選取後，Play解析10402／1.4.1-unity-test成功，僅原生symbols缺少警告；release4名稱TEST ONLY 10402 Unity isolated units與zhTW/enUS測試限制保存。既有發布授權及readiness PASS成立，完成internal發布，頁面提供給內部測試人員，2026-10-13 21:10；正式軌道未動。
+- Pixel邀請頁Download test app確實出現更新，已按更新並進入等待／PlayProtect通過；使用同Play簽章更新，不uninstall，375位置／6路線／591路點資料保留待update後核對。
+- 發布截圖保存play-10402-published.png；Unity實際來源／reward尚未驗證，不能當產品驗收PASS。
+
+## [RUN-011] Event — 2026-10-13 21:12:58 +0800 (A-061)
+
+- Pixel已完成真正Play更新10402／1.4.1-unity-test，installer com.android.vending；無uninstall。actualAppPID篩選log確認Unity4.20.1／Game800390974 initialized successfully、adapter成功、valid token，banner loaded/impression；尚不知fill來源，不把banner載入當Unity供應。
+- 廣告檢查器需要新版重新實體搖動，已請owner開啟；既有Google／Unity測試装置同意有效，不重問。UnitySDKlog production mode表示客戶端初始化參數，後台device testoverride另保存；不能只據此斷言非測試廣告。
+- Scope check: root僅devlog／tracker／readiness報告與runtimejson／Play發布圖，產品source與正式groups仍原狀，PR58保留、Mintegral排除；tracker2/3。Unitybanner/reward來源／取消／exactlyonce未驗。

@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-13T21:12:34.480146+08:00",
+  "package": "com.moooo_works.letsgogps",
+  "versionCode": 10402,
+  "versionName": "1.4.1-unity-test",
+  "installer": "com.android.vending",
+  "unityTestDeviceSaved": true,
+  "testOnly": true,
+  "sdkLogs": [
+    "I/UnityAds(16369): Initializing SDK 4.20.1 42001 with game id 800390974 in production mode, session [redacted]",
+    "I/UnityAds(16369): Initialized successfully",
+    "D/UnityMediationAdapter(16369): Unity Ads initialized successfully.",
+    "I/UnityAds(16369): Generated a valid token.",
+    "D/BannerAdView(16369): Banner ad loaded",
+    "D/BannerAdView(16369): Banner ad impression"
+  ],
+  "limits": [
+    "Unity SDK initialized and token generated; banner source not yet verified",
+    "Unity banner/reward/early-cancel/exactly-once not yet passed",
+    "No production rollout; future production versionCode must exceed10402"
+  ]
+}
