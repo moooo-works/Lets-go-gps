@@ -101,6 +101,7 @@ data class MapUiState(
     val showGpxTip: Boolean = false,
     /** Show a "what's new" tip card about jump playback mode. */
     val showJumpModeTip: Boolean = false,
+    val showFloatingToolsTip: Boolean = false,
     /** Show the system health-check ModalBottomSheet (driven by startMocking blocking failure or settings entry). */
     val showHealthCheck: Boolean = false,
     /** Latest health-check snapshot; null until first refresh. */

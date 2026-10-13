@@ -493,4 +493,6 @@
     <string name="joystick_open">조이스틱 열기</string>
     <string name="joystick_close">조이스틱 닫기</string>
     <string name="pro_dialog_feature_floating">플로팅 도구: 검색, 저장 장소 및 경로</string>
+    <string name="tip_floating_tools_title">플로팅 도구와 독립 조이스틱 추가!</string>
+    <string name="tip_floating_tools_body">지도의 두 버튼으로 다른 앱 위에 플로팅 도구 또는 가상 조이스틱을 열 수 있어요.\n\n도구에서 검색, 저장한 장소, 경로, 좌표 복사를 사용할 수 있어요. 지점을 선택하면 미리보기만 표시되며, 여기로 이동을 눌러야 이동해요. 배경은 반투명이며 접으면 화면 가장자리로 돌아가요.\n\n조이스틱으로 이동 방향과 속도를 조절해요. 한 번에 한 종류만 표시되며, 다른 도구를 열면 전환돼요.\n\n둘 다 Pro 기능으로 구독 또는 보상형 광고를 통해 6시간 잠금 해제할 수 있어요. 처음 사용할 때는 다른 앱 위에 표시 권한이 필요해요.</string>
 </resources>

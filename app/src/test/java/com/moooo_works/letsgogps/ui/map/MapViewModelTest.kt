@@ -20,6 +20,7 @@ import com.moooo_works.letsgogps.domain.repository.GeocodedLocation
 import com.moooo_works.letsgogps.domain.repository.MockStatus
 import com.moooo_works.letsgogps.domain.repository.TimezoneRepository
 import com.moooo_works.letsgogps.service.MockLocationService
+import io.mockk.coVerify
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -122,6 +123,7 @@ class MapViewModelTest {
         every { settingsRepository.hasSeenClipboardHintTip() } returns flowOf(true)
         every { settingsRepository.hasSeenGpxTip() } returns flowOf(true)
         every { settingsRepository.hasSeenJumpModeTip() } returns flowOf(true)
+        every { settingsRepository.hasSeenFloatingToolsTip() } returns flowOf(true)
 
         // Default: every health-check item passes — individual tests override
         // when they want to exercise the blocking-failure path.
@@ -140,6 +142,23 @@ class MapViewModelTest {
         routeSimulator, joystickOverlayManager, proRepository, rewardedAdManager, systemHealthCheck,
         timezoneRepository, mockk(relaxed = true), context
     )
+
+    @Test
+    fun `floating tools tip acknowledgement survives a new view model`() = runTest {
+        val seen = MutableStateFlow(false)
+        every { settingsRepository.hasSeenFloatingToolsTip() } returns seen
+        coEvery { settingsRepository.setFloatingToolsTipSeen() } coAnswers { seen.value = true }
+        val vm = createViewModel()
+        runCurrent()
+        assertTrue(vm.uiState.value.showFloatingToolsTip)
+        vm.dismissFloatingToolsTip()
+        runCurrent()
+        assertFalse(vm.uiState.value.showFloatingToolsTip)
+        val reopened = createViewModel()
+        runCurrent()
+        assertFalse(reopened.uiState.value.showFloatingToolsTip)
+        coVerify(exactly = 1) { settingsRepository.setFloatingToolsTipSeen() }
+    }
 
     @Test
     fun `both overlay entry points require Pro`() = runTest {

@@ -521,6 +521,11 @@ fun MapScreen(
     ) {
         JumpModeTipCard(onDismiss = { viewModel.dismissJumpModeTip() })
     }
+    if (uiState.showFloatingToolsTip && !uiState.showOnboarding && !uiState.showLoopBounceTip &&
+        !uiState.showClipboardHintTip && !uiState.showGpxTip && !uiState.showJumpModeTip
+    ) {
+        FloatingToolsTipDialog(onDismiss = viewModel::dismissFloatingToolsTip)
+    }
 }
 
 @Composable

@@ -496,4 +496,6 @@
     <string name="joystick_open">開啟獨立搖桿</string>
     <string name="joystick_close">關閉搖桿</string>
     <string name="pro_dialog_feature_floating">懸浮工具：搜尋、收藏與路線</string>
+    <string name="tip_floating_tools_title">新增懸浮工具與獨立搖桿！</string>
+    <string name="tip_floating_tools_body">地圖右側新增兩個獨立按鈕：懸浮工具與虛擬搖桿，可在其他 App 上方操作。\n\n懸浮工具提供搜尋、收藏、路線與座標複製。選點只會預覽，按「移動到這裡」才移動；背景半透明，收合後會回到螢幕邊緣。\n\n虛擬搖桿用來調整移動方向與速度。一次只顯示一種工具，開啟另一種時會切換。\n\n兩者皆為 Pro 功能，可透過訂閱或觀看獎勵廣告解鎖 6 小時；首次使用需允許顯示在其他 App 上層。</string>
 </resources>

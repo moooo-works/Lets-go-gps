@@ -517,6 +517,12 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.hasSeenFloatingToolsTip().collect { seen ->
+                _uiState.update { it.copy(showFloatingToolsTip = !seen) }
+            }
+        }
     }
 
     fun dismissOnboarding() {
@@ -545,6 +551,11 @@ class MapViewModel @Inject constructor(
     }
 
     /** Dismiss the "jump playback mode" new-feature tip and persist the ack. */
+    fun dismissFloatingToolsTip() {
+        _uiState.update { it.copy(showFloatingToolsTip = false) }
+        viewModelScope.launch { settingsRepository.setFloatingToolsTipSeen() }
+    }
+
     fun dismissJumpModeTip() {
         _uiState.update { it.copy(showJumpModeTip = false) }
         viewModelScope.launch { settingsRepository.setJumpModeTipSeen() }
