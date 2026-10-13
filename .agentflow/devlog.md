@@ -439,4 +439,31 @@ Still to do
 
 # → Ask / A-061 (Takeshi Mori)
 
-+
++ 你來處理上架，使用aab上到測試版測試看看新增的unity ads有沒有異常
+
+---
+
+## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
+
+- 授權範圍：使用已完成1.4.1／10401 signed AAB發布Play測試版並驗證Unity廣告；不發布正式版、不merge原PR58、不加Mintegral。沿用A060通過的產品與build，手機仍為Pro Debug，不能把它當正式廣告測試。
+- Play現有頁是正式版空草稿，未修改；切到有效內部測試（原1.2.11），建立release3。擴充功能setFiles因file URL權限拒絕，改官方系統picker，不改權限；選取確切15.5MB letsgo-1.4.1-release.aab並上傳，頁面已顯示最佳化處理。
+- 下一步：確認上傳版本／簽章、填測試說明並rollout內部測試，再保存手機資料、確認實際Play安裝與Unity單一來源／reward流程。持續檢查後台實況，正式mediation群組不擅自全域啟用。
+
+## [RUN-002] Event — 2026-10-13 12:49:59 +0800 (A-061)
+
+- Play內部測試release3／1.4.1 Unity Ads internal test已發布；頁面確認「提供給內部測試人員」及10月13日12:43。10401／1.4.1／target36解析通過；僅缺native symbols警告，無阻擋錯誤，正式草稿未修改。
+- Pixel尚未加入internaltest4701480342138425252，邀請頁要求同意email／使用資訊提供給本App開發者；已向owner提出action-time確認，未自行按Accept。另磁碟164–204Mi造成pull／heredoc寫入失敗，已提出仅清理可重建386Mi中間檔選項，未刪除。
+- 手機完整private tar補存/private/tmp/a061-before-data.tar；App內JSON匯出到手機Download/letsgo-a061-backup.json，讀取僅統計schema3／375位置／6路線／591路點／settings present。沒有移除App或傳私有內容。Edge瀏覽器連線消失／原生AX timeout；後台最新群組尚未查到，不以舊paused狀態當現況。
+
+## [RUN-003] Event — 2026-10-13 12:50:55 +0800 (A-061)
+
+- Scope check: root只修改devlog與A061 tracker；App source、AAB、正式Play草稿、PR與AdMob群組未再修改。tracker1/3：Play內部測試發布成功；實機安裝及廣告待驗。
+- JSON備份已pull至/private/tmp/letsgo-a061-backup.json（167335bytes），只留本機；schema／375位置／6路線／591路點／設定統計通過。完整private tar與既有APK另保留。手機加入測試的同意尚無回覆，不按Accept、不uninstall。
+
+## [WIP-001] Checkpoint — 2026-10-13 12:50:55 +0800 (A-061)
+
+- **Finished:** 1.4.1／10401簽章AAB已發布Play內部測試；手機完整tar及可匯入JSON已補備份並核對數量。
+- **Running now:** 等手機加入邀請同意，瀏覽器連線中斷待恢復；磁碟清理選項尚待回覆。
+- **Still to do:** 安裝真Play測試版，驗證Unity單來源banner／reward及同意／崩潰；目前不能宣稱廣告實測通過。
+- **Next work action:** 同意到達後接受內部邀請，保全資料再處理簽章替換；恢復AdMob後確認測試裝置與來源。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
