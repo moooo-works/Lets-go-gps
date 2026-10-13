@@ -1,0 +1,31 @@
+{
+  "git_preflight": "初始root main僅hook devlog／archive變動；fetch成功main2cae356；新feat/help-faq自main建立後承接floating-dock；source續查contains main，modified僅授權11files；5筆2cae356/52fdeb3/70a1590/fe4d28e/7fb573e",
+  "commands": "最新./gradlew test lintDebug assembleDebug assembleDebugAndroidTest SUCCESS6s (UI source前一建置完整SUCCESS)；unit285/0fail/60existingSkip；App/TestAPK install-r Success",
+  "phone": "Pixel7Pro Android17/API37，前APK/data備份private/tmp，install -r兩APK Success",
+  "help_ui": "最新combined HelpGuideTest＋FloatingLayoutTest OK2 17.102s；四語、App真MockGpsTheme淺深交替、日韓130%LocalConfiguration字級；tip/ack/search/steps/empty/FAQ/back及既有浮窗",
+  "floating_ui": "初次combinedrun的FloatingLayoutTest成功，HelpGuideTest當時失敗；分開記錄不冒稱整批PASS",
+  "formal_main_smoke": "最新Pen稿正式Main設定→FAQ→Pro文章→目錄→設定→地圖PASS",
+  "failures": "誤接外層callback／Activity型別缺cast編譯失敗已修；UI誤點editable query／en讀zh資源由診斷確認並修test LocalResources。原log private/tmp，非App語系bug",
+  "final_source_reuse": "最新test fixture主題與字級已建置並成功實跑；最終source e89697c，不以初次Penrun作最新接受。DB/prefs proof沿用同功能且未改持久層/權限。",
+  "localized_article_count": 14,
+  "diagrams": "原生Compose步驟与A/B/C示意，跟隨主題語系",
+  "limits": "四語App主題／日韓130%字級為testhost；正式Main流程PASS，最新實拍目錄為zh-TW DARK。未全面landscape／正式交易或全部Map merge gates。",
+  "product_commit": "e89697c0676357480054499f6b5d12c799d81e6d",
+  "base_product_commit": "3c568fd",
+  "unit_tests": {
+    "tests": 285,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "resource_keys_identical": true,
+  "localized_keys_each": 46,
+  "apk_sha256": "5e7462c926c6b68318208a8b24cce9ea328a633c9dfd28c106a08c3bf47a1a41",
+  "first_product_commit": "922bcdd3e3b1f86348703f4ba8bb60232503ae60",
+  "revision": "原review-01 BLOCKING修正保留；review-02四PASS保留。使用者追加Pen桌面四態設計，真設計完成後整合e89697c，最終stage3需重審",
+  "ui_acceptance": "Pen原稿四態host直接檢視，產品分組清單／內縮divider／chip橫滑／600dp最大寬／時間軸／結果提醒／原生浮窗示意圖；原四語操作內容保留，非實作設計稿推測功能。未宣稱owner審美確認 Host另直接檢視最新正式Main DARK目錄，圖案／橘字／分組與Pen對應。",
+  "ui_preview": {
+    "path": "/private/tmp/a057-pen-index.png",
+    "sha256": "3466c9a80f0dc4b5957e27b08f635a3c58f800f33bf7aa5e9c86014809e1aec7"
+  }
+}
