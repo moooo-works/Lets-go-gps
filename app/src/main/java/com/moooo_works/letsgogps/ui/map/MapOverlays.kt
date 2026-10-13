@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.NearMe
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ControlCamera
 import androidx.compose.material.icons.filled.Delete
@@ -160,12 +161,13 @@ fun MyLocationFab(
     }
 }
 
-/** Column of small FABs at the bottom-end of the map: map-type toggle + joystick toggle. */
+/** Column of small FABs at the bottom-end of the map: map-type, companion and joystick toggles. */
 @Composable
 fun MapActionFabs(
     uiState: MapUiState,
     onToggleMapType: () -> Unit,
     onToggleJoystick: () -> Unit,
+    onToggleCompanion: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -184,14 +186,25 @@ fun MapActionFabs(
         }
 
         SmallFloatingActionButton(
+            onClick = onToggleCompanion,
+            containerColor = if (uiState.isCompanionEnabled) Accent500 else MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = if (uiState.isCompanionEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+        ) {
+            Box {
+                Icon(Icons.Outlined.NearMe, contentDescription = stringResource(R.string.floating_title))
+                if (!uiState.isProActive) Icon(Icons.Default.Lock, null, Modifier.align(Alignment.BottomEnd).size(10.dp))
+            }
+        }
+
+        SmallFloatingActionButton(
             onClick = onToggleJoystick,
             containerColor = if (uiState.isJoystickEnabled) Accent500 else MaterialTheme.colorScheme.surfaceVariant,
             contentColor = if (uiState.isJoystickEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
         ) {
-            Icon(
-                if (uiState.isProActive) Icons.Default.ControlCamera else Icons.Default.Lock,
-                contentDescription = stringResource(R.string.map_joystick_toggle)
-            )
+            Box {
+                Icon(Icons.Default.ControlCamera, contentDescription = stringResource(R.string.joystick_title))
+                if (!uiState.isProActive) Icon(Icons.Default.Lock, null, Modifier.align(Alignment.BottomEnd).size(10.dp))
+            }
         }
     }
 }

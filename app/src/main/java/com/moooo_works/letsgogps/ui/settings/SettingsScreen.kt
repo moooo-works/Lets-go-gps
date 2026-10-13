@@ -54,6 +54,7 @@ fun SettingsScreen(
     themePreference: ThemePreference = ThemePreference.SYSTEM,
     onThemeChange: (ThemePreference) -> Unit = {},
     gpxImportBus: GpxImportBus? = null,
+    onNavigateHelp: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val activity = context as? android.app.Activity
@@ -279,6 +280,10 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                SettingsMenuItem(label = stringResource(R.string.help_title), onClick = onNavigateHelp)
+            }
+
             // Pro 訂閱狀態區塊
             ProSection(
                 state = proSection,
