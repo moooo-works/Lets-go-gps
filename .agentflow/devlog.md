@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品e89697c；最後審查ROOT c08b33d；本輪交付紀錄見Git.
+Current commit: 產品e5580b6；最後AAB接受與審查ROOT064e43a；交付見Git.
 
-Tests/scenarios: Gradle required＋TestAPK成功，285/0fail/60skip；Pixel四語主題／130%字體與浮窗OK2 17.102s、正式Main導航PASS.
+Tests/scenarios: test/lintDebug/assembleDebug成功285/0fail/60skip；bundleRelease成功6m22s；實際AAB版本10400／1.4.0、zipCRC與jar簽章通過.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 四語離線FAQ、Pen主題設計實作、Pixel更新及最終Claude四PASS、草稿PR63.
+Proven: 1.4.0簽章Release AAB產出並本機交付，版本分支push與Claude targeted四PASS.
 
-Open: Unity GameID待回覆；PR63未合併，全Map煙測／正式交易廣告／全面橫向未測.
+Open: Play未上傳；Release未另安裝；UnityGameID待回覆，既有PR58–63未合併／原合併煙測待補.
 
-Next: docs-only同步分支後待使用者查看教學；Unity Ads依原stream接續.
+Next: 同步release分支docs-only紀錄後由使用者取用AAB；UnityAds依原stream待回覆.
 
-Artifacts: A-057-help-faq tracker／design／Pen原稿PNG規格／validation／原review及runner.
+Artifacts: dist/letsgo-1.4.0-release.aab；A-058-release-aab build／version.diff／tracker／原review與runner.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -267,3 +267,49 @@ Still to do
 - AAB成功：補齊原簽章設定後bundleRelease BUILD SUCCESSFUL6m22s。dist/letsgo-1.4.0-release.aab 12,407,797bytes，SHA256 5d6b285b34680bec9fe04f91a6ff55fe4250137133c4459b079b1b207df22bef；直接解析AAB protobuf確認1.4.0／10400，zip.testzip通過，jarsigner jar verified，內含R8 mapping。原失敗與修正保留build.json，不宣稱第一次整批成功。
 - 版本branch chore/release-1.4.0已push，產品e5580b6；既有PR58–63不合併，Play未上傳。Gradle既有uploadCrashlyticsMappingFileRelease task執行，非Play發佈。
 - Scope check: runtime相對A057產品未變，仅build.gradle兩行版本metadata；ROOT A058原始版本diff／build接受事實／tracker／devlog，AAB與原credentials ignored。完成交付前保存當前包證據，host核對輸出；不再重跑成功產品checks。
+
+## [RUN-004] Event — 2026-10-13 11:49:34 +0800 (A-058)
+
+- 完成AAB版本／CRC／JAR簽章／mapping與SHA驗證，檔案在dist。產品e5580b6與版本分支已push；tracker3/3。無新增runtime、key、Playupload或原PRmerge。
+
+## [RUN-005] Event — 2026-10-13 11:49:34 +0800 (A-058)
+
+- Planner對版本config mixed metadata給targeted；接受AAB／簽章恢復證據凍結ROOT064e43a後作一次真正Claude Code獨立審查，actualclaude-opus-5-5/high request、exit0／未截斷／clone.changed=false，四項PASS。host核對原report與source／直接驗包證據；不為stamp重複model标签重跑，也不把Play推測當已接受。Scope check: source兩行版本metadata；ROOTpostreview僅原dispatch／clone／runner／report、tracker與devlog保存，無新產品或接受判定變更。
+
+## [RUN-006] Event — 2026-10-13 11:49:34 +0800 (A-058)
+
+- 首次close只因原report stamp後重複模型標記無法辨識而拒絕，未寫入。保留review.md原bytes並確認與runner.result相等；另存明確host-attributed review-record.md格式wrapper，引用原target／四PASS／原hash／限制，內嵌原report不改作者事實。只重試機械close，不重跑模型／建置。
+
+# ← Reply / A-058
+
+* _2026-10-13 11:49:34 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已升版為1.4.0／10400，完成約12.4MB的簽章Release AAB，版本、簽章與完整性通過；尚未上傳Play。
+
+## [FINAL REPORT]
+
+1. 「升版號後build aab」
+
+   - 成功：由1.3.4升為 **1.4.0**（versionCode **10400**），獨立worktree／branch `chore/release-1.4.0` 承接最新已驗證浮窗與FAQ，產品commit e5580b6已push。只改版本常數兩行，既有PR58–63未合併。
+   - 交付：[letsgo-1.4.0-release.aab](../dist/letsgo-1.4.0-release.aab)，**12,407,797 bytes**，使用原Release金鑰簽章，zipCRC及jarsigner通過；直接從真正AAB protobuf確認1.4.0／10400，內含R8 mapping。SHA256：`5d6b285b34680bec9fe04f91a6ff55fe4250137133c4459b079b1b207df22bef`。
+   - required test／lintDebug／assembleDebug成功，285tests、0fail／error、60既有skip。首次錯cwd與首次簽章配置不完整的失敗保留，合入root原四個KEY設定後最後`bundleRelease`成功6m22s。AAB與credentials都ignored，不進Git；MAPS設定保留，沒有新建金鑰。
+   - 我已檢查版本差異、實際AAB、簽章和完整性。真正Claude Code對固定ROOT064e43a／產品e5580b6進行targeted獨立審查，四項PASS；審查只讀源碼與host接受證據，並未親自驗包。clone無ROOTcommit本身，固定ROOT文件由host複製，限制原文保留。
+   - 尚未上傳Play或另行安裝Release到手機；Gradle既有Crashlytics mapping上傳task執行，不等同Play發佈。報告中對Play接受的推測不當作發佈成功。收尾ROOT紀錄push後會同步release分支的docs-only差異，App與本包不變。
+   - Key Records — read these first
+
+     [建置與AAB驗證](artifacts/A-058-release-aab/build.json) — 輸出檔名、版本、大小、SHA與真實失敗／恢復結果。
+
+     [最後Claude審查](artifacts/A-058-release-aab/review.md) — focused版本／打包证據判定及獨立性限制。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-059 (Takeshi Mori)
+
++
