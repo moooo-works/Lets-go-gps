@@ -1,0 +1,44 @@
+{
+  "all_mockgps_tables_identical": true,
+  "tables": {
+    "android_metadata": {
+      "rows": 1,
+      "sha256": "6493c1868b744679b9734ea5c4693cfae9dd8c9d5813cf623ed6699f865bc287"
+    },
+    "location_folders": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "room_master_table": {
+      "rows": 1,
+      "sha256": "5ee354e9c9c584c8d058b02977dd7dfb55e37c8f00ee8b785062f1fb96d2ff06"
+    },
+    "route_points": {
+      "rows": 591,
+      "sha256": "7089de45f6bcae9330ed291bc0226adab1052319500056704432db9da44d0876"
+    },
+    "routes": {
+      "rows": 6,
+      "sha256": "ad6e1bd14d00a3e6ed0e528d9d94ecc72c115c6f4cf6bf25eaef5f6a3386c509"
+    },
+    "saved_locations": {
+      "rows": 375,
+      "sha256": "fd8a8748f203e71f1a079d2a845b31e187824625cf74e006bc9b25492137d9f1"
+    },
+    "sqlite_sequence": {
+      "rows": 3,
+      "sha256": "97ecba848225a440edb8fa36a25ba5f9a491c385c329e4673c640f8fa66fd5fc"
+    }
+  },
+  "selected_prefs_before": {
+    "language_pref": "zh-TW",
+    "theme_pref": "LIGHT"
+  },
+  "selected_prefs_after": {
+    "language_pref": "zh-TW",
+    "theme_pref": "LIGHT"
+  },
+  "backup_apk": "/private/tmp/letsgps-a057-before.apk",
+  "backup_data": "/private/tmp/letsgps-a057-before-data.tar",
+  "limits": "未聲稱Google SDK事件庫完全相同；不公開任何地點內容"
+}
