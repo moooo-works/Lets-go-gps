@@ -461,6 +461,10 @@ Still to do
 
 + 繼續
 
++ <send_user_message_question_reply>
+  [{"answer":"同意加入 Unity 測試裝置","question":"Unity 新版後台目前沒有測試裝置；Google 官方要求 Unity 也啟用測試模式。是否同意把同一個 Pixel 廣告識別碼加入你的 Unity Ads 測試裝置清單？只用於此 App 的廣告測試。","questionItemId":"[\"request_user_input_async\",\"call_bc16d44146de4e92a3634f261a3a707f\",0]"}]
+  </send_user_message_question_reply>
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -522,3 +526,25 @@ Still to do
 - 後續Inspector已列兩SMOKE單元，但Adapters仍No adapters found／Single source只有AdMob；設定custom banner320×50後test button可用，兩次Fill皆AdMob，不能據此說Unity通過。先前default button停用與尺寸有關，不宣稱ApplicationContext為已證實原因；官方SDK版本／exclude配對與本版相同，R8保留UnityAdapter／UnityMediationAdapter名稱。
 - Restore export核對375／6／591、saved locations（扣id）及設定相等；route names／points全部相等，既有importer只重建六route createdAt，原完整tar保留。Map圖資已視覺核對正常，private截圖不Git。
 - 新測試方法限定同source＋兩隔離adunits＋10402 test metadata，不改產品behavior；原AAB與正式groups保留。design與可追溯init script已保存，NextGen候選code消耗10402須明確禁止promote正式版，後續prod code需更大。授權來源為A061上傳測試版並驗Unity及「繼續」，只送內部軌道。
+
+## [RUN-008] Event — 2026-10-13 15:55:00 +0800 (A-061)
+
+- Unity已依owner另行授權保存Pixel測試裝置，頁面Total test devices:1；correctApp已選，未變更全App強制test mode，私有AAID不Git。
+- 10402／1.4.1-unity-test隔離AAB建置、簽章／CRC／DEX及原10401保留驗證完成；產品source不變。只上internal，下一prod code>10402。
+- Claude獨立review已結束exit0且clone無改動，但6006-byte JSON被runner4096-byte診斷上限截斷，finalVerdict無完整證據；不能當PASS。保留runner原證據，啟動短text完整報告恢復，非修飾重審。review待完成不publish。
+- Scope check: root僅devlog、A061tracker／test配置證據／review派工紀錄；App source、正式群組與PR58未改，Mintegral排除。tracker2/3，Unity實測未完成。
+
+## [WIP-003] Checkpoint — 2026-10-13 15:55:00 +0800 (A-061)
+
+- **Finished:** Play10401發布／安裝及資料驗證還原；Google測試廣告觀察；Unity Pixel測試裝置保存；10402隔離AAB建置完成。
+- **Running now:** Claude短報告恢復，完整verdict取得前不發布10402。
+- **Still to do:** Play10402更新、真App Unity banner／reward及取消診斷、原theme/language/mock設定恢復。
+- **Next work action:** 接收readiness verdict後發布內部10402，更新Pixel並驗實際Unity來源。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-009] Event — 2026-10-13 16:02:04 +0800 (A-061)
+
+- 完整Claude恢復報告Outcome／Minimality／Conformance／Verdict皆PASS，target5b92cd6；host核對範圍與AAB證據後接受test-only readiness，away-gates提供Result Go。reviewer時間為估計值已明示，未將其當實測時鐘或Unity成功證據。
+- Play internal release4空草稿已建立；上傳原生GoTo面板Enter／Esc反覆回到/，重綁定及reset仍重現。瀏覽器filechooser因file URL權限拒絕，不擴張權限；將相同測試AAB複製Downloads，請owner手動選取已授權檔案。尚未上傳／publish10402。
+- 手機淺色／繁中恢復，原mock AppOps授權補回，前景refresh後App顯示已授權。10401與有限時廣告Pro仍保留。私有JSON／tar未傳出。
+- Git preflight main；main...origin/main ahead1，無behind；origin/main75091c7283589a226d8b8226c4a663b8b2b3306e，最近75091c7／4b1c676／9e231e6／3c4e18e／5fe28fb；本段沒有coding，feature產品source仍在獨立worktree。
