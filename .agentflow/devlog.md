@@ -469,6 +469,8 @@ Still to do
 
 + 已開啟
 
++ 已開啟
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -585,3 +587,10 @@ Still to do
 - **Still to do:** 關閉single-source、privacy／來源紀錄與正常restart確認、最後review；提前取消仍未證實。
 - **Next work action:** Inspector開啟後核對診斷並stop test，不開正式Unitygroup。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-014] Event — 2026-10-13 23:15:25 +0800 (A-061)
+
+- 最後Inspector真記錄banner FillUnityAds23:12:09／reward FillUnityAds23:05:24；Privacy GDPR applies=false，CMP欄未填，不強制地理或宣稱欧洲同意測試。
+- 已Stop single source，UI顯示Inactive／Test stopped，截圖保存；force-stop/restart正常App後mixedsource TestAd載入，無本次觀察到crash。
+- Live AdMob正式banner8708929545及reward8676901314仍paused，兩隔離SMOKE就緒。保持測試版可用，不發布正式、不mergePR58、不加Mintegral。
+- 驗收限定已完成內部發布／Pixel實際Unity正向banner與reward；取消／exactlyonce及Europe／production供應未驗，10401首次無可用廣告現象記錄不臆測修復。即將固定runtime證據給Claude最後核對，不重跑未變產品source的成功Gradle檢查。

@@ -1,0 +1,34 @@
+{
+  "observedAt": "2026-10-13T23:15:25.526789+08:00",
+  "versionCode": 10402,
+  "versionName": "1.4.1-unity-test",
+  "internalRelease": 4,
+  "finalInspector": {
+    "banner": "Fill Unity Ads 11:12:09 PM",
+    "rewarded": "Fill Unity Ads 11:05:24 PM",
+    "singleSourceAfterStop": "Inactive; Test stopped",
+    "privacyGdprApplies": false,
+    "cmpFields": "unpopulated; no forced European geography tested"
+  },
+  "afterStopForceRestart": {
+    "appStarted": true,
+    "bannerDisplayed": "Test Ad normal mixed-source request",
+    "crashObserved": false
+  },
+  "backendReadback": {
+    "formalBannerGroup8708929545": "paused",
+    "formalRewardGroup8676901314": "paused",
+    "isolatedBannerGroup2920871738": "ready",
+    "isolatedRewardGroup7981624829": "ready"
+  },
+  "dataProof": "update-data-preservation.json",
+  "scope": "Only internal testing, no production rollout, no PR merge, Mintegral excluded; no source repair needed for positive Unity journey",
+  "limits": [
+    "Early cancellation and exactly-once callback are not runtime verified",
+    "Production Unity supply/earnings and European consent journey not verified",
+    "The first10401watch temporarily unavailable then subsequentGoogle reward succeeded; no proven code cause",
+    "Existing import regenerated original route createdAt; rawprivate backups kept",
+    "10402 is TEST ONLY and must never be promoted; futureproduction code>10402"
+  ],
+  "hostInspection": "Inspected actual phoneUI, current-PID Unityload/show/reward logs, realInspectorfill, stoppedtestUI and restart, privateexports aggregateequality, liveAdMobformalpaused; unchangedproductsource reviewedA060; testinitreview5b92 accepted."
+}
