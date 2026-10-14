@@ -6,17 +6,17 @@ Notebook: .agentflow/devlog.md — root.
 
 Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: APK apksigner與manifest金鑰摘要、Cloud同金鑰Android白名單唯讀核對；未新增實機測試.
+Tests/scenarios: Cloud重開憑證驗五筆授權、原Android與API限制保留；沒有產品變更或朋友實機驗證.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 已核對交付debug APK真Maps金鑰與Cloud相符，其B2EF簽章未在白名單.
+Proven: debug Maps B2EF簽章授權已依確認儲存，重開同憑證五筆存在.
 
-Open: 朋友實際APK／手機／Android／錯誤訊息待補；Maps授權未修，模擬失敗未定因；原Unity限制保留.
+Open: 朋友地圖恢復待實機回報；模擬失敗待手機／Android／錯誤資訊；原Unity與lint限制保留.
 
-Next: 取得朋友裝置資訊後繼續診斷；若要補debug Maps授權須於變更時確認.
+Next: 朋友等待最多5分鐘、完全關閉再開App；取得無法飛的裝置資訊後續查.
 
-Artifacts: 本輪devlog唯讀診斷紀錄；原交付debug APK保留.
+Artifacts: .agentflow/artifacts/A-064-debug-maps/prepared.jpg、saved.jpg.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -119,5 +119,52 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-064 (Takeshi Mori)
+
++ 先處理debug版的授權缺漏
+
++ 確認
+
+---
+
+## [RUN-001] Event — 2026-10-14 11:57:21 +0800 (A-064)
+
+- 已重新開啟正確Maps key、核對原四笔簽章與32 API不變，僅在新增表單填入com.moooo_works.letsgogps與交付Debug SHA1 B2:EF:2A:B6:C7:B8:54:6A:A4:1D:3D:83:D7:1C:BB:8D:95:87:EA:4F，尚未按完成或儲存。
+
+- 瀏覽器Computer Use Confirmation Policy要求Creates or materially expands security-sensitive access必須action-time確認，即使此前指示處理仍需本次儲存前確認；已以精確package／fingerprint／destination／purpose詢問，沒有擅自擴大限制。表單markHandoff，prepared.jpg保存可審畫面，待owner確認後儲存並重讀白名單。
+
+## [RUN-002] Event — 2026-10-14 11:59:08 +0800 (A-064)
+
+- Owner確認後完成／儲存debug B2EF授權，儲存中後頁面意外about:blank；未重按Save，重新開同key後五筆授權持久存在。原四筆、Android限制及32 API維持；saved.jpg公開指紋圖目視核對無金鑰。僅修後台授權，未重建APK或測朋友實機。
+
+# ← Reply / A-064
+
+* _2026-10-14 11:59:08 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- Debug APK 地圖授權已補上並重新讀取確認；請朋友等待最多5分鐘後完全關閉再開App，無需重裝。
+
+- 已依確認套用精確套件與簽章，原四筆授權與限制保留。
+
+## [FINAL REPORT]
+
+1. 「先處理debug版的授權缺漏」
+
+   - 成功：Google Cloud lets-go-fake-gps 的 Maps Platform API Key 已新增 com.moooo_works.letsgogps／B2:EF:2A:B6:C7:B8:54:6A:A4:1D:3D:83:D7:1C:BB:8D:95:87:EA:4F。儲存後頁面曾轉about:blank，我重新開啟同憑證，確認五筆授權存在、Android應用程式限制仍checked、原32 API及四筆簽章保留。沒有再送一次儲存或公開金鑰。[授權完成畫面](artifacts/A-064-debug-maps/saved.jpg)。
+
+   - 這是後台修正，既有letsgo-1.4.1-debug-pro.apk可繼續用，無需build或重新安裝。Console提示最多5分鐘生效，請朋友完全關閉再開App重試地圖；尚未取得朋友實機成功回報，不能稱地圖恢復實測通過。無法飛是前輪另外待查的症狀，此次未改模擬引擎。
+
+2. 「確認」
+
+   - 已依action-time確認完成本次授權；我核對授權範圍與實際儲存結果，保留[待套用畫面](artifacts/A-064-debug-maps/prepared.jpg)及完成畫面。未改APK、產品程式、Play版或其他後台。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-065 (Takeshi Mori)
 
 +
