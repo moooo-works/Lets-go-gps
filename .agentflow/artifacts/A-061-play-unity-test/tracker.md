@@ -5,16 +5,16 @@
 - **Work key:** A-061-play-unity-test.
 - **Active Ask:** A-061.
 - **Goal:** 發布內部測試、實測Unity，完成正式10403發布及更新說明。
-- **Last update:** 2026-10-13 23:35:48 +0800.
-- **Evidence commit:** uncommitted.
+- **Last update:** 2026-10-14 08:00:51 +0800.
+- **Evidence commit:** 981977cd61204a5bc68e942b9271794b3b599331.
 
 ## Overall state
 
-- **State:** active.
-- **Reason:** 正式候選建置與Claude審查完成，internal10403已發布；手機鎖定待owner解鎖驗證，formal仍草稿。
+- **State:** complete.
+- **Reason:** 內部實測、正式候選及送審/自動推出設定完成，Claude最後接受PASS；Google審查仍待外部核准。
 - **Total:** 5.
-- **Completed:** 4.
-- **Remaining:** 1.
+- **Completed:** 5.
+- **Remaining:** 0.
 
 ## Accepted task checklist
 
@@ -25,7 +25,7 @@
 
 - [x] **T-4:** 從最新origin/main建立獨立production worktree，承接A060source只升1.4.3/10403，正式IDs及Profalse；必跑test/lintDebug/assembleDebug/bundleRelease、實包/簽章與Claude審查，更新說明zh/en/ja/ko。Source: A-061「完成後將測試版升級為正式版，更版說明記得寫」。 Proof: production-build.json/production-review.md，source31b528c/ROOT915bd58審查PASS，311tests0fail60existingSkip，lint命令exit0但34existingerrors明示。
 
-- [ ] **T-5:** 發布10403 internal更新Pixel保留資料，再正式release與Unity正式groups啟用；核對實際Google審查/發布狀態，不能直接promote10402、不mergePR58。Source: A-061正式發布授權。
+- [x] **T-5:** 發布10403 internal更新Pixel保留資料，再正式release與Unity正式groups啟用；核對實際Google審查/發布狀態，不能直接promote10402、不mergePR58。Source: A-061正式發布授權。 Proof: production-rollout.json/production-phone-smoke.json/Console送審圖及groupsReady；100%已送審，managedoff核准後自動推出；Google未核准，不稱已live。
 
 ## Accepted scope changes
 
@@ -35,20 +35,22 @@
 
 ## Current recovery
 
-- **Current item:** T-5.
-- **Last proven result:** Actual Unity banner loaded/shown; Unity rewarded earned and App+6h;10402export375/6/591 unchangedexcepttimestamp.
-- **Active blocker or running process:** Pixel locked; ownerunlockpending. NoGradle/reviewerprocess running.
-- **Next safe action:** PlayupdatePixel10403 and smoke; thenformalsubmit/rollout andenableformalUnitygroups; no10402promotion.
+- **Current item:** none.
+- **Last proven result:** production-phone-smoke.json; formal審查中/managedoff;formalUnitybanner及rewardready/googlefallback;10402未promote.
+- **Active blocker or running process:** none.
+- **Next safe action:** none.
 - **Expected changed files:** .agentflow/devlog.md; .agentflow/artifacts/A-061-play-unity-test/tracker.md; 必要測試證據。
 
 ## Completion proof
 
-- **All accepted tasks checked:** no.
+- **All accepted tasks checked:** yes.
 - **Blocking accepted decision:** none.
 - **Operation running:** no.
-- **Next action remaining:** T-5.
-- **Evidence status:** current.
-- **Judgment:** active.
+- **Next action remaining:** none.
+- **Evidence status:** complete.
+- **Judgment:** complete.
+
+- **External status:** Google審查待核准，managedpublishingoff核准後自動推出；正式送審操作完成不等於已公開上線。
 
 ## Update meaning
 

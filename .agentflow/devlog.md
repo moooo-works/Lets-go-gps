@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 产品0804c8b（App tree與built fbd8a84同）；review ROOT5fe28fb；交付見Git.
+Current commit: 產品built31b528c；正式AAB10403/1.4.3；最後review ROOT981977cd；交付紀錄見Git.
 
-Tests/scenarios: 五GradleSUCCESS2m55s；311/0fail/60skip；retry red20/3→green20/0；兩包DEX／簽章／版本／Pro分流；Pixel publicUI OK2與正式Main／Pro狀態、DB與App設定保留.
+Tests/scenarios: 四Gradle SUCCESS2m52s；311/0fail/60skip；lint34既有errorseverity；Pixel真Play更新/資料375-6-591/Map與Googlereward；Unity真banner/reward+6h/Inspectorfill/stop；正式groups與送審驗證.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 完整Unity／同意／PR58廣告整合，1.4.1 AAB與ProDebugAPK產出，Pixel更新與Claude四PASS，草稿PR64.
+Proven: Unity正向實測、正式10403簽章AAB與四語notes、Pixel更新資料保留、formal100%送審/自動推出設定與UnitygroupsReady；Claude四PASS.
 
-Open: 真AdMob Unity single-source／正式reward／付款未驗證，後台未啟用／Play未上傳；原PR58–64未合併，全Map煙測／全面layout未完成.
+Open: Google審查中未確認公開上線；正式非測試Unity供應/收益/付款、提前取消/exactlyonce/Europe未驗；手機兩項權限設定及既有lint問題.
 
-Next: docs-only同步base/head後取用雙產物；正式廣告供應另循原Unity stream驗證.
+Next: Google核准後自動全面推出；不要promote10402；原Unity stream保留其既有待辦.
 
-Artifacts: release-ad-integration工作樹outputs/bundle/release與outputs/apk/debug雙產物；A060 design/build/data/tracker/review及runner.
+Artifacts: .agentflow/artifacts/A-061-play-unity-test/production-rollout.json/production-build.json/production-phone-smoke.json/production-release-notes.txt/acceptance-review.md；release-ad-production outputs正式AAB.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -473,6 +473,8 @@ Still to do
 
 + 完成後將測試版升級為正式版，更版說明記得寫
 
++ 已解鎖
+
 ---
 
 ## [RUN-001] Event — 2026-10-13 12:41:38 +0800 (A-061)
@@ -628,3 +630,98 @@ Still to do
 - **Still to do:** Pixel真Play10403更新／smoke；正式送審／發布與Unity正式群組啟用，最後接受／紀錄。
 - **Next work action:** 解鎖後Play更新10403並確認資料/圖資；依既有正式授權繼續rollout。
 - **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-019] Event — 2026-10-14 07:50:26 +0800 (A-061)
+
+- Owner解鎖後Pixel真Play更新10403／1.4.3，installer com.android.vending，無uninstall。地圖真圖資正常（private screenshot僅tmp）；GoogleTestAd reward明示已發放獎勵，返回Pro5h59m。新匯出375／6／591及各section對10402相等，仅exportedAt異；淺色／繁中／MockAllowed保留。production-phone-smoke.json保存，通知/定位設定2項仍需使用者設定，沒有擅自給新權限。
+- 正式release42／10403四語notes與100%全面推出已保存，再點送審1項變更／將變更送審；Play顯示審查中的變更，快速檢查進行中，managedpublishing off，通過會自動發布。不能稱已正式上線。
+- 正式Unity Rewarded group核對正式6473078035、Game800390974、BP_Rewarded_Android與GoogleAdMob fallback，sourceUnity就緒/有效；已切啟用並儲存。switchcall回報timeout但readback已checked，僅續Save不重切；待列表確認，banner正式群組尚待核對啟用。
+
+## [RUN-020] Event — 2026-10-14 07:55:32 +0800 (A-061)
+
+- FormalUnityBanner核對1824598031／Game800390974／BP_Banner_Android，Googlefallback仍在；啟用/Save後DisabledSave確認，再Cancel離開已存編輯，列表兩正式groups皆就緒。group proof裁切只含兩列status/name，不留帳戶收益/AAID。
+- 10403正常force-stop/restart後Unity4.20.1與adapter成功初始化、正常TestAdbannerload/impression，無本次觀察到crash；不能稱正式非測試Unityfill，Pixel仍兩邊測試裝置。
+- Play formal審查中且managedoff，100%全推；快速檢查剩最多10分鐘。正式已提交但尚未live，production-rollout.json保存時點事實與limits。
+- Scope check: ROOT僅A061devlog/tracker／phone/rollout證據／公開Console圖；App/gradle未再改，acceptedsource31b528c與AAB不變，tracker4/5。僅新授權formalgroups啟用、Playrelease42送審；原PR58與Mintegral限制維持。
+
+## [WIP-006] Checkpoint — 2026-10-14 07:55:32 +0800 (A-061)
+
+- **Finished:** Pixel10403更新、地圖/資料/Googlereward驗證；formal42/10403四語notes/100%送審；Unity兩正式groupsReady/googlefallback。
+- **Running now:** Google快速檢查；目前無本機build或reviewworker。
+- **Still to do:** 核對檢查/審查實際狀態、最後deployment證據review與收尾。Google未核准前不稱live。
+- **Next work action:** 固定審查狀態及當前receipts，Claude核對真實送審/限制後交付；通過Google後自動推出。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-021] Event — 2026-10-14 07:56:16 +0800 (A-061)
+
+- Play快速檢查進度條及倒數已消失，實際顯示「變更項目正在審查中」，沒有可見阻擋；formal10403/100%與managedoff維持。當前operator工作已完成，Googlereviewpending後將自動發佈，仍不宣稱已live。
+- production-rollout.json更新新時點，Console screenshot重新保存；準備對固定ROOT部署證據最後cross-check，與先前readiness915bd58分開。所有成功build/tests沿用，產品source及AAB未變。
+
+## [RUN-022] Event — 2026-10-14 08:05:50 +0800 (A-061)
+
+- Claude最後deployment-acceptance stage1/3對ROOT981977cd及產品31b528c完成四PASS，exit0／無截斷／clone無改動；host核對rawreport與runner一致及實際手機/Play/groups/資料/實包，接受限定送審與驗證結果，away-gates對此target供應Result Go。Google審查中不稱已live。
+
+## [RUN-023] Event — 2026-10-14 08:05:50 +0800 (A-061)
+
+- 最終scope ROOT只保存原派工/clone/planner/runner/report與tracker/devlog；產品source和AAB不再改。逐一記錄postreview純保全路徑，tracker5/5以981977cd證據完成operator工作；Google核准後自動推出，取消/exactlyonce/Europe/正式非測試fill等限制保留。原PR58保留、Mintegral排除，沒有pendingworker。
+
+# ← Reply / A-061
+
+* _2026-10-14 08:05:50 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- Unity橫幅與獎勵已在Pixel真Play測試版確認來源，觀看後正常解鎖6小時Pro；資料保留，取消等未驗項明示。
+- 正式1.4.3／10403已送交Google審查，四語更新說明已套用、正式Unity群組已啟用；核准後自動100%推出，目前不能稱已上線。
+
+## [FINAL REPORT]
+
+1. 「你來處理上架，使用aab上到測試版測試看看新增的unity ads有沒有異常」
+
+   - 成功完成內部發布與正向Unity實測：Pixel7Pro／Android17真Play安裝10401，再更新隔離10402；Unity SDK4.20.1／adapter4.20.1.0初始化，實際banner載入顯示、reward回呼及App＋6h，最後Inspector兩者均Fill Unity Ads。[Unity來源圖](artifacts/A-061-play-unity-test/unity-inspector-fill.png)與[實測紀錄](artifacts/A-061-play-unity-test/unity-runtime-results.json)保留，單一來源測試已Stop／Inactive並重啟正常流程。
+   - Google與Unity測試裝置已依兩次明確授權保存，私有AAID／GPS備份不Git或傳出；手機10403目前為有限時Pro，沒有建立訂閱購買。375位置／6路線／591路點及設定對更新前相等，僅匯出時間不同；原首次匯入重建六條路線createdAt，完整原tar與JSON備份仍留本機。
+   - 限制：只證實此Pixel測試裝置的正向banner／reward，不能稱正式非測試Unity供應／收益通過；提前取消、exactly-once及歐洲同意流程未驗。10401第一次watch暫無可用廣告、下一次成功的現象已記錄，沒有把猜測當程式修復。手機通知／定位兩項設定仍待使用者處理；此次沒有擅給新權限或宣稱完整mock engine／全Map UX煙測。
+   - 10402只能測試，禁止升正式；原10401生產AAB與Pro Debug APK保留。Map圖資已實際目視確認正常，private位置截圖只留tmp。
+
+2. 「完成後將測試版升級為正式版，更版說明記得寫」
+
+   - 正式送審操作成功：Play正式track4698113845943788408／release42僅10403，1.4.3、100%全面推出；目前顯示審查中的變更／變更項目正在審查中，快速檢查進度已消失、無可見阻擋。控管型發布關閉，Google核准後會自動發布，無需再按發布；尚未確認公開上線。[正式送審圖](artifacts/A-061-play-unity-test/play-10403-submitted.png)。
+   - 使用新獨立worktree／分支fix/release-ad-production，從最新origin/main承接已審產品，對b9868ee僅versionPatch1→3；避開測試版消耗10402，沒有更動SDK、同意、解鎖或UI邏輯。[正式AAB](../.worktrees/release-ad-production/app/build/outputs/bundle/release/letsgo-1.4.3-release.aab)15,540,418bytes，SHA256 76f938ba511440e021677192df2225421fb9b560a479f2843409c5a5ea318c48；真manifest、CRC、原uploadkey簽章及DEX驗證10403／1.4.3、正式兩版位、Unityadapter、Profalse，沒有SMOKE IDs或Mintegral。
+   - Pixel已從Play更新10403，installer com.android.vending；地圖圖資、淺色／繁中／MockAllowed保留，GoogleTestAd reward正常給Pro5h59m，匯出375／6／591與所有section對10402相同（扣匯出時間）。Unity正式banner8708929545／reward8676901314已就緒，Game800390974、BP_Banner_Android／BP_Rewarded_Android及正式1824598031／6473078035逐一核對，Googlefallback保留；正式App重啟SDK與adapter成功，正常banner顯示。
+   - 更版說明已套用繁中、英文、日文、韓文，包含懸浮工具／獨立搖桿、Pro或廣告解鎖、使用說明與FAQ、Android17及浮窗操作改善、Unity與廣告隱私流程。
+   - 必要驗證：./gradlew test／lintDebug／assembleDebug／bundleRelease SUCCESS2m52s，311tests／0failure／0error／60既有skip。lintDebug命令成功不等於零lint問題：既有abortOnError=false，仍34errorseverity／100warning，Error ID counts與A060相同。此版只升版本，未修既有lint。
+   - Claude正式readiness對ROOT915bd58先PASS再發布；最後部署接受對固定ROOT981977cd61204a5bc68e942b9271794b3b599331四PASS，raw report与runner相同、exit0、無截斷／clone無改動。我核對了實包、手機、Console與所有交付路徑，沒有新增判定或把送審寫成上線。原PR58及其他原PR沒有merge；產品分支已push，close紀錄後僅同步docs保持不落後main，App/gradle對built31b528c不變。
+   - 開始coding前Git preflight輸出：
+
+     ```text
+     main
+     ## main...origin/main
+     b34d684718f0b0cb52d622c8bd0e7dc9507575fb
+     b34d684 規劃正式10403發布並保留Unity測試版限制
+     35f9c07 固定Unity來源驗證與測試收尾證據
+     8ec626b 確認Play測試版Unity橫幅與獎勵及資料保留
+     9e26f00 發布Unity隔離內部10402並確認PixelSDK初始化
+     7732e9d 記錄Unity測試建置審查與Pixel測試裝置設定
+     ```
+
+   - Key Records — read these first
+
+     [正式送審與Unity配置](artifacts/A-061-play-unity-test/production-rollout.json) — 當前Google審查狀態、正式群組及未驗限制。
+
+     [最後Claude審查](artifacts/A-061-play-unity-test/acceptance-review.md) — 原始四PASS及審查者權限／驗證限制。
+
+     [正式建置證據](artifacts/A-061-play-unity-test/production-build.json) — AAB、版本／簽章／版位／測試及lint實況。
+
+     [四語更版說明](artifacts/A-061-play-unity-test/production-release-notes.txt) — 已套用Play的更新內容。
+
+     [手機驗證](artifacts/A-061-play-unity-test/production-phone-smoke.json) — 10403更新、地圖／reward及資料保留結果。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+---
+
+# → Ask / A-062 (Takeshi Mori)
+
++

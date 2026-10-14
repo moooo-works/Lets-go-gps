@@ -1,0 +1,15 @@
+{
+  "changed_files": [
+    ".agentflow/artifacts/A-061-play-unity-test/production-phone-smoke.json",
+    ".agentflow/artifacts/A-061-play-unity-test/production-rollout.json",
+    ".agentflow/artifacts/A-061-play-unity-test/play-10403-submitted.png",
+    ".agentflow/artifacts/A-061-play-unity-test/unity-production-groups-ready.png"
+  ],
+  "changed_lines": 93,
+  "behavior_change": true,
+  "trust_boundary": true,
+  "broad_change": false,
+  "consequential_change": true,
+  "original_ask_path": ".agentflow/devlog.md",
+  "normal_journey_path": ".agentflow/artifacts/A-061-play-unity-test/production-design.md"
+}
