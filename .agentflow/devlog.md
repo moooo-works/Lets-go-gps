@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品built31b528c；正式AAB10403/1.4.3；最後review ROOT981977cd；交付紀錄見Git.
+Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: 四Gradle SUCCESS2m52s；311/0fail/60skip；lint34既有errorseverity；Pixel真Play更新/資料375-6-591/Map與Googlereward；Unity真banner/reward+6h/Inspectorfill/stop；正式groups與送審驗證.
+Tests/scenarios: 本輪公開Threads全文／帳號／版本／更新連結目視核對；未修改產品.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Unity正向實測、正式10403簽章AAB與四語notes、Pixel更新資料保留、formal100%送審/自動推出設定與UnitygroupsReady；Claude四PASS.
+Proven: 1.4.3公告成功發布於@moooo.works，依owner不附圖；上架狀態由owner確認.
 
-Open: Google審查中未確認公開上線；正式非測試Unity供應/收益/付款、提前取消/exactlyonce/Europe未驗；手機兩項權限設定及既有lint問題.
+Open: 本輪無；正式非測試Unity供應/收益/付款、取消/Europe與既有lint等原限制保留.
 
-Next: Google核准後自動全面推出；不要promote10402；原Unity stream保留其既有待辦.
+Next: 等待owner新任務；原Unity stream既有待辦保留.
 
-Artifacts: .agentflow/artifacts/A-061-play-unity-test/production-rollout.json/production-build.json/production-phone-smoke.json/production-release-notes.txt/acceptance-review.md；release-ad-production outputs正式AAB.
+Artifacts: .agentflow/artifacts/A-062-threads-announcement/announcement.txt、published.jpg.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -723,5 +723,54 @@ Still to do
 ---
 
 # → Ask / A-062 (Takeshi Mori)
+
++ 新版本已過審上架，我在google chrome中有登入threads帳號，你參考我之前發布的貼文語氣來發布新版本的公告文，如果可以的話附上實際截圖。
+
++ 不附圖
+
+---
+
+## [RUN-001] Event — 2026-10-14 09:50:04 +0800 (A-062)
+
+- 已閱讀 Chrome @moooo.works 的 1.3.4、步數同步與跳點更新貼文，沿用口語開頭、使用情境、限制及下載連結；本次公告草稿493字已填入，尚未發布。
+
+- Pixel 1.4.3 真實使用說明首頁與懸浮工具教學截圖已取得並目視確認，沒有私人地點或座標，保存於 artifacts/A-062-threads-announcement/。
+
+- 點附加影音後開啟原生選檔，但 extension filechooser 超時並重設 runtime；重新辨識 Chrome（ID 改變）與草稿分頁。原生 Google Chrome 操作被工具拒絕核准，沒有繞過；已請 owner 選兩圖或選擇不附圖直接發布，分頁 markHandoff，等待回覆。
+
+## [RUN-002] Event — 2026-10-14 09:53:31 +0800 (A-062)
+
+- 依 owner「不附圖」移除附圖敘述；@moooo.works 新版公告發布成功，實際貼文 DedPxQAmuVX 全文、版本及下載連結核對完成。公告純文字，只有商店連結預覽；公開頁已 markDeliverable，發布畫面保存。
+
+# ← Reply / A-062
+
+* _2026-10-14 09:53:31 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已參考既有語氣，在 @moooo.works 成功發布 1.4.3 公告與更新連結。
+
+- 已依「不附圖」改成純文字公告，移除附圖敘述。
+
+## [FINAL REPORT]
+
+1. 「新版本已過審上架，我在google chrome中有登入threads帳號，你參考我之前發布的貼文語氣來發布新版本的公告文，如果可以的話附上實際截圖。」
+
+   - 成功：[新版公告](https://www.threads.com/@moooo.works/post/DedPxQAmuVX)已發布，沿用之前口語開頭、使用情境、功能限制與下載連結的寫法。內容包含懸浮工具、獨立搖桿、Pro／廣告解鎖、FAQ、Android 17 與廣告隱私流程。
+
+   - 我核對公開貼文全文與版本、帳號、Google Play 連結，確認不是草稿或發佈中；[公告文字](artifacts/A-062-threads-announcement/announcement.txt)與[發布成功畫面](artifacts/A-062-threads-announcement/published.jpg)已保存。此次沒有修改產品程式或宣稱新增未做過的測試。
+
+2. 「不附圖」
+
+   - 已完成：不附手機圖片，刪除「附圖就是新版 App 的實際畫面。」；保留 Google Play 連結預覽。先前選檔受原生視窗工具核准限制，改成純文字後已成功發布，無待操作事項。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-063 (Takeshi Mori)
 
 +
