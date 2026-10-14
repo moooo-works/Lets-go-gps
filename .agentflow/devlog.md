@@ -6,17 +6,17 @@ Notebook: .agentflow/devlog.md — root.
 
 Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: Cloud重開憑證驗五筆授權、原Android與API限制保留；沒有產品變更或朋友實機驗證.
+Tests/scenarios: 讀取PixelPlay APK apksigner／installer／版本，AAB keytool簽章比對既有Cloud白名單.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: debug Maps B2EF簽章授權已依確認儲存，重開同憑證五筆存在.
+Proven: Pixel真Play1.4.3/10403簽章506F與Maps白名單相符；debug B2EF已補授權.
 
-Open: 朋友地圖恢復待實機回報；模擬失敗待手機／Android／錯誤資訊；原Unity與lint限制保留.
+Open: 朋友地圖恢復與無法飛待回報；本機release upload簽章0B9A未列Maps白名單；原限制保留.
 
-Next: 朋友等待最多5分鐘、完全關閉再開App；取得無法飛的裝置資訊後續查.
+Next: Play正式版無需因此更新；若分享本機release APK需先確認簽章授權.
 
-Artifacts: .agentflow/artifacts/A-064-debug-maps/prepared.jpg、saved.jpg.
+Artifacts: devlog診斷紀錄；原A064授權畫面.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -166,5 +166,32 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-065 (Takeshi Mori)
+
++ release版會有這個狀況嗎？
+
+# ← Reply / A-065
+
+* _2026-10-14 12:01:41 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- Google Play 正式1.4.3簽章已授權，不會因這次debug簽章漏登而地圖空白；自行發送本機release APK需另核對簽章。
+
+## [FINAL REPORT]
+
+1. 「release版會有這個狀況嗎？」
+
+   - Google Play正式版沒有此次debug授權缺漏：已從Pixel直接讀取Play安裝的1.4.3／10403 APK，installer=com.android.vending，SHA1=50:6F:D8:3D:F1:4D:C6:60:42:83:30:91:1A:51:C9:49:D3:2B:03:2C，與本輪前實際Cloud白名單既有506F條目相符。前次Pixel此版地圖也已目視正常。不能保證其他網路或装置問題永不發生，也不代表無法飛已修復。
+
+   - 本機Release AAB上傳金鑰SHA1=0B:9A:DB:92:36:A0:60:08:01:51:EA:64:8B:27:91:29:C8:66:BB:18，並非Play安裝簽章，且不在當前五筆地圖白名單。若用同本機release signingConfig直接build／側載APK，仍可能遇到同類授權缺漏；這與從Play下載不同。此次未建立新APK或擴大授權，手機APK唯讀pull至tmp無私人資料。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-066 (Takeshi Mori)
 
 +
