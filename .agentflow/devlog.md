@@ -6,17 +6,17 @@ Notebook: .agentflow/devlog.md — root.
 
 Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: 讀取PixelPlay APK apksigner／installer／版本，AAB keytool簽章比對既有Cloud白名單.
+Tests/scenarios: git fetch／遠端head／main祖先／Unity依賴與既有真AAB證據核對，PR58 GitHub讀取.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: Pixel真Play1.4.3/10403簽章506F與Maps白名單相符；debug B2EF已補授權.
+Proven: 正式1.4.3 AAB含Unity；遠端production及integration與本地head一致，Unity分支已存在.
 
-Open: 朋友地圖恢復與無法飛待回報；本機release upload簽章0B9A未列Maps白名單；原限制保留.
+Open: 發布產品尚未merge main／PR58保留OPEN draft；朋友症狀與Unity非測試供應等原限制維持.
 
-Next: Play正式版無需因此更新；若分享本機release APK需先確認簽章授權.
+Next: 等待owner新任务；勿從較舊main誤build發布.
 
-Artifacts: devlog診斷紀錄；原A064授權畫面.
+Artifacts: A061 production-build.json與GitHub產品分支.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -193,5 +193,34 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-066 (Takeshi Mori)
+
++ unity ads的分支是否已經跟這次新版本同時發布？有上git了嗎？
+
+# ← Reply / A-066
+
+* _2026-10-14 12:04:46 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- Unity Ads 已包含在正式1.4.3發布包，相關程式已push GitHub；發布整合分支尚未merge main，PR58仍保留。
+
+## [FINAL REPORT]
+
+1. 「unity ads的分支是否已經跟這次新版本同時發布？有上git了嗎？」
+
+   - 是：正式1.4.3／10403以產品31b528cea7278fb54650dbfab3d1711dd2d62446建置，AAB實包驗證包含Unity SDK／Google Unity adapter／同意流程，正式banner與reward版位；Mintegral排除。此前Unity測試來源與獎勵回呼已在Pixel確認；新版本上架由owner回報，正式非測試Unity供應／收益沒有宣稱驗證。[原建置紀錄](artifacts/A-061-play-unity-test/production-build.json)。
+
+   - 有上GitHub：本輪git fetch後，origin/fix/release-ad-integration=b9868ee5c02fc3502cffc2964d5c4738c456d0f4、origin/fix/release-ad-production=3f388df5bf1e4ba9181fcf64360c28412c9324b6，均與本地工作分支head相符。正式建置產品31b528c為production遠端祖先；origin/unity-ads亦存在。可看[正式版本分支](https://github.com/moooo-works/Lets-go-gps/tree/fix/release-ad-production)。
+
+   - 發布與merge main不同：main的app依賴尚未包含Unity，正式產品commit並非main祖先；整合版從production分支build並上架，不是main。依先前保留要求，[PR58](https://github.com/moooo-works/Lets-go-gps/pull/58)仍OPEN draft，沒有擅自merge。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-067 (Takeshi Mori)
 
 +
