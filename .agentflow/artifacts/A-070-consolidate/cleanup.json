@@ -1,0 +1,93 @@
+{
+  "removed": [
+    {
+      "worktree": "android17-dev-settings",
+      "branch": "fix/android17-developer-status",
+      "head": "6feb0776043632ad5ccd95225a0b235e6ac46747",
+      "removed": true
+    },
+    {
+      "worktree": "consent-verification",
+      "branch": "fix/ad-consent-verification",
+      "head": "88bc79034bd3ee345caa37caede3c84e967aa794",
+      "removed": true
+    },
+    {
+      "worktree": "consolidate-1.4.3",
+      "branch": "chore/consolidate-1.4.3",
+      "head": "e143067d39e46085737bcb3002bb3a4012c29ffa",
+      "removed": true
+    },
+    {
+      "worktree": "floating-appearance",
+      "branch": "fix/floating-theme-locale",
+      "head": "2d8e3ebdbb6aded2ac4ebdf5e0d85d604a4cf5dd",
+      "removed": true
+    },
+    {
+      "worktree": "floating-companion",
+      "branch": "feat/floating-companion",
+      "head": "ba2541fbecedc8cfa6c6fe5e54b6950899400df2",
+      "removed": true
+    },
+    {
+      "worktree": "floating-dock",
+      "branch": "fix/floating-dock",
+      "head": "2fec77d5649111f9c8c3b83149a039882f5a14e2",
+      "removed": true
+    },
+    {
+      "worktree": "help-faq",
+      "branch": "feat/help-faq",
+      "head": "2e7b99b4e4b47b6c91b71eb8d60e8bbe3f178277",
+      "removed": true
+    },
+    {
+      "worktree": "release-1.4.0",
+      "branch": "chore/release-1.4.0",
+      "head": "6532ac00193b67fcb765e54c8e4667f90466e6b8",
+      "removed": true
+    },
+    {
+      "worktree": "release-ad-integration",
+      "branch": "fix/release-ad-integration",
+      "head": "b9868ee5c02fc3502cffc2964d5c4738c456d0f4",
+      "removed": true
+    },
+    {
+      "worktree": "release-ad-production",
+      "branch": "fix/release-ad-production",
+      "head": "3f388df5bf1e4ba9181fcf64360c28412c9324b6",
+      "removed": true
+    },
+    {
+      "worktree": "unity-ads",
+      "branch": "unity-ads",
+      "head": "551ac280d20152a1756c4b2916521611c9fa6b7f",
+      "removed": true
+    },
+    {
+      "worktree": "unity-play-smoke",
+      "branch": "chore/unity-play-smoke",
+      "head": "3d39a7d56d85457d54b184be5230ed6ed8cc79f3",
+      "removed": true
+    }
+  ],
+  "remote_branches_deleted": [
+    "fix/android17-developer-status",
+    "chore/consolidate-1.4.3",
+    "fix/floating-theme-locale",
+    "feat/floating-companion",
+    "fix/floating-dock",
+    "feat/help-faq",
+    "chore/release-1.4.0",
+    "fix/release-ad-integration",
+    "fix/release-ad-production",
+    "unity-ads"
+  ],
+  "agf_cleanup": "first refused unknown ignored files; preserved all 76 local paths outside worktrees, retry returned could not inspect registered worktrees; standard git worktree list/status/ancestor/remove succeeded without force",
+  "main_merge": "2561609c58af658c8a17ee3008a94ad768d9f504",
+  "product_app_gradle_equal_31b528c": true,
+  "remaining_worktrees": "worktree /Users/mori/side-project/Lets-go-gps\nHEAD 2561609c58af658c8a17ee3008a94ad768d9f504\nbranch refs/heads/main\n\n",
+  "private_backup": "/Users/mori/Library/Application Support/Lets-go-gps/archives/A-070-20261015"
+}

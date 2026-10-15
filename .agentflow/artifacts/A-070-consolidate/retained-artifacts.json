@@ -1,0 +1,12 @@
+[
+  {
+    "name": "letsgo-1.4.3-release.aab",
+    "sha256": "76f938ba511440e021677192df2225421fb9b560a479f2843409c5a5ea318c48",
+    "destination": "/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.3-release.aab"
+  },
+  {
+    "name": "letsgo-1.4.1-debug-pro.apk",
+    "sha256": "5d4949f6ef0940d7dd32adcf4975800d3ecd14face23899ce76cca388106beb5",
+    "destination": "/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.1-debug-pro.apk"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "headRefName": "feat/floating-companion",
+    "number": 59,
+    "state": "CLOSED"
+  },
+  {
+    "headRefName": "fix/android17-developer-status",
+    "number": 60,
+    "state": "MERGED"
+  },
+  {
+    "headRefName": "fix/floating-theme-locale",
+    "number": 61,
+    "state": "CLOSED"
+  },
+  {
+    "headRefName": "fix/floating-dock",
+    "number": 62,
+    "state": "CLOSED"
+  },
+  {
+    "headRefName": "feat/help-faq",
+    "number": 63,
+    "state": "CLOSED"
+  },
+  {
+    "headRefName": "fix/release-ad-integration",
+    "number": 64,
+    "state": "CLOSED"
+  }
+]

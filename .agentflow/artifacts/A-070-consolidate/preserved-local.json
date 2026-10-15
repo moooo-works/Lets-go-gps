@@ -1,0 +1,306 @@
+[
+  {
+    "worktree": "android17-dev-settings",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "android17-dev-settings",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "android17-dev-settings",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "android17-dev-settings",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "android17-dev-settings",
+    "relative": "build"
+  },
+  {
+    "worktree": "android17-dev-settings",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "consent-verification",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "consent-verification",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "consent-verification",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "consent-verification",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "consent-verification",
+    "relative": "build"
+  },
+  {
+    "worktree": "consent-verification",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "consolidate-1.4.3",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "consolidate-1.4.3",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "consolidate-1.4.3",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "consolidate-1.4.3",
+    "relative": "build"
+  },
+  {
+    "worktree": "consolidate-1.4.3",
+    "relative": "app/build"
+  },
+  {
+    "worktree": "floating-appearance",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "floating-appearance",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "floating-appearance",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "floating-appearance",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "floating-appearance",
+    "relative": "build"
+  },
+  {
+    "worktree": "floating-appearance",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "floating-companion",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "floating-companion",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "floating-companion",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "floating-companion",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "floating-companion",
+    "relative": "build"
+  },
+  {
+    "worktree": "floating-companion",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "floating-dock",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "floating-dock",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "floating-dock",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "floating-dock",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "floating-dock",
+    "relative": "build"
+  },
+  {
+    "worktree": "floating-dock",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": "build"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": "app/build"
+  },
+  {
+    "worktree": "help-faq",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": "build"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": "app/build"
+  },
+  {
+    "worktree": "release-1.4.0",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": "build"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": "app/build"
+  },
+  {
+    "worktree": "release-ad-integration",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": "build"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": "app/build"
+  },
+  {
+    "worktree": "release-ad-production",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": ".codex"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": "build"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": ".DS_Store"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": ".agentflow/.tmp"
+  },
+  {
+    "worktree": "unity-ads",
+    "relative": "app/.DS_Store"
+  },
+  {
+    "worktree": "unity-play-smoke",
+    "relative": ".kotlin"
+  },
+  {
+    "worktree": "unity-play-smoke",
+    "relative": "local.properties"
+  },
+  {
+    "worktree": "unity-play-smoke",
+    "relative": ".gradle"
+  },
+  {
+    "worktree": "unity-play-smoke",
+    "relative": "build"
+  },
+  {
+    "worktree": "unity-play-smoke",
+    "relative": "app/build"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "pr": 65,
+  "state": "MERGED",
+  "merge_commit": "2561609c58af658c8a17ee3008a94ad768d9f504",
+  "review_candidate": "e143067d39e46085737bcb3002bb3a4012c29ffa",
+  "candidate_ci_run": 38681473086,
+  "candidate_ci_conclusion": "success",
+  "behind_main_before_merge": 0,
+  "product_diff_from_published_31b528c": [],
+  "remaining_open_prs": [],
+  "additional_worktrees": 0,
+  "existing_lint_errors": 34,
+  "no_additional_runtime_changes": true
+}

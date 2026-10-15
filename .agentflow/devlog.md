@@ -4,25 +4,23 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
+Current commit: main合併2561609；產品等同published31b528c/1.4.3/10403；本輪交付紀錄見Git.
 
-Tests/scenarios: git worktree list --porcelain、11個worktree逐一git status --short.
+Tests/scenarios: test/lintDebug/assembleDebug成功2m8s，311/0fail/60skip，34既有lintError；GitHubCI成功8m；Claude四PASS；備份還原與12worktree清理核對.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 11個額外worktree已清點且git status皆clean；正式整合分支及產物保留.
+Proven: 正式1.4.3整合main，PR65 merged、舊PR收尾；0額外worktree；AAB/APK另存與完整私有備份.
 
-Open: 11個worktree未清理；main尚未合併發布整合分支，其他既有待辦保留.
+Open: 朋友手機無法飛待資訊；既有lint及Unity非測試供應/收益/取消/歐洲流程等原限制保留.
 
-Next: 等待owner決定是否清理；清理前保全ignored APK/AAB與分支內容.
+Next: 從main開發新任務；產物見Downloads/Lets-go-gps-release-artifacts，恢復見私有A070備份.
 
-Artifacts: .worktrees下11個既有工作目錄；原A061/A060產物.
+Artifacts: .agentflow/artifacts/A-070-consolidate/delivery.json/review.md/cleanup.json/retained-artifacts.json/backup.json/validation.json.
 
 Archived eras: .agentflow/devlog.archive.md.
 
-Streams:
-
-stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.md
+Streams: none.
 ---
 
 # → Ask / A-062 (Takeshi Mori)
@@ -303,5 +301,120 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-070 (Takeshi Mori)
+
++ 這些應該已經完成且上架了，處理合併事項後就清理掉
+
+---
+
+## [RUN-001] Event — 2026-10-15 12:23:56 +0800 (A-070)
+
+- Git preflight：main；main...origin/main ahead8、只有本輪devlog未提交；fetch成功；origin/main=3f148693dad780bf9ea70990d533f9a3d47a19b8，最近五筆3f14869/981977c/a083690/eb70ede/dcbd2e3。11舊worktree均clean，無其他活躍native agent。
+
+- 從origin/main開獨立chore/consolidate-1.4.3，整合發布分支與本地主目錄已完成紀錄，候選2de01c624cddb3746f607581fdba392cd6e88327；App/gradle對built31b528c完全無diff。舊consent/Unity程式是發布版之前的來源，smoke僅versionPatch1；8個舊HEAD為production祖先，另3個差異已核對，沒有新功能待保留。
+
+- tracker已建立及validate；必要test/lintDebug/assembleDebug執行中。11個worktree完整tar與全refs Git bundle在Git外私有備份中；正式AAB與Pro debug APK已複製到Downloads/Lets-go-gps-release-artifacts且SHA相等。合併與清理不改產品／Cloud設定；稍後獨立審查整合候選。
+
+## [RUN-002] Event — 2026-10-15 12:27:38 +0800 (A-070)
+
+- 候選e143067d39e46085737bcb3002bb3a4012c29ffa：合入已發布產品及主目錄紀錄，對3個已被承接的舊來源做history-only merge，App/gradle對31b528c仍無差異，11舊HEAD皆為候選祖先。test/lintDebug/assembleDebug成功2m8s，311/0fail/0error/60skip；既有lint34Error/100Warning/3Hint，abortOnError=false。
+
+- Claude Code claude-opus-5-5/high fresh no-remote clone全量只讀審查四PASS，exit0/無截斷/clone未改，host核對報告與原來源、建置及備份證據接受；CLI限制非OS sandbox，無聲稱worker自己測手機或備份。away-gates對此候選供應Result Go；原friend故障留待另查。
+
+- PR65已建立並更新實況；GitHub behindmain=0，CI仍執行中，因此尚未merge。Git外私有完整11worktree tar 813069110bytes、全refs bundle驗證；還原串流核對24項.git/local.properties及AAB/APK hash，原授權/私密設定不入Git。另備份本輪新consolidate worktree並驗tar，清理會保留恢復來源。
+
+## [RUN-003] Event — 2026-10-15 12:29:24 +0800 (A-070)
+
+- 當前scope root僅A070 devlog及artifacts，產品merge候選App/gradle相同已發布版本，無未授權修正；tracker T1完成，T2等CI，T3備份已完待清理。新consolidate完整tar亦可讀；CI目前build未結束，未猜測失敗或提前merge。
+
+## [WIP-001] Checkpoint — 2026-10-15 12:29:24 +0800 (A-070)
+
+- **Finished:** 發布來源整合與祖先保留；本機test/lintDebug/assembleDebug成功；Claude四PASS；完整12工作目錄及全refs備份、AAB/APK另存與還原摘要核對。
+
+- **Running now:** GitHub PR65 Android CI build，run38681473086。
+
+- **Still to do:** CI成功後merge main、關閉已被承接PR、清理12 worktrees及回讀main/產物/歷史狀態。
+
+- **Next work action:** 查看CI實際結果；成功後依已授權計畫繼續，失敗則先診斷。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-004] Event — 2026-10-15 12:36:31 +0800 (A-070)
+
+- GitHub CI38681473086 build/test成功8m0s，PR65 CLEAN/behind0後merge為2561609c58af658c8a17ee3008a94ad768d9f504；root fast-forward成功，App/gradle對已發布31b528c完全相同。PR60自動MERGED，其餘59/61/62/63/64已CLOSED，open PR清單空。
+
+- agf cleanup unity-ads先拒絕unknown ignored快取；已保全全部76個local項目到私有preserved-local，retry回報could not inspect registered worktrees。未修工具或force；標準git worktree list/status/ancestor皆正常，逐一git worktree remove（無force）及branch -d成功，12個HEAD皆已在main；10個對應遠端分支刪除，其餘兩個未有遠端。全refs另存post-merge bundle驗證。
+
+- 最後git worktree list只剩root/main、root追蹤狀態只有A070紀錄；正式AAB和ProDebug APK留Downloads且SHA等原始，完整11舊目錄及本輪consolidate tar、local快取/私有設定/Git bundle均在Git外私有目錄。Tracker3/3，無產品新增改動，不重跑已通過檢查。root STATUS將移除已完成unity stream pointer，原stream歷史可從main祖先/私有tar恢復，不改寫舊notebook。
+
+## [RUN-005] Event — 2026-10-15 12:38:13 +0800 (A-070)
+
+- **Scope check:** 最後變更只有root devlog及A070 artifacts，均為已審候選／派工／原始報告與相同操作回執；main產品對31b528c無diff，12worktree已保全清理，無額外程式改動。最後close被checkpoint freshness/Scope check欄位要求擋下，僅補機械完成紀錄，既有成功測試與review沿用。
+
+## [WIP-002] Checkpoint — 2026-10-15 12:38:13 +0800 (A-070)
+
+- **Finished:**
+
+  1. PR65合併main、CI成功、Claude通過；12worktree已保全並移除，產物與歷史保留。
+
+- **Running now:**
+
+  1. 無。
+
+- **Still to do:**
+
+  1. 無產品或清理工作；僅保存最終Reply並push紀錄。
+
+- **Next work action:** 執行close保存本輪結果。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+# ← Reply / A-070
+
+* _2026-10-15 12:38:14 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已將已上架1.4.3整合回main並推到GitHub，收尾舊PR、保全產物與完整備份，12個額外worktree全部清理，目前只剩main。
+
+## [FINAL REPORT]
+
+1. 「這些應該已經完成且上架了，處理合併事項後就清理掉」
+
+   - 成功：[PR65](https://github.com/moooo-works/Lets-go-gps/pull/65)已merge為2561609c58af658c8a17ee3008a94ad768d9f504，main本地與GitHub同步，產品App/gradle與已發布31b528c完全相同。完整保留Unity／AdMob／隱私流程、懸浮工具／搖桿、FAQ與Android17修正，不需要重新上架。
+
+   - 先從origin/main建立獨立consolidate分支，合入正式發布與本地紀錄；舊Unity/consent程式已由發布版承接、smoke只差舊版號，因此保留其歷史祖先而維持發布產品。11舊worktree HEAD及本輪整合HEAD都已進main。必要preflight完整輸出已在PR說明，origin/main起點3f148693dad780bf9ea70990d533f9a3d47a19b8，合併前behind=0。
+
+   - 本機test/lintDebug/assembleDebug成功2m8s，311tests、0failure/error、60既有skip；lint仍34Error／100Warning／3Hint（abortOnError=false），此次未修既有問題。GitHub CI38681473086 build/test成功8m0s後才merge。Claude對e143067d39e46085737bcb3002bb3a4012c29ffa原始候選與清理計畫四PASS；我核對報告、實際來源／備份／CI／merge／最後檔案清單接受，沒有新手機測試或擴大產品修改。
+
+   - 收尾結果：PR60為MERGED，PR59／61／62／63／64已CLOSED，先前PR58仍CLOSED，目前open PR清單空。刪除11舊worktree加本輪consolidate共12個，以及其已整合本地分支和10個有對應遠端的分支；git worktree list目前只有主目錄main。Git歷史仍在main祖先與備份bundle，已完成unity stream的root active pointer移除；原stream紀錄未改寫。
+
+   - 清理工具先拒絕unknown ignored檔案；76個本機項目已移到Git外私有preserved-local，再試工具遇到「could not inspect registered worktrees」。我以標準Git重新確認worktree／狀態／main祖先後，逐一git worktree remove與branch -d成功，沒有使用force，也沒有丟棄未保全資料。
+
+   - 產物可直接取用：[正式1.4.3 AAB](/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.3-release.aab)與[Pro debug 1.4.1 APK](/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.1-debug-pro.apk)，SHA與原始檔一致。完整11舊目錄tar 813069110bytes、本輪目錄tar、全部分支bundle與本機設定／快取位於[私有備份](</Users/mori/Library/Application Support/Lets-go-gps/archives/A-070-20261015>)；tar可讀、bundle可驗、24項還原串流摘要相等。私有設定未入Git。
+
+   - 限制：朋友手機的「無法飛」仍需裝置資訊與實際訊息，這次只整合及清理；正式非測試Unity供應／收益、提前取消、歐洲同意等原未驗項不因此改判通過。
+
+   - Key Records — read these first
+
+     [收尾狀態](artifacts/A-070-consolidate/delivery.json) — main合併、CI及worktree／PR最終狀態。
+
+     [原始Claude審查](artifacts/A-070-consolidate/review.md) — 四PASS及審查限制。
+
+     [清理回執](artifacts/A-070-consolidate/cleanup.json) — 12個目錄、分支及無force清理結果。
+
+     [產物位置](artifacts/A-070-consolidate/retained-artifacts.json) — Downloads檔案與原始SHA。
+
+     [備份回執](artifacts/A-070-consolidate/backup.json) — 私有備份與還原核對範圍。
+
+     [建置驗證](artifacts/A-070-consolidate/validation.json) — 本機測試及既有lint實況。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-071 (Takeshi Mori)
 
 +

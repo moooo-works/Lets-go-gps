@@ -1,0 +1,17 @@
+{
+  "candidate": "e143067d39e46085737bcb3002bb3a4012c29ffa",
+  "same_product_app_gradle_as": "31b528cea7278fb54650dbfab3d1711dd2d62446",
+  "gradle": "test lintDebug assembleDebug SUCCESS in 2m 8s",
+  "tests": 311,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 60,
+  "lint": {
+    "Error": 34,
+    "Warning": 100,
+    "Hint": 3
+  },
+  "lint_abortOnError": false,
+  "history_only_merge": "unity-ads, fix/ad-consent-verification, chore/unity-play-smoke; already applied product reused, no source replacement",
+  "no_current_phone_smoke": "reused A061 exact source Play10403 evidence; this merge does not install phone"
+}
