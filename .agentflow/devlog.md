@@ -6,17 +6,17 @@ Notebook: .agentflow/devlog.md — root.
 
 Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: git fetch／遠端head／main祖先／Unity依賴與既有真AAB證據核對，PR58 GitHub讀取.
+Tests/scenarios: gh pr view58標題／body／四個修改檔／OPEN Draft／分支核對.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 正式1.4.3 AAB含Unity；遠端production及integration與本地head一致，Unity分支已存在.
+Proven: PR58內容與OPEN Draft已GitHub唯讀確認；Unity及AdMob優化承接正式1.4.3.
 
-Open: 發布產品尚未merge main／PR58保留OPEN draft；朋友症狀與Unity非測試供應等原限制維持.
+Open: main尚未合併發布整合分支；朋友症狀與其他既有待辦保留.
 
-Next: 等待owner新任务；勿從較舊main誤build發布.
+Next: 等待owner新任務，PR58維持現況.
 
-Artifacts: A061 production-build.json與GitHub產品分支.
+Artifacts: GitHub PR58與既有A061建置紀錄.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -222,5 +222,32 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-067 (Takeshi Mori)
+
++ pr58是什麼
+
+# ← Reply / A-067
+
+* _2026-10-15 12:17:01 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- PR58是既有AdMob廣告優化提案，仍為未合併草稿；其功能已隨後續整合進1.4.3發布。
+
+## [FINAL REPORT]
+
+1. 「pr58是什麼」
+
+   - [PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58)標題為「改善 AdMob 自適應橫幅與獎勵廣告重試」。PR是把分支修改審查後合併主分支的請求；此份由feat/admob-ad-optimization指向main。
+
+   - 功能是依可用寬度調整橫幅廣告、獎勵廣告失敗後有限次自動重試、補充錯誤與曝光診斷；不是Unity Ads整合本身。本輪gh直接確認仍OPEN／Draft。先前依owner保留要求未合併，但相關優化後續已承接進正式1.4.3整合分支，因此PR未合併不表示正式版缺這些功能。沒有進行任何merge或PR修改。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-068 (Takeshi Mori)
 
 +
