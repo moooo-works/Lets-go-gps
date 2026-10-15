@@ -6,17 +6,17 @@ Notebook: .agentflow/devlog.md — root.
 
 Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: fetch、PR58 close後state/closedAt讀取及發布分支adaptive/retry實作核對.
+Tests/scenarios: git worktree list --porcelain、11個worktree逐一git status --short.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: GitHub PR58 CLOSED；1.4.3包含後續整合的AdMob優化及Unity.
+Proven: 11個額外worktree已清點且git status皆clean；正式整合分支及產物保留.
 
-Open: main尚未合併發布整合分支，其他既有待辦保留.
+Open: 11個worktree未清理；main尚未合併發布整合分支，其他既有待辦保留.
 
-Next: 等待owner新任務.
+Next: 等待owner決定是否清理；清理前保全ignored APK/AAB與分支內容.
 
-Artifacts: GitHub PR58關閉狀態.
+Artifacts: .worktrees下11個既有工作目錄；原A061/A060產物.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -276,5 +276,32 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-069 (Takeshi Mori)
+
++ 目前還有額外開的worktree嗎
+
+# ← Reply / A-069
+
+* _2026-10-15 12:19:30 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 主工作目錄外仍有11個worktree，均無Git追蹤的未提交變更；尚未清理。
+
+## [FINAL REPORT]
+
+1. 「目前還有額外開的worktree嗎」
+
+   - 有11個，都在.worktrees：android17-dev-settings、consent-verification、floating-appearance、floating-companion、floating-dock、help-faq、release-1.4.0、release-ad-integration、release-ad-production、unity-ads、unity-play-smoke。git worktree list與逐一git status --short已讀取，11個皆clean；主目錄只有本輪devlog變更。
+
+   - clean只表示Git追蹤狀態沒有未提交變更，不表示可直接丟掉整個資料夾。release-ad-production保存正式1.4.3 AAB，release-ad-integration保存1.4.1 Pro debug APK；其他ignored建置產物與local.properties未以status完整盤點。main尚未納入正式整合產品，清理前應先保全產物與各分支未整合內容。此次僅查詢，沒有刪除worktree或分支。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-070 (Takeshi Mori)
 
 +
