@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: main合併2561609；產品等同published31b528c/1.4.3/10403；本輪交付紀錄見Git.
+Current commit: main已整合1.4.3，12個worktree已清理；本輪紀錄見Git.
 
-Tests/scenarios: test/lintDebug/assembleDebug成功2m8s，311/0fail/60skip，34既有lintError；GitHubCI成功8m；Claude四PASS；備份還原與12worktree清理核對.
+Tests/scenarios: 截圖原文與歷史工單範圍/A061實測證據比對，未新增外部狀態操作.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 正式1.4.3整合main，PR65 merged、舊PR收尾；0額外worktree；AAB/APK另存與完整私有備份.
+Proven: 原Unity SDK整合問題已有正向banner/reward實測；建議回覆00939092可結案.
 
-Open: 朋友手機無法飛待資訊；既有lint及Unity非測試供應/收益/取消/歐洲流程等原限制保留.
+Open: Unity工單尚未代回覆或關閉；朋友裝置與既有未驗限制保留.
 
-Next: 從main開發新任務；產物見Downloads/Lets-go-gps-release-artifacts，恢復見私有A070備份.
+Next: owner若授權回覆即可寄原信確認SDK問題解決；無自動寄信.
 
-Artifacts: .agentflow/artifacts/A-070-consolidate/delivery.json/review.md/cleanup.json/retained-artifacts.json/backup.json/validation.json.
+Artifacts: A061 Unity實測與本輪工單回覆草稿.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -416,5 +416,34 @@ Streams: none.
 ---
 
 # → Ask / A-071 (Takeshi Mori)
+
++ [Image #1] 這個有需要回復嗎？
+
+# ← Reply / A-071
+
+* _2026-10-15 12:39:19 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 建議回覆工單00939092原SDK問題已解決、可結案；這次只提供文字，沒有寄出。
+
+## [FINAL REPORT]
+
+1. 「[Image #1] 這個有需要回復嗎？」
+
+   - 建議回覆。截圖是Unity未收到3天回應的跟進提醒，詢問是否已解決；不是新的整合錯誤。此工單原本追查Game ID／SDK初始化拒絕，後續A061已實測Unity成功初始化，AdMob Inspector實際banner與reward來源均為Unity，reward回呼與Pro+6h正常，因此就原SDK問題可回覆已解決、請結案。
+
+   - 可直接回覆原信：Thank you for following up. We have successfully initialized Unity Ads and verified both banner and rewarded test ads through AdMob mediation. The original SDK integration issue has been resolved, so ticket 00939092 can be closed. Thank you for your assistance.
+
+   - 不宣稱正式非測試供應／收益／收款驗證完成，也沒有讀取最新完整工單往返信件。此次為是否回覆的詢問，沒有授權寄信，因此未代寄或關閉工單。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-072 (Takeshi Mori)
 
 +
