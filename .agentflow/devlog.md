@@ -6,17 +6,17 @@ Notebook: .agentflow/devlog.md — root.
 
 Current commit: 產品 built31b528c；正式1.4.3/10403；公告交付紀錄見Git.
 
-Tests/scenarios: gh pr view58標題／body／四個修改檔／OPEN Draft／分支核對.
+Tests/scenarios: fetch、PR58 close後state/closedAt讀取及發布分支adaptive/retry實作核對.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: PR58內容與OPEN Draft已GitHub唯讀確認；Unity及AdMob優化承接正式1.4.3.
+Proven: GitHub PR58 CLOSED；1.4.3包含後續整合的AdMob優化及Unity.
 
-Open: main尚未合併發布整合分支；朋友症狀與其他既有待辦保留.
+Open: main尚未合併發布整合分支，其他既有待辦保留.
 
-Next: 等待owner新任務，PR58維持現況.
+Next: 等待owner新任務.
 
-Artifacts: GitHub PR58與既有A061建置紀錄.
+Artifacts: GitHub PR58關閉狀態.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -249,5 +249,32 @@ stream: unity-ads — active — .agentflow/features/unity-ads/unity-ads.devlog.
 ---
 
 # → Ask / A-068 (Takeshi Mori)
+
++ 那這個應該可以close了吧
+
+# ← Reply / A-068
+
+* _2026-10-15 12:18:06 +0800 (codex/unknown)_
+
+## [SUMMARY]
+
+- 已關閉PR58；已發布1.4.3及原遠端分支保留。
+
+## [FINAL REPORT]
+
+1. 「那這個應該可以close了吧」
+
+   - 已完成：[PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58)已關閉，GitHub再次讀取state=CLOSED，closedAt=2026-10-15T04:17:53Z。沒有合併main或刪除分支，也未傳送額外留言。
+
+   - 此PR的廣告優化後續透過fbd8a84整合進release-ad-production；原PR58 head不是發布分支祖先，不能稱原PR已merge。發布分支仍有adaptive banner與有限次retry實作，1.4.3發布包保留不受關閉PR影響。此次是依owner新指示結束先前保留的草稿，沒有改產品程式。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-069 (Takeshi Mori)
 
 +
