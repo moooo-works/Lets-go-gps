@@ -77,6 +77,8 @@ class SystemHealthCheckImpl : SystemHealthCheck {
     }
 
     private fun evaluateDeveloperMode(): ItemStatus {
+        // Android 17 向一般 App 隱藏此狀態；0 不代表關閉，實際授權仍由 AppOps 檢查。
+        if (sdkInt >= 37) return ItemStatus.NotApplicable
         val enabled = try {
             Settings.Global.getInt(
                 context.contentResolver,

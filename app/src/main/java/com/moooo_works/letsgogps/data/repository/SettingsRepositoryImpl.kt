@@ -46,6 +46,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val HAS_SEEN_CLIPBOARD_HINT_TIP = booleanPreferencesKey("has_seen_clipboard_hint_tip")
         val HAS_SEEN_FOLDER_TIP = booleanPreferencesKey("has_seen_folder_tip")
         val HAS_SEEN_GPX_TIP = booleanPreferencesKey("has_seen_gpx_tip")
+        val HAS_SEEN_FLOATING_TOOLS_TIP = booleanPreferencesKey("has_seen_floating_tools_tip")
         val HAS_SEEN_JUMP_MODE_TIP = booleanPreferencesKey("has_seen_jump_mode_tip")
         val ENABLE_TIMEZONE_CHECK = booleanPreferencesKey("enable_timezone_check")
         val STEP_SYNC_ENABLED = booleanPreferencesKey("step_sync_enabled")
@@ -193,6 +194,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setGpxTipSeen() {
         dataStore.edit { it[HAS_SEEN_GPX_TIP] = true }
+    }
+
+    override fun hasSeenFloatingToolsTip(): Flow<Boolean> =
+        dataStore.data.map { it[HAS_SEEN_FLOATING_TOOLS_TIP] ?: false }
+
+    override suspend fun setFloatingToolsTipSeen() {
+        dataStore.edit { it[HAS_SEEN_FLOATING_TOOLS_TIP] = true }
     }
 
     override fun hasSeenJumpModeTip(): Flow<Boolean> =

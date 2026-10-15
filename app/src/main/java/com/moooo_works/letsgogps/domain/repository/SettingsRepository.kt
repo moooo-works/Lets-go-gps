@@ -52,6 +52,9 @@ interface SettingsRepository {
 
     fun hasSeenGpxTip(): Flow<Boolean>
     suspend fun setGpxTipSeen()
+    fun hasSeenFloatingToolsTip(): Flow<Boolean>
+    suspend fun setFloatingToolsTipSeen()
+
     fun hasSeenJumpModeTip(): Flow<Boolean>
     suspend fun setJumpModeTipSeen()
 

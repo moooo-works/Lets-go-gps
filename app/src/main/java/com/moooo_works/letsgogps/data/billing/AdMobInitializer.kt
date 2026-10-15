@@ -36,10 +36,11 @@ interface AdMobInitializationGate {
 
 @Singleton
 class AdMobInitializer @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val consent: AdConsentManager
 ) : AdMobInitializationGate {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val started = AtomicBoolean(false)
     private val callbackLock = Any()
@@ -48,11 +49,21 @@ class AdMobInitializer @Inject constructor(
 
     val state: StateFlow<AdMobInitializationState> = mutableState.asStateFlow()
 
-    override fun initialize() {
-        if (!started.compareAndSet(false, true)) return
-
-        mutableState.value = AdMobInitializationState.Initializing
+    init {
         scope.launch {
+            consent.state.collect { if (it.canRequestAds) initialize() }
+        }
+    }
+
+    override fun initialize() {
+        scope.launch {
+            if (started.get()) return@launch
+            if (!consent.prepareAdRequest()) {
+                drainCallbacks(success = false)
+                return@launch
+            }
+            if (!started.compareAndSet(false, true)) return@launch
+            mutableState.value = AdMobInitializationState.Initializing
             try {
                 val requestConfiguration = RequestConfiguration.Builder()
                     .apply {
@@ -75,6 +86,10 @@ class AdMobInitializer @Inject constructor(
     }
 
     override fun whenReady(callback: (Boolean) -> Unit) {
+        if (!consent.state.value.canRequestAds) {
+            dispatchToMain { callback(false) }
+            return
+        }
         val completedState = synchronized(callbackLock) {
             when (mutableState.value) {
                 AdMobInitializationState.Ready -> true
@@ -88,23 +103,23 @@ class AdMobInitializer @Inject constructor(
         }
 
         if (completedState != null) {
-            dispatchToMain { callback(completedState) }
+            dispatchToMain { callback(completedState && consent.state.value.canRequestAds) }
         } else {
             initialize()
         }
     }
 
     private fun complete(success: Boolean) {
+        mutableState.value = if (success) AdMobInitializationState.Ready else AdMobInitializationState.Failed
+        drainCallbacks(success)
+    }
+
+    private fun drainCallbacks(success: Boolean) {
         val callbacks = synchronized(callbackLock) {
-            mutableState.value = if (success) {
-                AdMobInitializationState.Ready
-            } else {
-                AdMobInitializationState.Failed
-            }
             pendingCallbacks.toList().also { pendingCallbacks.clear() }
         }
         dispatchToMain {
-            callbacks.forEach { callback -> callback(success) }
+            callbacks.forEach { callback -> callback(success && consent.state.value.canRequestAds) }
         }
     }
 
@@ -125,4 +140,5 @@ class AdMobInitializer @Inject constructor(
 @InstallIn(SingletonComponent::class)
 interface AdMobInitializerEntryPoint {
     fun adMobInitializer(): AdMobInitializer
+    fun adConsentManager(): AdConsentManager
 }

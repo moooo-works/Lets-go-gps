@@ -2,10 +2,18 @@ package com.moooo_works.letsgogps.data.billing
 
 import android.app.Activity
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class RewardedAdManagerTest {
 
     private val activity = mockk<Activity>(relaxed = true)
@@ -15,21 +23,42 @@ class RewardedAdManagerTest {
         var nextOutcome: Outcome = Outcome.LoadFails
         var pendingReward: (() -> Unit)? = null
         var pendingDismiss: (() -> Unit)? = null
+        var destroyCalls = 0
+        val loadCallbacks = mutableListOf<(RewardedAdManager.LoadedAd) -> Unit>()
+        val failureCallbacks = mutableListOf<() -> Unit>()
+
+        fun ad() = object : RewardedAdManager.LoadedAd {
+            override fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit) {
+                pendingReward = onReward
+                pendingDismiss = onDismiss
+            }
+            override fun destroy() { destroyCalls++ }
+        }
 
         enum class Outcome { LoadFails, LoadOk, InFlight }
 
         override fun load(unitId: String, onLoaded: (RewardedAdManager.LoadedAd) -> Unit, onFailed: () -> Unit) {
             loadCalls++
+            loadCallbacks += onLoaded
+            failureCallbacks += onFailed
             when (nextOutcome) {
                 Outcome.LoadFails -> onFailed()
-                Outcome.LoadOk -> onLoaded(object : RewardedAdManager.LoadedAd {
-                    override fun show(activity: Activity, onReward: () -> Unit, onDismiss: () -> Unit) {
-                        pendingReward = onReward
-                        pendingDismiss = onDismiss
-                    }
-                })
+                Outcome.LoadOk -> onLoaded(ad())
                 Outcome.InFlight -> { /* never resolves — models a real async load in progress */ }
             }
+        }
+    }
+
+    private class FakeConsent : AdConsentGate {
+        override val state = MutableStateFlow(AdConsentState(canRequestAds = true))
+        var privacyReady = true
+        var preparations = 0
+        override fun prepareAdRequest(): Boolean {
+            preparations++
+            return state.value.canRequestAds && privacyReady
+        }
+        fun update(allowed: Boolean) {
+            state.value = state.value.copy(canRequestAds = allowed, revision = state.value.revision + 1)
         }
     }
 
@@ -60,8 +89,11 @@ class RewardedAdManagerTest {
 
     private fun manager(
         loader: FakeLoader,
-        gate: FakeInitializationGate = FakeInitializationGate()
-    ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate)
+        gate: FakeInitializationGate = FakeInitializationGate(),
+        consent: FakeConsent = FakeConsent(),
+        retryScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
+    ) = RewardedAdManager(loader, unitId = "test/123", initializationGate = gate,
+        consent = consent, scope = retryScope)
 
     @Test
     fun `preload calls loader once`() {
@@ -171,6 +203,174 @@ class RewardedAdManagerTest {
         loader.pendingDismiss?.invoke()
 
         assertEquals(1, rewardCount)
+    }
+
+    @Test fun `denied consent never loads or shows`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
+        val consent = FakeConsent().apply { update(false) }
+        val mgr = manager(loader, consent = consent)
+        mgr.preload()
+        var unavailable = false
+        mgr.showAd(activity, { fail("must not reward") }, { unavailable = true })
+        assertEquals(0, loader.loadCalls)
+        assertTrue(unavailable)
+    }
+
+    @Test fun `privacy change destroys loaded ad and requires fresh load even if allowed`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent)
+        mgr.preload()
+        consent.update(true)
+        assertEquals(1, loader.destroyCalls)
+        var unavailable = false
+        mgr.showAd(activity, { fail("old ad must not show") }, { unavailable = true })
+        assertTrue(unavailable)
+        assertEquals(2, loader.loadCalls)
+    }
+
+    @Test fun `late load across consent revision is destroyed without replacing new ad`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.InFlight }
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent)
+        mgr.preload()
+        consent.update(false)
+        consent.update(true)
+        mgr.preload()
+        loader.loadCallbacks[0](loader.ad())
+        loader.failureCallbacks[0]()
+        mgr.preload()
+        assertEquals(2, loader.loadCalls)
+        assertEquals(1, loader.destroyCalls)
+        loader.loadCallbacks[1](loader.ad())
+        mgr.showAd(activity, {}, { fail("new ad should be ready") })
+    }
+
+    @Test fun `revocation during initialization prevents subsequent load`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
+        val consent = FakeConsent()
+        val gate = FakeInitializationGate(null)
+        val mgr = manager(loader, gate, consent)
+        mgr.preload()
+        consent.update(false)
+        gate.complete(true)
+        assertEquals(0, loader.loadCalls)
+    }
+
+    @Test fun `stale reward callback after a privacy change cannot grant reward`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent)
+        mgr.preload()
+        var rewards = 0
+        mgr.showAd(activity, { rewards++ }, { fail("ad should be ready") })
+        consent.update(false)
+        loader.pendingReward?.invoke()
+        loader.pendingDismiss?.invoke()
+        assertEquals(0, rewards)
+        assertEquals(1, loader.loadCalls)
+    }
+
+    @Test fun `privacy preparation failure blocks real load and cached ad show`() {
+        val loader = FakeLoader().apply { nextOutcome = FakeLoader.Outcome.LoadOk }
+        val consent = FakeConsent().apply { privacyReady = false }
+        val mgr = manager(loader, consent = consent)
+        mgr.preload()
+        assertEquals(0, loader.loadCalls)
+        consent.privacyReady = true
+        mgr.preload()
+        assertEquals(1, loader.loadCalls)
+        consent.privacyReady = false
+        var unavailable = false
+        mgr.showAd(activity, { fail("must not reward") }, { unavailable = true })
+        assertTrue(unavailable)
+        assertEquals(1, loader.destroyCalls)
+        assertEquals(3, consent.preparations)
+    }
+
+    @Test
+    fun `failed load retries automatically and stops after three retries`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+
+        advanceTimeBy(4_999)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+        advanceTimeBy(15_000)
+        runCurrent()
+        assertEquals(3, loader.loadCalls)
+        advanceTimeBy(30_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+        advanceTimeBy(120_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+    }
+
+    @Test
+    fun `manual preload cancels scheduled retry and does not load a second cached ad`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        loader.nextOutcome = FakeLoader.Outcome.LoadOk
+        mgr.preload()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+    }
+
+    @Test
+    fun `successful retry resets backoff for the next ad`() = runTest {
+        val loader = FakeLoader()
+        val mgr = manager(loader, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        loader.nextOutcome = FakeLoader.Outcome.LoadOk
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(2, loader.loadCalls)
+
+        mgr.showAd(activity, onReward = {}, onUnavailable = { fail("ad should be ready") })
+        loader.nextOutcome = FakeLoader.Outcome.LoadFails
+        loader.pendingDismiss?.invoke()
+        runCurrent()
+        assertEquals(3, loader.loadCalls)
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(4, loader.loadCalls)
+    }
+
+    @Test fun `retry rechecks mediation privacy before loading`() = runTest {
+        val loader = FakeLoader()
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        consent.privacyReady = false
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        assertEquals(2, consent.preparations)
+    }
+
+    @Test fun `consent withdrawal cancels pending retry`() = runTest {
+        val loader = FakeLoader()
+        val consent = FakeConsent()
+        val mgr = manager(loader, consent = consent, retryScope = backgroundScope)
+        mgr.preload()
+        runCurrent()
+        consent.update(false)
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(1, loader.loadCalls)
+        assertEquals(1, consent.preparations)
     }
 
     private fun fail(msg: String): Nothing = throw AssertionError(msg)
