@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 本輪診斷紀錄見Git.
+Current commit: 修復產品20a18ed，PR66已推送；root紀錄見Git.
 
-Tests/scenarios: 完整堆疊及服務生命週期唯讀檢查.
+Tests/scenarios: test/lintDebug/assembleDebug成功；317tests/60既有skip/0failure，新服務6tests/0skip；Claude三PASS.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: MockLocationService前景啟動逾時；版本1.4.1/10401.
+Proven: 前景服務啟停競態修復已交付PR66；未merge或上架.
 
-Open: 實際延遲來源未定，沒有POCO重現.
+Open: POCO原裝置及手機smoke未測；遠端CI仍執行中，既有lint保留.
 
-Next: 取得當機前操作與log定位觸發路徑.
+Next: 實機驗證快速啟停與冷啟動，再評估發布.
 
-Artifacts: owner提供的stacktrace.
+Artifacts: PR66與A073設計、審查、validation；root完成tracker.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -484,5 +484,108 @@ Streams: none.
 ---
 
 # → Ask / A-073 (Takeshi Mori)
+
++ 有辦法修復嗎？可以的話就開始進行修復，可以跟claude code討論
+
+---
+
+## [RUN-001] Event — 2026-10-16 23:30:28 +0800 (A-073)
+
+- Git preflight：main；status只有本輪Ask；fetch成功；origin/main=bc94c12ef788ec672999838f780046d4feb8b942；最近五筆bc94c12/58a8f37/8c03dbf/2561609/e143067，AGENTS.md存在。由最新origin/main建立fix/mock-service-foreground-timeout，未重設或丟棄變更。
+- Route selected_advisors；allow-ag on、streams off。Host負責服務及回歸測試；Claude Code opus/high在獨立無remote clone唯讀討論「如何縮短前景提升前工作、避免啟停漏提升」。只開Read/Glob/Grep，CLI限制不是OS sandbox，仍繼承帳號及網路能力。當前owner授權修復本次前景服務逾時；不更改地圖、廣告或收費行為。
+
+## [RUN-002] Event — 2026-10-16 23:33:44 +0800 (A-073)
+
+- Claude討論完成exit0，clone未改、無截斷、無巢狀worker；第一個啟動因CLI可變長選項吞掉prompt而失敗，加入--分隔後單次修正成功。報告自述低思考量與實際--effort high不符，採dispatch為準並保留原文，不重跑。
+- Host核對Android16 ActiveServices與Service API：等待前景提升時bringDown會排程崩潰；stopSelf(startId)可避免尚未交付的新開始遭舊停止銷毀。收斂到此可證的啟停缺陷，不採onCreate全面提升或全面lazy注入。
+- 已保存design.md與Minimality check，away-gates on對此已授權方案供應Design Go；先提交設計，再修改產品。原SDK33服務測試全部跳過；SDK28生命週期測試已確實執行。先前onCreate通知假設測試失敗但非採用契約，已改以stopSelf編號驗證真正修正目標。
+
+## [RUN-003] Event — 2026-10-16 23:36:25 +0800 (A-073)
+
+- Design commit4cf63ba已保存後才改服務。stopSelf編號回歸先失敗expected2 actual0；修正後4個SDK28生命週期測試全部通過、0skip。新增IDLE發布順序與舊route-completion保護共6項，隨必要完整test/lintDebug/assembleDebug驗證中。僅使用佔位Maps key建置，無實機連線，不交付此APK作實機地圖驗證。
+- Scope check：只改MockLocationService及新增服務回歸測試，附A073設計、原Claude討論、tracker與devlog；不修廣告runBlocking等未證相關路徑。Git hook拒絕將root notebook提交到feature branch，因此已保留root紀錄未暫存；產品分支完成後回main保存root紀錄，不繞過hook。
+
+## [WIP-001] Checkpoint — 2026-10-16 23:36:25 +0800 (A-073)
+
+- **Finished:** 啟停競態修正；4項確實執行的生命週期測試通過；Claude初步討論已驗收。
+- **Running now:** 完整test/lintDebug/assembleDebug（含新增2項測試）。
+- **Still to do:** 最終獨立審查、單主題分支推送及PR。
+- **Next work action:** 讀取建置結果並提交審查候選。
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+## [RUN-004] Event — 2026-10-16 23:38:06 +0800 (A-073)
+
+- 完整test/lintDebug/assembleDebug成功1m12s；317tests/60既有skip/0failure/0error，新服務6tests/0skip。Lint既有34Error/100Warning/3Hint，abortOnError=false。ADB沒有裝置，無POCO重現或手機smoke。validation.json已保存摘要。
+- 修復候選20a18ed已提交；cross-check-plan為targeted。delegation-route選出claude-default better=opus5.5/high，使用新無remote clone及僅Read/Glob/Grep審查，已凍結review-brief與原始Ask/正常流程/最小性契約及測試證據。等待結果，未合併或上架。
+- Tracker補足完成項Proof後validate通過1/2；先前WIP時驗證因Proof欄位遺漏而失敗，已修正，沒有重跑已通過的產品測試。origin/main...HEAD=0/2；遠端同名feature尚不存在，首推前HEAD..origin/feature無可比對引用，沒有遠端新commit待保留。
+
+## [RUN-005] Event — 2026-10-16 23:40:52 +0800 (A-073)
+
+- Claude對20a18edb1618009bca137405013ab440d8ff8ea1獨立審查Outcome/Minimality/Conformance全PASS，exit0/無截斷/clone未改/無巢狀worker。Host檢查原始報告、測試及差異接受；away-gates on供應Result Go，未宣稱POCO原當機已重現。
+- PR66 OPEN，產品分支已推送；本機必要3指令成功，遠端CI仍執行中，沒有merge／上架。Tracker已validate完成2/2；先前complete缺Evidence status欄位僅修紀錄後再驗，未重跑產品。source只有服務及6項新測試；其餘為相同證據保存，審查後產品未變。
+- Scope check：root回main保留本輪devlog，dirty只有root notebook；產品與所有A073 artifacts留在PR分支，可從GitHub連結讀取。準備保存root Reply；保存後同步main紀錄到PR分支以維持behind0，不更動已審產品。
+
+## [RUN-006] Event — 2026-10-16 23:42:10 +0800 (A-073)
+
+- **Scope check:** 最後root只有本輪devlog及由PR分支原樣保留的完成tracker（僅更新時間），產品仍只在PR66。close因root缺tracker及checkpoint證據欄位拒絕；已補root恢復紀錄，2/2validate通過，沒有重跑產品或審查。
+
+## [WIP-002] Checkpoint — 2026-10-16 23:42:10 +0800 (A-073)
+
+- **Finished:**
+
+  1. 修復、必要測試、Claude三PASS、PR66推送均完成；root紀錄及完成tracker已核對。
+
+- **Running now:**
+
+  1. 無本機工作；遠端CI獨立執行中。
+
+- **Still to do:**
+
+  1. 只剩保存Reply及同步main紀錄到PR分支；無產品改動。
+
+- **Next work action:** 保存本輪Reply與推送紀錄。
+
+- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
+
+# ← Reply / A-073
+
+* _2026-10-16 23:42:36 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已修復前景服務啟停競態並建立PR66；必要檢查與Claude獨立審查通過，POCO實機仍待驗證，未合併或上架。
+
+## [FINAL REPORT]
+
+1. 「有辦法修復嗎？可以的話就開始進行修復，可以跟claude code討論」
+
+   - 已完成修復並推送[PR #66](https://github.com/moooo-works/Lets-go-gps/pull/66)。舊停止可能銷毀系統已排隊的新開始；現在按Android啟動編號停止，背景停止與路線完成回到主執行緒核對編號，舊回呼不清掉新工作；先發出系統停止要求才發布IDLE。產品只改MockLocationService及6項新測試，保留原地圖、廣告、權限及恢復流程。
+
+   - 已和Claude Code討論並完成最終獨立唯讀審查，對20a18edb1618009bca137405013ab440d8ff8ea1的Outcome／Minimality／Conformance全PASS。我核對原始報告、差異與測試後接受。審查後產品未改，只補紀錄；CLI讀取限制不等於OS沙箱。
+
+   - test／lintDebug／assembleDebug全部成功。317tests、0failure/error，新增6tests全執行0skip；60個既有測試仍跳過。停止編號回歸修復前expected2／actual0失敗，修復後通過。Lint保留既有34Error／100Warning／3Hint，因abortOnError=false而指令成功。
+
+   - 沒有連接ADB裝置，尚未在POCO M7 Android16重現原當機或實機smoke；這是可證啟停缺陷的修復，不能保證已排除所有當機。仍需補測冷啟動、單點／路線及快速停止再開始。使用Maps佔位key做建置驗證，沒有把這份APK交付朋友做地圖測試。
+
+   - 從最新origin/main bc94c12開fix/mock-service-foreground-timeout，完整preflight及實機待測清單已放PR。PR OPEN、遠端CI仍執行中；未merge或上架。root紀錄回main保存後同步到PR分支以維持behind0，沿用未變產品的驗證。完成tracker亦保存在main供恢復。
+
+   - Key Records — read these first
+
+     [修復與驗證清單](https://github.com/moooo-works/Lets-go-gps/pull/66) — 程式差異、preflight、建置結果與實機待測範圍。
+
+     [Claude最終審查](https://github.com/moooo-works/Lets-go-gps/blob/fix/mock-service-foreground-timeout/.agentflow/artifacts/A-073-foreground-timeout/review-report.md) — 三項PASS、接受的取捨及審查限制。
+
+     [修復設計](https://github.com/moooo-works/Lets-go-gps/blob/fix/mock-service-foreground-timeout/.agentflow/artifacts/A-073-foreground-timeout/design.md) — 正常流程、保留規則、最小修改理由。
+
+     [驗證摘要](https://github.com/moooo-works/Lets-go-gps/blob/fix/mock-service-foreground-timeout/.agentflow/artifacts/A-073-foreground-timeout/validation.json) — 測試與lint實際數字。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-074 (Takeshi Mori)
 
 +
