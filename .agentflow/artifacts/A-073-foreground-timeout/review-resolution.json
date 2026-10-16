@@ -1,0 +1,22 @@
+{
+  "reviewed_commit": "20a18edb1618009bca137405013ab440d8ff8ea1",
+  "review_report": ".agentflow/artifacts/A-073-foreground-timeout/review-report.md",
+  "outcome": "PASS",
+  "minimality": "PASS",
+  "conformance": "PASS",
+  "host_acceptance": "Inspected final source/tests and original reviewer report; accepted bounded race repair; POCO incident remains unreproduced. No product change after review target.",
+  "transport": {
+    "exit_code": 0,
+    "stdout_truncated": false,
+    "clone_changed": false,
+    "nested_detected": false,
+    "stdin_closed": true
+  },
+  "limitations": [
+    "CLI read-only tools, not OS sandbox; inherited account/network",
+    "SDK28 Robolectric cannot model Android16 system deadline",
+    "Pause/resume may defer failure stop to next injection; count retained",
+    "No adb device, POCO smoke pending"
+  ],
+  "result_go": "away-gates on supplies Result Go for reviewed commit after host acceptance"
+}
