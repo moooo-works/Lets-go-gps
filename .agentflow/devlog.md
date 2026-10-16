@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: main已整合1.4.3，12個worktree已清理；本輪紀錄見Git.
+Current commit: 本輪診斷紀錄見Git.
 
-Tests/scenarios: 截圖原文與歷史工單範圍/A061實測證據比對，未新增外部狀態操作.
+Tests/scenarios: 完整堆疊及服務生命週期唯讀檢查.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 原Unity SDK整合問題已有正向banner/reward實測；建議回覆00939092可結案.
+Proven: MockLocationService前景啟動逾時；版本1.4.1/10401.
 
-Open: Unity工單尚未代回覆或關閉；朋友裝置與既有未驗限制保留.
+Open: 實際延遲來源未定，沒有POCO重現.
 
-Next: owner若授權回覆即可寄原信確認SDK問題解決；無自動寄信.
+Next: 取得當機前操作與log定位觸發路徑.
 
-Artifacts: A061 Unity實測與本輪工單回覆草稿.
+Artifacts: owner提供的stacktrace.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -445,5 +445,44 @@ Streams: none.
 ---
 
 # → Ask / A-072 (Takeshi Mori)
+
++ [Image #1] /Users/mori/Downloads/com.moooo_works.letsgogps_issue_bf0aa132fee08d894d95a404d1a44d14_crash_session_6AD21E8400DB0001344D06CA4FC7C8C3_DNE_0_v2_stacktrace.txt 這個問題造成多次當機，檢查是什麼問題
+
+---
+
+## [RUN-001] Event — 2026-10-16 23:28:45 +0800 (A-072)
+
+- 完整讀取當機堆疊並核對服務啟動、通知與停止路徑；未改產品。
+
+# ← Reply / A-072
+
+* _2026-10-16 23:28:45 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已確認模擬定位服務未及時完成前景啟動，Android因此終止App；實際延遲來源仍需追查。
+
+## [FINAL REPORT]
+
+1. 「[Image #1] /Users/mori/Downloads/com.moooo_works.letsgogps_issue_bf0aa132fee08d894d95a404d1a44d14_crash_session_6AD21E8400DB0001344D06CA4FC7C8C3_DNE_0_v2_stacktrace.txt 這個問題造成多次當機，檢查是什麼問題」
+
+   - 直接原因已確認：ForegroundServiceDidNotStartInTimeException指定MockLocationService，表示呼叫startForegroundService後未在系統期限內成功完成startForeground，系統因而終止App。[Android官方說明](https://developer.android.com/develop/background-work/services/fgs/troubleshooting)。
+
+   - 紀錄是1.4.1（10401）、2026-10-16 20:54:37；截圖裝置是POCO M7、Android16、OS3.0.302.0.WBOTWXM.C07。單筆資料不能證明多次當機全是同原因，也不能判定是POCO特有問題或先前交付的Pro debug APK。
+
+   - 現有MockLocationService.kt:410的onStartCommand僅四種開始動作會在428行提升前景；此前需要完成服務依賴建立、onCreate及通知建構。停止流程會移除前景並stopSelf。應優先調查建立／主執行緒延遲及快速啟停競態，尚無證據可選定其中一項為根因。
+
+   - 目前RuntimeException捕捉攔不到之後由ActivityThread丟出的系統逾時；單加try/catch無法解決。修正方向是縮短前景提升前工作並驗證啟停順序，涵蓋冷啟動及快速停止再啟動。1.4.3仍有相同結構，不能保證更新即可排除。
+
+   - 堆疊沒有顯示地圖金鑰、Unity或模擬權限拒絕。需要當機前logcat／Crashlytics操作紀錄來分辨首次開始、切背景或停止再啟動的觸發路徑。此次完成靜態診斷，沒有POCO實機重現、產品修改或建置測試；已核對差異只有本輪紀錄。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-073 (Takeshi Mori)
 
 +
