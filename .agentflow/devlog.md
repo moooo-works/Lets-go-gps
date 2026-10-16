@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: 修復產品20a18ed，PR66已推送；root紀錄見Git.
+Current commit: Debug取自修復分支e609bb8；本輪交付紀錄見Git.
 
-Tests/scenarios: test/lintDebug/assembleDebug成功；317tests/60既有skip/0failure，新服務6tests/0skip；Claude三PASS.
+Tests/scenarios: assembleDebug成功；APK版本、debuggable、Maps摘要、簽章、複製SHA核對通過.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 前景服務啟停競態修復已交付PR66；未merge或上架.
+Proven: 含PR66修復的1.4.3 Pro Debug APK已交付Downloads.
 
-Open: POCO原裝置及手機smoke未測；遠端CI仍執行中，既有lint保留.
+Open: POCO實機當機回歸仍待驗證；PR66未merge.
 
-Next: 實機驗證快速啟停與冷啟動，再評估發布.
+Next: 以交付Debug APK測試冷啟動與快速啟停.
 
-Artifacts: PR66與A073設計、審查、validation；root完成tracker.
+Artifacts: Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.3-debug-pro-fgs-fix-e609bb8.apk.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -587,5 +587,46 @@ Streams: none.
 ---
 
 # → Ask / A-074 (Takeshi Mori)
+
++ 先build debug版給我
+
+---
+
+## [RUN-001] Event — 2026-10-16 23:50:15 +0800 (A-074)
+
+- Preflight：main；status只有A074 devlog；fetch成功；origin/main0135214db62421a09cb7fec9e29b65b921fe3dbc，最近五筆0135214/bc94c12/58a8f37/8c03dbf/2561609。切至既有修復分支e609bb84f9d7e1d91f6714b92a4bd47383b2c76a並確認behind0、遠端同步；產品對已審20a18ed無差異。direct host建置，無程式修改。
+
+## [RUN-002] Event — 2026-10-16 23:50:15 +0800 (A-074)
+
+- 從先前授權Debug APK在記憶體取得Maps key，摘要13496733ebf5；assembleDebug成功2s。交付1.4.3/10403 debuggable APK，簽章B2EF與A064已授權Debug相同；複製後SHA256相等。回main只保存本輪紀錄；未安裝手機或merge／上架。
+
+# ← Reply / A-074
+
+* _2026-10-16 23:50:15 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- 已建置含當機修復的1.4.3 Pro Debug APK，存到Downloads，可更新先前Debug版。
+
+## [FINAL REPORT]
+
+1. 「先build debug版給我」
+
+   - 成功：[下載Debug APK](/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.3-debug-pro-fgs-fix-e609bb8.apk)。版本1.4.3／10403，約35.3MB，包含PR66前景服務啟停修復，維持Debug的Pro解鎖與測試廣告設定。
+
+   - 從修復分支e609bb8建置，產品與Claude已審20a18ed相同；assembleDebug成功2s。APK可驗簽、debuggable=true、package正確；Maps真金鑰摘要13496733ebf5與先前授權APK相同，Debug SHA1 B2:EF:2A:B6:C7:B8:54:6A:A4:1D:3D:83:D7:1C:BB:8D:95:87:EA:4F符合A064已登錄簽章，沒有使用前輪佔位key。
+
+   - 可更新相同簽章的舊Debug版；Google Play正式版簽章不同，不能直接覆蓋安裝。尚未在POCO實機驗證；本次只建置與檢查APK，不宣稱當機已於原裝置排除。未修改程式、安裝手機、merge或上架，沿用前輪已通過的產品測試／審查。
+
+   - 交付SHA256：dc83725cb1ce5f2077f976bfb2b554d1b52909bf13a21d54faebfa2695529e59；來源與Downloads副本相同。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-075 (Takeshi Mori)
 
 +
