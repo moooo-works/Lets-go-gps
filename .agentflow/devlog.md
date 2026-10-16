@@ -4,19 +4,19 @@ Project: Lets-go-gps
 
 Notebook: .agentflow/devlog.md — root.
 
-Current commit: Debug取自修復分支e609bb8；本輪交付紀錄見Git.
+Current commit: 本輪路徑說明見Git.
 
-Tests/scenarios: assembleDebug成功；APK版本、debuggable、Maps摘要、簽章、複製SHA核對通過.
+Tests/scenarios: 核對A074交付紀錄及兩份APK存在與大小.
 
 Configuration: ag.json — schema v8; validated for codex this round.
 
-Proven: 含PR66修復的1.4.3 Pro Debug APK已交付Downloads.
+Proven: Downloads是另存副本，Gradle原始輸出仍在專案build目錄.
 
-Open: POCO實機當機回歸仍待驗證；PR66未merge.
+Open: POCO實機驗證仍待進行；PR66未merge.
 
-Next: 以交付Debug APK測試冷啟動與快速啟停.
+Next: 等待owner測試或指定交付位置.
 
-Artifacts: Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.3-debug-pro-fgs-fix-e609bb8.apk.
+Artifacts: 專案app-debug.apk與Downloads命名副本.
 
 Archived eras: .agentflow/devlog.archive.md.
 
@@ -628,5 +628,34 @@ Streams: none.
 ---
 
 # → Ask / A-075 (Takeshi Mori)
+
++ 為什麼路徑會在downloads底下?
+
+# ← Reply / A-075
+
+* _2026-10-16 23:52:03 +0800 (gpt-6.1-sol/low)_
+
+## [SUMMARY]
+
+- Downloads是我另存交付副本的位置；Gradle原始輸出仍在專案app/build/outputs/apk/debug/app-debug.apk。
+
+## [FINAL REPORT]
+
+1. 「為什麼路徑會在downloads底下?」
+
+   - 是我主動複製到那裡，沿用之前A070保存發布檔的Downloads/Lets-go-gps-release-artifacts資料夾，方便取用並避免後續build覆寫交付版本。這不是Gradle的輸出設定，也不是從網路下載。
+
+   - 原始建置檔仍在[app-debug.apk](/Users/mori/side-project/Lets-go-gps/app/build/outputs/apk/debug/app-debug.apk)；Downloads那份只是重新命名的副本，前輪已核對SHA256一致，本輪確認兩檔都存在、大小相同。
+
+   - 你沒有指定輸出目錄，Downloads是我自行選的交付位置，先前應說明清楚。此次僅解釋，沒有搬動檔案或修改建置設定。
+
+## Questions (batched — each with a suggested default)
+
+- None.
+
+
+---
+
+# → Ask / A-076 (Takeshi Mori)
 
 +
