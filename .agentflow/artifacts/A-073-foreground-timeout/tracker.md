@@ -13,8 +13,8 @@
 - **State:** complete.
 - **Reason:** 修復已提交並交付PR66，實機限制列於驗證紀錄。
 - **Total:** 2.
-- **Completed:** 1.
-- **Remaining:** 1.
+- **Completed:** 2.
+- **Remaining:** 0.
 
 ## Accepted task checklist
 
@@ -39,7 +39,7 @@
 - **Blocking accepted decision:** none.
 - **Operation running:** no.
 - **Next action remaining:** none.
-- **Evidence status:** current.
+- **Evidence status:** complete.
 - **Judgment:** complete.
 
 ## Update meaning
