@@ -8,6 +8,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
@@ -76,6 +78,10 @@ class MockLocationService : Service() {
     @Volatile
     private var isStopping = false
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile
+    private var latestStartId = 0
+
     // Default dispatcher (not Main) so the route simulator's tick loop and
     // location-injection collectors keep running at full cadence when the user
     // switches MockGPS to background. Android 11+ throttles a backgrounded
@@ -83,7 +89,7 @@ class MockLocationService : Service() {
     // delay() in the simulator and "freeze" the mock location for consumers
     // like Pokemon GO / Pikmin Bloom. None of the work in this scope touches
     // UI: startForeground/stopForeground are called from onStartCommand /
-    // handleStop which run on the system's binder thread, not in serviceScope.
+    // handleStop which run on the main thread, not in serviceScope.
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var locationPushJob: Job? = null
     private var isProviderSetup = false
@@ -250,6 +256,7 @@ class MockLocationService : Service() {
     }
 
     private fun performInjection(location: LatLng, bearing: Float = 0f, speed: Float = 0f, applyJitter: Boolean = true) {
+        val injectionStartId = latestStartId
         try {
             val altitude = if (cachedRandomAltitude) {
                 cachedAltitude + kotlin.random.Random.nextDouble(-0.5, 0.5)
@@ -281,8 +288,12 @@ class MockLocationService : Service() {
             val isPermissionRevoked = e is SecurityException || e.cause is SecurityException
             if (isPermissionRevoked || consecutiveInjectionFailures >= MAX_INJECTION_FAILURES) {
                 Log.w(TAG, "Stopping service: permission revoked=$isPermissionRevoked failures=$consecutiveInjectionFailures")
-                mockStateRepository.setMockError(MockEngineError.SetLocation(e))
-                handleStop()
+                mainHandler.post {
+                    if (latestStartId == injectionStartId && !isStopping) {
+                        mockStateRepository.setMockError(MockEngineError.SetLocation(e))
+                        handleStop(injectionStartId)
+                    }
+                }
             }
         }
     }
@@ -412,6 +423,7 @@ class MockLocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        latestStartId = startId
         val action = intent?.action ?: return START_NOT_STICKY
 
         if (action == ACTION_START_SINGLE || action == ACTION_START_ROUTE ||
@@ -435,7 +447,7 @@ class MockLocationService : Service() {
                 // every launch. See task fix-fgs-restore-crash.
                 clearPersistedSession()
                 mockStateRepository.setMockError(MockEngineError.Setup(e))
-                stopSelf()
+                stopSelf(startId)
                 return START_NOT_STICKY
             }
         }
@@ -651,7 +663,13 @@ class MockLocationService : Service() {
         }
     }
 
-    private fun handleRouteCompleted() {
+    private fun handleRouteCompleted(expectedStartId: Int = latestStartId) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mainHandler.post { handleRouteCompleted(expectedStartId) }
+            return
+        }
+        if (expectedStartId != latestStartId ||
+            !isRouteCompletionOnIdle(isStopping, mockStateRepository.mockStatus.value)) return
         currentRouteProgress = null
         clearPersistedSession() // route finished — nothing to recover
         val finalLocation = mockStateRepository.currentMockLocation.value
@@ -664,7 +682,20 @@ class MockLocationService : Service() {
         performInjection(finalLocation, speed = 0f, applyJitter = false)
     }
 
-    private fun handleStop() {
+    private fun handleStop(expectedStartId: Int = latestStartId) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mainHandler.post { handleStop(expectedStartId) }
+            return
+        }
+        if (expectedStartId != latestStartId) return
+        cleanUpSimulation()
+        // Android may already have a newer foreground start queued for this service.
+        // Never destroy it on behalf of an older delivered command.
+        stopSelf(expectedStartId)
+        mockStateRepository.setMockStatus(MockStatus.IDLE)
+    }
+
+    private fun cleanUpSimulation() {
         isStopping = true
         consecutiveInjectionFailures = 0
         stopLocationPushJob()
@@ -673,11 +704,9 @@ class MockLocationService : Service() {
             try { mockEngine.teardownMockProvider() } catch (e: Exception) {}
             isProviderSetup = false
         }
-        mockStateRepository.setMockStatus(MockStatus.IDLE)
         mockStateRepository.setCurrentMockLocation(null)
         flushStepsOnStop()
         stopForeground(true)
-        stopSelf()
     }
 
     /**
@@ -787,7 +816,9 @@ class MockLocationService : Service() {
     }
 
     override fun onDestroy() {
-        handleStop()
+        mainHandler.removeCallbacksAndMessages(null)
+        cleanUpSimulation()
+        mockStateRepository.setMockStatus(MockStatus.IDLE)
         serviceScope.cancel()
         super.onDestroy()
     }
