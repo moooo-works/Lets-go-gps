@@ -1,0 +1,60 @@
+{
+  "schema-version": 13,
+  "switches": {
+    "omit-asker": "off",
+    "inline-reply": "off",
+    "use-lang": "zh-tw",
+    "omit-run": "off",
+    "omit-wip": "off",
+    "notebook-name": "devlog.md",
+    "ag-dir": ".agentflow",
+    "saving-mode": "off"
+  },
+  "pipeline-roles": {
+    "requirements": "better",
+    "codewalk": "better",
+    "explore": "better",
+    "spike": "better",
+    "spec": "better",
+    "implementation": "basic",
+    "security-scan": "best",
+    "acceptance": "better",
+    "learn": "basic",
+    "threeways": "better"
+  },
+  "model-family": {
+    "openai": {
+      "best": "gpt-6-astra/medium",
+      "better": "gpt-6.1-sol/high",
+      "basic": "gpt-6.1-sol/low",
+      "cheap": "gpt-6-luna/high"
+    },
+    "claude": {
+      "best": "claude-opus-5-5/xhigh",
+      "better": "claude-opus-5-5/high",
+      "basic": "claude-sonnet-5-5/high",
+      "cheap": "haiku/high"
+    }
+  },
+  "external-workers": [
+    {
+      "id": "codex-default",
+      "command": [
+        "codex",
+        "exec"
+      ],
+      "priority": 3,
+      "model-family": "openai"
+    },
+    {
+      "id": "claude-default",
+      "command": [
+        "claude",
+        "-p"
+      ],
+      "priority": 3,
+      "model-family": "claude"
+    }
+  ],
+  "next_update_date": "2026-10-31"
+}

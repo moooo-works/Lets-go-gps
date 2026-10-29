@@ -1,5 +1,9 @@
 AGENTS.md — Jules / Codex 協同開發規範（Lets-go-gps）
 
+工作階段開始時，面向使用者的主 agent 必須透過支援的技能探索方式載入並遵循 agentflow，並尊重使用者明確停用的指示。若技能不可用，須回報，不得猜測路徑或自行安裝。受派 agent 只遵循派工內容，不啟動 agentflow。
+
+所有專案 agent 與審查者在工作或審查前，須讀取已解析 agentflow 技能中的 `references/project-rules.md`（或主 agent 提供的完整原文），再讀取 `.agentflow/rules.md`（若存在）。若共用規範不可用，暫緩共用紀錄寫入及不變條件／審查驗收，回報缺口並繼續可獨立進行的已授權工作。讀取規範本身不啟動 agentflow。
+
 目標：避免「Codex 的功能已合併 main，但 Jules 未拉取 main 就在舊 branch 繼續開發」導致回歸與整合失敗。
 適用對象：google-labs-jules / Codex（含其 bot 連接器）。
 

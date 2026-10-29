@@ -1,26 +1,21 @@
 # STATUS
 
-Project: Lets-go-gps
+專案: Lets-go-gps
 
-Notebook: .agentflow/devlog.md — root.
+筆記本: .agentflow/devlog.md — 根目錄筆記本。
 
-Current commit: 本輪路徑說明見Git.
+工作目錄: /Users/mori/side-project/Lets-go-gps
 
-Tests/scenarios: 核對A074交付紀錄及兩份APK存在與大小.
+分支: main
 
-Configuration: ag.json — schema v8; validated for codex this round.
+目前工作: A-076 遷移至 Agentflow v9，見[遷移追蹤](artifacts/A-076/tracker.md)。保留[PR66 修復與待測事項](#-ask--a-073-takeshi-mori)及[Debug APK 交付](#-ask--a-074-takeshi-mori)；POCO 實機待測，PR66 尚未合併（沿用上輪紀錄，未重新查詢）。
 
-Proven: Downloads是另存副本，Gradle原始輸出仍在專案build目錄.
+已驗證: 舊設定已轉換並移至 .agentflow/ag.json；產品程式未修改。
 
-Open: POCO實機驗證仍待進行；PR66未merge.
+下一步: 完成遷移驗證與獨立審查，再交付設定紀錄。
 
-Next: 等待owner測試或指定交付位置.
+封存紀錄: .agentflow/devlog.archive.md。
 
-Artifacts: 專案app-debug.apk與Downloads命名副本.
-
-Archived eras: .agentflow/devlog.archive.md.
-
-Streams: none.
 ---
 
 # → Ask / A-062 (Takeshi Mori)
@@ -658,4 +653,6 @@ Streams: none.
 
 # → Ask / A-076 (Takeshi Mori)
 
-+
++ godev
+
++ 遷移至v9

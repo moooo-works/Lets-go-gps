@@ -1,0 +1,43 @@
+{
+  "session": "f3d42aaf-7272-4d0a-af86-b303bfc8aff6",
+  "backup": "/Users/mori/.aglite-backups/b07f007e-12db-44ab-8e62-f6dab4b7d792",
+  "notebook": "/Users/mori/side-project/Lets-go-gps/.agentflow/devlog.md",
+  "ask": "A-076",
+  "baseline": {
+    "ag.json": "cf9f016115a5a3430c965319a4ce9e5bc700ce22f484470df01ad2d55d0b0207",
+    "AGENTS.md": "956012b92a682d6a0d2e4fa61c70203e1b7e74c9ffa3bcee1c57de628c1f895a",
+    ".codex/hooks.json": "d256b4e3899dffd779e13711be62c9d64ee3cb4bc97d0378c6152f76faf4baec",
+    ".git/hooks/pre-commit": "67e2a478287a618fdd8d1ef63341945a18e082246f192d02ab601fceecbacb2c",
+    ".agentflow/devlog.md": "43a94e3f9fbcfd8c874b74a22685a7b7adc4d072db53a18b3dd29a9615ce50cf",
+    ".agentflow/devlog.archive.md": "7f744de8302ad2b7f3e07275b44dae3227bf60ebcbc3238d07706d92318a9477"
+  },
+  "planned": {
+    "config": {
+      "sha256": "3b63e23c15c287f2182e215d69915a591dd5fbb1091c99aad8f09419e7818183",
+      "mode": 420
+    },
+    "hooks": {
+      "sha256": "78922a784ee78e9e50587e93628cd3b9d4dfbe49087adc4514e6781cea38cbb9",
+      "mode": 420
+    },
+    "agents": {
+      "sha256": "e093701c272fe84617e9193af5244df16008ef53f8a1734f499829b2a011e4db",
+      "mode": 420
+    }
+  },
+  "trash-precommit": "/Users/mori/.Trash/Lets-go-gps-agentflow-v8-pre-commit-f3d42aaf-7272-4d0a-af86-b303bfc8aff6",
+  "original-modes": {
+    "ag.json": 420,
+    "AGENTS.md": 420,
+    ".codex/hooks.json": 420,
+    ".git/hooks/pre-commit": 493
+  },
+  "status-history-sha256": "fb22d79ec8f6f858f0015402fadec56269c521d428e414ba4811a2bbe5d7ada0",
+  "applied": [
+    "codex-hooks",
+    "git-precommit-trashed",
+    "agents-addition",
+    "config-relocated-and-mapped",
+    "status-projected"
+  ]
+}
