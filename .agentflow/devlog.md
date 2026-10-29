@@ -8,11 +8,11 @@
 
 分支: main
 
-目前工作: A-076 遷移至 Agentflow v9，見[遷移追蹤](artifacts/A-076/tracker.md)。保留[PR66 修復與待測事項](#-ask--a-073-takeshi-mori)及[Debug APK 交付](#-ask--a-074-takeshi-mori)；POCO 實機待測，PR66 尚未合併（沿用上輪紀錄，未重新查詢）。
+目前工作: A-076 已完成專案設定遷移至 Agentflow v9，見[遷移追蹤](artifacts/A-076/tracker.md)。保留[PR66 修復與待測事項](#-ask--a-073-takeshi-mori)及[Debug APK 交付](#-ask--a-074-takeshi-mori)；POCO 實機待測，PR66 尚未合併（沿用上輪紀錄，未重新查詢）。
 
 已驗證: 舊設定已轉換並移至 .agentflow/ag.json；產品程式未修改。
 
-下一步: 完成遷移驗證與獨立審查，再交付設定紀錄。
+下一步: 等待使用者提供 POCO 測試結果或指定新工作。
 
 封存紀錄: .agentflow/devlog.archive.md。
 
@@ -656,3 +656,43 @@
 + godev
 
 + 遷移至v9
+
+## [RUN-001] 事件 — 2026-10-29 17:17:09 +0800 (A-076)
+
+- 專案設定與舊掛鉤已完成遷移；既有開發歷史、模型選擇及待測線索保留。[遷移與回復紀錄](artifacts/A-076/tracker.md)。
+
+# → 回覆 / A-076
+
+* _2026-10-29 17:17:09 +0800_
+
+1. 「遷移至v9」
+
+   已將此專案遷移至已安裝的 Agentflow 9.0.0（設定 schema 13）。設定由根目錄 `ag.json` 移到 `.agentflow/ag.json`；筆記本及封存維持原路徑，歷史保留。模型名稱、推理強度、worker 指令與優先順序的相對關係均保留。
+
+   舊 Stop／UserPromptSubmit 掛鉤已移除，完整 Agentflow Git guard 已移至垃圾桶，原始檔與預定輸出保存在 Git 外私有備份。AGENTS.md 僅增補技能啟動及共用規範指向。其他既有工作階段若已載入舊 hooks，需重開才能刷新。
+
+   設定對應為 `workspace-dir`→`ag-dir`、`target-doc`→`notebook-name`、`lang`→`use-lang`、`ask-names:on`→`omit-asker:off`、`log-verbosity:all`→兩個 omit 開關皆 off，新增 `saving-mode:off`。profile tiers 移至共用 model-family；相同的 cross-check／acceptance 合併，threeways 保留。
+
+   舊 `auto-reply:on` 不再自動核准，筆記本改為強制認領，核准依現行 owner-only 邊界處理，功能分支不自動建立。`allowed-worker` 全集、`cli-provider:on`、`allow-ag:on`、`review-policy:prefer-independent` 退役；120 分鐘拆工門檻、30 秒 Git timeout、關閉自動清理及 7 天清理間隔也不再控制新流程。本次沒有清理歷史或備份。
+
+   未修改產品程式或合併 PR66，POCO 實機待測事項保留。三項 Gradle 驗證以環境佔位 Maps key 通過；原本 Debug APK 已恢復並核對一致，未交付佔位版。完整檢查及審查限制見紀錄。
+
+   安裝仍為 9.0.0；已查到 [9.1.0](https://github.com/agfnow/agentflow/releases/tag/v9.1.0) 可用，可另行準備更新，此次未替換安裝。
+
+   **主要紀錄**
+
+   - [遷移追蹤與回復入口](artifacts/A-076/tracker.md)：完成範圍、保留待辦及回復位置。
+
+   - [驗證證據](artifacts/A-076/evidence.md)：設定對應、Git preflight、歷史核對、建置及原 APK 恢復。
+
+   - [獨立審查原文](artifacts/A-076/review.md)：審查發現與可觀察範圍；修正記錄位於驗證證據。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-077 (Takeshi Mori)
+
++
