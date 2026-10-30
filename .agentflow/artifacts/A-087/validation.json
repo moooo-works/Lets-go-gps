@@ -1,0 +1,19 @@
+{
+  "version": "1.4.4",
+  "versionCode": 10404,
+  "tests": {
+    "tests": 335,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 60
+  },
+  "lint": {
+    "Error": 33,
+    "Warning": 103,
+    "Hint": 3
+  },
+  "lintAbortOnError": false,
+  "checks": "./gradlew test lintDebug assembleDebug bundleRelease: BUILD SUCCESSFUL in 2m52s",
+  "priorDeviceEvidence": "A08612/12oldsource; newsource device rerun planned",
+  "device": "Pixel7Pro Android17 newsource a..k11/11 passed 0fail0skip; l screenoff not rerun"
+}

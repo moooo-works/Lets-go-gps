@@ -1,0 +1,8 @@
+{
+  "mock_start_confirmed": true,
+  "stop_ui_and_overrides_cleared": true,
+  "camera_coordinate_display_changed": true,
+  "fused_fix_non_mock": true,
+  "google_maps_opened": false,
+  "map_tiles_unavailable": true
+}

@@ -34,6 +34,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import android.widget.Toast
+import kotlinx.coroutines.CancellationException
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,11 +54,13 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.CameraPositionState
 import com.moooo_works.letsgogps.R
 import com.moooo_works.letsgogps.data.model.SavedLocation
 import com.moooo_works.letsgogps.ui.theme.Accent500
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Top search bar that also shows the current mock/simulation status. */
 @Composable
@@ -123,7 +131,7 @@ fun MapSearchBar(
     }
 }
 
-/** FAB that jumps the camera to the device's last known location. */
+/** FAB that requests a fresh, non-mock device location. */
 @Composable
 fun MyLocationFab(
     cameraPositionState: CameraPositionState,
@@ -133,6 +141,7 @@ fun MyLocationFab(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    var locating by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -141,22 +150,42 @@ fun MyLocationFab(
     ) {
         SmallFloatingActionButton(
             onClick = {
-                fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
-                    if (loc != null) {
-                        val target = LatLng(loc.latitude, loc.longitude)
-                        coroutineScope.launch {
-                            cameraPositionState.animate(
-                                CameraUpdateFactory.newLatLngZoom(target, 15f)
-                            )
+                if (!locating) coroutineScope.launch {
+                    locating = true
+                    try {
+                        val loc = freshDeviceLocation(fusedLocationClient)
+                        if (loc == null) {
+                            Toast.makeText(context, R.string.map_real_location_unavailable, Toast.LENGTH_LONG).show()
+                        } else {
+                            val target = LatLng(loc.latitude, loc.longitude)
+                            val animated = withTimeoutOrNull(2_000) {
+                                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
+                                true
+                            }
+                            if (animated != true) {
+                                cameraPositionState.position = CameraPosition.fromLatLngZoom(target, 15f)
+                            }
                             onLocationFound(target)
                         }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: SecurityException) {
+                        Toast.makeText(context, R.string.error_location_permission, Toast.LENGTH_LONG).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, R.string.map_real_location_unavailable, Toast.LENGTH_LONG).show()
+                    } finally {
+                        locating = false
                     }
                 }
             },
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ) {
-            Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.map_my_location))
+            if (locating) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.map_my_location))
+            }
         }
     }
 }

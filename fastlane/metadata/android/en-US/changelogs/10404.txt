@@ -1,0 +1,3 @@
+Fixed an issue where location could remain at the simulated position after stopping.
+Improved stability when starting and stopping quickly and while running in the background.
+The location button now requests a fresh fix and shows progress and errors.

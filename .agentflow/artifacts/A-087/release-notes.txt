@@ -1,0 +1,20 @@
+<zh-TW>
+修正停止模擬定位後，位置可能仍停留在模擬點的問題。
+改善快速啟停與背景服務的穩定性。
+定位按鈕會重新取得即時位置，並顯示定位進度與錯誤提示。
+</zh-TW>
+<en-US>
+Fixed an issue where location could remain at the simulated position after stopping.
+Improved stability when starting and stopping quickly and while running in the background.
+The location button now requests a fresh fix and shows progress and errors.
+</en-US>
+<ja-JP>
+位置シミュレーション停止後も、位置が模擬地点に残ることがある問題を修正しました。
+素早い開始・停止時とバックグラウンド動作の安定性を改善しました。
+現在地ボタンで最新の位置を取得し、進行状況やエラーを表示します。
+</ja-JP>
+<ko-KR>
+위치 시뮬레이션을 중지한 후에도 모의 위치에 머물 수 있는 문제를 수정했습니다.
+빠른 시작 및 중지와 백그라운드 실행의 안정성을 개선했습니다.
+현재 위치 버튼에서 최신 위치를 요청하고 진행 상황과 오류를 표시합니다.
+</ko-KR>

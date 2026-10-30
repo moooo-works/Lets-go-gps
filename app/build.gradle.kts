@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 
 val versionMajor = 1
 val versionMinor = 4
-val versionPatch = 3
+val versionPatch = 4
 
 android {
     namespace = "com.moooo_works.letsgogps"
@@ -157,6 +157,7 @@ configurations.configureEach {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     testImplementation(libs.robolectric)
     implementation(libs.hilt.navigation.compose)
 

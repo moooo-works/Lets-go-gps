@@ -1,0 +1,18 @@
+{
+  "app/build.gradle.kts": "e3e5a6b99cfe423eb46a494b8aa336da2c9d7f739440f4d1beec7ec5ab03eb6d",
+  "app/src/androidTest/java/com/moooo_works/letsgogps/ui/map/LocationRecoveryDeviceTest.kt": "cb5cabb3660c0de23762a49d6c761072af40449f37afd9786c3ac9a7de94c05c",
+  "app/src/main/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngine.kt": "f566d20918007ef965d86a8f52db77d905a65ca71ca4eca9e154f86fb9a25dfa",
+  "app/src/main/java/com/moooo_works/letsgogps/domain/LocationMockEngine.kt": "78954094a97c3fb21b91ca2949eda42080c3a6ca741ab7ec70844085b61457c1",
+  "app/src/main/java/com/moooo_works/letsgogps/service/MockLocationService.kt": "7f1636b5a42449abfb29ce7b9596687bc9f3ef5432303cbbd6a5a36b6b5d8900",
+  "app/src/main/java/com/moooo_works/letsgogps/ui/map/FreshDeviceLocation.kt": "d76355a4a6309c55d80368121337d5915579b83ebe19b0794ce8645023f3bf56",
+  "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt": "e6e8d955292024473feb49b8da2629ae4cf44853fb9ebc11339c075f9c1de9f0",
+  "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt": "79bae29224ed4d33a0c15c71c69f5503ced05a1d1bd39c91eac23cdc76cb907e",
+  "app/src/main/res/values-en/strings.xml": "5c286df69ffa42e64fe6827d44084929272c3c5da53499412e89815e016bea47",
+  "app/src/main/res/values-ja/strings.xml": "9d46c09ccdad29f8a26cc250810ad6d3fa4622a7d068be1fdf3e2c5a7b7b27da",
+  "app/src/main/res/values-ko/strings.xml": "08513335bc560075c99f36631b87ab4f3c3576f9d7717790a3f5c02ace125045",
+  "app/src/main/res/values/strings.xml": "87354582667f9a5632859ee7a8a966f6467e12145bd5a13c3af620f2aa57461d",
+  "app/src/test/java/com/moooo_works/letsgogps/data/engine/MockTeardownRecoveryTest.kt": "c96c642a1c4ed2b1f11c1dff8d7f19b33ca9178c27254916fe91baa31a8210e2",
+  "app/src/test/java/com/moooo_works/letsgogps/service/MockLocationStopRecoveryTest.kt": "1c480041ee97acfddfbd1b8080d2d1b1f1bf065fbb0b48eb97373b28f039ee4a",
+  "app/src/test/java/com/moooo_works/letsgogps/ui/map/FreshDeviceLocationTest.kt": "4bd2247d0ae30974d63f42199a3fd8cec03797ad09289f00ebc068cfd8d9e2d2",
+  "app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt": "ffbc88bce38277fcaa131f2a43c81ddd6fc474f29f1872e36f3a25c094179b61"
+}

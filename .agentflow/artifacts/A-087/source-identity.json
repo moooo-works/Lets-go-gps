@@ -1,0 +1,7 @@
+{
+  "app/build.gradle.kts": "3bd14a92454f212132443b3f8318714f987a210be7fa63a0a36f000662057c56",
+  "app/src/main/java/com/moooo_works/letsgogps/service/MockLocationService.kt": "b8ea7f84433183a1555eff8c89c8a74a8d5df6335616b6f6873309b0ac4099d5",
+  "app/src/test/java/com/moooo_works/letsgogps/service/MockLocationForegroundStartupTest.kt": "726e7330e031a4c9b84443502e72f75447b4f422ef1fb99f4902235ca5d72212",
+  "app/src/test/java/com/moooo_works/letsgogps/service/MockLocationStopRecoveryTest.kt": "a02e858ac7670188553ae8c990af437fe0a7da7ea6ef5d4e242641fc7adb7f80",
+  "app/src/androidTest/java/com/moooo_works/letsgogps/service/MockServiceDeviceRegressionTest.kt": "b7c666f1459bcc305be2b94c4a5db85a8ddde985b7aa89b9dccd11acc9b672ad"
+}

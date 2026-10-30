@@ -1,0 +1,23 @@
+{
+  "versionName": "1.4.4",
+  "versionCode": 10404,
+  "aabPath": "/Users/mori/Downloads/Lets-go-gps-release-artifacts/1.4.4/letsgo-1.4.4-release.aab",
+  "aabBytes": 15581232,
+  "aabSHA256": "e4a1178fb5e24681d83f8bd0028c6694b2aab38c0d77dcb07436f0bf4199b627",
+  "zipCRC": "pass",
+  "jarsigner": "verified",
+  "uploadCertificateSHA256": "ca6c84999beccdf08d29ca86177b84a5b6477767de262df2b664b0a1c86b4952",
+  "sameCertificateAs10403": null,
+  "priorAabAvailable": false,
+  "manifest": {
+    "package": "com.moooo_works.letsgogps",
+    "versionCode": "10404",
+    "versionName": "1.4.4"
+  },
+  "releaseBuildConfig": {
+    "DEBUG": false,
+    "DEV_FORCE_PRO": false,
+    "productionAdUnits": true
+  },
+  "mappingSHA256": "f396578ba6ccc962fd2bb8d1647d329994c8a7daafccf6757ae75cc92bdb7459"
+}

@@ -501,4 +501,5 @@
     <string name="tip_floating_tools_body">地圖右側新增兩個獨立按鈕：懸浮工具與虛擬搖桿，可在其他 App 上方操作。\n\n懸浮工具提供搜尋、收藏、路線與座標複製。選點只會預覽，按「移動到這裡」才移動；背景半透明，收合後會回到螢幕邊緣。\n\n虛擬搖桿用來調整移動方向與速度。一次只顯示一種工具，開啟另一種時會切換。\n\n兩者皆為 Pro 功能，可透過訂閱或觀看獎勵廣告解鎖 6 小時；首次使用需允許顯示在其他 App 上層。</string>
     <string name="ad_privacy_options">廣告隱私選項</string>
     <string name="ad_privacy_error">目前無法開啟或更新廣告隱私選項，請稍後再試。</string>
+    <string name="map_real_location_unavailable">無法取得真實位置。請先停止模擬，確認定位權限並到收訊良好處再試。</string>
 </resources>

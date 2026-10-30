@@ -1,0 +1,5 @@
+{
+  "baseline": "19bd469a3242869c7f1c8f37c44791c033ba98cb",
+  "test_file": "app/src/androidTest/java/com/moooo_works/letsgogps/service/MockServiceDeviceRegressionTest.kt",
+  "sha256": "c1eaec2d63b3282ce83d08b662b41b2c0b79ca65b2223b581174f92e4f262877"
+}
