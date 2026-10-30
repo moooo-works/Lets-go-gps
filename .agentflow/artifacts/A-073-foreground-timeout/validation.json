@@ -1,0 +1,24 @@
+{
+  "command": "MAPS_API_KEY=foreground-timeout-test ./gradlew test lintDebug assembleDebug",
+  "result": "BUILD SUCCESSFUL in 1m12s",
+  "tests": {
+    "tests": 317,
+    "skipped": 60,
+    "failures": 0,
+    "errors": 0
+  },
+  "new_service_tests": {
+    "tests": 6,
+    "skipped": 0,
+    "failures": 0
+  },
+  "lint": {
+    "Error": 34,
+    "Warning": 100,
+    "Hint": 3
+  },
+  "lint_abortOnError": false,
+  "smoke": "No adb devices connected; POCO Android16 not reproduced",
+  "apk_key": "placeholder; build artifact not for map smoke testing",
+  "red": "Stop token regression failed expected2 actual0 before production edit"
+}

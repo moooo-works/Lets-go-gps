@@ -1,0 +1,18 @@
+{
+  "device": "Pixel7Pro",
+  "android": "17",
+  "originalPackage": "com.moooo_works.letsgogps",
+  "originalAPK_SHA256_before": "2f837ff0d2aabfcb7d121c83f8b688771e73c0718a8694130dc8f99773ff5b4e",
+  "isolatedTarget": "com.moooo_works.letsgogps.recoverytest",
+  "note": "APK backup only; original user data untouched",
+  "originalAPK_SHA256_after": "2f837ff0d2aabfcb7d121c83f8b688771e73c0718a8694130dc8f99773ff5b4e",
+  "isolatedPackagesRemoved": true,
+  "newSourceTests": {
+    "tests": 11,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 85.083
+  },
+  "screenOff": "not rerun; previous A086 only",
+  "mockProvidersAfterCleanup": false
+}

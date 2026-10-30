@@ -29,11 +29,14 @@ class MockLocationStopRecoveryTest {
             field(this, "isProviderSetup").set(this, true)
         }
     private fun stop(service: MockLocationService) {
-        MockLocationService::class.java.getDeclaredMethod("handleStop").apply { isAccessible = true }.invoke(service)
+        MockLocationService::class.java.getDeclaredMethod("handleStop", Int::class.javaPrimitiveType).apply { isAccessible = true }.invoke(service, field(service, "latestStartId").getInt(service))
     }
     private fun settled(service: MockLocationService) {
         val until = System.nanoTime() + TimeUnit.SECONDS.toNanos(3)
-        while (field(service, "cleanupInProgress").getBoolean(service) && System.nanoTime() < until) Thread.sleep(10)
+        while (field(service, "cleanupInProgress").getBoolean(service) && System.nanoTime() < until) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            Thread.sleep(10)
+        }
         assertFalse(field(service, "cleanupInProgress").getBoolean(service))
     }
     @Test fun `failed stop retains setup and next stop retries cleanup`() {

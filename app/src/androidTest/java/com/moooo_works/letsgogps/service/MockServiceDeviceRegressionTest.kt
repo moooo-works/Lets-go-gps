@@ -169,20 +169,25 @@ class MockServiceDeviceRegressionTest {
         fresh()
     }
     @Test fun c_fiveRapidStopStartBurstsRemainRecoverable() = runBlocking {
-        repeat(5) {
+        repeat(5) { cycle ->
+            val targetLatitude = origin.latitude + .001 * (cycle + 1)
             single(); active()
             main {
                 context.startService(Intent(context, MockLocationService::class.java).setAction(MockLocationService.ACTION_STOP))
                 ContextCompat.startForegroundService(context, Intent(context, MockLocationService::class.java).apply {
                     action = MockLocationService.ACTION_START_SINGLE
-                    putExtra(MockLocationService.EXTRA_LAT, origin.latitude)
+                    putExtra(MockLocationService.EXTRA_LAT, targetLatitude)
                     putExtra(MockLocationService.EXTRA_LNG, origin.longitude)
                 })
             }
-            // Starts during STOPPING may be rejected; no crash or stuck service is allowed.
-            stopped()
+            // The newest start must survive asynchronous teardown and publish its target.
+            until("latest rapid restart target") {
+                state.currentMockLocation.value?.latitude == targetLatitude &&
+                    state.mockStatus.value == MockStatus.MOCKING
+            }
+            active()
+            stop()
             state.clearError()
-            single(); active(); stop()
         }
         fresh()
     }

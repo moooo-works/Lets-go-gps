@@ -1,0 +1,27 @@
+{
+  "status": "selected",
+  "candidate_id": "claude-default",
+  "kind": "external",
+  "reason": "Owner permits Claude discussion; separate final read-only review.",
+  "requested_model": "inherited",
+  "requested_effort": "inherited",
+  "requested": {
+    "tier": "better"
+  },
+  "actual": {
+    "model": "claude-opus-5-5",
+    "effort": "high"
+  },
+  "usable_model": "claude-opus-5-5",
+  "usable_effort": "high",
+  "limitations": [],
+  "action": {
+    "type": "external-runner",
+    "candidate_id": "claude-default",
+    "profile_id": "claude-default",
+    "command": [
+      "claude",
+      "-p"
+    ]
+  }
+}
