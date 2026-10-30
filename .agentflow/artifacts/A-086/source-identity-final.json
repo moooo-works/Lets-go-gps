@@ -1,0 +1,7 @@
+{
+  "baseline": "19bd469",
+  "test_file": "app/src/androidTest/java/com/moooo_works/letsgogps/service/MockServiceDeviceRegressionTest.kt",
+  "sha256": "ecad687ceec6f4c0b95f286ff7230c517124bec764f72dc1b886760ff9f28bdd",
+  "external_route": "Claude quota failure; native configured fallback",
+  "native_pair": "gpt-6.1-sol/high"
+}

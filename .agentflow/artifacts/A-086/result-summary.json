@@ -1,0 +1,26 @@
+{
+  "device": "Pixel 7 Pro / Android 17",
+  "applicationId": "com.moooo_works.letsgogps.recoverytest",
+  "executed": 12,
+  "passed": 12,
+  "failed": 0,
+  "skipped": 0,
+  "seconds": 95.529,
+  "normal_start_stop_cycles": 10,
+  "rapid_stop_start_bursts": 5,
+  "manual_unlock_enabled": true,
+  "cases": {
+    "a_singleServiceStopAndRealFix": 0,
+    "b_tenStartStopCycles": 0,
+    "c_fiveRapidStopStartBurstsRemainRecoverable": 0,
+    "d_routeWalkPauseResumeStop": 0,
+    "e_routeCompletionStillAllowsStop": 0,
+    "f_jumpRouteTransitionsAndStops": 0,
+    "g_explorationMovesAndStops": 0,
+    "h_teleportExplorationChangesAnchorAndStops": 0,
+    "i_realJoystickOverlayDragAndStop": 0,
+    "j_backgroundInjectionAndNotificationStop": 0,
+    "k_mockAuthorityRevokedStopAndRecovery": 0,
+    "l_screenOffInjectionAndNotificationStop": 0
+  }
+}
