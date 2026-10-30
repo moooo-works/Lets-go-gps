@@ -1,0 +1,16 @@
+{
+  "session": "fef2bf4a-45d7-4ef1-9ddb-688979475d13",
+  "ask": "A-077",
+  "backup": "/Users/mori/.aglite-backups/5bd539dd-b224-4306-aa09-0865eb0ceac6",
+  "upgraded-installs": [
+    "/Users/mori/.agents/skills/agentflow",
+    "/Users/mori/.codex/skills/agentflow"
+  ],
+  "release": "v9.1.0",
+  "config-sha256": "3b63e23c15c287f2182e215d69915a591dd5fbb1091c99aad8f09419e7818183",
+  "archive-sha256": "7f744de8302ad2b7f3e07275b44dae3227bf60ebcbc3238d07706d92318a9477",
+  "notebook-history-before-close-sha256": "279a01857de263fe4f435d5b69ffa08a9b24a04616c7539ac4dbf4417a7a8acd",
+  "codex-thread-id": "01a186e9-8f4d-7ea3-8608-debc0406351d",
+  "release-tag-object": "75ae9bc578231aad169e3f558a3df87ae7d97f99",
+  "tarball-sha256": "bccb0ca823c5f3df5b943d7952bea018c7b7ddcbff6874b9ee3c33d41fe5f49c"
+}

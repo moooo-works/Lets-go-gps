@@ -1,0 +1,118 @@
+
+> Configure project :app
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:generateDebugResources
+> Task :app:injectCrashlyticsMappingFileIdDebug
+> Task :app:processDebugGoogleServices
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:parseDebugLocalResources
+> Task :app:generateDebugRFile
+> Task :app:mapDebugSourceSetPaths
+> Task :app:javaPreCompileDebug
+> Task :app:checkDebugAarMetadata
+> Task :app:compileDebugNavigationResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:mergeDebugResources
+> Task :app:processDebugResources
+> Task :app:kspDebugKotlin
+
+> Task :app:compileDebugKotlin
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/MainActivity.kt:201:53 'val Icons.Filled.List: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.List.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt:286:60 Unnecessary safe call on a non-null receiver of type 'List<ExportSavedLocation>'.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt:287:44 Unnecessary safe call on a non-null receiver of type 'List<ExportRoute>'.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt:288:46 Unnecessary safe call on a non-null receiver of type 'List<ExportFolder>'.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt:319:46 Elvis operator (?:) always returns the left operand of non-nullable type 'List<ExportFolder>'.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt:320:51 Elvis operator (?:) always returns the left operand of non-nullable type 'List<ExportSavedLocation>'.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/backup/BackupManager.kt:321:44 Elvis operator (?:) always returns the left operand of non-nullable type 'List<ExportRoute>'.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/billing/AdConsentManager.kt:154:9 'constructor(p0: Context!): MetaData' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt:188:47 The corresponding parameter in the supertype 'AdLoadCallback' is named 'adError'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/billing/RewardedAdManager.kt:212:64 The corresponding parameter in the supertype 'AdEventCallback' is named 'fullScreenContentError'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngine.kt:46:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngine.kt:157:31 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/healthcheck/SystemHealthCheckImpl.kt:101:21 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/local/AppDatabase.kt:24:34 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/local/AppDatabase.kt:31:34 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/local/AppDatabase.kt:38:34 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/data/local/AppDatabase.kt:48:34 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/di/NetworkModule.kt:19:14 'fun setLenient(): GsonBuilder!' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/service/MockLocationService.kt:679:9 'fun stopForeground(p0: Boolean): Unit' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt:53:37 'fun getCurrentOrientationAnchoredAdaptiveBannerAdSize(context: Context, width: Int): AdSize' is deprecated. Use AdSize.getLargeAnchoredAdaptiveBannerAdSize instead.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/components/BannerAdView.kt:77:71 The corresponding parameter in the supertype 'AdLoadCallback' is named 'adError'. This may cause problems when calling this function with named arguments.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/help/HelpScreen.kt:177:72 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/help/HelpScreen.kt:210:30 'val Icons.Filled.DirectionsWalk: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.DirectionsWalk.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/help/HelpScreen.kt:212:27 'val Icons.Filled.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.HelpOutline.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/help/HelpScreen.kt:253:32 'val Icons.Filled.ArrowForward: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowForward.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt:188:72 'val Icons.Filled.ArrowForward: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowForward.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt:223:121 'val Icons.Filled.ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/FloatingCompanionView.kt:297:253 'val Icons.Filled.PlaylistAdd: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.PlaylistAdd.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/JoystickOverlayManager.kt:64:56 'static field SOFT_INPUT_ADJUST_RESIZE: Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapScreen.kt:88:26 'val LocalLifecycleOwner: ProvidableCompositionLocal<LifecycleOwner>' is deprecated. Moved to lifecycle-runtime-compose library in androidx.lifecycle.compose package.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt:188:17 'when' is exhaustive so 'else' is redundant here.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt:207:21 'when' is exhaustive so 'else' is redundant here.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/pro/StepSyncCreditDialog.kt:43:31 'val Icons.Filled.DirectionsWalk: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.DirectionsWalk.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/savedlocations/SavedLocationsScreen.kt:453:37 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/savedlocations/SavedLocationsViewModel.kt:99:42 This declaration is in a preview state and can be changed in a backwards-incompatible manner with a best-effort migration. Its usage should be marked with '@kotlinx.coroutines.FlowPreview' or '@OptIn(kotlinx.coroutines.FlowPreview::class)' if you accept the drawback of relying on preview API
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/savedlocations/SavedLocationsViewModel.kt:104:7 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:81:26 'val LocalLifecycleOwner: ProvidableCompositionLocal<LifecycleOwner>' is deprecated. Moved to lifecycle-runtime-compose library in androidx.lifecycle.compose package.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:485:42 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:576:42 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:733:17 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:746:17 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:788:17 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:800:21 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:908:31 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsScreen.kt:942:63 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/SettingsViewModel.kt:336:23 'field versionCode: Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/main/java/com/moooo_works/letsgogps/ui/settings/StepSyncSection.kt:55:26 'val LocalLifecycleOwner: ProvidableCompositionLocal<LifecycleOwner>' is deprecated. Moved to lifecycle-runtime-compose library in androidx.lifecycle.compose package.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:hiltCollectClassesDebug
+> Task :app:processDebugJavaRes
+> Task :app:hiltAggregateDepsDebug
+> Task :app:hiltJavaCompileDebug
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:kspDebugUnitTestKotlin SKIPPED
+> Task :app:transformDebugClassesWithAsm
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/Android17MockPermissionTest.kt:29:21 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/Android17MockPermissionTest.kt:36:21 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/Android17MockPermissionTest.kt:40:21 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngineTest.kt:112:27 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngineTest.kt:128:27 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngineTest.kt:155:27 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngineTest.kt:164:27 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/healthcheck/SystemHealthCheckImplTest.kt:51:27 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/healthcheck/SystemHealthCheckImplTest.kt:104:27 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///Users/mori/side-project/Lets-go-gps/app/src/test/java/com/moooo_works/letsgogps/data/healthcheck/SystemHealthCheckImplTest.kt:147:31 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:hiltCollectClassesDebugUnitTest
+> Task :app:hiltAggregateDepsDebugUnitTest
+> Task :app:hiltJavaCompileDebugUnitTest NO-SOURCE
+> Task :app:transformDebugUnitTestClassesWithAsm
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+> Task :app:testDebugUnitTest
+> Task :app:test
+
+[Incubating] Problems report is available at: file:///Users/mori/side-project/Lets-go-gps/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 44s
+34 actionable tasks: 34 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html

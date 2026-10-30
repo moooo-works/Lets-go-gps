@@ -6,64 +6,15 @@
 
 工作目錄: /Users/mori/side-project/Lets-go-gps
 
-分支: main
+分支: fix/location-recovery
 
-目前工作: A-076 已完成專案設定遷移至 Agentflow v9，見[遷移追蹤](artifacts/A-076/tracker.md)。保留[PR66 修復與待測事項](#-ask--a-073-takeshi-mori)及[Debug APK 交付](#-ask--a-074-takeshi-mori)；POCO 實機待測，PR66 尚未合併（沿用上輪紀錄，未重新查詢）。
+目前工作: A-087 發布1.4.4、合併Git與清理空間，見[追蹤](artifacts/A-087/tracker.md)。保留[A077恢復入口](artifacts/A-077/tracker.md)及先前紀錄交付。
 
-已驗證: 舊設定已轉換並移至 .agentflow/ag.json；產品程式未修改。
+已驗證: 1.4.4正式包核對通過、335單元測試0失敗及新版Pixel11/11通過；Play已接受10404套件。
 
-下一步: 等待使用者提供 POCO 測試結果或指定新工作。
+下一步: 等PR67本次CI，合併後核對產品樹並正式送審，然後依盤點清理；尚未刪檔。
 
 封存紀錄: .agentflow/devlog.archive.md。
-
----
-
-# → Ask / A-062 (Takeshi Mori)
-
-+ 新版本已過審上架，我在google chrome中有登入threads帳號，你參考我之前發布的貼文語氣來發布新版本的公告文，如果可以的話附上實際截圖。
-
-+ 不附圖
-
----
-
-## [RUN-001] Event — 2026-10-14 09:50:04 +0800 (A-062)
-
-- 已閱讀 Chrome @moooo.works 的 1.3.4、步數同步與跳點更新貼文，沿用口語開頭、使用情境、限制及下載連結；本次公告草稿493字已填入，尚未發布。
-
-- Pixel 1.4.3 真實使用說明首頁與懸浮工具教學截圖已取得並目視確認，沒有私人地點或座標，保存於 artifacts/A-062-threads-announcement/。
-
-- 點附加影音後開啟原生選檔，但 extension filechooser 超時並重設 runtime；重新辨識 Chrome（ID 改變）與草稿分頁。原生 Google Chrome 操作被工具拒絕核准，沒有繞過；已請 owner 選兩圖或選擇不附圖直接發布，分頁 markHandoff，等待回覆。
-
-## [RUN-002] Event — 2026-10-14 09:53:31 +0800 (A-062)
-
-- 依 owner「不附圖」移除附圖敘述；@moooo.works 新版公告發布成功，實際貼文 DedPxQAmuVX 全文、版本及下載連結核對完成。公告純文字，只有商店連結預覽；公開頁已 markDeliverable，發布畫面保存。
-
-# ← Reply / A-062
-
-* _2026-10-14 09:53:31 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- 已參考既有語氣，在 @moooo.works 成功發布 1.4.3 公告與更新連結。
-
-- 已依「不附圖」改成純文字公告，移除附圖敘述。
-
-## [FINAL REPORT]
-
-1. 「新版本已過審上架，我在google chrome中有登入threads帳號，你參考我之前發布的貼文語氣來發布新版本的公告文，如果可以的話附上實際截圖。」
-
-   - 成功：[新版公告](https://www.threads.com/@moooo.works/post/DedPxQAmuVX)已發布，沿用之前口語開頭、使用情境、功能限制與下載連結的寫法。內容包含懸浮工具、獨立搖桿、Pro／廣告解鎖、FAQ、Android 17 與廣告隱私流程。
-
-   - 我核對公開貼文全文與版本、帳號、Google Play 連結，確認不是草稿或發佈中；[公告文字](artifacts/A-062-threads-announcement/announcement.txt)與[發布成功畫面](artifacts/A-062-threads-announcement/published.jpg)已保存。此次沒有修改產品程式或宣稱新增未做過的測試。
-
-2. 「不附圖」
-
-   - 已完成：不附手機圖片，刪除「附圖就是新版 App 的實際畫面。」；保留 Google Play 連結預覽。先前選檔受原生視窗工具核准限制，改成純文字後已成功發布，無待操作事項。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
 
 ---
 
@@ -150,258 +101,6 @@
 2. 「確認」
 
    - 已依action-time確認完成本次授權；我核對授權範圍與實際儲存結果，保留[待套用畫面](artifacts/A-064-debug-maps/prepared.jpg)及完成畫面。未改APK、產品程式、Play版或其他後台。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
-
----
-
-# → Ask / A-065 (Takeshi Mori)
-
-+ release版會有這個狀況嗎？
-
-# ← Reply / A-065
-
-* _2026-10-14 12:01:41 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- Google Play 正式1.4.3簽章已授權，不會因這次debug簽章漏登而地圖空白；自行發送本機release APK需另核對簽章。
-
-## [FINAL REPORT]
-
-1. 「release版會有這個狀況嗎？」
-
-   - Google Play正式版沒有此次debug授權缺漏：已從Pixel直接讀取Play安裝的1.4.3／10403 APK，installer=com.android.vending，SHA1=50:6F:D8:3D:F1:4D:C6:60:42:83:30:91:1A:51:C9:49:D3:2B:03:2C，與本輪前實際Cloud白名單既有506F條目相符。前次Pixel此版地圖也已目視正常。不能保證其他網路或装置問題永不發生，也不代表無法飛已修復。
-
-   - 本機Release AAB上傳金鑰SHA1=0B:9A:DB:92:36:A0:60:08:01:51:EA:64:8B:27:91:29:C8:66:BB:18，並非Play安裝簽章，且不在當前五筆地圖白名單。若用同本機release signingConfig直接build／側載APK，仍可能遇到同類授權缺漏；這與從Play下載不同。此次未建立新APK或擴大授權，手機APK唯讀pull至tmp無私人資料。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
-
----
-
-# → Ask / A-066 (Takeshi Mori)
-
-+ unity ads的分支是否已經跟這次新版本同時發布？有上git了嗎？
-
-# ← Reply / A-066
-
-* _2026-10-14 12:04:46 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- Unity Ads 已包含在正式1.4.3發布包，相關程式已push GitHub；發布整合分支尚未merge main，PR58仍保留。
-
-## [FINAL REPORT]
-
-1. 「unity ads的分支是否已經跟這次新版本同時發布？有上git了嗎？」
-
-   - 是：正式1.4.3／10403以產品31b528cea7278fb54650dbfab3d1711dd2d62446建置，AAB實包驗證包含Unity SDK／Google Unity adapter／同意流程，正式banner與reward版位；Mintegral排除。此前Unity測試來源與獎勵回呼已在Pixel確認；新版本上架由owner回報，正式非測試Unity供應／收益沒有宣稱驗證。[原建置紀錄](artifacts/A-061-play-unity-test/production-build.json)。
-
-   - 有上GitHub：本輪git fetch後，origin/fix/release-ad-integration=b9868ee5c02fc3502cffc2964d5c4738c456d0f4、origin/fix/release-ad-production=3f388df5bf1e4ba9181fcf64360c28412c9324b6，均與本地工作分支head相符。正式建置產品31b528c為production遠端祖先；origin/unity-ads亦存在。可看[正式版本分支](https://github.com/moooo-works/Lets-go-gps/tree/fix/release-ad-production)。
-
-   - 發布與merge main不同：main的app依賴尚未包含Unity，正式產品commit並非main祖先；整合版從production分支build並上架，不是main。依先前保留要求，[PR58](https://github.com/moooo-works/Lets-go-gps/pull/58)仍OPEN draft，沒有擅自merge。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
-
----
-
-# → Ask / A-067 (Takeshi Mori)
-
-+ pr58是什麼
-
-# ← Reply / A-067
-
-* _2026-10-15 12:17:01 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- PR58是既有AdMob廣告優化提案，仍為未合併草稿；其功能已隨後續整合進1.4.3發布。
-
-## [FINAL REPORT]
-
-1. 「pr58是什麼」
-
-   - [PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58)標題為「改善 AdMob 自適應橫幅與獎勵廣告重試」。PR是把分支修改審查後合併主分支的請求；此份由feat/admob-ad-optimization指向main。
-
-   - 功能是依可用寬度調整橫幅廣告、獎勵廣告失敗後有限次自動重試、補充錯誤與曝光診斷；不是Unity Ads整合本身。本輪gh直接確認仍OPEN／Draft。先前依owner保留要求未合併，但相關優化後續已承接進正式1.4.3整合分支，因此PR未合併不表示正式版缺這些功能。沒有進行任何merge或PR修改。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
-
----
-
-# → Ask / A-068 (Takeshi Mori)
-
-+ 那這個應該可以close了吧
-
-# ← Reply / A-068
-
-* _2026-10-15 12:18:06 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- 已關閉PR58；已發布1.4.3及原遠端分支保留。
-
-## [FINAL REPORT]
-
-1. 「那這個應該可以close了吧」
-
-   - 已完成：[PR #58](https://github.com/moooo-works/Lets-go-gps/pull/58)已關閉，GitHub再次讀取state=CLOSED，closedAt=2026-10-15T04:17:53Z。沒有合併main或刪除分支，也未傳送額外留言。
-
-   - 此PR的廣告優化後續透過fbd8a84整合進release-ad-production；原PR58 head不是發布分支祖先，不能稱原PR已merge。發布分支仍有adaptive banner與有限次retry實作，1.4.3發布包保留不受關閉PR影響。此次是依owner新指示結束先前保留的草稿，沒有改產品程式。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
-
----
-
-# → Ask / A-069 (Takeshi Mori)
-
-+ 目前還有額外開的worktree嗎
-
-# ← Reply / A-069
-
-* _2026-10-15 12:19:30 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- 主工作目錄外仍有11個worktree，均無Git追蹤的未提交變更；尚未清理。
-
-## [FINAL REPORT]
-
-1. 「目前還有額外開的worktree嗎」
-
-   - 有11個，都在.worktrees：android17-dev-settings、consent-verification、floating-appearance、floating-companion、floating-dock、help-faq、release-1.4.0、release-ad-integration、release-ad-production、unity-ads、unity-play-smoke。git worktree list與逐一git status --short已讀取，11個皆clean；主目錄只有本輪devlog變更。
-
-   - clean只表示Git追蹤狀態沒有未提交變更，不表示可直接丟掉整個資料夾。release-ad-production保存正式1.4.3 AAB，release-ad-integration保存1.4.1 Pro debug APK；其他ignored建置產物與local.properties未以status完整盤點。main尚未納入正式整合產品，清理前應先保全產物與各分支未整合內容。此次僅查詢，沒有刪除worktree或分支。
-
-## Questions (batched — each with a suggested default)
-
-- None.
-
-
----
-
-# → Ask / A-070 (Takeshi Mori)
-
-+ 這些應該已經完成且上架了，處理合併事項後就清理掉
-
----
-
-## [RUN-001] Event — 2026-10-15 12:23:56 +0800 (A-070)
-
-- Git preflight：main；main...origin/main ahead8、只有本輪devlog未提交；fetch成功；origin/main=3f148693dad780bf9ea70990d533f9a3d47a19b8，最近五筆3f14869/981977c/a083690/eb70ede/dcbd2e3。11舊worktree均clean，無其他活躍native agent。
-
-- 從origin/main開獨立chore/consolidate-1.4.3，整合發布分支與本地主目錄已完成紀錄，候選2de01c624cddb3746f607581fdba392cd6e88327；App/gradle對built31b528c完全無diff。舊consent/Unity程式是發布版之前的來源，smoke僅versionPatch1；8個舊HEAD為production祖先，另3個差異已核對，沒有新功能待保留。
-
-- tracker已建立及validate；必要test/lintDebug/assembleDebug執行中。11個worktree完整tar與全refs Git bundle在Git外私有備份中；正式AAB與Pro debug APK已複製到Downloads/Lets-go-gps-release-artifacts且SHA相等。合併與清理不改產品／Cloud設定；稍後獨立審查整合候選。
-
-## [RUN-002] Event — 2026-10-15 12:27:38 +0800 (A-070)
-
-- 候選e143067d39e46085737bcb3002bb3a4012c29ffa：合入已發布產品及主目錄紀錄，對3個已被承接的舊來源做history-only merge，App/gradle對31b528c仍無差異，11舊HEAD皆為候選祖先。test/lintDebug/assembleDebug成功2m8s，311/0fail/0error/60skip；既有lint34Error/100Warning/3Hint，abortOnError=false。
-
-- Claude Code claude-opus-5-5/high fresh no-remote clone全量只讀審查四PASS，exit0/無截斷/clone未改，host核對報告與原來源、建置及備份證據接受；CLI限制非OS sandbox，無聲稱worker自己測手機或備份。away-gates對此候選供應Result Go；原friend故障留待另查。
-
-- PR65已建立並更新實況；GitHub behindmain=0，CI仍執行中，因此尚未merge。Git外私有完整11worktree tar 813069110bytes、全refs bundle驗證；還原串流核對24項.git/local.properties及AAB/APK hash，原授權/私密設定不入Git。另備份本輪新consolidate worktree並驗tar，清理會保留恢復來源。
-
-## [RUN-003] Event — 2026-10-15 12:29:24 +0800 (A-070)
-
-- 當前scope root僅A070 devlog及artifacts，產品merge候選App/gradle相同已發布版本，無未授權修正；tracker T1完成，T2等CI，T3備份已完待清理。新consolidate完整tar亦可讀；CI目前build未結束，未猜測失敗或提前merge。
-
-## [WIP-001] Checkpoint — 2026-10-15 12:29:24 +0800 (A-070)
-
-- **Finished:** 發布來源整合與祖先保留；本機test/lintDebug/assembleDebug成功；Claude四PASS；完整12工作目錄及全refs備份、AAB/APK另存與還原摘要核對。
-
-- **Running now:** GitHub PR65 Android CI build，run38681473086。
-
-- **Still to do:** CI成功後merge main、關閉已被承接PR、清理12 worktrees及回讀main/產物/歷史狀態。
-
-- **Next work action:** 查看CI實際結果；成功後依已授權計畫繼續，失敗則先診斷。
-
-- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
-
-## [RUN-004] Event — 2026-10-15 12:36:31 +0800 (A-070)
-
-- GitHub CI38681473086 build/test成功8m0s，PR65 CLEAN/behind0後merge為2561609c58af658c8a17ee3008a94ad768d9f504；root fast-forward成功，App/gradle對已發布31b528c完全相同。PR60自動MERGED，其餘59/61/62/63/64已CLOSED，open PR清單空。
-
-- agf cleanup unity-ads先拒絕unknown ignored快取；已保全全部76個local項目到私有preserved-local，retry回報could not inspect registered worktrees。未修工具或force；標準git worktree list/status/ancestor皆正常，逐一git worktree remove（無force）及branch -d成功，12個HEAD皆已在main；10個對應遠端分支刪除，其餘兩個未有遠端。全refs另存post-merge bundle驗證。
-
-- 最後git worktree list只剩root/main、root追蹤狀態只有A070紀錄；正式AAB和ProDebug APK留Downloads且SHA等原始，完整11舊目錄及本輪consolidate tar、local快取/私有設定/Git bundle均在Git外私有目錄。Tracker3/3，無產品新增改動，不重跑已通過檢查。root STATUS將移除已完成unity stream pointer，原stream歷史可從main祖先/私有tar恢復，不改寫舊notebook。
-
-## [RUN-005] Event — 2026-10-15 12:38:13 +0800 (A-070)
-
-- **Scope check:** 最後變更只有root devlog及A070 artifacts，均為已審候選／派工／原始報告與相同操作回執；main產品對31b528c無diff，12worktree已保全清理，無額外程式改動。最後close被checkpoint freshness/Scope check欄位要求擋下，僅補機械完成紀錄，既有成功測試與review沿用。
-
-## [WIP-002] Checkpoint — 2026-10-15 12:38:13 +0800 (A-070)
-
-- **Finished:**
-
-  1. PR65合併main、CI成功、Claude通過；12worktree已保全並移除，產物與歷史保留。
-
-- **Running now:**
-
-  1. 無。
-
-- **Still to do:**
-
-  1. 無產品或清理工作；僅保存最終Reply並push紀錄。
-
-- **Next work action:** 執行close保存本輪結果。
-
-- **Checks:** [x] tracker.md | [x] devlog RUN | [x] scope matches tracker
-
-# ← Reply / A-070
-
-* _2026-10-15 12:38:14 +0800 (codex/unknown)_
-
-## [SUMMARY]
-
-- 已將已上架1.4.3整合回main並推到GitHub，收尾舊PR、保全產物與完整備份，12個額外worktree全部清理，目前只剩main。
-
-## [FINAL REPORT]
-
-1. 「這些應該已經完成且上架了，處理合併事項後就清理掉」
-
-   - 成功：[PR65](https://github.com/moooo-works/Lets-go-gps/pull/65)已merge為2561609c58af658c8a17ee3008a94ad768d9f504，main本地與GitHub同步，產品App/gradle與已發布31b528c完全相同。完整保留Unity／AdMob／隱私流程、懸浮工具／搖桿、FAQ與Android17修正，不需要重新上架。
-
-   - 先從origin/main建立獨立consolidate分支，合入正式發布與本地紀錄；舊Unity/consent程式已由發布版承接、smoke只差舊版號，因此保留其歷史祖先而維持發布產品。11舊worktree HEAD及本輪整合HEAD都已進main。必要preflight完整輸出已在PR說明，origin/main起點3f148693dad780bf9ea70990d533f9a3d47a19b8，合併前behind=0。
-
-   - 本機test/lintDebug/assembleDebug成功2m8s，311tests、0failure/error、60既有skip；lint仍34Error／100Warning／3Hint（abortOnError=false），此次未修既有問題。GitHub CI38681473086 build/test成功8m0s後才merge。Claude對e143067d39e46085737bcb3002bb3a4012c29ffa原始候選與清理計畫四PASS；我核對報告、實際來源／備份／CI／merge／最後檔案清單接受，沒有新手機測試或擴大產品修改。
-
-   - 收尾結果：PR60為MERGED，PR59／61／62／63／64已CLOSED，先前PR58仍CLOSED，目前open PR清單空。刪除11舊worktree加本輪consolidate共12個，以及其已整合本地分支和10個有對應遠端的分支；git worktree list目前只有主目錄main。Git歷史仍在main祖先與備份bundle，已完成unity stream的root active pointer移除；原stream紀錄未改寫。
-
-   - 清理工具先拒絕unknown ignored檔案；76個本機項目已移到Git外私有preserved-local，再試工具遇到「could not inspect registered worktrees」。我以標準Git重新確認worktree／狀態／main祖先後，逐一git worktree remove與branch -d成功，沒有使用force，也沒有丟棄未保全資料。
-
-   - 產物可直接取用：[正式1.4.3 AAB](/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.3-release.aab)與[Pro debug 1.4.1 APK](/Users/mori/Downloads/Lets-go-gps-release-artifacts/letsgo-1.4.1-debug-pro.apk)，SHA與原始檔一致。完整11舊目錄tar 813069110bytes、本輪目錄tar、全部分支bundle與本機設定／快取位於[私有備份](</Users/mori/Library/Application Support/Lets-go-gps/archives/A-070-20261015>)；tar可讀、bundle可驗、24項還原串流摘要相等。私有設定未入Git。
-
-   - 限制：朋友手機的「無法飛」仍需裝置資訊與實際訊息，這次只整合及清理；正式非測試Unity供應／收益、提前取消、歐洲同意等原未驗項不因此改判通過。
-
-   - Key Records — read these first
-
-     [收尾狀態](artifacts/A-070-consolidate/delivery.json) — main合併、CI及worktree／PR最終狀態。
-
-     [原始Claude審查](artifacts/A-070-consolidate/review.md) — 四PASS及審查限制。
-
-     [清理回執](artifacts/A-070-consolidate/cleanup.json) — 12個目錄、分支及無force清理結果。
-
-     [產物位置](artifacts/A-070-consolidate/retained-artifacts.json) — Downloads檔案與原始SHA。
-
-     [備份回執](artifacts/A-070-consolidate/backup.json) — 私有備份與還原核對範圍。
-
-     [建置驗證](artifacts/A-070-consolidate/validation.json) — 本機測試及既有lint實況。
 
 ## Questions (batched — each with a suggested default)
 
@@ -695,4 +394,336 @@
 
 # → 提問 / A-077 (Takeshi Mori)
 
-+
++ 升級到v9.1.0，[Image #1] 然後處理掉這個錯誤
+
+## [WIP-001] 檢查點 — 2026-10-29 17:37:25 +0800 (A-077)
+
+- **已完成：** 兩份安裝更新至 v9.1.0 並逐檔核對；新 Codex loader 確認無 hooks／警告／錯誤。
+
+- **執行中：** 套件診斷測試，工具 sessions 84495、45758；獨立審查已結束。
+
+- **尚待完成：** 整理測試環境限制及交付紀錄，並交接使用者重開目前 Codex 驗證畫面。
+
+- **下一步：** 收束測試程序，保存已證明結果及尚未證明的 runtime 狀態。見[追蹤](artifacts/A-077/tracker.md)。
+
+## [RUN-001] 事件 — 2026-10-29 17:43:41 +0800 (A-077)
+
+- v9.1.0 安裝與新載入 hooks 檢查已完成。套件測試未全通過，原 TUI 尚待重開確認；詳見[追蹤與限制](artifacts/A-077/tracker.md)。
+
+# → 回覆 / A-077
+
+* _2026-10-29 17:43:41 +0800_
+
+1. 「升級到v9.1.0，[Image #1] 然後處理掉這個錯誤」
+
+   兩份安裝都已升級至官方 v9.1.0，逐檔雜湊一致，原安裝已有私有備份。專案設定仍為schema13，既有模型設定與產品來源保留。
+
+   新啟動的同版Codex對此專案檢查為0 hooks／0警告／0錯誤；沒有新增空殼腳本或全面關閉hooks。截圖只有exit1，無法證明歷史錯誤根因；舊工作階段持有舊掛鉤是推論，原TUI錯誤消失尚未驗證。
+
+   請退出目前Codex，在本專案執行 `codex resume 01a186e9-8f4d-7ea3-8608-debc0406351d`，完成一回合確認。若仍出現Hook failed，需取得hook名稱與完整輸出；無需關閉其他不相關工作階段。新技能重新載入後生效；[官方安裝說明](https://github.com/agfnow/agentflow/blob/v9.1.0/README.md)也要求更新後重開對話。
+
+   套件測試未全通過：預設Git305項中234通過，系統Git重驗239通過、66失敗；已重現Git2.34.1不支援worktree -z及macOS .Trash EPERM限制。未擅改系統權限。產品App三項Gradle驗證沿用A076，本次未重跑或覆寫APK。本輪紀錄因檢查未全通過暫留本機，未commit/push。
+
+   **主要紀錄**
+
+   - [追蹤與重開步驟](artifacts/A-077/tracker.md)：已完成安裝、待驗項及恢復入口。
+
+   - [驗證證據](artifacts/A-077/evidence.md)：官方版本身分、hooks載入結果、失敗測試及本機交付範圍。
+
+   - [獨立審查](artifacts/A-077/review.md)：原始審查意見；逐項處理與未證明限制見證據。
+
+## 問題（集中列出，附建議預設值）
+
+- 無待決選項；需依上述步驟重開並回報結果。
+
+---
+
+# → 提問 / A-078 (Takeshi Mori)
+
++ godev
+
+# → 回覆 / A-078
+
+* _2026-10-29 18:15:54 +0800_
+
+已載入 Agentflow 9.1.0 並恢復既有進度。升級已完成；仍需確認重開後是否再出現 `Hook failed`。若仍出現，請提供 hook 名稱與完整輸出，才能繼續定位。現有證據不足以宣稱原畫面錯誤已消失。
+
+[A-077 恢復步驟](artifacts/A-077/tracker.md)保留套件測試環境限制及未提交紀錄；PR66／POCO 實機待測狀態沿用，未新增產品修改或合併。
+
+## 問題（集中列出，附建議預設值）
+
+- Q-078-1：重開後是否仍出現 `Hook failed`？建議回報本回合結果；若有錯誤，附 hook 名稱與完整輸出。
+
+- ans:
+
+---
+
+# → 提問 / A-079 (Takeshi Mori)
+
++ 錯誤訊息已經沒有出現了，poco也實測過可用了
+
+## [RUN-001] 事件 — 2026-10-29 18:17:06 +0800 (A-079)
+
+- 使用者回報已確認 Hook failed 不再出現、POCO 實機可用；解除兩項待回報狀態。套件診斷限制與 PR66 合併狀態仍分開保留。
+
+# → 回覆 / A-079
+
+* _2026-10-29 18:17:06 +0800_
+
+1. 「錯誤訊息已經沒有出現了，poco也實測過可用了」
+
+   已記錄你的確認：Hook 錯誤已消失，POCO 實機測試可用。Q-078-1 已於本輪回覆處理；這兩項不再列為待驗。
+
+   套件診斷仍有先前的環境限制，既有紀錄暫留本機。PR66 未在本輪重新查詢或合併；此次實測回報不代表完整 smoke checklist 各項皆已逐一驗證。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-080 (Takeshi Mori)
+
++ [Image #1] [Image #2] [Image #3] [Image #4] 看看程式中有什麼問題會造成這個現象
+
+圖片內容摘要：Samsung S24 Ultra、Android 16；停止模擬後按定位仍停在模擬點，關閉 App 也未恢復。
+
+## [RUN-001] 事件 — 2026-10-29 18:25:01 +0800 (A-080)
+
+- 已完成停止清理與定位按鈕的程式碼診斷，辨識非同步結果未追蹤、失敗狀態遭清除及快取定位三項缺口；尚未在回報裝置重現。
+
+# → 回覆 / A-080
+
+* _2026-10-29 18:25:01 +0800_
+
+1. 「[Image #1] [Image #2] [Image #3] [Image #4] 看看程式中有什麼問題會造成這個現象」
+
+   找到三處能造成這類症狀的程式缺口，其中「未確認退出 Google 模擬模式」最值得優先處理。現有程式碼足以證明缺口存在，但沒有 Samsung S24 Ultra／Android 16 的操作紀錄與 log，還不能斷言這次回報的唯一根因。
+
+   **1. 停止模擬只送出非同步請求，沒有確認成功。**
+
+   `AndroidLocationMockEngine.kt` 第 98 行呼叫 `fusedClient.setMockMode(false)`，下一行就記錄「disabled」。這個 API 回傳 `Task<Void>`；目前沒有等待結果，也沒有成功／失敗監聽，所以外層 `try/catch` 接不到稍後由 Task 回報的失敗。開始模擬及注入座標也有同樣缺口。
+
+   Google 官方文件明確說明：模擬模式會影響使用融合定位服務的其他 App；成功退出時才會清除該服務的模擬位置快取。因此「畫面顯示停止，但實際退出失敗」能解釋其他 App 仍停在南投的情況；目前是待裝置證實的候選原因。[Google API 文件](https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient#setMockMode(boolean))。
+
+   **2. 清理失敗後仍丟失追蹤狀態，服務照樣結束。**
+
+   同檔第 84–104 行逐一移除測試 provider，即使移除失敗，最後仍清空 `enabledProviders`。`MockLocationService.kt` 第 667–682 行也在呼叫清理後直接設定 `isProviderSetup=false`、狀態改為 IDLE 並停止服務；外層例外被吞掉。後續 `onDestroy()` 再進來時，已不會重跑 provider 清理。
+
+   這代表失敗後沒有可靠的完成判定與補救路徑。不是「程式完全忘記清理」，而是「有送清理，但沒有確保完成」。單純關掉 App 也不能當作已確認退出模擬的證據。
+
+   **3. App 的定位按鈕拿的是快取，沒有要求新的真實定位。**
+
+   `MapOverlays.kt` 第 144 行只讀 `lastLocation`，沒有檢查位置年齡或 mock 標記，也沒有等待新定位。按鈕因此可能再次把鏡頭移到舊模擬點；回傳 null 或失敗時也沒有提示。官方說明 `lastLocation` 可能是任意久以前的資料，不能等同現在的位置。[Google API 文件](https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient#getLastLocation())。
+
+   這一點能解釋本 App 的定位按鈕；若連 Google Maps 等其他 App 也一直卡住，則應優先查前兩項。即使成功停止模擬，取得新的真實 GPS 定位仍可能需要時間，不能保證停止當下立即跳回真實位置。
+
+   建議修正方向是：追蹤 Google Task 結果、保留未清理成功的 provider 狀態，讓停止完成與失敗能被辨識；停止後的定位按鈕改為請求有時效限制的新位置，排除模擬結果並顯示等待或失敗。這次只完成診斷，沒有改產品程式或產出 APK。
+
+   這些 FLP 呼叫至少在 `e25f562`（1.0.7）已加入，不能僅依「更新後發生」認定是最新版本才引入。最有辨識力的下一份證據是：問題發生時 Google Maps 是否也卡住、朋友實際 App 版本，以及停止時的 Task 結果／provider 移除錯誤。
+
+## 問題（集中列出，附建議預設值）
+
+- 無待決選項；以上為診斷與建議，未執行修正。
+
+---
+
+# → 提問 / A-081 (Takeshi Mori)
+
++ 我手上沒有samsung手機可以測試
+
+# → 回覆 / A-081
+
+* _2026-10-29 19:07:16 +0800_
+
+1. 「我手上沒有samsung手機可以測試」
+
+   不需要先取得 Samsung 才能處理已找到的程式缺口。可以先以自動測試確認：退出模擬的非同步請求失敗時不會被當成成功、provider 清理失敗仍保留待處理狀態，以及定位按鈕不會直接採用過期或模擬位置。
+
+   再用手邊的 Pixel／POCO 驗證開始模擬、停止、重新取得真實定位及重複操作。這能驗證共通流程，無法代替 Samsung Android 16 的實機確認。
+
+   後續若進行修正，可提供測試 APK 給朋友重試原本的情境，附上不含精確座標的停止結果診斷資訊。朋友回測前，交付應標示為「已修正共通缺口，Samsung 情境待確認」，不能宣稱該機型已修復。本輪僅記錄測試限制及可行驗證方式，未修改產品程式。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-082 (Takeshi Mori)
+
++ 開始測試
+
+## [RUN-001] 事件 — 2026-10-29 20:30:29 +0800 (A-082)
+
+- 測試已完成：兩個失敗清理情境可重現；Pixel可恢復非模擬定位，但只讀快取的按鈕曾留在模擬點。結果與限制見[測試證據](artifacts/A-082/evidence.md)。
+
+# → 回覆 / A-082
+
+* _2026-10-29 20:30:29 +0800_
+
+1. 「開始測試」
+
+   測試已完成，重現兩個清理失敗的程式缺口，也在 Pixel 觀察到停止後定位按鈕仍停在模擬點。目前沒有修正產品程式。
+
+   隔離測試注入兩種失敗，兩項都未達預期：Google 退出模擬的 Task 失敗時，清理函式仍正常返回；provider 移除失敗後，追蹤狀態仍被清空。這些是可重現的共通缺口，不需要 Samsung 才能確認。
+
+   Pixel 7 Pro／Android17 的既有1.4.3測試中，停止後系統的模擬provider已移除，但舊mock位置仍留在快取，按定位沒有離開原模擬點。開啟Google Maps後取得新的非模擬位置；本次沒有重現持續困在模擬模式。Samsung Android16的實際根因仍未確認。
+
+   現有測試強制重跑為251項通過、60項跳過；其中定位引擎8項與服務3項全被既有Robolectric設定跳過，不能視為通過。額外失敗情境測試確實執行了2項、0跳過、2失敗。
+
+   已停止模擬並恢復此次暫時開啟的測試權限，未重裝App或覆寫APK。下一步修正可針對非同步停止結果、清理重試狀態及要求新定位三處進行；此次測試結果不代表已修復。
+
+   **主要紀錄**
+
+   - [測試證據與重現方式](artifacts/A-082/evidence.md)：測試數字、實機觀察、來源身分與未證明範圍。
+
+   - [隔離測試原文](artifacts/A-082/MockTeardownProbeTest.kt)：兩個失敗情境，搭配同目錄init與結果XML重現。
+
+## 問題（集中列出，附建議預設值）
+
+- 無；本輪完成測試，修正尚未執行。
+
+---
+
+# → 提問 / A-083 (Takeshi Mori)
+
++ 有測出什麼結果嗎？
+
+# → 回覆 / A-083
+
+* _2026-10-29 20:35:45 +0800_
+
+1. 「有測出什麼結果嗎？」
+
+   有，測出三個重點：
+
+   - **Pixel 也出現停止後仍停在模擬點的現象。** 停止時系統已移除模擬 provider，但定位按鈕只讀到舊快取，畫面沒有回到真實位置。開啟 Google Maps 後，系統取得新的非模擬定位。這支持目前位置按鈕需要主動要求新定位。
+
+   - **停止失敗沒有被可靠辨識。** 隔離測試讓 Google「退出模擬」回傳失敗，現有清理函式仍正常返回；另一次讓 provider 移除失敗，程式仍清掉它的追蹤狀態。兩個缺口均已由測試重現。
+
+   - **尚未證明 Samsung 的確切原因。** Pixel 這次可以恢復真實定位，沒有重現持續困在模擬模式。以上缺口值得修正，但目前只完成測試，還沒修改產品程式或產出修正版 APK。
+
+   原本測試為251項通過、60項跳過；額外加入的兩個失敗情境測試確實執行、皆未通過預期，正是上述缺口的證據。完整結果見[測試紀錄](artifacts/A-082/evidence.md)。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-084 (Takeshi Mori)
+
++ 報告在哪裡
+
++ pixel 7 pro也測出同樣的問題，表示真的有bug，開始進行修正
+
+## [WIP-001] 檢查點 — 2026-10-30 10:50:50 +0800 (A-084)
+
+- **已完成：** 修正與回歸、Pixel核心裝置測試；詳見[追蹤](artifacts/A-084/tracker.md)。
+
+- **執行中：** 最後鏡頭等待保護的獨立審查與隔離套件UI回測。
+
+- **尚待完成：** 收束回測、審查及安全分離交付；先前A077與混合筆記本變更保留。
+
+- **下一步：** 取得UI結果，更新最終證據及交付。
+
+## [RUN-001] 事件 — 2026-10-30 10:58:29 +0800 (A-084)
+
+- 修正及Pixel回測完成，獨立審查無剩餘阻擋；結果見[修正報告](artifacts/A-084/report.md)。產品與本輪證據分開交付，先前混合紀錄保留本機。
+
+# → 回覆 / A-084
+
+* _2026-10-30 10:58:29 +0800_
+
+1. 「報告在哪裡」
+
+   原診斷／測試在[A-082證據](artifacts/A-082/evidence.md)；這次修正結果整理於[A-084報告](artifacts/A-084/report.md)。
+
+2. 「pixel 7 pro也測出同樣的問題，表示真的有bug，開始進行修正」
+
+   已修正停止清理與舊定位快取問題。Pixel7Pro實際開始→停止→按定位已通過，座標顯示與非mock位置更新，不需要先開Google Maps。
+
+   三項Gradle指令成功，新增15項回歸均執行；Pixel另1項裝置測試通過，獨立審查無剩餘阻擋。仍有60項既有測試跳過及其他lint發現；完整限制在證據中。
+
+   [修正版Debug APK](../app/build/outputs/apk/debug/letsgo-1.4.3-location-recovery-debug.apk)已建立，未發布。Samsung仍需朋友回測，隔離package也未驗收完整底圖渲染；原Pixel App因簽章不同未被覆蓋。
+
+   [修正報告](artifacts/A-084/report.md)提供結果與APK入口，[驗證證據](artifacts/A-084/evidence.md)保留失敗重現、審查處置及實機證明範圍。Git交付見[追蹤](artifacts/A-084/tracker.md)；舊A077/A082及混合筆記本仍保留本機。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-085 (Takeshi Mori)
+
++ 這次修正會不會影響其他功能造成crash?
+
+# → 回覆 / A-085
+
+* _2026-10-30 12:46:12 +0800_
+
+1. 「這次修正會不會影響其他功能造成crash?」
+
+   目前未發現可確認的新crash，但不能保證完全沒有回歸。GitHub CI已成功，現有來源與測試／審查版本一致；不過路線、探索、跳點與搖桿共用停止流程，尚未逐項做完整實機回歸。
+
+   建議先保留草稿，再補快速連續啟停、各模式停止／再開始、背景／熄屏與權限撤銷測試。這次問答只完成風險核對，沒有啟動新測試或改產品。
+
+   [風險評估](artifacts/A-085/risk-assessment.md)整理已驗證範圍、未測功能及PR66的區別，避免把CI成功當作所有功能零crash。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-086 (Takeshi Mori)
+
++ 進行實機回歸
+
++ 可以，提醒我解鎖
+
++ 已解鎖
+
+## [WIP-001] 檢查點 — 2026-10-30 13:48:05 +0800 (A-086)
+
+- **已完成：** 已取得11個情境的實機通過證據，含搖桿真實觸控；見[追蹤](artifacts/A-086/tracker.md)。
+
+- **執行中：** 獨立審查及最後裝置測試編譯。
+
+- **尚待完成：** 熄屏段需使用者配合解鎖；尚未啟動受鎖保護的測試，不繞過安全鎖。
+
+- **下一步：** 收審查與編譯結果，等待人工配合回覆，再完成熄屏與最終清理／交付。
+
+## [RUN-001] 事件 — 2026-10-30 14:10:38 +0800 (A-086)
+
+- Pixel最後整批12項通過，0失敗／跳過；人工解鎖完成。審查兩P2已修正重驗，測試套件已清理，原App保留。見[實機回歸報告](artifacts/A-086/report.md)。
+
+# → 回覆 / A-086
+
+* _2026-10-30 14:10:38 +0800_
+
+1. 「進行實機回歸」
+
+   已完成Pixel7Pro／Android17的12項情境，12通過、0失敗、0跳過。涵蓋一般／快速啟停、路線暫停續播／完成、跳點、探索／傳送探索、真實搖桿觸控、背景、熄屏、通知停止與mock權限撤銷恢復；受測過程未觀察到crash／ANR。
+
+   本輪沒有修改產品程式。新增測試的兩個判斷缺口已按獨立審查修正，整批重驗後無剩餘阻擋；原App及資料保留，隔離套件已移除。Samsung、長時間Doze、正式簽章、付款入口與Health實寫未驗，不能外推零crash保證。
+
+   [回歸報告](artifacts/A-086/report.md)列出12項結果與限制；[原始結果](artifacts/A-086/accepted-regression.txt)及[證據](artifacts/A-086/evidence.md)保留重現與審查處置。測試補充附於PR67，未合併／發布。
+
+2. 「可以，提醒我解鎖」
+
+   已提醒並完成安全鎖下的熄屏回歸，沒有關閉或繞過安全鎖。
+
+3. 「已解鎖」
+
+   已確認解鎖後取得非mock位置；最後整批熄屏段亦完成，無需再操作手機。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-087 (Takeshi Mori)

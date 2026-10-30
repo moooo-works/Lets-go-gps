@@ -1,0 +1,7 @@
+gradle.beforeProject { p ->
+    if (p.path == ':app') {
+        p.plugins.withId('com.android.application') {
+            p.extensions.getByName('android').sourceSets.getByName('test').kotlin.srcDir('/private/tmp/gps-a082-tests')
+        }
+    }
+}

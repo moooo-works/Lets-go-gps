@@ -1,0 +1,65 @@
+{
+  "active": {
+    "mock_overrides": true,
+    "providers": {
+      "passive": {
+        "has_location": true,
+        "mock": true
+      },
+      "fused": {
+        "has_location": true,
+        "mock": true
+      },
+      "gps": {
+        "has_location": true,
+        "mock": true
+      },
+      "network": {
+        "has_location": true,
+        "mock": true
+      }
+    }
+  },
+  "stopped": {
+    "mock_overrides": false,
+    "providers": {
+      "passive": {
+        "has_location": true,
+        "mock": true
+      },
+      "fused": {
+        "has_location": true,
+        "mock": true
+      },
+      "gps": {
+        "has_location": false,
+        "mock": false
+      },
+      "network": {
+        "has_location": false,
+        "mock": false
+      }
+    }
+  },
+  "maps": {
+    "mock_overrides": false,
+    "providers": {
+      "passive": {
+        "has_location": true,
+        "mock": false
+      },
+      "fused": {
+        "has_location": true,
+        "mock": false
+      },
+      "gps": {
+        "has_location": true,
+        "mock": false
+      },
+      "network": {
+        "has_location": true,
+        "mock": false
+      }
+    }
+  }
+}
