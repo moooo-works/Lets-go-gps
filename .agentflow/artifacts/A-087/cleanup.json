@@ -1,0 +1,475 @@
+{
+  "observedAt": "2026-10-30T15:12:13.229050+08:00",
+  "beforeFreeBytes": 4368924672,
+  "activeGradleVersions": [],
+  "preserved": [
+    "/Users/mori/Downloads/Lets-go-gps-release-artifacts/1.4.4",
+    "/Users/mori/side-project/Lets-go-gps/.git",
+    "/Users/mori/side-project/Lets-go-gps/local.properties",
+    "/Users/mori/side-project/Lets-go-gps/.agentflow",
+    "/Users/mori/.gradle/caches/8.13",
+    "/Users/mori/.gradle/caches/9.3.1",
+    "/Users/mori/.gradle/caches/modules-2",
+    "/Users/mori/.gradle/wrapper",
+    "/private/tmp/gps-a084-google-services.json",
+    "/private/tmp/gps-a087-cleanup.py",
+    "/private/tmp/gps-a084-maps-key",
+    "/private/tmp/gps-a087-package-check.py",
+    "/private/tmp/gps-a084-isolated.init.gradle"
+  ],
+  "skipped": [],
+  "deleted": [
+    {
+      "path": "/Users/mori/side-project/Lets-go-gps/app/build",
+      "logicalBytes": 658524480,
+      "allocatedBytes": 679460864,
+      "entries": 11932
+    },
+    {
+      "path": "/Users/mori/side-project/Lets-go-gps/build",
+      "logicalBytes": 141592,
+      "allocatedBytes": 143360,
+      "entries": 5
+    },
+    {
+      "path": "/Users/mori/side-project/Lets-go-gps/.gradle",
+      "logicalBytes": 21906937,
+      "allocatedBytes": 21954560,
+      "entries": 28
+    },
+    {
+      "path": "/Users/mori/side-project/Lets-go-gps/.kotlin",
+      "logicalBytes": 160,
+      "allocatedBytes": 0,
+      "entries": 2
+    },
+    {
+      "path": "/Users/mori/.gradle/caches/8.8",
+      "logicalBytes": 1050825988,
+      "allocatedBytes": 1072566272,
+      "entries": 13586
+    },
+    {
+      "path": "/Users/mori/.gradle/caches/8.11.1",
+      "logicalBytes": 1082238126,
+      "allocatedBytes": 1115652096,
+      "entries": 20369
+    },
+    {
+      "path": "/Users/mori/.gradle/caches/8.14",
+      "logicalBytes": 5044637110,
+      "allocatedBytes": 5155762176,
+      "entries": 69441
+    },
+    {
+      "path": "/private/tmp/gps-a082-before.png",
+      "logicalBytes": 1068714,
+      "allocatedBytes": 1069056,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-location-stopped.txt",
+      "logicalBytes": 66252,
+      "allocatedBytes": 69632,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-maps.png",
+      "logicalBytes": 1723363,
+      "allocatedBytes": 1724416,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-location-active.txt",
+      "logicalBytes": 65267,
+      "allocatedBytes": 65536,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-stopped.png",
+      "logicalBytes": 1109876,
+      "allocatedBytes": 1110016,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-start.png",
+      "logicalBytes": 1107872,
+      "allocatedBytes": 1110016,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-tests.init.gradle",
+      "logicalBytes": 248,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-test.log",
+      "logicalBytes": 16711,
+      "allocatedBytes": 20480,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-location-maps.txt",
+      "logicalBytes": 74899,
+      "allocatedBytes": 77824,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-tests",
+      "logicalBytes": 2540,
+      "allocatedBytes": 4096,
+      "entries": 2
+    },
+    {
+      "path": "/private/tmp/gps-a082-active.png",
+      "logicalBytes": 1098150,
+      "allocatedBytes": 1101824,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a082-probe.log",
+      "logicalBytes": 3068,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-ui-smoke.py",
+      "logicalBytes": 1746,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-review-final-input.txt",
+      "logicalBytes": 129279,
+      "allocatedBytes": 131072,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-stopped.png",
+      "logicalBytes": 179542,
+      "allocatedBytes": 180224,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-device-build.log",
+      "logicalBytes": 4980,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-device-stop.json",
+      "logicalBytes": 170,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-dismiss-tips.py",
+      "logicalBytes": 874,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-isolated-build.log",
+      "logicalBytes": 3799,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-restore-build.log",
+      "logicalBytes": 3799,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-review-input.txt",
+      "logicalBytes": 328372,
+      "allocatedBytes": 331776,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-isolated.apk",
+      "logicalBytes": 35374658,
+      "allocatedBytes": 35377152,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-device-active.json",
+      "logicalBytes": 165,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-target.log",
+      "logicalBytes": 2938,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-original-after.apk",
+      "logicalBytes": 14619612,
+      "allocatedBytes": 14622720,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-original.apk",
+      "logicalBytes": 14619612,
+      "allocatedBytes": 14622720,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-review-final-original.md",
+      "logicalBytes": 7017,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-checks-final.log",
+      "logicalBytes": 4001,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-device-test.log",
+      "logicalBytes": 823,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-checks.log",
+      "logicalBytes": 3951,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-after-location.png",
+      "logicalBytes": 214775,
+      "allocatedBytes": 217088,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-ready.png",
+      "logicalBytes": 189992,
+      "allocatedBytes": 192512,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-initial.png",
+      "logicalBytes": 116270,
+      "allocatedBytes": 118784,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-review-source.txt",
+      "logicalBytes": 322679,
+      "allocatedBytes": 323584,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-device-after-location.json",
+      "logicalBytes": 170,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a084-pr-body.md",
+      "logicalBytes": 2476,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-joystick.txt",
+      "logicalBytes": 825,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-build-final.txt",
+      "logicalBytes": 4384,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-final-regression.txt",
+      "logicalBytes": 19011,
+      "allocatedBytes": 20480,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-regression.txt",
+      "logicalBytes": 18459,
+      "allocatedBytes": 20480,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-review",
+      "logicalBytes": 76237,
+      "allocatedBytes": 98304,
+      "entries": 11
+    },
+    {
+      "path": "/private/tmp/gps-a086-checks.txt",
+      "logicalBytes": 4901,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-joystick-drag.png",
+      "logicalBytes": 158677,
+      "allocatedBytes": 159744,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-original.apk",
+      "logicalBytes": 14619612,
+      "allocatedBytes": 14622720,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-screen-off.txt",
+      "logicalBytes": 840,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-joystick-before.png",
+      "logicalBytes": 158580,
+      "allocatedBytes": 159744,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-checks-final.txt",
+      "logicalBytes": 4955,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-original-after.apk",
+      "logicalBytes": 14619612,
+      "allocatedBytes": 14622720,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-joystick-window.txt",
+      "logicalBytes": 825,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-joystick-final.txt",
+      "logicalBytes": 6924,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-build-manual.txt",
+      "logicalBytes": 5376,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-pr-body.md",
+      "logicalBytes": 4353,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-checks-accepted.txt",
+      "logicalBytes": 4955,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-accepted-regression.txt",
+      "logicalBytes": 8285,
+      "allocatedBytes": 12288,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-review-final",
+      "logicalBytes": 64633,
+      "allocatedBytes": 90112,
+      "entries": 11
+    },
+    {
+      "path": "/private/tmp/gps-a086-build.log",
+      "logicalBytes": 4384,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a086-smoke.txt",
+      "logicalBytes": 818,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-pr-body.md",
+      "logicalBytes": 3702,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-device-regression.txt",
+      "logicalBytes": 7594,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-checks.log",
+      "logicalBytes": 19314,
+      "allocatedBytes": 20480,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-target.log",
+      "logicalBytes": 3231,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-device-build-final.log",
+      "logicalBytes": 5275,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-final-checks.log",
+      "logicalBytes": 7124,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-post-device-checks.log",
+      "logicalBytes": 4900,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-device-build.log",
+      "logicalBytes": 6278,
+      "allocatedBytes": 8192,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/gps-a087-ci-watch.txt",
+      "logicalBytes": 66,
+      "allocatedBytes": 4096,
+      "entries": 1
+    },
+    {
+      "path": "/private/tmp/letsgo-location-recovery-debug.apk",
+      "logicalBytes": 35815846,
+      "allocatedBytes": 35819520,
+      "entries": 1
+    }
+  ],
+  "status": "complete",
+  "recovery": "First rmtree removed build contents, then Finder recreated .DS_Store. Inspected remainder: only .DS_Store, no build process/open file. Resume once with bounded metadata handling.",
+  "activeGradleVersionsAtResume": [],
+  "completedAt": "2026-10-30T15:14:40.185394+08:00",
+  "afterFreeBytes": 12621111296,
+  "freeSpaceDeltaBytes": 8252186624,
+  "deletedAllocatedBytes": 8183865344,
+  "deletedLogicalBytes": 7996403029
+}

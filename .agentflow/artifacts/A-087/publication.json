@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-30T15:12:08.522440+08:00",
+  "package": "com.moooo_works.letsgogps",
+  "versionCode": 10404,
+  "versionName": "1.4.4",
+  "track": "production",
+  "releaseId": 43,
+  "rolloutPercent": 100,
+  "managedPublishing": false,
+  "state": "in_review",
+  "live": false,
+  "uiEvidence": "play-in-review.jpg",
+  "warning": "Native debug symbols not uploaded; ReTrace mapping included; 0 blocking validation errors",
+  "deviceSupportLost": 0,
+  "notesLanguages": [
+    "zh-TW",
+    "en-US",
+    "ja-JP",
+    "ko-KR"
+  ],
+  "submissionAction": "On revisit UI already showed in_review; host did not issue duplicate submit. Current authoritative state verified."
+}

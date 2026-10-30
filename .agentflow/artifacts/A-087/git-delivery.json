@@ -1,0 +1,34 @@
+{
+  "mergedMain": "de3565fe78c93208a71e928316f2c74915ef828c",
+  "productSource": "7c7132b93ad3f4ab4540d16f5242d40952949d78",
+  "productTreeMatchesAABSource": true,
+  "pr67": {
+    "mergeCommit": {
+      "oid": "de3565fe78c93208a71e928316f2c74915ef828c"
+    },
+    "mergedAt": "2026-10-30T07:09:45Z",
+    "state": "MERGED",
+    "url": "https://github.com/moooo-works/Lets-go-gps/pull/67"
+  },
+  "pr66": {
+    "mergeCommit": {
+      "oid": "7c7132b93ad3f4ab4540d16f5242d40952949d78"
+    },
+    "mergedAt": "2026-10-30T07:09:47Z",
+    "state": "MERGED",
+    "url": "https://github.com/moooo-works/Lets-go-gps/pull/66"
+  },
+  "ci": {
+    "conclusion": "success",
+    "headSha": "7c7132b93ad3f4ab4540d16f5242d40952949d78",
+    "status": "completed",
+    "url": "https://github.com/moooo-works/Lets-go-gps/actions/runs/41015448589"
+  },
+  "observedAt": "2026-10-30T15:10:41.523219+08:00",
+  "mergedMainCI": {
+    "conclusion": "",
+    "headSha": "de3565fe78c93208a71e928316f2c74915ef828c",
+    "status": "in_progress",
+    "url": "https://github.com/moooo-works/Lets-go-gps/actions/runs/41018382397"
+  }
+}

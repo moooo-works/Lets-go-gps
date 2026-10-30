@@ -1,0 +1,23 @@
+$ git rev-parse --abbrev-ref HEAD
+fix/location-recovery
+
+$ git status --short --branch
+## fix/location-recovery...origin/fix/location-recovery [ahead 7]
+ M .agentflow/devlog.archive.md
+ M .agentflow/devlog.md
+?? .agentflow/artifacts/A-077/
+?? .agentflow/artifacts/A-082/
+?? .agentflow/artifacts/A-085/
+
+$ git fetch origin --prune
+
+$ git rev-parse origin/main
+62b9898bf98a78c8f3d1439df5a28c48cf784e8c
+
+$ git log --oneline -5 origin/main
+62b9898 補齊v9遷移回覆與恢復狀態
+bed4426 遷移專案設定至 Agentflow v9
+202580c 說明Debug APK原始輸出與交付副本位置
+17d6d6a 交付含前景服務修復的1.4.3 Debug APK
+0135214 記錄前景服務當機修復與PR66交付
+

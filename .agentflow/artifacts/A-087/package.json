@@ -19,5 +19,15 @@
     "DEV_FORCE_PRO": false,
     "productionAdUnits": true
   },
-  "mappingSHA256": "f396578ba6ccc962fd2bb8d1647d329994c8a7daafccf6757ae75cc92bdb7459"
+  "mappingSHA256": "f396578ba6ccc962fd2bb8d1647d329994c8a7daafccf6757ae75cc92bdb7459",
+  "productSourceCommit": "7c7132b93ad3f4ab4540d16f5242d40952949d78",
+  "playUploadAccepted": {
+    "versionCode": 10404,
+    "releaseId": 43,
+    "track": "production draft",
+    "observedAt": "2026-10-30T14:42:50.350029+08:00",
+    "evidence": "Play processed AAB, showed 10404(1.4.4)/ReTrace mapping and enabled Next; no upload-key error"
+  },
+  "mergedMainCommit": "de3565fe78c93208a71e928316f2c74915ef828c",
+  "mergedProductTreeMatches": true
 }

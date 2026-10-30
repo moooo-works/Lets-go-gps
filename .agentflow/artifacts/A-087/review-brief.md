@@ -6,6 +6,6 @@
 
 版號由Play最高10403升10404/1.4.4。local.properties已具正式簽章設定，Mapskey私密注入；勿讀或輸出secrets。四語說明fastlane...10404.txt。上傳前須核實正式包manifest、signature、releaseBuildConfig（DEBUG/DEV_FORCE_PROfalse、正式廣告）、Gitbehind0+CI+合併產品樹；正式送審而非聲稱上線。
 
-清理清單擬：app/build、build、.gradle專案快取（先保留最新AAB與mapping到專案外持久release目錄）；/private/tmp/gps-a082/84/86/87本任務重複APK／reviewcopy／logs已保存證據後刪除。保留Mapskey及隔離init/config至後續驗證結束，保留一份原PlayAPK恢復副本；任何未確認唯一資料不刪。共用Gradle caches8.8、8.11.1為可重建歷史版本；刪前證明沒有對應活躍daemon/編譯及不刪活躍8.13／目前9.3.1、modules-2、wrapper或可能在用8.14。保留.git、工作紀錄、簽章、local.properties、所有使用者資料。量測實際檔案與磁碟空間，APFS延遲如實記錄。
+清理清單擬：app/build、build、.gradle專案快取（先保留最新AAB與mapping到專案外持久release目錄）；/private/tmp/gps-a082/84/86/87本任務重複APK／reviewcopy／logs已保存證據後刪除。保留Mapskey及隔離init/config至後續驗證結束，保留一份原PlayAPK恢復副本；任何未確認唯一資料不刪。共用Gradle caches8.8、8.11.1、8.14為可重建歷史版本；刪前證明沒有對應活躍daemon/編譯及不刪活躍8.13／目前9.3.1、modules-2、wrapper。保留.git、工作紀錄、簽章、local.properties、所有使用者資料。量測實際檔案與磁碟空間，APFS延遲如實記錄。
 
 請獨立檢查整合競態、scope/minimality、每個INV/AC可否成立，並列出阻擋與可沿用證據／未證明部分。不能新增需求或自行發布刪檔。

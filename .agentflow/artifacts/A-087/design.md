@@ -6,7 +6,7 @@
 
 - INV-1：合併後保留兩個修正的保證：停止時完成 provider 清理、取得新鮮非 mock 定位，以及快速啟停不以過期 startId 停掉新服務；清理期間 START 必須有明確終止／重播語意。失敗時不得發布。
 - INV-2：正式包保持原 applicationId、正式簽章及 production 廣告／非強制 Pro；不更改權限、安全鎖、Cloud 白名單或使用者資料。簽章或版本不符則停止上傳。
-- INV-3：清理只刪除已盤點的可重建專案 build／本任務重複暫存，以及 ~/.gradle/caches/8.8、8.11.1 兩個未使用的舊版快取（刪前再查程序與檔案使用；其他版本／modules-2／wrapper 保留）；保留 keystore、設定、完整 Git／工作紀錄、最新 AAB 與 mapping、必要恢復副本。量測實際刪除位元組及磁碟可用量；未證明可丟者保留。
+- INV-3：清理只刪除已盤點的可重建專案 build／本任務重複暫存，以及 ~/.gradle/caches/8.8、8.11.1、8.14 三個未使用的舊版快取（刪前再查程序與檔案使用；其他版本／modules-2／wrapper 保留）；保留 keystore、設定、完整 Git／工作紀錄、最新 AAB 與 mapping、必要恢復副本。量測實際刪除位元組及磁碟可用量；未證明可丟者保留。
 
 共用規範已讀；.agentflow/rules.md、sys-invariants.md 不存在，不新增重複 registry。
 
@@ -23,8 +23,10 @@ Git preflight 已保存於工作回覆工具輸出；合併前重查 main。檢�
 
 ## Minimality check
 
-沿用目前 PR、測試與發布程序，僅修補整合造成的衝突／競態；不重構其他功能，不新增發佈平台。不清理其他專案、Gradle 目前使用的版本或共用依賴／wrapper；只移除明列兩個舊版可重建快取，避免資料及活躍建置受影響。
+沿用目前 PR、測試與發布程序，僅修補整合造成的衝突／競態；不重構其他功能，不新增發佈平台。不清理其他專案、Gradle 目前使用的版本或共用依賴／wrapper；只移除明列三個舊版可重建快取，避免資料及活躍建置受影響。
 
 規劃採既有已授權發布模式；Claude CLI 本次前一輪已確認配額耗盡，使用設定 gpt-6.1-sol/high 原生 fresh-context 挑戰（release_plan），主 agent 最終整合。審查權限為只讀指示，非 OS 沙箱。
 
 規劃挑戰處置：release_plan 指出舊 startId 與非同步 teardown 合併會留下空轉服務，已採 Main 序列化、清理期間保存最後 START、清理完成後重播；後續 STOP 取消待重播。新增阻塞 teardown 測試驗證。沿用目前 PR67 合併 PR66 全祖先（其相對 main 僅產品修正／A073 證據，不含舊 notebook 差異），保留 Git 歷史而非新開重複 PR；所有合併衝突均重新驗證。Play 所有最新套件最高10403，採1.4.4/10404。
+
+清理盤點補充：實際Java GradleDaemon僅8.13/9.3.1；lsof未發現8.8/8.11.1/8.14開啟檔案，故明列8.14舊快取也可重建刪除（約4.8GB）。刪前仍重查；若有使用則保留。不停止或清理其他專案活躍daemon。

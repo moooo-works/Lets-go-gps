@@ -6,13 +6,13 @@
 
 工作目錄: /Users/mori/side-project/Lets-go-gps
 
-分支: fix/location-recovery
+分支: main
 
-目前工作: A-087 發布1.4.4、合併Git與清理空間，見[追蹤](artifacts/A-087/tracker.md)。保留[A077恢復入口](artifacts/A-077/tracker.md)及先前紀錄交付。
+目前工作: A-087已完成執行，見[報告](artifacts/A-087/report.md)及[追蹤](artifacts/A-087/tracker.md)。保留[A077先前恢復入口](artifacts/A-077/tracker.md)，未刪除或冒稱其環境診斷全部通過。
 
-已驗證: 1.4.4正式包核對通過、335單元測試0失敗及新版Pixel11/11通過；Play已接受10404套件。
+已驗證: 1.4.4正式版在Play審查中、PR66/67合併、335單元測試0失敗與新版Pixel11/11通過；清理約8.18GB，當下可用12.62GB。
 
-下一步: 等PR67本次CI，合併後核對產品樹並正式送審，然後依盤點清理；尚未刪檔。
+下一步: 等Google審查通過後自動推出；沒有背景監看排程。等待下一個需求，A077先前恢復入口保留。
 
 封存紀錄: .agentflow/devlog.archive.md。
 
@@ -727,3 +727,39 @@
 ---
 
 # → 提問 / A-087 (Takeshi Mori)
+
++ 改版號後上架，git合併，然後清理多餘資料，釋放出空間
+
++ 回報
+
+## [RUN-001] 事件 — 2026-10-30 15:19:01 +0800 (A-087)
+
+- 1.4.4/10404正式AAB與來源核對、335單元測試及新版Pixel11/11通過；PR67/66已合併。Play重新檢視已在審查中，未重複提交。清理8.18GB配置空間，當下可用12.62GB；見[完整報告](artifacts/A-087/report.md)。歷史紀錄另commit4284c76，舊行／archive前綴保留校對通過。
+
+# → 回覆 / A-087
+
+* _2026-10-30 15:19:01 +0800_
+
+1. 「改版號後上架」
+
+   已升1.4.4（10404），確認Google Play正式版審查中；通過後自動100%推出，目前尚未上線。四語更新說明、正式包與mapping已保存，詳見[發布回執](artifacts/A-087/publication.json)。
+
+2. 「git合併」
+
+   PR67及PR66均已合併。PR CI成功，main產品樹與正式AAB來源相同，見[Git回執](artifacts/A-087/git-delivery.json)。先前未提交紀錄另行保存，未混入產品修正。
+
+3. 「然後清理多餘資料，釋放出空間」
+
+   已刪除約8.18GB可重建快取及重複暫存；當下可用量4.37→12.62GB。正式產物、mapping、簽章設定、Git歷史及原App資料保留，見[逐項清理](artifacts/A-087/cleanup.json)。
+
+4. 「回報」
+
+   [完整報告](artifacts/A-087/report.md)彙整上述結果、保留路徑與測試界限。335項單元測試0失敗／60既有跳過，新版Pixel11/11通過；本輪未重做人工解鎖熄屏及Samsung測試，不保證所有裝置零crash。
+
+## 問題（集中列出，附建議預設值）
+
+- 無。
+
+---
+
+# → 提問 / A-088 (Takeshi Mori)

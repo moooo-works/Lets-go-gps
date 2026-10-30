@@ -1,0 +1,254 @@
+[
+  {
+    "name": "com.moooo_works.letsgogps.service.MockLocationServiceTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "3"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.savedlocations.SavedLocationsViewModelTest",
+    "tests": "14",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.JoystickControllerTest",
+    "tests": "8",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "8"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.StepSyncGateTest",
+    "tests": "12",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.SearchViewModelTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "11"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.domain.RouteSimulatorTest",
+    "tests": "28",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.CompanionExecutionRequestsTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.repository.LocationRepositoryImplTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.FreshDeviceLocationTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.service.MockLocationForegroundStartupTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.engine.AndroidLocationMockEngineTest",
+    "tests": "8",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "8"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.domain.MockSessionRestoreTest",
+    "tests": "15",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.service.MockLocationStopRecoveryTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.utils.LocationQueryParserTest",
+    "tests": "12",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.repository.SearchRepositoryImplTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.RouteControllerTest",
+    "tests": "17",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "17"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.repository.ProRepositoryImplTest",
+    "tests": "16",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.utils.LatLngBoundsUtilTest",
+    "tests": "6",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.MapViewModelTest",
+    "tests": "18",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.JoystickOverlayManagerTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.LocationPinControllerTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "10"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.billing.AdMobInitializerTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.billing.AdUnlockStoreTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "3"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.engine.Android17MockPermissionTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.OverlayPositionTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.FloatingCompanionControllerTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.RouteSpeedSliderConfigTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.engine.MockTeardownRecoveryTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.settings.SettingsViewModelTest",
+    "tests": "17",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.billing.RewardedAdManagerTest",
+    "tests": "20",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.healthcheck.SystemHealthCheckImplTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.map.FloatingOverlayColorsTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.utils.GeoDistanceMetersTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.data.billing.AdConsentManagerTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.domain.health.StepAccumulatorTest",
+    "tests": "29",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.moooo_works.letsgogps.ui.routes.RoutesViewModelTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  }
+]
