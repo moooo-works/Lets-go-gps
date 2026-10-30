@@ -1010,7 +1010,7 @@ class MapViewModel @Inject constructor(
                 else MockError.ProviderSetupFailed("Mock engine setup failed: ${cause.message}")
             }
             is MockEngineError.SetLocation -> MockError.SetLocationFailed(error.cause.message ?: "Failed to push mock location")
-            is MockEngineError.Teardown -> MockError.Unknown("Operation failed: ${error.cause.message}")
+            is MockEngineError.Teardown -> MockError.ProviderTeardownFailed(error.cause.message ?: "Mock location cleanup failed")
             is MockEngineError.PermissionCheck -> MockError.PermissionCheckFailed(error.cause.message ?: "Permission check failed")
         }
         setMockError(refinedError)

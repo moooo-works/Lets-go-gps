@@ -410,4 +410,13 @@ class MapViewModelTest {
         io.mockk.coVerify(exactly=0) { proRepository.consumeFeatureCredits(any()) }
     }
 
+    @Test
+    fun `cleanup failure is a teardown error rather than permission advice`() = runTest {
+        val viewModel = createViewModel()
+        runCurrent()
+        mockErrorFlow.value = MockEngineError.Teardown(IllegalStateException("cleanup failed"))
+        runCurrent()
+        assertTrue(viewModel.uiState.value.mockError is MockError.ProviderTeardownFailed)
+    }
+
 }

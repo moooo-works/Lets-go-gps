@@ -1,0 +1,17 @@
+{
+  "app/build.gradle.kts": "e3e5a6b99cfe423eb46a494b8aa336da2c9d7f739440f4d1beec7ec5ab03eb6d",
+  "app/src/main/java/com/moooo_works/letsgogps/data/engine/AndroidLocationMockEngine.kt": "5b8e50b03fbe044af42b7f5b29be682c1a0bef1906c414e84a320479bf92114f",
+  "app/src/main/java/com/moooo_works/letsgogps/domain/LocationMockEngine.kt": "78954094a97c3fb21b91ca2949eda42080c3a6ca741ab7ec70844085b61457c1",
+  "app/src/main/java/com/moooo_works/letsgogps/service/MockLocationService.kt": "06c723d172285ad31d3c4ff4475e6815e14191b2fa41254125b17390de1dc116",
+  "app/src/main/java/com/moooo_works/letsgogps/ui/map/FreshDeviceLocation.kt": "321ded8e6d29760d22f357f7d6cb318b021e1f3ecd8c37523c8faa6fcf46a8a1",
+  "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapOverlays.kt": "d10006f0d6340e05faf57a963108f6a540ce87389de0ed44df8574d54740c04d",
+  "app/src/main/java/com/moooo_works/letsgogps/ui/map/MapViewModel.kt": "79bae29224ed4d33a0c15c71c69f5503ced05a1d1bd39c91eac23cdc76cb907e",
+  "app/src/main/res/values/strings.xml": "87354582667f9a5632859ee7a8a966f6467e12145bd5a13c3af620f2aa57461d",
+  "app/src/main/res/values-en/strings.xml": "5c286df69ffa42e64fe6827d44084929272c3c5da53499412e89815e016bea47",
+  "app/src/main/res/values-ja/strings.xml": "9d46c09ccdad29f8a26cc250810ad6d3fa4622a7d068be1fdf3e2c5a7b7b27da",
+  "app/src/main/res/values-ko/strings.xml": "08513335bc560075c99f36631b87ab4f3c3576f9d7717790a3f5c02ace125045",
+  "app/src/test/java/com/moooo_works/letsgogps/data/engine/MockTeardownRecoveryTest.kt": "f99eeb4661ee50187a043bca0bfc2b1c1cc9458fe3930f9cfddc370ace05589e",
+  "app/src/test/java/com/moooo_works/letsgogps/service/MockLocationStopRecoveryTest.kt": "216c0a6d4be2e46d1f31b0ee164ad729a6aaba548422cea1420e57b1182131cf",
+  "app/src/test/java/com/moooo_works/letsgogps/ui/map/FreshDeviceLocationTest.kt": "d49ad72039fa077ac951904fdf43ad1dc0509b648fd183bdb3d781a4b0717001",
+  "app/src/test/java/com/moooo_works/letsgogps/ui/map/MapViewModelTest.kt": "ffbc88bce38277fcaa131f2a43c81ddd6fc474f29f1872e36f3a25c094179b61"
+}

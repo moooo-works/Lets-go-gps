@@ -10,7 +10,19 @@ import android.os.Process
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.Executor
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import com.moooo_works.letsgogps.domain.LocationMockEngine
 import com.moooo_works.letsgogps.domain.MockPermissionStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -51,12 +63,19 @@ class AndroidLocationMockEngine : LocationMockEngine {
         "passive"
     )
     private val enabledProviders = linkedSetOf<String>()
+    private val registeredProviders = linkedSetOf<String>()
+    private var tearingDown = false
+    private val cleanupMutex = Mutex()
+    private var flpEnableTask: Task<Void>? = null
     private val setupFailures = linkedMapOf<String, String>()
 
     private val _errors = MutableSharedFlow<MockEngineError>(extraBufferCapacity = ERROR_BUFFER_CAPACITY)
     val errors: SharedFlow<MockEngineError> = _errors.asSharedFlow()
 
+    @Synchronized
     override fun setupMockProvider() {
+        check(!cleanupMutex.isLocked) { "Mock provider cleanup is still in progress" }
+        tearingDown = false
         enabledProviders.clear()
         setupFailures.clear()
 
@@ -74,34 +93,66 @@ class AndroidLocationMockEngine : LocationMockEngine {
 
         // Enable FLP mock mode to directly override Fused Location Provider
         try {
-            fusedClient.setMockMode(true)
-            Log.d(TAG, "FusedLocationProviderClient mock mode enabled")
+            flpEnableTask = fusedClient.setMockMode(true)
+            Log.d(TAG, "FusedLocationProviderClient mock mode requested")
         } catch (e: Exception) {
+            flpEnableTask = Tasks.forException(e)
             Log.w(TAG, "Failed to enable FLP mock mode: ${e.message}")
         }
     }
 
-    override fun teardownMockProvider() {
-        enabledProviders.forEach { provider ->
-            try {
-                locationManager.removeTestProvider(provider)
-            } catch (e: Exception) {
-                val message = "Provider $provider teardown failed: ${e::class.java.simpleName}: ${e.message}"
-                Log.e(TAG, message, e)
-                reportError(MockEngineError.Teardown(e), message)
+    override suspend fun teardownMockProvider(): Unit = cleanupMutex.withLock {
+        withContext(Dispatchers.IO) {
+            // The caller may enter undispatched while holding an IO context on Main.
+            yield()
+            val failures = mutableListOf<Throwable>()
+            // Serialize with any injection already in flight before the stop flag was set.
+            synchronized(this@AndroidLocationMockEngine) {
+                tearingDown = true
+                (registeredProviders + enabledProviders).forEach { provider ->
+                    try {
+                        locationManager.removeTestProvider(provider)
+                        enabledProviders.remove(provider)
+                        registeredProviders.remove(provider)
+                    } catch (e: Exception) {
+                        failures.add(e)
+                        Log.e(TAG, "Provider $provider teardown failed", e)
+                    }
+                }
+                setupFailures.clear()
             }
-        }
-        enabledProviders.clear()
-        setupFailures.clear()
-
-        try {
-            fusedClient.setMockMode(false)
-            Log.d(TAG, "FusedLocationProviderClient mock mode disabled")
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to disable FLP mock mode: ${e.message}")
+            val enableTask = flpEnableTask
+            val exitRequired = enableTask == null || !enableTask.isComplete || enableTask.isSuccessful
+            try {
+                // Await completion without blocking any thread, including an undispatched caller.
+                withTimeout(3_000) {
+                    suspendCancellableCoroutine<Unit> { continuation ->
+                        fusedClient.setMockMode(false).addOnCompleteListener(Executor { it.run() }) { task ->
+                            if (continuation.isActive) {
+                                if (task.isSuccessful) continuation.resume(Unit)
+                                else continuation.resumeWithException(
+                                    task.exception ?: IllegalStateException("Mock mode exit was cancelled")
+                                )
+                            }
+                        }
+                    }
+                }
+                flpEnableTask = null
+                Log.d(TAG, "FusedLocationProviderClient mock mode disabled")
+            } catch (e: Exception) {
+                if (exitRequired) failures.add(e)
+                else Log.w(TAG, "FLP mock was not enabled; provider cleanup is sufficient", e)
+            }
+            if (failures.isNotEmpty()) {
+                val error = IllegalStateException("Mock location cleanup failed", failures.first())
+                failures.drop(1).forEach(error::addSuppressed)
+                reportError(MockEngineError.Teardown(error), error.message.orEmpty())
+                throw error
+            }
         }
     }
 
+    @Synchronized
     override fun setLocation(
         latitude: Double,
         longitude: Double,
@@ -109,6 +160,7 @@ class AndroidLocationMockEngine : LocationMockEngine {
         speed: Float,
         altitude: Double
     ) {
+        if (tearingDown) return
         if (enabledProviders.isEmpty()) {
             val details = setupFailures.values.joinToString(separator = " | ")
             val message = "No test providers enabled${if (details.isNotBlank()) ". $details" else ""}"
@@ -205,6 +257,7 @@ class AndroidLocationMockEngine : LocationMockEngine {
                     LEGACY_ACCURACY_FINE
                 )
             }
+            registeredProviders.add(provider)
             Log.d(TAG, "addTestProvider success provider=$provider")
         }.onFailure { addError ->
             val message = "Provider $provider setup failed: ${addError::class.java.simpleName}: ${addError.message}"

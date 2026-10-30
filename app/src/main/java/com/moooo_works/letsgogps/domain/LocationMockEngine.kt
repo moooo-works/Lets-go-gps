@@ -9,7 +9,7 @@ sealed class MockPermissionStatus {
 
 interface LocationMockEngine {
     fun setupMockProvider()
-    fun teardownMockProvider()
+    suspend fun teardownMockProvider()
     fun setLocation(
         latitude: Double,
         longitude: Double,
