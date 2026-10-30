@@ -10,4 +10,4 @@
 
 SamsungAndroid16仍需朋友回測，不能宣稱該機型已驗證。隔離套件底圖授權受限，因此未驗收完整圖磚渲染；這不影響已取得非mock位置與座標更新的觀察。
 
-[驗證與限制](evidence.md)保存重現、檢查及審查處置；[最終UI回測](ui-smoke.json)不含私人座標。PR／commit交付後補於[追蹤](tracker.md)。先前A077/A082與混合筆記本變更仍保留本機，未混入本次產品提交。
+[驗證與限制](evidence.md)保存重現、檢查及審查處置；[最終UI回測](ui-smoke.json)不含私人座標。已推送並建立[草稿PR67](https://github.com/moooo-works/Lets-go-gps/pull/67)，未合併或發布；GitHub CI執行中。詳見[追蹤](tracker.md)。先前A077/A082與混合筆記本變更仍保留本機，未混入本次產品提交。
